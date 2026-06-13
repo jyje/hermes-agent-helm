@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "hermes-agent.fullname" . }}
+  name: {{ include "hermes-agent-helm.fullname" . }}
   labels:
-    {{- include "hermes-agent.labels" . | nindent 4 }}
+    {{- include "hermes-agent-helm.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "hermes-agent.headlessServiceName" . }}
+  serviceName: {{ include "hermes-agent-helm.headlessServiceName" . }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "hermes-agent.selectorLabels" . | nindent 6 }}
+      {{- include "hermes-agent-helm.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -20,12 +20,12 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
-        {{- include "hermes-agent.selectorLabels" . | nindent 8 }}
+        {{- include "hermes-agent-helm.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
+      serviceAccountName: {{ include "hermes-agent-helm.serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -38,7 +38,7 @@ spec:
         # Hermes merges it over its built-in defaults. Hermes also writes to its
         # home at runtime, so config is not mounted read-only.
         - name: seed-config
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "hermes-agent-helm.image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -63,7 +63,7 @@ spec:
       {{- end }}
       containers:
         - name: hermes-agent
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "hermes-agent-helm.image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.command }}
           command:
@@ -83,7 +83,7 @@ spec:
             {{- end }}
           envFrom:
             - secretRef:
-                name: {{ include "hermes-agent.fullname" . }}-env
+                name: {{ include "hermes-agent-helm.fullname" . }}-env
             {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -104,7 +104,7 @@ spec:
         {{- if .Values.bootstrap.enabled }}
         - name: config
           configMap:
-            name: {{ include "hermes-agent.fullname" . }}-config
+            name: {{ include "hermes-agent-helm.fullname" . }}-config
         {{- end }}
         {{- if not .Values.persistence.enabled }}
         - name: data
@@ -127,7 +127,7 @@ spec:
     - metadata:
         name: data
         labels:
-          {{- include "hermes-agent.labels" . | nindent 10 }}
+          {{- include "hermes-agent-helm.labels" . | nindent 10 }}
       spec:
         accessModes:
           {{- toYaml .Values.persistence.accessModes | nindent 10 }}

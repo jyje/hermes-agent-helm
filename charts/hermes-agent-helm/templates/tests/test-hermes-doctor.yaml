@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "hermes-agent.fullname" . }}-test
+  name: {{ include "hermes-agent-helm.fullname" . }}-test
   labels:
-    {{- include "hermes-agent.labels" . | nindent 4 }}
+    {{- include "hermes-agent-helm.labels" . | nindent 4 }}
     app.kubernetes.io/component: test
   annotations:
     # Helm test hook: created/run by `helm test <release>`, after install.
@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "hermes-agent.selectorLabels" . | nindent 8 }}
+        {{- include "hermes-agent-helm.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: test
     spec:
       restartPolicy: Never
@@ -33,7 +33,7 @@ spec:
         # Seed the same chart config into a private HERMES_HOME so `hermes doctor`
         # evaluates what the workload runs with.
         - name: seed-config
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "hermes-agent-helm.image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -49,7 +49,7 @@ spec:
       {{- end }}
       containers:
         - name: hermes-doctor
-          image: "{{ .Values.tests.image.repository | default .Values.image.repository }}:{{ .Values.tests.image.tag | default .Values.image.tag }}"
+          image: "{{ include "hermes-agent-helm.testImage" . }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy | default .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -60,7 +60,7 @@ spec:
               value: {{ .Values.persistence.mountPath | quote }}
           envFrom:
             - secretRef:
-                name: {{ include "hermes-agent.fullname" . }}-env
+                name: {{ include "hermes-agent-helm.fullname" . }}-env
             {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -70,7 +70,7 @@ spec:
             - |
               set -eu
               echo "===================================================="
-              echo " hermes-agent install test (doctor-style)"
+              echo " hermes-agent-helm install test (doctor-style)"
               echo "===================================================="
 
               echo "[1/4] hermes CLI version"
@@ -111,7 +111,7 @@ spec:
         {{- if .Values.bootstrap.enabled }}
         - name: config
           configMap:
-            name: {{ include "hermes-agent.fullname" . }}-config
+            name: {{ include "hermes-agent-helm.fullname" . }}-config
         {{- end }}
         - name: data
           emptyDir: {}

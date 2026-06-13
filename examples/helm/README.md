@@ -1,7 +1,7 @@
 # Installing with Helm
 
-Two ways to install `hermes-agent`: **from Git** (this repo) and **from an OCI
-registry** (GitHub Packages / `ghcr.io`, the form indexed by Artifact Hub).
+Two ways to install `hermes-agent-helm`: **from Git** (this repo) and **from an
+OCI registry** (GitHub Packages / `ghcr.io`, the form indexed by Artifact Hub).
 
 In every case, keep the API key out of the manifests — pass it at install time
 or inject it from a pre-created Secret (see "Secrets").
@@ -18,21 +18,21 @@ git clone https://github.com/jyje/hermes-helm
 cd hermes-helm
 
 # generic defaults (real OpenAI)
-helm upgrade --install hermes-agent ./charts/hermes-agent \
-  --namespace hermes-agent --create-namespace \
+helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
+  --namespace hermes-agent-helm --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 
 # environment-specific (in-cluster LiteLLM)
-helm upgrade --install hermes-agent ./charts/hermes-agent \
-  --namespace hermes-agent --create-namespace \
-  -f charts/hermes-agent/values.example.yaml \
+helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
+  --namespace hermes-agent-helm --create-namespace \
+  -f charts/hermes-agent-helm/values.example.yaml \
   --set-string env.OPENAI_API_KEY='sk-<litellm-key>' --wait
 
-helm test hermes-agent -n hermes-agent
+helm test hermes-agent-helm -n hermes-agent-helm
 ```
 
-> Release name `hermes-agent` (== chart name) keeps resources clean
-> (`hermes-agent-0`, not `hermes-hermes-agent-0`).
+> Release name `hermes-agent-helm` (== chart name) keeps resources clean
+> (`hermes-agent-helm-0`, not `hermes-agent-helm-hermes-agent-helm-0`).
 
 ---
 
@@ -43,23 +43,23 @@ form Artifact Hub lists.
 
 ```bash
 # public chart: no login needed to pull
-helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/charts/hermes-agent --version 0.1.0 \
-  --namespace hermes-agent --create-namespace \
+helm upgrade --install hermes-agent-helm \
+  oci://ghcr.io/jyje/hermes-agent-helm --version 0.1.0 \
+  --namespace hermes-agent-helm --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 
 # with an env-specific values file (download or keep your own)
-helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/charts/hermes-agent --version 0.1.0 \
-  --namespace hermes-agent --create-namespace \
+helm upgrade --install hermes-agent-helm \
+  oci://ghcr.io/jyje/hermes-agent-helm --version 0.1.0 \
+  --namespace hermes-agent-helm --create-namespace \
   -f my-values.yaml --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
 Inspect before installing:
 
 ```bash
-helm show values oci://ghcr.io/jyje/charts/hermes-agent --version 0.1.0
-helm show readme oci://ghcr.io/jyje/charts/hermes-agent --version 0.1.0
+helm show values oci://ghcr.io/jyje/hermes-agent-helm --version 0.1.0
+helm show readme oci://ghcr.io/jyje/hermes-agent-helm --version 0.1.0
 ```
 
 If the package is private, log in first:
@@ -77,13 +77,13 @@ install time, or pre-create a Secret and reference it via `extraEnvFrom` (the
 later envFrom wins over the chart's placeholder):
 
 ```bash
-kubectl create namespace hermes-agent
-kubectl create secret generic hermes-agent-litellm -n hermes-agent \
+kubectl create namespace hermes-agent-helm
+kubectl create secret generic hermes-agent-helm-litellm -n hermes-agent-helm \
   --from-literal=OPENAI_API_KEY='sk-<litellm-key>'
 
-helm upgrade --install hermes-agent oci://ghcr.io/jyje/charts/hermes-agent \
-  --version 0.1.0 -n hermes-agent --create-namespace \
-  --set 'extraEnvFrom[0].secretRef.name=hermes-agent-litellm'
+helm upgrade --install hermes-agent-helm oci://ghcr.io/jyje/hermes-agent-helm \
+  --version 0.1.0 -n hermes-agent-helm --create-namespace \
+  --set 'extraEnvFrom[0].secretRef.name=hermes-agent-helm-litellm'
 ```
 
 ---
@@ -92,19 +92,19 @@ helm upgrade --install hermes-agent oci://ghcr.io/jyje/charts/hermes-agent \
 
 > **CI owns the `.tgz` lifecycle.** Bumping `version` in `Chart.yaml` on `main`
 > triggers `.github/workflows/release.yml`, which tags `vX.Y.Z`, writes release
-> notes (git-cliff), and pushes to `oci://ghcr.io/<owner>/charts` — the package
+> notes (git-cliff), and pushes to `oci://ghcr.io/<owner>` — the package
 > is never committed. The commands below are the equivalent manual/local flow.
 
 ```bash
 # 1) package (also runs docs + lint via the Makefile target)
-make package                      # -> dist/hermes-agent-0.1.0.tgz
+make package                      # -> dist/hermes-agent-helm-0.1.0.tgz
 
 # 2) login to ghcr (PAT needs write:packages)
 echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u jyje --password-stdin
 
 # 3) push as an OCI artifact
-helm push dist/hermes-agent-0.1.0.tgz oci://ghcr.io/jyje/charts
-#   -> ghcr.io/jyje/charts/hermes-agent:0.1.0
+helm push dist/hermes-agent-helm-0.1.0.tgz oci://ghcr.io/jyje
+#   -> ghcr.io/jyje/hermes-agent-helm:0.1.0
 
 # (Makefile shortcut)
 make push
@@ -116,7 +116,7 @@ settings) so Artifact Hub and users can pull anonymously.
 ### Register on Artifact Hub
 
 1. artifacthub.io → Control Panel → Add → **Helm charts** repository.
-2. URL: `oci://ghcr.io/jyje/charts/hermes-agent`
+2. URL: `oci://ghcr.io/jyje/hermes-agent-helm`
 3. (Recommended) Verify ownership: push `artifacthub-repo.yml` (in this folder)
    to the same OCI path so Artifact Hub can confirm you own the repo. The
    `artifacthub.io/*` annotations already in `Chart.yaml` populate the listing.

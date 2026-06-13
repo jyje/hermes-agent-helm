@@ -1,4 +1,4 @@
-# Default values for hermes-agent.
+# Default values for hermes-agent-helm.
 # StatefulSet + ConfigMap (config.yaml) + Secret (.env) + Helm test.
 
 # -- Override the chart name used in resource names.
@@ -10,7 +10,7 @@ image:
   repository: nousresearch/hermes-agent
   # Upstream uses DATE-based tags (e.g. v2026.6.5 == Hermes v0.16.0), plus
   # `latest` / `main`. There is no semver tag. Multi-arch (amd64 + arm64).
-  tag: "v2026.6.5"
+  tag: ""
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

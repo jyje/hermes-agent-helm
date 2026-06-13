@@ -1,7 +1,7 @@
 # Deploying with ArgoCD
 
-These Application manifests deploy `hermes-agent` via ArgoCD safely — including
-**multiple instances in the same namespace without collisions**.
+These Application manifests deploy `hermes-agent-helm` via ArgoCD safely —
+including **multiple instances in the same namespace without collisions**.
 
 ## The one rule: unique `fullname` per instance
 
@@ -35,8 +35,8 @@ Keep the chart's `env.OPENAI_API_KEY` as a placeholder and inject the real key
 from a Secret created out-of-band (or via sealed-secrets / external-secrets):
 
 ```bash
-kubectl create namespace hermes-agent
-kubectl create secret generic hermes-agent-litellm -n hermes-agent \
+kubectl create namespace hermes-agent-helm
+kubectl create secret generic hermes-agent-helm-litellm -n hermes-agent-helm \
   --from-literal=OPENAI_API_KEY="$(kubectl get secret litellm-creds -n ollama-system \
     -o go-template='{{ index .data "litellm.masterkey" | base64decode }}')"
 ```
@@ -47,26 +47,26 @@ env Secret, its `OPENAI_API_KEY` wins.
 ## Apply
 
 ```bash
-kubectl apply -f examples/argocd/hermes-agent.application.yaml
+kubectl apply -f examples/argocd/hermes-agent-helm.application.yaml
 ```
 
 ## Multiple instances in the same namespace
 
 Just duplicate the Application with a different name == releaseName. Example
-second instance alongside the first, both in `hermes-agent`:
+second instance alongside the first, both in `hermes-agent-helm`:
 
 ```yaml
 metadata:
-  name: hermes-agent-staging      # different name
+  name: hermes-agent-helm-staging      # different name
 spec:
   source:
     helm:
-      releaseName: hermes-agent-staging   # == metadata.name
+      releaseName: hermes-agent-helm-staging   # == metadata.name
   destination:
-    namespace: hermes-agent       # SAME namespace is fine
+    namespace: hermes-agent-helm       # SAME namespace is fine
 ```
 
-Resources render as `hermes-agent-staging-*` (pod `hermes-agent-staging-0`,
-`hermes-agent-staging-config`, `data-hermes-agent-staging-0`, …) — no overlap
-with the `hermes-agent-*` set. Each gets its own PVC, so the two instances do
-**not** share a knowledge base.
+Resources render as `hermes-agent-helm-staging-*` (pod `hermes-agent-helm-staging-0`,
+`hermes-agent-helm-staging-config`, `data-hermes-agent-helm-staging-0`, …) — no
+overlap with the `hermes-agent-helm-*` set. Each gets its own PVC, so the two
+instances do **not** share a knowledge base.

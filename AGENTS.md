@@ -4,7 +4,7 @@ Guidance for agents working in this repo (`hermes-helm`).
 
 ## What this is
 
-A Helm chart (`charts/hermes-agent`) that runs **Hermes Agent**
+A Helm chart (`charts/hermes-agent-helm`) that runs **Hermes Agent**
 (`nousresearch/hermes-agent`) on Kubernetes as a **StatefulSet**, with
 `config.yaml` managed as a **ConfigMap** and `.env` as a **Secret**.
 
@@ -52,7 +52,7 @@ A Helm chart (`charts/hermes-agent`) that runs **Hermes Agent**
   controls re-seed (true) vs seed-if-absent (false). Secrets go in via `envFrom`
   (env wins over config.yaml), not a `.env` file. Never try to reproduce the
   full upstream config in the chart.
-- **Environment-specific config lives in `charts/hermes-agent/values.example.yaml`**
+- **Environment-specific config lives in `charts/hermes-agent-helm/values.example.yaml`**
   (jyje's Raspberry Pi MicroK8s cluster: LiteLLM in `ollama-system`, deployed to
   the `hermes-agent` namespace,
   `subdir-usb` NFS StorageClass). Per-environment values do not belong in the
@@ -61,7 +61,7 @@ A Helm chart (`charts/hermes-agent`) that runs **Hermes Agent**
 ## Workflow
 
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
-  `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
+  `make docs` (uses `charts/hermes-agent-helm/README.md.gotmpl` + `# --` annotations).
 - Validate with `make lint` and `make template`.
 - Package for release with `make package` (runs docs + lint, then
   `helm package`). `Chart.yaml` carries `artifacthub.io/*` annotations for the

@@ -2,20 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   # The Application name. KEEP IT EQUAL TO spec.source.helm.releaseName below.
-  name: hermes-agent
+  name: hermes-agent-helm
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/jyje/hermes-helm
     targetRevision: main
-    path: charts/hermes-agent
+    path: charts/hermes-agent-helm
     helm:
       # MUST equal metadata.name. This makes the chart's
       # app.kubernetes.io/instance value match the Application, and makes the
       # rendered fullname unique per instance -> no collisions even when
       # multiple Applications target the SAME namespace.
-      releaseName: hermes-agent
+      releaseName: hermes-agent-helm
       valuesObject:
         config:
           # In-cluster LiteLLM as a custom OpenAI-compatible provider.
@@ -35,16 +35,16 @@ spec:
         # Do NOT commit the API key to Git. Keep the chart Secret as a harmless
         # placeholder and inject the real key from a pre-created Secret via
         # extraEnvFrom (the later envFrom wins, overriding the placeholder).
-        #   kubectl create secret generic hermes-agent-litellm -n hermes-agent \
+        #   kubectl create secret generic hermes-agent-helm-litellm -n hermes-agent-helm \
         #     --from-literal=OPENAI_API_KEY=<litellm key>
         env:
           OPENAI_API_KEY: "set-via-extraEnvFrom"
         extraEnvFrom:
           - secretRef:
-              name: hermes-agent-litellm
+              name: hermes-agent-helm-litellm
   destination:
     server: https://kubernetes.default.svc
-    namespace: hermes-agent
+    namespace: hermes-agent-helm
   syncPolicy:
     automated:
       prune: true

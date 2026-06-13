@@ -12,7 +12,7 @@ No long-lived `rc`/`release` branches — a release is a tag/event.
 
 ## How to cut a release
 
-The chart **`version` in `charts/hermes-agent/Chart.yaml` is the source of truth**.
+The chart **`version` in `charts/hermes-agent-helm/Chart.yaml` is the source of truth**.
 
 1. Bump `version` (e.g. `0.1.0` → `0.2.0`) following semver.
 2. Refresh the changelog: `make changelog` (git-cliff) and commit `CHANGELOG.md`
@@ -35,7 +35,7 @@ description) are safe — the tag-existence guard makes them no-ops.
   re-running a publish after a failed step.
 - **`/version vX.Y.Z` PR comment**: a maintainer (OWNER/MEMBER/COLLABORATOR)
   can comment `/version vX.Y.Z` on a PR. [version-comment.yml](.github/workflows/version-comment.yml)
-  bumps `charts/hermes-agent/Chart.yaml` `version` to `X.Y.Z`, regenerates
+  bumps `charts/hermes-agent-helm/Chart.yaml` `version` to `X.Y.Z`, regenerates
   `CHANGELOG.md` (git-cliff), and pushes that commit to the PR branch. Merging
   the PR to `main` then triggers `release.yml` as usual.
 

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: hermes-agent
+name: hermes-agent-helm
 description: |
   Hermes Agent on Kubernetes as a StatefulSet, wired to an OpenAI-compatible
   LLM provider (LiteLLM). config.yaml is managed via ConfigMap and the .env via

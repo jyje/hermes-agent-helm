@@ -14,11 +14,11 @@ jobs:
       - uses: azure/setup-helm@v4
 
       - name: helm lint
-        run: helm lint charts/hermes-agent --set env.OPENAI_API_KEY=sk-test
+        run: helm lint charts/hermes-agent-helm --set env.OPENAI_API_KEY=sk-test
 
       - name: helm template
         run: |
-          helm template hermes-agent charts/hermes-agent \
+          helm template hermes-agent-helm charts/hermes-agent-helm \
             --set-string env.OPENAI_API_KEY=sk-test > /dev/null
 
       - name: install helm-docs
@@ -32,8 +32,8 @@ jobs:
       - name: helm-docs is up to date
         run: |
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
-          git diff --exit-code charts/hermes-agent/README.md \
-            || { echo "::error::charts/hermes-agent/README.md is stale — run 'make docs' and commit"; exit 1; }
+          git diff --exit-code charts/hermes-agent-helm/README.md \
+            || { echo "::error::charts/hermes-agent-helm/README.md is stale — run 'make docs' and commit"; exit 1; }
 
   test:
     # Isolated install + helm test on an ephemeral kind cluster (no real cluster).
@@ -54,8 +54,8 @@ jobs:
         run: |
           if [ -n "$GOOGLE_API_KEY" ]; then
             echo "Installing with Gemini provider ($CI_MODEL)"
-            helm upgrade --install hermes-agent charts/hermes-agent \
-              --namespace hermes-agent --create-namespace \
+            helm upgrade --install hermes-agent-helm charts/hermes-agent-helm \
+              --namespace hermes-agent-helm --create-namespace \
               --set config.model.provider=gemini \
               --set-string config.model.default="$CI_MODEL" \
               --set-string env.GOOGLE_API_KEY="$GOOGLE_API_KEY" \
@@ -63,20 +63,20 @@ jobs:
               --wait --timeout 12m
           else
             echo "No GOOGLE_API_KEY secret — installing with placeholder (doctor-only)"
-            helm upgrade --install hermes-agent charts/hermes-agent \
-              --namespace hermes-agent --create-namespace \
+            helm upgrade --install hermes-agent-helm charts/hermes-agent-helm \
+              --namespace hermes-agent-helm --create-namespace \
               --set-string env.OPENAI_API_KEY=sk-test \
               --wait --timeout 12m
           fi
 
       - name: Helm test (hermes doctor)
-        run: helm test hermes-agent -n hermes-agent --timeout 12m
+        run: helm test hermes-agent-helm -n hermes-agent-helm --timeout 12m
 
       - name: Real model round-trip (only when a key is present)
         if: env.GOOGLE_API_KEY != ''
         run: |
           set -o pipefail
-          kubectl exec hermes-agent-0 -n hermes-agent -- sh -lc \
+          kubectl exec hermes-agent-helm-0 -n hermes-agent-helm -- sh -lc \
             "su hermes -s /bin/sh -c 'HERMES_HOME=/opt/data timeout 180 /opt/hermes/.venv/bin/hermes chat -q \"Reply with the single word READY and nothing else.\" --max-turns 1'" \
             | tee roundtrip.txt
           grep -qi 'READY' roundtrip.txt || { echo "::error::no model response from Gemini"; exit 1; }
@@ -84,6 +84,6 @@ jobs:
       - name: Diagnostics on failure
         if: failure()
         run: |
-          kubectl get pods -n hermes-agent -o wide || true
-          kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1 || true
-          kubectl logs -n hermes-agent -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
+          kubectl get pods -n hermes-agent-helm -o wide || true
+          kubectl logs -n hermes-agent-helm -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n hermes-agent-helm -l app.kubernetes.io/name=hermes-agent-helm --tail=-1 || true

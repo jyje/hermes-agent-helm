@@ -1,4 +1,4 @@
-# hermes-agent
+# hermes-agent-helm
 
 Hermes Agent on Kubernetes as a StatefulSet, wired to an OpenAI-compatible
 LLM provider (LiteLLM). config.yaml is managed via ConfigMap and the .env via
@@ -40,26 +40,26 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 ## Install
 
 ```bash
-helm upgrade --install hermes-agent ./charts/hermes-agent \
-  --namespace hermes-agent --create-namespace \
+helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
+  --namespace hermes-agent-helm --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
 The chart ships a placeholder `OPENAI_API_KEY`; override it (and `config.model`)
 for your provider at install/upgrade time, or supply a values file.
 
-> Tip: using a release name equal to the chart name (`hermes-agent`) keeps
-> resource names clean (`hermes-agent-0`) instead of doubling the prefix
-> (`hermes-hermes-agent-0`). Or set `fullnameOverride`.
+> Tip: using a release name equal to the chart name (`hermes-agent-helm`) keeps
+> resource names clean (`hermes-agent-helm-0`) instead of doubling the prefix
+> (`hermes-agent-helm-hermes-agent-helm-0`). Or set `fullnameOverride`.
 
 ## Test
 
 After install, run the bundled Helm test (a Job, hook `helm.sh/hook: test`):
 
 ```bash
-helm test hermes-agent -n hermes-agent
+helm test hermes-agent-helm -n hermes-agent-helm
 # the test is a Job, so fetch its output by label (not `helm test --logs`):
-kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+kubectl logs -n hermes-agent-helm -l app.kubernetes.io/component=test --tail=-1
 ```
 
 It runs `hermes --version`, verifies the seeded `config.yaml`, checks docker
@@ -83,7 +83,7 @@ the full upstream config (which would drift across Hermes versions).
 - **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
 
-See `charts/hermes-agent/values.example.yaml` for a complete example (in-cluster
+See `charts/hermes-agent-helm/values.example.yaml` for a complete example (in-cluster
 OpenAI-compatible proxy on NFS storage).
 
 ## Values
@@ -103,7 +103,7 @@ OpenAI-compatible proxy on NFS storage).
 | fullnameOverride | string | `""` | Fully override the generated resource name (release-name-chart). |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"nousresearch/hermes-agent"` |  |
-| image.tag | string | `"v2026.6.5"` |  |
+| image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `""` | Override the chart name used in resource names. |
 | nodeSelector | object | `{}` |  |

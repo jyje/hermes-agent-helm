@@ -5,12 +5,12 @@
 # (OpenAI-compatible) in the `ollama-system` namespace, on NFS storage.
 #
 # Namespace is chosen entirely via the CLI. Use release name == chart name so
-# resources are named `hermes-agent-*` (not `hermes-hermes-agent-*`), e.g.:
-#   helm upgrade --install hermes-agent ./charts/hermes-agent \
-#     --namespace hermes-agent --create-namespace \
-#     -f charts/hermes-agent/values.example.yaml \
+# resources are named `hermes-agent-helm-*` (not `hermes-agent-helm-hermes-agent-helm-*`), e.g.:
+#   helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
+#     --namespace hermes-agent-helm --create-namespace \
+#     -f charts/hermes-agent-helm/values.example.yaml \
 #     --set-string env.OPENAI_API_KEY='sk-<litellm-key>'
-#   helm test hermes-agent -n hermes-agent
+#   helm test hermes-agent-helm -n hermes-agent-helm
 
 # Register the in-cluster LiteLLM proxy as a custom OpenAI-compatible provider.
 # The key ("litellm") is the provider id referenced by model.provider.
