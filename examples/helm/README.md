@@ -70,6 +70,55 @@ echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u jyje --password-stdin
 
 ---
 
+## Upgrading an existing release across a chart rename
+
+If you installed an earlier version of this chart under its old name (e.g.
+`hermes-agent`) and are upgrading in place to `hermes-agent-helm`, a plain
+`helm upgrade` can fail or — worse — create a **second, empty StatefulSet +
+PVC** alongside your existing one. This happens because two things derive from
+the chart name (`Chart.Name`):
+
+1. **`fullname`** — if your release name doesn't already contain the new chart
+   name, Helm computes `<release>-<chart>` (e.g. `hermes-agent-hermes-agent-helm`)
+   instead of reusing the existing `<release>` name, so it creates brand-new
+   resources (including a fresh, empty PVC) rather than upgrading the old ones.
+2. **`volumeClaimTemplates[].metadata.labels["helm.sh/chart"]`** — this label
+   includes the chart name+version and is part of a StatefulSet's *immutable*
+   `volumeClaimTemplates`, so Kubernetes rejects the upgrade outright once the
+   chart name changes.
+
+Fix both by pinning the original name and recreating (not deleting) the
+StatefulSet:
+
+```bash
+# 1) keep fullname/selectors stable (replace with YOUR existing release name)
+RELEASE=hermes-agent
+NS=hermes-agent
+
+# 2) drop the StatefulSet object only — Pod and PVC (and your data) are kept
+kubectl delete sts "$RELEASE" -n "$NS" --cascade=orphan
+
+# 3) upgrade to the renamed chart, pinning nameOverride to the old name
+helm upgrade --install "$RELEASE" ./charts/hermes-agent-helm -n "$NS" \
+  -f charts/hermes-agent-helm/values.example.yaml \
+  --set nameOverride="$RELEASE" \
+  --set-string env.OPENAI_API_KEY='sk-<litellm-key>'
+
+# 4) the Pod restarts once (new chart's StatefulSet adopts the old PVC); verify
+kubectl rollout status statefulset/"$RELEASE" -n "$NS"
+helm test "$RELEASE" -n "$NS"
+```
+
+Verified end-to-end on jyje's cluster: `hermes-agent-0` kept its original
+`data-hermes-agent-0` PVC, `helm test` passed, and a live chat round-trip
+through the in-cluster LiteLLM proxy returned a reply.
+
+> If you don't need to preserve the existing release name/resources, skip
+> `nameOverride` and just `helm uninstall` + reinstall fresh with the new chart
+> name instead.
+
+---
+
 ## Secrets (both methods)
 
 Never bake the key into a committed values file. Either `--set-string` it at
