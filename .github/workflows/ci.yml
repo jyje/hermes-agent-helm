@@ -77,9 +77,9 @@ jobs:
         run: |
           set -o pipefail
           kubectl exec hermes-agent-helm-0 -n hermes-agent-helm -- sh -lc \
-            "su hermes -s /bin/sh -c 'HERMES_HOME=/opt/data timeout 180 /opt/hermes/.venv/bin/hermes chat -q \"Reply with the single word READY and nothing else.\" --max-turns 1'" \
+            "su hermes -s /bin/sh -c 'HERMES_HOME=/opt/data timeout 180 /opt/hermes/.venv/bin/hermes chat -q \"Just say hi.\" --max-turns 1'" \
             | tee roundtrip.txt
-          grep -qi 'READY' roundtrip.txt || { echo "::error::no model response from Gemini"; exit 1; }
+          grep -qiw 'hi' roundtrip.txt || { echo "::error::no model response from Gemini"; exit 1; }
 
       - name: Diagnostics on failure
         if: failure()

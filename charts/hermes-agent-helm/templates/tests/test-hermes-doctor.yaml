@@ -93,9 +93,9 @@ spec:
 
               echo "[4/4] hermes doctor (timeout {{ .Values.tests.doctorTimeout }}s)"
               if [ "{{ .Values.tests.doctorStrict }}" = "true" ]; then
-                timeout {{ .Values.tests.doctorTimeout }} hermes doctor
+                timeout -k 10 {{ .Values.tests.doctorTimeout }} hermes doctor
               else
-                timeout {{ .Values.tests.doctorTimeout }} hermes doctor \
+                timeout -k 10 {{ .Values.tests.doctorTimeout }} hermes doctor \
                   || echo "  doctor reported issues (non-fatal: tests.doctorStrict=false)"
               fi
 
