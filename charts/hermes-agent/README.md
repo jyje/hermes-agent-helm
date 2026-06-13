@@ -1,10 +1,11 @@
-# hermes-agent-helm
+# hermes-agent
 
-Hermes Agent on Kubernetes as a StatefulSet, wired to an OpenAI-compatible
-LLM provider (LiteLLM). config.yaml is managed via ConfigMap and the .env via
-Secret.
+Hermes Agent on Kubernetes as a StatefulSet (or Deployment), configurable for
+any LLM provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, or
+any OpenAI-compatible proxy such as LiteLLM). config.yaml is managed via
+ConfigMap and the .env via Secret.
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
+![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
 
 ## Overview
 
@@ -42,32 +43,46 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 ## Install
 
 ```bash
-helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
-  --namespace hermes-agent-helm --create-namespace \
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
 The chart ships a placeholder `OPENAI_API_KEY`; override it (and `config.model`)
 for your provider at install/upgrade time, or supply a values file.
 
-> Tip: using a release name equal to the chart name (`hermes-agent-helm`) keeps
-> resource names clean (`hermes-agent-helm-0`) instead of doubling the prefix
-> (`hermes-agent-helm-hermes-agent-helm-0`). Or set `fullnameOverride`.
+> Tip: using a release name equal to the chart name (`hermes-agent`) keeps
+> resource names clean (`hermes-agent-0`) instead of doubling the prefix
+> (`hermes-agent-hermes-agent-0`). Or set `fullnameOverride`.
 
 ## Test
 
 After install, run the bundled Helm test (a Job, hook `helm.sh/hook: test`):
 
 ```bash
-helm test hermes-agent-helm -n hermes-agent-helm
+helm test hermes-agent -n hermes-agent
 # the test is a Job, so fetch its output by label (not `helm test --logs`):
-kubectl logs -n hermes-agent-helm -l app.kubernetes.io/component=test --tail=-1
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 ```
 
 It runs `hermes --version`, verifies the seeded `config.yaml`, checks docker
 availability (informational, since the backend is `local`), and runs
 `hermes doctor`. Disable with `--set tests.enabled=false`; make doctor failures
 fatal with `--set tests.doctorStrict=true`.
+
+Set `tests.chat.enabled=true` to additionally run a real `hermes chat`
+round-trip against the configured provider and print the conversation (prompt +
+response) to the Job's logs — useful for verifying a LiteLLM or Gemini setup
+end-to-end:
+
+```bash
+# Gemini
+helm test hermes-agent -n hermes-agent \
+  --set tests.chat.enabled=true \
+  --set config.model.provider=gemini \
+  --set-string config.model.default=gemini-2.5-flash \
+  --set-string env.GOOGLE_API_KEY='<your-key>'
+```
 
 ## Configuration model
 
@@ -85,8 +100,8 @@ the full upstream config (which would drift across Hermes versions).
 - **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
 
-See `charts/hermes-agent-helm/values.example.yaml` for a complete example (in-cluster
-OpenAI-compatible proxy on NFS storage).
+See `charts/hermes-agent/values.example.yaml` for a complete example (custom
+OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
 
 ## Values
 
@@ -129,7 +144,13 @@ OpenAI-compatible proxy on NFS storage).
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` | Name to use; generated from fullname when empty. |
-| tests | object | `{"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | ------------------------------------------------------------------------- |
+| tests | object | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | ------------------------------------------------------------------------- |
+| tests.chat | object | `{"enabled":false,"failOnError":false,"maxTurns":1,"prompt":"Just say hi.","timeout":180}` | ------------------------------------------------------------------------- |
+| tests.chat.enabled | bool | `false` | Run a `hermes chat` round-trip and log the conversation. |
+| tests.chat.failOnError | bool | `false` | When true, a failed/empty round-trip fails the test job. |
+| tests.chat.maxTurns | int | `1` | Max agent turns for the round-trip. |
+| tests.chat.prompt | string | `"Just say hi."` | Prompt sent to the agent. |
+| tests.chat.timeout | int | `180` | Seconds to allow the round-trip to run before timing out. |
 | tests.doctorStrict | bool | `false` | When true, `hermes doctor` issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes --version, seeded config) fail. |
 | tests.doctorTimeout | int | `120` | Seconds to allow `hermes doctor` to run before timing out. |
 | tolerations | list | `[]` |  |

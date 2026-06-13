@@ -1,12 +1,13 @@
 # AGENTS.md
 
-Guidance for agents working in this repo (`hermes-helm`).
+Guidance for agents working in this repo (`hermes-agent-helm`).
 
 ## What this is
 
-A Helm chart (`charts/hermes-agent-helm`) that runs **Hermes Agent**
-(`nousresearch/hermes-agent`) on Kubernetes as a **StatefulSet**, with
-`config.yaml` managed as a **ConfigMap** and `.env` as a **Secret**.
+A Helm chart (`charts/hermes-agent`) that runs **Hermes Agent**
+(`nousresearch/hermes-agent`) on Kubernetes as a **StatefulSet or Deployment**
+(`controller.type`), with `config.yaml` managed as a **ConfigMap** and `.env`
+as a **Secret**.
 
 ## Design principles
 
@@ -52,16 +53,15 @@ A Helm chart (`charts/hermes-agent-helm`) that runs **Hermes Agent**
   controls re-seed (true) vs seed-if-absent (false). Secrets go in via `envFrom`
   (env wins over config.yaml), not a `.env` file. Never try to reproduce the
   full upstream config in the chart.
-- **Environment-specific config lives in `charts/hermes-agent-helm/values.example.yaml`**
-  (jyje's Raspberry Pi MicroK8s cluster: LiteLLM in `ollama-system`, deployed to
-  the `hermes-agent` namespace,
-  `subdir-usb` NFS StorageClass). Per-environment values do not belong in the
-  chart defaults.
+- **Environment-specific config lives in `charts/hermes-agent/values.example.yaml`**
+  (a sample setup: a custom OpenAI-compatible provider such as LiteLLM, plus
+  persistent storage with a non-default StorageClass). Per-environment values
+  do not belong in the chart defaults.
 
 ## Workflow
 
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
-  `make docs` (uses `charts/hermes-agent-helm/README.md.gotmpl` + `# --` annotations).
+  `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
 - Validate with `make lint` and `make template`.
 - Package for release with `make package` (runs docs + lint, then
   `helm package`). `Chart.yaml` carries `artifacthub.io/*` annotations for the
@@ -69,5 +69,5 @@ A Helm chart (`charts/hermes-agent-helm`) that runs **Hermes Agent**
 
 ## Scope
 
-- Resources: StatefulSet, ConfigMap, Secret, Services, ServiceAccount,
-  optional Namespace. No operator / CRD mode.
+- Resources: StatefulSet or Deployment (`controller.type`), ConfigMap, Secret,
+  Services, ServiceAccount, PVC. No operator / CRD mode.

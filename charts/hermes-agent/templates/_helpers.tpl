@@ -1,14 +1,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "hermes-agent-helm.name" -}}
+{{- define "hermes-agent.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a fully qualified app name.
 */}}
-{{- define "hermes-agent-helm.fullname" -}}
+{{- define "hermes-agent.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -24,16 +24,16 @@ Create a fully qualified app name.
 {{/*
 Chart name and version label.
 */}}
-{{- define "hermes-agent-helm.chart" -}}
+{{- define "hermes-agent.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels.
 */}}
-{{- define "hermes-agent-helm.labels" -}}
-helm.sh/chart: {{ include "hermes-agent-helm.chart" . }}
-{{ include "hermes-agent-helm.selectorLabels" . }}
+{{- define "hermes-agent.labels" -}}
+helm.sh/chart: {{ include "hermes-agent.chart" . }}
+{{ include "hermes-agent.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,17 +43,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels.
 */}}
-{{- define "hermes-agent-helm.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "hermes-agent-helm.name" . }}
+{{- define "hermes-agent.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "hermes-agent.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Service account name.
 */}}
-{{- define "hermes-agent-helm.serviceAccountName" -}}
+{{- define "hermes-agent.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "hermes-agent-helm.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "hermes-agent.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
@@ -62,21 +62,21 @@ Service account name.
 {{/*
 Headless service name used for StatefulSet governance.
 */}}
-{{- define "hermes-agent-helm.headlessServiceName" -}}
-{{- printf "%s-headless" (include "hermes-agent-helm.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "hermes-agent.headlessServiceName" -}}
+{{- printf "%s-headless" (include "hermes-agent.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Main image reference. Falls back to Chart.AppVersion when image.tag is empty.
 */}}
-{{- define "hermes-agent-helm.image" -}}
+{{- define "hermes-agent.image" -}}
 {{- printf "%s:%s" .Values.image.repository (.Values.image.tag | default .Chart.AppVersion) }}
 {{- end }}
 
 {{/*
 Test image reference. Falls back to the main image when tests.image fields are empty.
 */}}
-{{- define "hermes-agent-helm.testImage" -}}
+{{- define "hermes-agent.testImage" -}}
 {{- $repo := .Values.tests.image.repository | default .Values.image.repository }}
 {{- $tag := .Values.tests.image.tag | default .Values.image.tag | default .Chart.AppVersion }}
 {{- printf "%s:%s" $repo $tag }}
@@ -86,7 +86,7 @@ Test image reference. Falls back to the main image when tests.image fields are e
 Pod template (metadata + spec), shared by the StatefulSet and Deployment
 controllers. Caller is expected to nest this under `template:` with `nindent 4`.
 */}}
-{{- define "hermes-agent-helm.podTemplate" -}}
+{{- define "hermes-agent.podTemplate" -}}
 metadata:
   annotations:
     # Roll pods when config/secret content changes.
@@ -96,12 +96,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{- include "hermes-agent-helm.selectorLabels" . | nindent 4 }}
+    {{- include "hermes-agent.selectorLabels" . | nindent 4 }}
     {{- with .Values.podLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ include "hermes-agent-helm.serviceAccountName" . }}
+  serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
     {{- toYaml . | nindent 4 }}
@@ -114,7 +114,7 @@ spec:
     # Hermes merges it over its built-in defaults. Hermes also writes to its
     # home at runtime, so config is not mounted read-only.
     - name: seed-config
-      image: "{{ include "hermes-agent-helm.image" . }}"
+      image: "{{ include "hermes-agent.image" . }}"
       imagePullPolicy: {{ .Values.image.pullPolicy }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
@@ -139,7 +139,7 @@ spec:
   {{- end }}
   containers:
     - name: hermes-agent
-      image: "{{ include "hermes-agent-helm.image" . }}"
+      image: "{{ include "hermes-agent.image" . }}"
       imagePullPolicy: {{ .Values.image.pullPolicy }}
       {{- with .Values.command }}
       command:
@@ -159,7 +159,7 @@ spec:
         {{- end }}
       envFrom:
         - secretRef:
-            name: {{ include "hermes-agent-helm.fullname" . }}-env
+            name: {{ include "hermes-agent.fullname" . }}-env
         {{- with .Values.extraEnvFrom }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -180,13 +180,13 @@ spec:
     {{- if .Values.bootstrap.enabled }}
     - name: config
       configMap:
-        name: {{ include "hermes-agent-helm.fullname" . }}-config
+        name: {{ include "hermes-agent.fullname" . }}-config
     {{- end }}
     {{- if .Values.persistence.enabled }}
     {{- if eq .Values.controller.type "deployment" }}
     - name: data
       persistentVolumeClaim:
-        claimName: {{ include "hermes-agent-helm.fullname" . }}
+        claimName: {{ include "hermes-agent.fullname" . }}
     {{- end }}
     {{- else }}
     - name: data

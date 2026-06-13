@@ -2,26 +2,28 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   # The Application name. KEEP IT EQUAL TO spec.source.helm.releaseName below.
-  name: hermes-agent-helm
+  name: hermes-agent
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/jyje/hermes-helm
+    repoURL: https://github.com/jyje/hermes-agent-helm
     targetRevision: main
-    path: charts/hermes-agent-helm
+    path: charts/hermes-agent
     helm:
       # MUST equal metadata.name. This makes the chart's
       # app.kubernetes.io/instance value match the Application, and makes the
       # rendered fullname unique per instance -> no collisions even when
       # multiple Applications target the SAME namespace.
-      releaseName: hermes-agent-helm
+      releaseName: hermes-agent
       valuesObject:
         config:
-          # In-cluster LiteLLM as a custom OpenAI-compatible provider.
+          # Example: a custom OpenAI-compatible provider (e.g. an in-cluster
+          # LiteLLM proxy). Swap for a built-in provider key (gemini, anthropic,
+          # openai-api, ...) if you don't need a custom proxy.
           providers:
             litellm:
-              base_url: http://litellm.ollama-system.svc.cluster.local:4000/v1
+              base_url: http://litellm.example.svc.cluster.local:4000/v1
               key_env: OPENAI_API_KEY
               discover_models: true
           model:
@@ -30,21 +32,21 @@ spec:
           terminal:
             backend: local
         persistence:
-          storageClass: subdir-usb
+          storageClass: my-storage-class
           size: 5Gi
         # Do NOT commit the API key to Git. Keep the chart Secret as a harmless
         # placeholder and inject the real key from a pre-created Secret via
         # extraEnvFrom (the later envFrom wins, overriding the placeholder).
-        #   kubectl create secret generic hermes-agent-helm-litellm -n hermes-agent-helm \
-        #     --from-literal=OPENAI_API_KEY=<litellm key>
+        #   kubectl create secret generic hermes-agent-provider-key -n hermes-agent \
+        #     --from-literal=OPENAI_API_KEY=<your-key>
         env:
           OPENAI_API_KEY: "set-via-extraEnvFrom"
         extraEnvFrom:
           - secretRef:
-              name: hermes-agent-helm-litellm
+              name: hermes-agent-provider-key
   destination:
     server: https://kubernetes.default.svc
-    namespace: hermes-agent-helm
+    namespace: hermes-agent
   syncPolicy:
     automated:
       prune: true

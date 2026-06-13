@@ -1,0 +1,55 @@
+# values.example.yaml
+#
+# Sample overrides: Hermes Agent talking to a custom OpenAI-compatible proxy
+# (e.g. LiteLLM, vLLM) and using persistent storage with a non-default
+# StorageClass.
+#
+# Namespace is chosen entirely via the CLI. Use release name == chart name so
+# resources are named `hermes-agent-*` (not `hermes-agent-hermes-agent-*`), e.g.:
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values.example.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-<your-key>'
+#   helm test hermes-agent -n hermes-agent
+
+# Register a custom OpenAI-compatible provider (e.g. an in-cluster LiteLLM
+# proxy). The key ("litellm") is the provider id referenced by model.provider.
+#
+# To use a built-in provider instead (e.g. Gemini), drop this `providers`
+# block and set:
+#   config:
+#     model:
+#       provider: gemini
+#       default: gemini-2.5-flash
+#   env:
+#     GOOGLE_API_KEY: "<your-gemini-key>"
+config:
+  providers:
+    litellm:
+      # FQDN/URL of your OpenAI-compatible proxy.
+      base_url: http://litellm.example.svc.cluster.local:4000/v1
+      key_env: OPENAI_API_KEY      # env var that holds the proxy key
+      discover_models: true        # populate the model picker from /v1/models
+  model:
+    provider: litellm
+    # Must match a model name exposed by the proxy (see /v1/models).
+    default: openai/gpt-oss-120b
+  terminal:
+    backend: local
+  agent:
+    max_turns: 90
+    gateway_timeout: 1800
+
+# Proxy/provider key. Prefer overriding on the CLI with --set-string instead
+# of committing a real key here.
+env:
+  OPENAI_API_KEY: "sk-REPLACE_ME"
+
+# Persistence with a non-default StorageClass.
+persistence:
+  enabled: true
+  storageClass: my-storage-class
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /opt/data

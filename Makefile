@@ -1,7 +1,7 @@
-CHART := charts/hermes-agent-helm
-CHART_NAME := hermes-agent-helm
-NS    := hermes-agent-helm
-RELEASE := hermes-agent-helm
+CHART := charts/hermes-agent
+CHART_NAME := hermes-agent
+NS    := hermes-agent
+RELEASE := hermes-agent
 VALUES := $(CHART)/values.example.yaml
 OCI_REGISTRY ?= oci://ghcr.io/jyje
 

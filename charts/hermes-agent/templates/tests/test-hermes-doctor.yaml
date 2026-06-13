@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "hermes-agent-helm.fullname" . }}-test
+  name: {{ include "hermes-agent.fullname" . }}-test
   labels:
-    {{- include "hermes-agent-helm.labels" . | nindent 4 }}
+    {{- include "hermes-agent.labels" . | nindent 4 }}
     app.kubernetes.io/component: test
   annotations:
     # Helm test hook: created/run by `helm test <release>`, after install.
@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "hermes-agent-helm.selectorLabels" . | nindent 8 }}
+        {{- include "hermes-agent.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: test
     spec:
       restartPolicy: Never
@@ -33,7 +33,7 @@ spec:
         # Seed the same chart config into a private HERMES_HOME so `hermes doctor`
         # evaluates what the workload runs with.
         - name: seed-config
-          image: "{{ include "hermes-agent-helm.image" . }}"
+          image: "{{ include "hermes-agent.image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -49,7 +49,7 @@ spec:
       {{- end }}
       containers:
         - name: hermes-doctor
-          image: "{{ include "hermes-agent-helm.testImage" . }}"
+          image: "{{ include "hermes-agent.testImage" . }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy | default .Values.image.pullPolicy }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -60,7 +60,7 @@ spec:
               value: {{ .Values.persistence.mountPath | quote }}
           envFrom:
             - secretRef:
-                name: {{ include "hermes-agent-helm.fullname" . }}-env
+                name: {{ include "hermes-agent.fullname" . }}-env
             {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -70,7 +70,7 @@ spec:
             - |
               set -eu
               echo "===================================================="
-              echo " hermes-agent-helm install test (doctor-style)"
+              echo " hermes-agent install test (doctor-style)"
               echo "===================================================="
 
               echo "[1/4] hermes CLI version"
@@ -91,13 +91,31 @@ spec:
                 echo "  docker not installed (expected: terminal.backend=local)"
               fi
 
-              echo "[4/4] hermes doctor (timeout {{ .Values.tests.doctorTimeout }}s)"
+              echo "[4/{{ if .Values.tests.chat.enabled }}5{{ else }}4{{ end }}] hermes doctor (timeout {{ .Values.tests.doctorTimeout }}s)"
               if [ "{{ .Values.tests.doctorStrict }}" = "true" ]; then
                 timeout -k 10 {{ .Values.tests.doctorTimeout }} hermes doctor
               else
                 timeout -k 10 {{ .Values.tests.doctorTimeout }} hermes doctor \
                   || echo "  doctor reported issues (non-fatal: tests.doctorStrict=false)"
               fi
+
+              {{- if .Values.tests.chat.enabled }}
+              echo "[5/5] hermes chat round-trip (timeout {{ .Values.tests.chat.timeout }}s)"
+              echo "--- prompt ---"
+              echo {{ .Values.tests.chat.prompt | quote }}
+              echo "--- response ---"
+              set +e
+              timeout -k 10 {{ .Values.tests.chat.timeout }} hermes chat \
+                -q {{ .Values.tests.chat.prompt | quote }} \
+                --max-turns {{ .Values.tests.chat.maxTurns }} | tee /tmp/chat-response.txt
+              chat_status=$?
+              set -e
+              echo "--- end response ---"
+              if [ "{{ .Values.tests.chat.failOnError }}" = "true" ]; then
+                [ $chat_status -eq 0 ] && [ -s /tmp/chat-response.txt ] \
+                  || { echo "  FAIL: hermes chat round-trip failed or returned no output"; exit 1; }
+              fi
+              {{- end }}
 
               echo "===================================================="
               echo " ALL REQUIRED CHECKS PASSED"
@@ -111,7 +129,7 @@ spec:
         {{- if .Values.bootstrap.enabled }}
         - name: config
           configMap:
-            name: {{ include "hermes-agent-helm.fullname" . }}-config
+            name: {{ include "hermes-agent.fullname" . }}-config
         {{- end }}
         - name: data
           emptyDir: {}

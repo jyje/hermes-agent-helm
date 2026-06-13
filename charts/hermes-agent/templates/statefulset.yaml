@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "hermes-agent-helm.fullname" . }}
+  name: {{ include "hermes-agent.fullname" . }}
   labels:
-    {{- include "hermes-agent-helm.labels" . | nindent 4 }}
+    {{- include "hermes-agent.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "hermes-agent-helm.headlessServiceName" . }}
+  serviceName: {{ include "hermes-agent.headlessServiceName" . }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "hermes-agent-helm.selectorLabels" . | nindent 6 }}
+      {{- include "hermes-agent.selectorLabels" . | nindent 6 }}
   template:
-    {{- include "hermes-agent-helm.podTemplate" . | nindent 4 }}
+    {{- include "hermes-agent.podTemplate" . | nindent 4 }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
         name: data
         labels:
-          {{- include "hermes-agent-helm.labels" . | nindent 10 }}
+          {{- include "hermes-agent.labels" . | nindent 10 }}
       spec:
         accessModes:
           {{- toYaml .Values.persistence.accessModes | nindent 10 }}

@@ -1,17 +1,17 @@
 <div align="center">
 
-# jyje/hermes-agent-helm
+# jyje/hermes-agent
 
 <img width="640" src="https://raw.githubusercontent.com/NousResearch/hermes-agent/main/assets/banner.png" alt="Hermes Agent"/>
 
 ⚓ A community-powered, lightweight Helm chart to run **Hermes Agent** on Kubernetes
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/jyje/hermes-helm?style=social)](https://github.com/jyje/hermes-helm)
+[![GitHub Repo stars](https://img.shields.io/github/stars/jyje/hermes-agent-helm?style=social)](https://github.com/jyje/hermes-agent-helm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Helm](https://img.shields.io/badge/Helm-3-0F1689?logo=helm&logoColor=white)](https://helm.sh)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
-[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent-helm/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
 
 
 ---
@@ -22,11 +22,12 @@
 
 ## Summary
 
-`hermes-agent-helm` is a **community-powered** Helm chart that packages
+`hermes-agent` is a **community-powered** Helm chart that packages
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)
-(`nousresearch/hermes-agent`) as a Kubernetes **StatefulSet**, with `config.yaml`
-managed as a **ConfigMap** and `.env` as a **Secret**. It is not an official
-Nous Research release — it's maintained in the open by the community.
+(`nousresearch/hermes-agent`) as a Kubernetes **StatefulSet or Deployment**
+(`controller.type`), with `config.yaml` managed as a **ConfigMap** and `.env`
+as a **Secret**. It is not an official Nous Research release — it's
+maintained in the open by the community.
 
 ## Provider-agnostic
 
@@ -40,15 +41,15 @@ through `values.yaml`. No provider is baked into the templates.
 ## Lightweight
 
 Defaults target **small clusters** (homelab / single-node / edge). Resource
-requests and limits are intentionally modest, and the StatefulSet runs a single
+requests and limits are intentionally modest, and the workload runs a single
 replica with a small persistent volume. Scale `resources`, `replicaCount`, and
 `persistence.size` up via values when you need more.
 
 ## Layout
 
 ```
-charts/hermes-agent-helm/                     # the Helm chart (see its README for the full values table)
-charts/hermes-agent-helm/values.example.yaml  # example overrides (in-cluster LiteLLM proxy on NFS storage)
+charts/hermes-agent/                     # the Helm chart (see its README for the full values table)
+charts/hermes-agent/values.example.yaml  # example overrides (custom OpenAI-compatible provider + persistence)
 examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
 examples/argocd/                         # ArgoCD Application + safe multi-instance guide
 .github/workflows/                       # ci (lint + docs drift + kind test) and release (version bump -> tag -> ghcr OCI)
@@ -65,30 +66,30 @@ make template
 make lint
 
 # install with the generic defaults (set your provider key)
-# release name == chart name keeps resources clean (hermes-agent-helm-0, not hermes-agent-helm-hermes-agent-helm-0)
-helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
-  --namespace hermes-agent-helm --create-namespace \
+# release name == chart name keeps resources clean (hermes-agent-0, not hermes-agent-hermes-agent-0)
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 
 # run the install test (doctor-style Job)
-helm test hermes-agent-helm -n hermes-agent-helm
-kubectl logs -n hermes-agent-helm -l app.kubernetes.io/component=test --tail=-1
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 
 # or use an environment-specific values file
-helm upgrade --install hermes-agent-helm ./charts/hermes-agent-helm \
-  --namespace hermes-agent-helm --create-namespace \
-  -f charts/hermes-agent-helm/values.example.yaml \
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values.example.yaml \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
 ## Docs
 
 Chart docs are generated with [helm-docs](https://github.com/norwoodj/helm-docs)
-from `charts/hermes-agent-helm/README.md.gotmpl` + the `# --` annotations in
+from `charts/hermes-agent/README.md.gotmpl` + the `# --` annotations in
 `values.yaml`:
 
 ```bash
-make docs   # regenerate charts/hermes-agent-helm/README.md
+make docs   # regenerate charts/hermes-agent/README.md
 ```
 
 ## Releasing

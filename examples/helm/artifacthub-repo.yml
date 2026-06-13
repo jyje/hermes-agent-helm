@@ -2,7 +2,7 @@
 #
 # Push this to the same OCI path as the chart so Artifact Hub can verify you own
 # the repository, e.g.:
-#   oras push ghcr.io/jyje/hermes-agent-helm:artifacthub.io \
+#   oras push ghcr.io/jyje/hermes-agent:artifacthub.io \
 #     artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
 # (For a classic HTTP Helm repo, place this file next to index.yaml instead.)
 #
