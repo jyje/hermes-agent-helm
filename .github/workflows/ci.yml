@@ -2,8 +2,14 @@ name: ci
 
 on:
   pull_request:
+    paths:
+      - "charts/hermes-agent-helm/**"
+      - ".github/workflows/ci.yml"
   push:
     branches: [dev, main]
+    paths:
+      - "charts/hermes-agent-helm/**"
+      - ".github/workflows/ci.yml"
 
 jobs:
   lint:
