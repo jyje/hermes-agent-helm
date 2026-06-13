@@ -11,12 +11,14 @@ Secret.
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes.
 It deploys:
 
-- a **StatefulSet** (single-writer, persistent `HERMES_HOME`) running the
-  image's s6-supervised gateway
+- a **StatefulSet** (default) or **Deployment** (`controller.type`), single
+  replica with persistent `HERMES_HOME`, running the image's s6-supervised
+  gateway
 - a **ConfigMap** holding the partial `config.yaml`
 - a **Secret** holding the `.env` (injected via `envFrom`)
-- a headless Service for StatefulSet DNS (no inbound port — the gateway is
-  outbound) and an **optional** ClusterIP Service for the dashboard
+- for `controller.type=statefulset`: a headless Service for DNS/governance
+  (no inbound port — the gateway is outbound); for `deployment`: a standalone
+  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 Hermes supports many LLM providers via **built-in provider keys**
@@ -97,6 +99,8 @@ OpenAI-compatible proxy on NFS storage).
 | bootstrap.overwrite | bool | `true` | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). |
 | command[0] | string | `"hermes"` |  |
 | config | object | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` | ------------------------------------------------------------------------- |
+| controller | object | `{"type":"statefulset"}` | ------------------------------------------------------------------------- |
+| controller.type | string | `"statefulset"` | Workload kind: "statefulset" or "deployment". |
 | env | object | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` | ------------------------------------------------------------------------- |
 | extraEnv | list | `[]` | Plain (non-secret) env vars injected directly on the container. |
 | extraEnvFrom | list | `[]` | Extra envFrom sources (reference existing ConfigMaps/Secrets). |

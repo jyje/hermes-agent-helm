@@ -1,4 +1,4 @@
-Hermes Agent ({{ .Chart.AppVersion }}) deployed as a StatefulSet.
+Hermes Agent ({{ .Chart.AppVersion }}) deployed as a {{ if eq .Values.controller.type "deployment" }}Deployment{{ else }}StatefulSet{{ end }}.
 
 Release:   {{ .Release.Name }}
 Namespace: {{ .Release.Namespace }}
@@ -7,7 +7,7 @@ Provider:  {{ .Values.config.model.provider }} ({{ .Values.config.model.base_url
 Backend:   terminal.backend={{ .Values.config.terminal.backend }} (commands run in-pod)
 
 1. Watch rollout:
-   kubectl rollout status statefulset/{{ include "hermes-agent-helm.fullname" . }} -n {{ .Release.Namespace }}
+   kubectl rollout status {{ .Values.controller.type }}/{{ include "hermes-agent-helm.fullname" . }} -n {{ .Release.Namespace }}
 
 2. Set the provider API key if you used the placeholder:
    helm upgrade {{ .Release.Name }} . -n {{ .Release.Namespace }} \
@@ -19,4 +19,4 @@ Backend:   terminal.backend={{ .Values.config.terminal.backend }} (commands run 
 {{- end }}
 
 Logs:
-   kubectl logs statefulset/{{ include "hermes-agent-helm.fullname" . }} -n {{ .Release.Namespace }} -f
+   kubectl logs {{ .Values.controller.type }}/{{ include "hermes-agent-helm.fullname" . }} -n {{ .Release.Namespace }} -f

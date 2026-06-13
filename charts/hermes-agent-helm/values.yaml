@@ -23,6 +23,23 @@ imagePullSecrets: []
 command: ["hermes"]
 args: ["gateway", "run"]
 
+# ---------------------------------------------------------------------------
+# Workload controller.
+# "statefulset" (default): stable identity, a dedicated PVC via
+#   volumeClaimTemplates (data-<fullname>-0), and a headless Service for
+#   governance/DNS.
+# "deployment": no headless Service; when persistence is enabled, a single
+#   standalone PVC (named <fullname>) is created and the rollout strategy is
+#   forced to Recreate (so the new Pod doesn't race the old one for the
+#   ReadWriteOnce volume).
+# Both render the same Pod spec (resources, env, probes, ...) — pick
+# "deployment" if you don't need StatefulSet semantics (ordered rollout,
+# stable network identity).
+# ---------------------------------------------------------------------------
+controller:
+  # -- Workload kind: "statefulset" or "deployment".
+  type: statefulset
+
 # Single-writer stateful workload -> keep at 1.
 replicaCount: 1
 
