@@ -1,0 +1,44 @@
+# git-cliff configuration — Keep a Changelog style, grouped by Conventional Commit type.
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this chart are documented here.
+"""
+body = """
+{% if version %}\
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## [unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }}\
+{% endfor %}
+{% endfor %}\n
+"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+split_commits = false
+commit_parsers = [
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+  { message = "^perf", group = "Performance" },
+  { message = "^refactor", group = "Refactor" },
+  { message = "^docs", group = "Documentation" },
+  { message = "^ci", group = "CI/CD" },
+  { message = "^build", group = "Build" },
+  { message = "^test", group = "Tests" },
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "^chore", group = "Miscellaneous" },
+  { body = ".*security", group = "Security" },
+]
+protect_breaking_commits = true
+filter_commits = false
+tag_pattern = "v[0-9]*"
+topo_order = false
+sort_commits = "oldest"

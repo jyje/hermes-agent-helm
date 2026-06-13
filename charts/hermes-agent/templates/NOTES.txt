@@ -1,0 +1,22 @@
+Hermes Agent ({{ .Chart.AppVersion }}) deployed as a StatefulSet.
+
+Release:   {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Model:     {{ .Values.config.model.default }}
+Provider:  {{ .Values.config.model.provider }} ({{ .Values.config.model.base_url }})
+Backend:   terminal.backend={{ .Values.config.terminal.backend }} (commands run in-pod)
+
+1. Watch rollout:
+   kubectl rollout status statefulset/{{ include "hermes-agent.fullname" . }} -n {{ .Release.Namespace }}
+
+2. Set the provider API key if you used the placeholder:
+   helm upgrade {{ .Release.Name }} . -n {{ .Release.Namespace }} \
+     --set-string env.OPENAI_API_KEY='sk-...'
+{{- if .Values.tests.enabled }}
+
+3. Run the install test (doctor-style Job):
+   helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+{{- end }}
+
+Logs:
+   kubectl logs statefulset/{{ include "hermes-agent.fullname" . }} -n {{ .Release.Namespace }} -f

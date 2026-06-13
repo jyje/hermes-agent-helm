@@ -1,0 +1,95 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+## Overview
+
+Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes.
+It deploys:
+
+- a **StatefulSet** (single-writer, persistent `HERMES_HOME`) running the
+  image's s6-supervised gateway
+- a **ConfigMap** holding the partial `config.yaml`
+- a **Secret** holding the `.env` (injected via `envFrom`)
+- a headless Service for StatefulSet DNS (no inbound port — the gateway is
+  outbound) and an **optional** ClusterIP Service for the dashboard
+- a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
+
+Hermes supports many LLM providers via **built-in provider keys**
+(`openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`, `deepseek`,
+`lmstudio`, …). For an **OpenAI-compatible proxy** (LiteLLM, vLLM, LM Studio),
+register it under `config.providers` and reference it by key. The chart is fully
+driven by `values.yaml` — point it at a hosted API or an in-cluster proxy.
+
+> The provider key `openai` is **not** valid in Hermes (it aliases to
+> OpenRouter). Use `openai-api` for api.openai.com, or a custom provider for a
+> proxy — see `values.example.yaml`.
+
+The agent's command execution uses the **`local` backend** (commands run inside
+the pod; the pod is the sandbox). The `docker` backend is intentionally **not
+supported in-cluster** — it requires a Docker daemon/socket, absent on
+containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
+
+> Image tags are **date-based** (e.g. `v2026.6.5` == Hermes v0.16.0); the image
+> is multi-arch (amd64 + arm64), so it runs on Raspberry Pi clusters.
+
+## Install
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+The chart ships a placeholder `OPENAI_API_KEY`; override it (and `config.model`)
+for your provider at install/upgrade time, or supply a values file.
+
+> Tip: using a release name equal to the chart name (`hermes-agent`) keeps
+> resource names clean (`hermes-agent-0`) instead of doubling the prefix
+> (`hermes-hermes-agent-0`). Or set `fullnameOverride`.
+
+## Test
+
+After install, run the bundled Helm test (a Job, hook `helm.sh/hook: test`):
+
+```bash
+helm test hermes-agent -n hermes-agent
+# the test is a Job, so fetch its output by label (not `helm test --logs`):
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+It runs `hermes --version`, verifies the seeded `config.yaml`, checks docker
+availability (informational, since the backend is `local`), and runs
+`hermes doctor`. Disable with `--set tests.enabled=false`; make doctor failures
+fatal with `--set tests.doctorStrict=true`.
+
+## Configuration model
+
+Hermes reads `$HERMES_HOME/config.yaml` and secrets from the environment as
+**partial overrides** on top of its version-specific built-in defaults
+(precedence: CLI > `config.yaml` > `.env` > built-in defaults). This chart
+follows that model — you only set what you want to change, and never reproduce
+the full upstream config (which would drift across Hermes versions).
+
+- **`config.yaml`** — set only override keys under `.Values.config`. It is
+  rendered into a ConfigMap and **seeded into `HERMES_HOME`** (the persistent
+  volume) by an init container, because Hermes also writes to its home at
+  runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=true`
+  (default) re-seeds on every deploy; set `false` to seed only when absent.
+- **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
+  injected via `envFrom` as environment variables (env wins over `config.yaml`).
+
+See `charts/hermes-agent/values.example.yaml` for a complete example (in-cluster
+OpenAI-compatible proxy on NFS storage).
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesHeader" . }}
+
+{{ template "chart.valuesTable" . }}
+
+{{ template "helm-docs.versionFooter" . }}

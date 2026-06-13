@@ -1,0 +1,81 @@
+name: version-comment
+
+# ChatOps trigger: a maintainer comments `/version vX.Y.Z` on a PR. This bumps
+# `version` in charts/hermes-agent/Chart.yaml, refreshes CHANGELOG.md
+# (git-cliff), and pushes the commit to the PR branch. Merging that PR to
+# `main` then triggers release.yml (tag + GitHub Release + OCI push).
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    if: |
+      github.event.issue.pull_request != null &&
+      startsWith(github.event.comment.body, '/version ') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse version from comment
+        id: parse
+        run: |
+          VER=$(echo "${{ github.event.comment.body }}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          if [ -z "$VER" ]; then
+            echo "::error::could not parse a semver from comment (expected '/version vX.Y.Z')"
+            exit 1
+          fi
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PR head
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            if (pr.data.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              core.setFailed('refusing to push to a fork-owned PR branch');
+              return;
+            }
+            core.setOutput('ref', pr.data.head.ref);
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Bump Chart.yaml version
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.parse.outputs.version }}/" charts/hermes-agent/Chart.yaml
+
+      - name: Update CHANGELOG.md
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag v${{ steps.parse.outputs.version }} -o CHANGELOG.md
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add charts/hermes-agent/Chart.yaml CHANGELOG.md
+          git commit -m "chore(release): bump chart version to ${{ steps.parse.outputs.version }}"
+          git push origin HEAD:${{ steps.pr.outputs.ref }}
+
+      - name: React to comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket',
+            });

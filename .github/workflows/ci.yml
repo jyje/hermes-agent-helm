@@ -1,0 +1,89 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+
+      - name: helm lint
+        run: helm lint charts/hermes-agent --set env.OPENAI_API_KEY=sk-test
+
+      - name: helm template
+        run: |
+          helm template hermes-agent charts/hermes-agent \
+            --set-string env.OPENAI_API_KEY=sk-test > /dev/null
+
+      - name: install helm-docs
+        env:
+          HELM_DOCS_VERSION: "1.14.2"
+        run: |
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz" \
+            | tar -xz helm-docs
+          sudo install helm-docs /usr/local/bin/
+
+      - name: helm-docs is up to date
+        run: |
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+          git diff --exit-code charts/hermes-agent/README.md \
+            || { echo "::error::charts/hermes-agent/README.md is stale — run 'make docs' and commit"; exit 1; }
+
+  test:
+    # Isolated install + helm test on an ephemeral kind cluster (no real cluster).
+    # If a GOOGLE_API_KEY secret is present (non-fork runs), also do a real model
+    # round-trip through Google AI Studio (Gemini); otherwise doctor-only.
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      CI_MODEL: gemini-2.5-flash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+
+      - uses: helm/kind-action@v1
+
+      - name: Install chart (Gemini if a key is available, else placeholder)
+        run: |
+          if [ -n "$GOOGLE_API_KEY" ]; then
+            echo "Installing with Gemini provider ($CI_MODEL)"
+            helm upgrade --install hermes-agent charts/hermes-agent \
+              --namespace hermes-agent --create-namespace \
+              --set config.model.provider=gemini \
+              --set-string config.model.default="$CI_MODEL" \
+              --set-string env.GOOGLE_API_KEY="$GOOGLE_API_KEY" \
+              --set-string env.OPENAI_API_KEY=unused \
+              --wait --timeout 12m
+          else
+            echo "No GOOGLE_API_KEY secret — installing with placeholder (doctor-only)"
+            helm upgrade --install hermes-agent charts/hermes-agent \
+              --namespace hermes-agent --create-namespace \
+              --set-string env.OPENAI_API_KEY=sk-test \
+              --wait --timeout 12m
+          fi
+
+      - name: Helm test (hermes doctor)
+        run: helm test hermes-agent -n hermes-agent --timeout 12m
+
+      - name: Real model round-trip (only when a key is present)
+        if: env.GOOGLE_API_KEY != ''
+        run: |
+          set -o pipefail
+          kubectl exec hermes-agent-0 -n hermes-agent -- sh -lc \
+            "su hermes -s /bin/sh -c 'HERMES_HOME=/opt/data timeout 180 /opt/hermes/.venv/bin/hermes chat -q \"Reply with the single word READY and nothing else.\" --max-turns 1'" \
+            | tee roundtrip.txt
+          grep -qi 'READY' roundtrip.txt || { echo "::error::no model response from Gemini"; exit 1; }
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl get pods -n hermes-agent -o wide || true
+          kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n hermes-agent -l app.kubernetes.io/name=hermes-agent --tail=-1 || true

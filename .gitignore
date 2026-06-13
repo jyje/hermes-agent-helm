@@ -1,0 +1,9 @@
+# Helm package output
+dist/
+*.tgz
+
+# Local env / editor
+.DS_Store
+.idea/
+.vscode/
+.claude/

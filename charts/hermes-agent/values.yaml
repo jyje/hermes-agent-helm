@@ -1,0 +1,199 @@
+# Default values for hermes-agent.
+# StatefulSet + ConfigMap (config.yaml) + Secret (.env) + Helm test.
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Fully override the generated resource name (release-name-chart).
+fullnameOverride: ""
+
+image:
+  repository: nousresearch/hermes-agent
+  # Upstream uses DATE-based tags (e.g. v2026.6.5 == Hermes v0.16.0), plus
+  # `latest` / `main`. There is no semver tag. Multi-arch (amd64 + arm64).
+  tag: "v2026.6.5"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# Entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which
+# exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart
+# loop. So run the long-lived gateway explicitly; inside the s6-overlay image
+# `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on
+# crash). Append `--no-supervise` only if you want to bypass s6.
+command: ["hermes"]
+args: ["gateway", "run"]
+
+# Single-writer stateful workload -> keep at 1.
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  # -- Name to use; generated from fullname when empty.
+  name: ""
+  annotations: {}
+
+# ---------------------------------------------------------------------------
+# config.yaml -> Hermes reads $HERMES_HOME/config.yaml as a PARTIAL OVERRIDE on
+# top of its version-specific built-in defaults (precedence: CLI > config.yaml >
+# .env > built-in defaults). Only set the keys you want to change here; never
+# reproduce the full upstream config (it drifts across versions and Hermes fills
+# the rest in). This map is rendered into a ConfigMap and seeded into HERMES_HOME
+# by an init container (see `bootstrap`). Keys below use the real v2026.6.5 schema.
+#
+# Hermes supports many providers (openai, anthropic, google, openrouter, and any
+# OpenAI-compatible endpoint). Defaults use the provider's public endpoint —
+# override to point anywhere (see values.example.yaml for an in-cluster proxy).
+# ---------------------------------------------------------------------------
+config:
+  model:
+    # Model id for the chosen provider (no vendor prefix for built-ins).
+    default: gpt-4o-mini
+    # Hermes provider key. Use a BUILT-IN key — common ones:
+    #   openai-api (api.openai.com) | anthropic | gemini | openrouter |
+    #   nvidia | deepseek | lmstudio | ...
+    # NOTE: `openai` is NOT valid (it aliases to openrouter).
+    # For an OpenAI-compatible proxy (LiteLLM / vLLM / LM Studio / ...), register
+    # a custom provider under `config.providers` below and set this to that key
+    # (see values.example.yaml).
+    provider: openai-api
+  # Custom OpenAI-compatible providers, keyed by provider id. Empty by default.
+  #   providers:
+  #     litellm:
+  #       base_url: http://litellm.my-ns.svc.cluster.local:4000/v1
+  #       key_env: OPENAI_API_KEY   # env var holding the key
+  #       discover_models: true     # populate model picker from /v1/models
+  providers: {}
+  terminal:
+    # Run the agent's shell/code execution INSIDE this pod. The pod itself
+    # (namespace, securityContext, resource limits, PVC) is the sandbox.
+    # The `docker` backend is intentionally NOT supported in-cluster: it needs
+    # a Docker daemon/socket, which is a security risk and absent on containerd
+    # clusters (e.g. MicroK8s / Raspberry Pi). Keep this `local`.
+    backend: local
+  agent:
+    max_turns: 90
+    gateway_timeout: 1800
+
+# Seeding of config.yaml into HERMES_HOME (the persistent volume). Hermes writes
+# to its home at runtime (skills, auth.json, self-improvement), so config lives
+# in the writable volume rather than a read-only mount.
+bootstrap:
+  # -- Seed the rendered config.yaml into HERMES_HOME via an init container.
+  enabled: true
+  # -- true: overwrite HERMES_HOME/config.yaml with chart content on every
+  #    deploy (declarative). false: seed only if it does not already exist
+  #    (preserve runtime edits).
+  overwrite: true
+
+# ---------------------------------------------------------------------------
+# .env / secrets -> Hermes reads API keys from the environment, which take
+# precedence over config.yaml. Keys are rendered into a Secret and injected via
+# envFrom (not written as a .env file). Override at deploy time, e.g.
+#   --set-string env.OPENAI_API_KEY=sk-...
+# Provider key names: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY,
+# NVIDIA_API_KEY, OPENROUTER_API_KEY, LM_API_KEY (LM Studio), ...
+# ---------------------------------------------------------------------------
+env:
+  OPENAI_API_KEY: "sk-REPLACE_ME"
+
+# -- Plain (non-secret) env vars injected directly on the container.
+extraEnv: []
+#  - name: HERMES_ACCEPT_HOOKS
+#    value: "1"
+
+# -- Extra envFrom sources (reference existing ConfigMaps/Secrets).
+extraEnvFrom: []
+#  - secretRef:
+#      name: some-existing-secret
+
+# ---------------------------------------------------------------------------
+# Persistence: HERMES_HOME state lives here.
+# ---------------------------------------------------------------------------
+persistence:
+  enabled: true
+  # -- StorageClass for the volumeClaimTemplate. Empty = cluster default.
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /opt/data
+
+# ---------------------------------------------------------------------------
+# Networking. `hermes gateway run` is primarily OUTBOUND (Telegram/Discord/etc.)
+# and exposes no inbound API, so no access Service is created by default. A
+# headless Service is always created for StatefulSet DNS/governance.
+#
+# The only inbound HTTP surface is the management `dashboard` (default port
+# 9119, binds to 127.0.0.1). Exposing it cluster-wide requires `--insecure`,
+# which the upstream warns EXPOSES API KEYS on the network — so it is opt-in.
+# ---------------------------------------------------------------------------
+service:
+  # -- Create a ClusterIP Service (only useful if you expose the dashboard).
+  enabled: false
+  type: ClusterIP
+  port: 9119
+  annotations: {}
+
+# Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64).
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# Pod/container security contexts are left empty by default to stay compatible
+# with the image's s6-overlay init (which starts as root and drops privileges
+# itself). Add hardening here once verified for your environment.
+podSecurityContext: {}
+#  fsGroup: 1000
+
+securityContext: {}
+#  allowPrivilegeEscalation: false
+#  capabilities:
+#    drop: [ALL]
+
+# Health probes. Empty = none. The image's s6-overlay already supervises and
+# auto-restarts the gateway in-container, so k8s probes are optional. Provide a
+# full probe spec to enable, e.g. an exec check:
+#   liveness:
+#     exec: { command: ["hermes","gateway","status"] }
+#     initialDelaySeconds: 30
+#     periodSeconds: 30
+probes:
+  liveness: {}
+  readiness: {}
+
+# ---------------------------------------------------------------------------
+# Helm test (chart test). `helm test <release>` runs a doctor-style Job
+# (helm.sh/hook: test) AFTER install to verify the deployment. Rendered by
+# default; set tests.enabled=false to skip it entirely.
+# ---------------------------------------------------------------------------
+tests:
+  enabled: true
+  image:
+    # Empty fields fall back to the main `image.*` (so the hermes CLI + doctor
+    # are available and arch matches).
+    repository: ""
+    tag: ""
+    pullPolicy: ""
+  # -- When true, `hermes doctor` issues fail the test. When false, doctor runs
+  #    for visibility but only hard checks (hermes --version, seeded config) fail.
+  doctorStrict: false
+  # -- Seconds to allow `hermes doctor` to run before timing out.
+  doctorTimeout: 120
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+podAnnotations: {}
+podLabels: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

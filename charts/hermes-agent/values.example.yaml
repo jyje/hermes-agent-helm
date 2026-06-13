@@ -1,0 +1,46 @@
+# values.example.yaml
+#
+# Environment-specific overrides for jyje's Raspberry Pi (arm64) MicroK8s
+# cluster: Hermes Agent connected to an in-cluster LiteLLM proxy
+# (OpenAI-compatible) in the `ollama-system` namespace, on NFS storage.
+#
+# Namespace is chosen entirely via the CLI. Use release name == chart name so
+# resources are named `hermes-agent-*` (not `hermes-hermes-agent-*`), e.g.:
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values.example.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-<litellm-key>'
+#   helm test hermes-agent -n hermes-agent
+
+# Register the in-cluster LiteLLM proxy as a custom OpenAI-compatible provider.
+# The key ("litellm") is the provider id referenced by model.provider.
+config:
+  providers:
+    litellm:
+      # Cross-namespace FQDN of the litellm Service in ollama-system.
+      base_url: http://litellm.ollama-system.svc.cluster.local:4000/v1
+      key_env: OPENAI_API_KEY     # env var that holds the LiteLLM key
+      discover_models: true       # populate the model picker from /v1/models
+  model:
+    provider: litellm
+    # Must match a LiteLLM `model_name` exposed by the proxy (see /v1/models).
+    default: openai/gpt-oss-120b
+  terminal:
+    backend: local
+  agent:
+    max_turns: 90
+    gateway_timeout: 1800
+
+# LiteLLM key. Prefer overriding on the CLI with --set-string instead of
+# committing a real key here.
+env:
+  OPENAI_API_KEY: "sk-REPLACE_ME"  # LiteLLM PROXY_MASTER_KEY or a virtual key
+
+# NFS-backed persistence (cluster default StorageClass is `subdir-usb`).
+persistence:
+  enabled: true
+  storageClass: subdir-usb
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /opt/data
