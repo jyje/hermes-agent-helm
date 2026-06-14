@@ -1,6 +1,24 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.0.3] - 2026-06-14
+
+### Bug Fixes
+
+- 🛠️ fix(release): add instructions for merging release proposals ([`453450b`](https://github.com/jyje/hermes-agent-helm/commit/453450bb8464259facf762ba5a0609c8a7292170)) — @jyje
+
+### Features
+
+- ✨ feat(dependabot): add configuration for automated dependency updates (gha, helm) ([`c13812f`](https://github.com/jyje/hermes-agent-helm/commit/c13812f1b00b2ea9c851d6ec356218c27f5db3c5)) — @jyje
+
+### Miscellaneous
+
+- 🔧 chore(ci): add emoji to release proposal, dynamic release name, branch cleanup ([`84ca116`](https://github.com/jyje/hermes-agent-helm/commit/84ca11636f6521d1699aaa6437ece567c5ce2be4)) — @jyje
+
+### Refactor
+
+- ♻️ refactor(ci): rename YAML file, fix dependabot settings ([`610046c`](https://github.com/jyje/hermes-agent-helm/commit/610046c789e21a7471069b718c797c28aff82c3f)) — @jyje
+
 ## [0.0.2] - 2026-06-14
 
 ### Bug Fixes
@@ -9,6 +27,7 @@ All notable changes to this chart are documented here.
 - 🛠️ fix(ci): avoid duplicate auth header in propose-release PR step ([`b1674d2`](https://github.com/jyje/hermes-agent-helm/commit/b1674d25ce201b1451c2030276c4b4501c7dc84f)) — @jyje
 - 🛠️ fix(ci): regenerate chart docs in the release proposal ([`d6ebf6f`](https://github.com/jyje/hermes-agent-helm/commit/d6ebf6f366984d3986f2ebb64989d61a99058549)) — @jyje
 - 🛠️ fix(ci): harden NIM advisor against null content and any error ([`e40ce46`](https://github.com/jyje/hermes-agent-helm/commit/e40ce46c3e857b9731af2057bc72ec4440b2c6ae)) — @jyje
+- 🛠️ fix(readme): reorder logos in README for improved visibility ([`f52fb4b`](https://github.com/jyje/hermes-agent-helm/commit/f52fb4bd580c896f543c626987f70203daf36e04)) — @jyje
 
 ### Documentation
 
@@ -26,6 +45,7 @@ All notable changes to this chart are documented here.
 - 🔧 chore(ci): add debug output for the helm test job-discovery loop ([`da80da0`](https://github.com/jyje/hermes-agent-helm/commit/da80da0e3760b7b76c1e7fc9957e76ad3108acca)) — @jyje
 - 🔧 chore(ci): bump checkout/setup-helm to node24-based versions ([`f034208`](https://github.com/jyje/hermes-agent-helm/commit/f034208568c5e6248660cecb65a9dbc27fb2d553)) — @jyje
 - 🔧 chore(ci): make changelog entries title + commit link only ([`f656ada`](https://github.com/jyje/hermes-agent-helm/commit/f656ada2cc1b57a2162b3fa546527265a6028b9f)) — @jyje
+- 🔧 chore(ci): move all runners to ubuntu-26.04-arm ([`95e0484`](https://github.com/jyje/hermes-agent-helm/commit/95e04849567832bbd2dcdcaca5df58919b792729)) — @jyje
 
 ## [0.0.1] - 2026-06-14
 
