@@ -40,10 +40,36 @@ config:
     max_turns: 90
     gateway_timeout: 1800
 
-# Proxy/provider key. Prefer overriding on the CLI with --set-string instead
-# of committing a real key here.
+# Proxy/provider key. Prefer overriding on the CLI with --set-string, or use
+# the SealedSecret pattern below, instead of committing a real key here.
 env:
   OPENAI_API_KEY: "sk-REPLACE_ME"
+
+# ---------------------------------------------------------------------------
+# Recommended for GitOps: inject the provider key via a SealedSecret (sealed
+# with `kubeseal` for THIS release namespace) instead of `env` above, then
+# point `extraEnvFrom` at the Secret it decrypts into. `extraEnvFrom` is
+# applied after the chart's own env Secret, so its OPENAI_API_KEY wins over
+# the placeholder.
+# ---------------------------------------------------------------------------
+# extraResources:
+#   - apiVersion: bitnami.com/v1alpha1
+#     kind: SealedSecret
+#     metadata:
+#       name: hermes-agent-provider-key
+#       namespace: hermes-agent
+#     spec:
+#       encryptedData:
+#         OPENAI_API_KEY: AgB...   # `kubeseal` output, scoped to this name+namespace
+#       template:
+#         metadata:
+#           name: hermes-agent-provider-key
+#           namespace: hermes-agent
+#         type: Opaque
+#
+# extraEnvFrom:
+#   - secretRef:
+#       name: hermes-agent-provider-key
 
 # Persistence with a non-default StorageClass.
 persistence:

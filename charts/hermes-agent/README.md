@@ -1,9 +1,9 @@
 # hermes-agent
 
-Hermes Agent on Kubernetes as a StatefulSet (or Deployment), configurable for
-any LLM provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, or
-any OpenAI-compatible proxy such as LiteLLM). config.yaml is managed via
-ConfigMap and the .env via Secret.
+Community-powered Hermes Agent on Kubernetes as a Deployment (or StatefulSet),
+configurable for any LLM provider Hermes supports (OpenAI, Anthropic, Gemini,
+OpenRouter, or any OpenAI-compatible proxy such as LiteLLM). config.yaml is
+managed via ConfigMap and the .env via Secret.
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
 
@@ -12,7 +12,7 @@ ConfigMap and the .env via Secret.
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes.
 It deploys:
 
-- a **StatefulSet** (default) or **Deployment** (`controller.type`), single
+- a **Deployment** (default) or **StatefulSet** (`controller.type`), single
   replica with persistent `HERMES_HOME`, running the image's s6-supervised
   gateway
 - a **ConfigMap** holding the partial `config.yaml`
@@ -55,6 +55,38 @@ for your provider at install/upgrade time, or supply a values file.
 > resource names clean (`hermes-agent-0`) instead of doubling the prefix
 > (`hermes-agent-hermes-agent-0`). Or set `fullnameOverride`.
 
+### Install options: LLM provider
+
+This is the main thing you configure at install time — *which* LLM backend
+Hermes talks to. (Messenger integrations such as Telegram/Discord are not yet
+covered by this chart; planned for a future release.)
+
+- **Built-in provider** — set `config.model.provider` to one of Hermes'
+  built-in keys (`openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`,
+  `deepseek`, `lmstudio`, …) and `config.model.default` to a model id for that
+  provider. Supply the matching key under `env` (`OPENAI_API_KEY`,
+  `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, …).
+
+  ```bash
+  # OpenAI
+  helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
+    --set-string config.model.provider=openai-api \
+    --set-string config.model.default=gpt-4o-mini \
+    --set-string env.OPENAI_API_KEY='sk-...' --wait
+
+  # Gemini
+  helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
+    --set-string config.model.provider=gemini \
+    --set-string config.model.default=gemini-2.5-flash \
+    --set-string env.GOOGLE_API_KEY='<your-key>' \
+    --set-string env.OPENAI_API_KEY=unused --wait
+  ```
+
+- **Custom OpenAI-compatible provider** (LiteLLM, vLLM, LM Studio, …) — register
+  it under `config.providers.<id>` (`base_url`, `key_env`) and point
+  `config.model.provider` at that `<id>`. See
+  `charts/hermes-agent/values.example.yaml` for a full LiteLLM example.
+
 ## Test
 
 After install, run the bundled Helm test (a Job, hook `helm.sh/hook: test`):
@@ -70,19 +102,44 @@ availability (informational, since the backend is `local`), and runs
 `hermes doctor`. Disable with `--set tests.enabled=false`; make doctor failures
 fatal with `--set tests.doctorStrict=true`.
 
-Set `tests.chat.enabled=true` to additionally run a real `hermes chat`
-round-trip against the configured provider and print the conversation (prompt +
-response) to the Job's logs — useful for verifying a LiteLLM or Gemini setup
-end-to-end:
+### Verifying a provider end-to-end (`tests.chat.enabled`)
+
+`tests.chat.enabled=true` adds a 5th check: a real `hermes chat` round-trip
+using the **same `config`/`env` the release was installed with** (the test Job
+mounts the same ConfigMap and Secret as the main workload — no separate
+provider key needed), with the **full conversation (prompt + response) printed
+to the test Job's logs**. Since `helm test` doesn't take `--set`, flip the flag
+with `helm upgrade --reuse-values` and then run the test:
 
 ```bash
-# Gemini
-helm test hermes-agent -n hermes-agent \
-  --set tests.chat.enabled=true \
-  --set config.model.provider=gemini \
-  --set-string config.model.default=gemini-2.5-flash \
-  --set-string env.GOOGLE_API_KEY='<your-key>'
+helm upgrade hermes-agent ./charts/hermes-agent -n hermes-agent \
+  --reuse-values --set tests.chat.enabled=true --wait
+
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 ```
+
+Sample output (Gemini, prompt `tests.chat.prompt` default "Just say hi."):
+
+```
+[5/5] hermes chat round-trip (timeout 180s)
+--- prompt ---
+Just say hi.
+--- response ---
+Query: Just say hi.
+Initializing agent...
+────────────────────────────────────────
+
+╭─ ⚕ Hermes ───────────────────────────────────────────────────────────────────╮
+    Hi.
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+--- end response ---
+```
+
+By default a failed/empty round-trip is **non-fatal** (logged only); set
+`tests.chat.failOnError=true` to make it fail the test job (this is what CI
+does when a `GOOGLE_API_KEY` secret is available).
 
 ## Configuration model
 
@@ -99,6 +156,10 @@ the full upstream config (which would drift across Hermes versions).
   (default) re-seeds on every deploy; set `false` to seed only when absent.
 - **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
+  For GitOps, avoid committing real keys in `env` — instead deploy a
+  `SealedSecret` (or similar) via `extraResources` and reference the Secret it
+  produces with `extraEnvFrom` (applied after the chart's own Secret, so it
+  wins). See `values.example.yaml`.
 
 See `charts/hermes-agent/values.example.yaml` for a complete example (custom
 OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
@@ -114,11 +175,12 @@ OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
 | bootstrap.overwrite | bool | `true` | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). |
 | command[0] | string | `"hermes"` |  |
 | config | object | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` | ------------------------------------------------------------------------- |
-| controller | object | `{"type":"statefulset"}` | ------------------------------------------------------------------------- |
-| controller.type | string | `"statefulset"` | Workload kind: "statefulset" or "deployment". |
+| controller | object | `{"type":"deployment"}` | ------------------------------------------------------------------------- |
+| controller.type | string | `"deployment"` | Workload kind: "deployment" or "statefulset". |
 | env | object | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` | ------------------------------------------------------------------------- |
 | extraEnv | list | `[]` | Plain (non-secret) env vars injected directly on the container. |
 | extraEnvFrom | list | `[]` | Extra envFrom sources (reference existing ConfigMaps/Secrets). |
+| extraResources | list | `[]` | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see values.example.yaml).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see values.example.yaml). |
 | fullnameOverride | string | `""` | Fully override the generated resource name (release-name-chart). |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"nousresearch/hermes-agent"` |  |
@@ -133,7 +195,7 @@ OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
 | podSecurityContext | object | `{}` |  |
 | probes.liveness | object | `{}` |  |
 | probes.readiness | object | `{}` |  |
-| replicaCount | int | `1` |  |
+| replicaCount | int | `1` | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. |
 | resources.limits.cpu | string | `"1"` |  |
 | resources.limits.memory | string | `"1Gi"` |  |
 | resources.requests.cpu | string | `"100m"` |  |

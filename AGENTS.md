@@ -5,7 +5,7 @@ Guidance for agents working in this repo (`hermes-agent-helm`).
 ## What this is
 
 A Helm chart (`charts/hermes-agent`) that runs **Hermes Agent**
-(`nousresearch/hermes-agent`) on Kubernetes as a **StatefulSet or Deployment**
+(`nousresearch/hermes-agent`) on Kubernetes as a **Deployment or StatefulSet**
 (`controller.type`), with `config.yaml` managed as a **ConfigMap** and `.env`
 as a **Secret**.
 
@@ -69,5 +69,5 @@ as a **Secret**.
 
 ## Scope
 
-- Resources: StatefulSet or Deployment (`controller.type`), ConfigMap, Secret,
+- Resources: Deployment or StatefulSet (`controller.type`), ConfigMap, Secret,
   Services, ServiceAccount, PVC. No operator / CRD mode.

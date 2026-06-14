@@ -25,22 +25,27 @@ args: ["gateway", "run"]
 
 # ---------------------------------------------------------------------------
 # Workload controller.
-# "statefulset" (default): stable identity, a dedicated PVC via
-#   volumeClaimTemplates (data-<fullname>-0), and a headless Service for
-#   governance/DNS.
-# "deployment": no headless Service; when persistence is enabled, a single
-#   standalone PVC (named <fullname>) is created and the rollout strategy is
-#   forced to Recreate (so the new Pod doesn't race the old one for the
-#   ReadWriteOnce volume).
-# Both render the same Pod spec (resources, env, probes, ...) — pick
-# "deployment" if you don't need StatefulSet semantics (ordered rollout,
-# stable network identity).
+# "deployment" (default): no headless Service; when persistence is enabled, a
+#   single standalone PVC (named <fullname>) is created and the rollout
+#   strategy is forced to Recreate (so the new Pod doesn't race the old one
+#   for the ReadWriteOnce volume). More resource-flexible (no StatefulSet
+#   ordering/identity overhead) — the right choice for a single replica.
+# "statefulset": stable identity, a dedicated PVC via volumeClaimTemplates
+#   (data-<fullname>-0), and a headless Service for governance/DNS. Pick this
+#   if you need StatefulSet semantics (ordered rollout, stable network
+#   identity).
+# Both render the same Pod spec (resources, env, probes, ...).
 # ---------------------------------------------------------------------------
 controller:
-  # -- Workload kind: "statefulset" or "deployment".
-  type: statefulset
+  # -- Workload kind: "deployment" or "statefulset".
+  type: deployment
 
-# Single-writer stateful workload -> keep at 1.
+# -- DO NOT change this. Hermes Agent is a single-writer workload bound to one
+# HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out —
+# with controller.type=deployment extra replicas just hang Pending (can't mount
+# the same RWO volume); with statefulset they become separate, disconnected
+# agent instances with their own PVC/identity. There is no supported
+# multi-replica mode for this chart.
 replicaCount: 1
 
 serviceAccount:
@@ -122,6 +127,14 @@ extraEnv: []
 extraEnvFrom: []
 #  - secretRef:
 #      name: some-existing-secret
+
+# -- Extra raw manifests rendered as-is alongside this chart's resources.
+#    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
+#    may be either an object or a multiline string (see values.example.yaml).
+#    Useful for things this chart doesn't model directly, e.g. a SealedSecret
+#    that a sealed-secrets controller decrypts into a Secret referenced via
+#    `extraEnvFrom` (see values.example.yaml).
+extraResources: []
 
 # ---------------------------------------------------------------------------
 # Persistence: HERMES_HOME state lives here.

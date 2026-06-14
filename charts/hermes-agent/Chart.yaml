@@ -1,10 +1,10 @@
 apiVersion: v2
 name: hermes-agent
 description: |
-  Community-powered Hermes Agent on Kubernetes as a StatefulSet (or Deployment),
-  configurable for any LLM provider Hermes supports (OpenAI, Anthropic, Gemini,
-  OpenRouter, or any OpenAI-compatible proxy such as LiteLLM). config.yaml is
-  managed via ConfigMap and the .env via Secret.
+  Community-powered Hermes Agent on Kubernetes. This chart deploys the Hermes Agent,
+  a versatile agent framework that can be configurable for any LLM provider Hermes
+  supports (OpenAI, Anthropic, Gemini, OpenRouter, or any OpenAI-compatible proxy
+  such as LiteLLM). config.yaml is managed via ConfigMap and the .env via Secret.
 type: application
 
 # Chart version (bump on chart changes).
@@ -19,7 +19,6 @@ keywords:
   - agent
   - llm
   - openai-compatible
-  - statefulset
 
 home: https://github.com/jyje/hermes-agent-helm
 sources:

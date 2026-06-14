@@ -24,7 +24,7 @@
 
 `hermes-agent` is a **community-powered** Helm chart that packages
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)
-(`nousresearch/hermes-agent`) as a Kubernetes **StatefulSet or Deployment**
+(`nousresearch/hermes-agent`) as a Kubernetes **Deployment or StatefulSet**
 (`controller.type`), with `config.yaml` managed as a **ConfigMap** and `.env`
 as a **Secret**. It is not an official Nous Research release — it's
 maintained in the open by the community.
