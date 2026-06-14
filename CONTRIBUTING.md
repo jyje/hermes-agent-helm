@@ -44,9 +44,11 @@ version recommendation in place.
 
 ### 2. `/version vX.Y.Z` PR comment
 
-A maintainer (OWNER/MEMBER/COLLABORATOR) comments `/version vX.Y.Z` on any PR.
-[command-version-change.yaml](.github/workflows/command-version-change.yaml) bumps `Chart.yaml`,
-regenerates `CHANGELOG.md`, and pushes to that PR branch.
+A maintainer (OWNER/MEMBER/COLLABORATOR) comments `/version vX.Y.Z` on the
+release proposal PR. [command-version-change.yaml](.github/workflows/command-version-change.yaml)
+re-runs `propose-release.yaml` with that exact version, which regenerates the
+whole proposal in place — `Chart.yaml`, `CHANGELOG.md`, chart docs, and the PR
+body (showing the override and the AI's original suggestion for comparison).
 
 ### 3. Manual bump
 
