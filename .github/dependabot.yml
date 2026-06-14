@@ -1,0 +1,21 @@
+# Dependabot configuration for automated dependency updates.
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/.github/*"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "github-actions"
+
+  # Helm charts
+  - package-ecosystem: "helm"
+    directories:
+      - "/charts/*"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "github-actions"
