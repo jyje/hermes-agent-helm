@@ -101,4 +101,19 @@ recommended value and refreshed \`CHANGELOG.md\`. To release:
    same PR in place — it won't open a duplicate.
 
 > Nothing is published until this PR is merged. Closing it ships nothing.
+
+## How to merge this release
+
+When merging via the GitHub UI (select "Create a merge commit") or locally with
+\`git merge --no-ff\`, use this commit message (can also paste into the CLI merge):
+
+\`\`\`
+🚀 chore(release): merge v${NEW_VERSION} release proposal
+
+Includes changes from the following commits:
+
+$(cat "$OUT/CHANGELOG_FRAGMENT.md" | grep -E '^- ' | sed 's/^//')
+\`\`\`
+
+(Adjust the commit message as needed; the version will flow through to the tag.)
 EOF
