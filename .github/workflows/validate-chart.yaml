@@ -1,15 +1,15 @@
-name: ci
+name: 🔍 validate-chart
 
 on:
   pull_request:
     paths:
       - "charts/hermes-agent/**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/validate-chart.yaml"
   push:
     branches: [dev, main]
     paths:
       - "charts/hermes-agent/**"
-      - ".github/workflows/ci.yml"
+      - ".github/workflows/validate-chart.yaml"
 
 jobs:
   lint:

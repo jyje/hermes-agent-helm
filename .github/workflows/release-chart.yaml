@@ -1,4 +1,4 @@
-name: release
+name: 🚀 release-chart
 
 # Release model: the chart `version` in Chart.yaml is the source of truth.
 # When a commit on `main` changes it to a version that has no tag yet, CI tags
@@ -14,7 +14,7 @@ permissions:
   packages: write   # push to ghcr
 
 jobs:
-  release:
+  release-chart:
     runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v6

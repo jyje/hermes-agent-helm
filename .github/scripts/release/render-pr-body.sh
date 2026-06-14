@@ -45,7 +45,7 @@ fi
 cat <<EOF
 ## 🚀 Release proposal: v${NEW_VERSION}
 
-> Opened by the **propose-release** workflow. The changelog, diff, and
+> Opened by the **📋 propose-release** workflow. The changelog, diff, and
 > contributor list below are produced **deterministically** by git / git-cliff.
 > Only the **version recommendation and summary** are AI-assisted.
 
@@ -93,11 +93,11 @@ recommended value and refreshed \`CHANGELOG.md\`. To release:
 2. **Adjust the version if needed** (the recommendation is a starting point):
    - edit \`version:\` in \`charts/hermes-agent/Chart.yaml\` on this branch, **or**
    - comment \`/version vX.Y.Z\` on this PR to have the bot set it for you.
-3. **Merge to \`main\`.** That triggers \`release.yml\`, which tags \`v${NEW_VERSION}\`,
+3. **Merge to \`main\`.** That triggers \`release-chart.yaml\`, which tags \`v${NEW_VERSION}\`,
    writes the GitHub Release notes, and pushes the chart to
    \`oci://ghcr.io/<owner>/hermes-agent\`.
-4. **Regenerate this proposal** anytime by re-running the **propose-release**
-   workflow (Actions tab → "propose-release" → "Run workflow"). It updates this
+4. **Regenerate this proposal** anytime by re-running the **📋 propose-release**
+   workflow (Actions tab → "📋 propose-release" → "Run workflow"). It updates this
    same PR in place — it won't open a duplicate.
 
 > Nothing is published until this PR is merged. Closing it ships nothing.

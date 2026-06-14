@@ -135,7 +135,7 @@ helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent \
 ## Publishing to GitHub Packages (OCI) for Artifact Hub
 
 > **CI owns the `.tgz` lifecycle.** Bumping `version` in `Chart.yaml` on `main`
-> triggers `.github/workflows/release.yml`, which tags `vX.Y.Z`, writes release
+> triggers `.github/workflows/release-chart.yaml`, which tags `vX.Y.Z`, writes release
 > notes (git-cliff), and pushes to `oci://ghcr.io/<owner>` — the package
 > is never committed. The commands below are the equivalent manual/local flow.
 

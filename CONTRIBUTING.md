@@ -18,8 +18,8 @@ is what ships**. There are three ways to produce that bump — pick one:
 
 ### 1. AI-assisted proposal (recommended)
 
-Run [propose-release.yml](.github/workflows/propose-release.yml) via
-`workflow_dispatch` (Actions tab → "propose-release" → "Run workflow"). It:
+Run [propose-release.yaml](.github/workflows/propose-release.yaml) via
+`workflow_dispatch` (Actions tab → "📋 propose-release" → "Run workflow"). It:
 
 - diffs `main` against the last release tag and builds the changelog
   **deterministically** (git / git-cliff) — no AI in this part;
@@ -40,7 +40,7 @@ Dry-run the same proposal locally (no PR, no push) with `make propose`.
 ### 2. `/version vX.Y.Z` PR comment
 
 A maintainer (OWNER/MEMBER/COLLABORATOR) comments `/version vX.Y.Z` on any PR.
-[version-comment.yml](.github/workflows/version-comment.yml) bumps `Chart.yaml`,
+[event-version-comment.yaml](.github/workflows/event-version-comment.yaml) bumps `Chart.yaml`,
 regenerates `CHANGELOG.md`, and pushes to that PR branch.
 
 ### 3. Manual bump
@@ -51,12 +51,11 @@ PR yourself.
 ### What merging does
 
 Once any of the above merges to `main`,
-[release.yml](.github/workflows/release.yml) sees the new version, and if no
+[release-chart.yaml](.github/workflows/release-chart.yaml) sees the new version, and if no
 `vX.Y.Z` tag exists yet it creates the tag + GitHub Release (git-cliff notes)
 and pushes the chart to `oci://ghcr.io/<owner>/hermes-agent`. Commits that touch
 `Chart.yaml` for other reasons (e.g. `appVersion`, description) are safe — the
-tag-existence guard makes them no-ops. You can also re-run `release.yml` via
-`workflow_dispatch` to retry a failed publish.
+tag-existence guard makes them no-ops.
 
 > `appVersion` tracks the upstream Hermes image (date-based, e.g. `v2026.6.5`)
 > and is bumped manually; only the chart `version` drives releases.
@@ -72,7 +71,7 @@ clean and grouped. `chore(release):` commits are skipped in the changelog.
 PRs and pushes run an isolated **kind** install + `helm test` (the `hermes
 doctor` Job). If a `GOOGLE_API_KEY` repository secret is set, CI additionally
 does a real model round-trip via Google AI Studio (Gemini) — see
-[ci.yml](.github/workflows/ci.yml). Fork PRs don't receive the secret, so they
+[validate-chart.yaml](.github/workflows/validate-chart.yaml). Fork PRs don't receive the secret, so they
 fall back to doctor-only (safe).
 
 ## Local checks (run before pushing)

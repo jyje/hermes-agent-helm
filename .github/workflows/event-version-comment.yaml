@@ -3,7 +3,7 @@ name: version-comment
 # ChatOps trigger: a maintainer comments `/version vX.Y.Z` on a PR. This bumps
 # `version` in charts/hermes-agent/Chart.yaml, refreshes CHANGELOG.md
 # (git-cliff), and pushes the commit to the PR branch. Merging that PR to
-# `main` then triggers release.yml (tag + GitHub Release + OCI push).
+# `main` then triggers release-chart.yaml (tag + GitHub Release + OCI push).
 on:
   issue_comment:
     types: [created]
@@ -64,7 +64,7 @@ jobs:
         run: |
           ver="${{ steps.parse.outputs.version }}"
           sed -i "s/^version: .*/version: ${ver}/" charts/hermes-agent/Chart.yaml
-          # Keep the chart README's version badge in sync so ci.yml's docs-drift
+          # Keep the chart README's version badge in sync so validate-chart.yaml's docs-drift
           # check passes on the PR.
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
 

@@ -1,11 +1,11 @@
-name: propose-release
+name: 📋 propose-release
 
 # Opens (or updates) a single "release proposal" PR for the current state of
 # `main`. The changelog, diff, change signals, and contributors are produced
 # deterministically by git / git-cliff; only the version recommendation and the
 # human summary are AI-assisted (NVIDIA NIM, with a heuristic fallback when no
 # key is available). Nothing is published here — merging the PR triggers
-# release.yml, which is what actually tags + pushes the chart.
+# release-chart.yaml, which is what actually tags + pushes the chart.
 #
 # Trigger is workflow_dispatch only: it is maintainer-initiated and never runs
 # on untrusted PR events, so the NIM secret and write permissions are never
@@ -102,7 +102,7 @@ jobs:
           sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
           git-cliff --tag "v${new}" -o CHANGELOG.md
           # Regenerate the chart README so its version badge matches Chart.yaml —
-          # otherwise ci.yml's docs-drift check fails on the release PR.
+          # otherwise validate-chart.yaml's docs-drift check fails on the release PR.
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
 
       - name: Build contributors block
