@@ -46,7 +46,7 @@ jobs:
             }
             core.setOutput('ref', pr.data.head.ref);
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ steps.pr.outputs.ref }}
           fetch-depth: 0

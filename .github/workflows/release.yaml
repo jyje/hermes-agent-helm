@@ -18,7 +18,7 @@ jobs:
   release:
     runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0   # full history + tags for git-cliff and the tag guard
 
