@@ -8,7 +8,6 @@ on:
   push:
     branches: [main]
     paths: ["charts/hermes-agent/Chart.yaml"]
-  workflow_dispatch:
 
 permissions:
   contents: write   # create tag + GitHub Release
