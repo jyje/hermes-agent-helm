@@ -61,7 +61,7 @@ jobs:
           helm package charts/hermes-agent --destination dist/
           echo "${{ secrets.GITHUB_TOKEN }}" \
             | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
-          helm push dist/hermes-agent-*.tgz "oci://ghcr.io/${{ github.repository_owner }}"
+          helm push dist/hermes-agent-*.tgz "oci://ghcr.io/${{ github.repository }}"
 
       - name: Checkout existing Helm repo index (gh-pages)
         if: steps.ver.outputs.exists == 'false'

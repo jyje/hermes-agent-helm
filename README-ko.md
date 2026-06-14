@@ -134,7 +134,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   **릴리즈 PR**을 생성/업데이트합니다. 버전이 마음에 안 들면 조정한 후 머지하세요.
   (또는 제안을 건너뛰고 `Chart.yaml`을 직접 범프하거나 `/version vX.Y.Z`를 코멘트하세요.)
   PR이 `main`으로 머지되면 [release-chart.yaml](.github/workflows/release-chart.yaml)이
-  `vX.Y.Z` 태그를 생성하고, GitHub Release를 작성하고, 차트를 `oci://ghcr.io/<owner>/hermes-agent`에 배포합니다.
+  `vX.Y.Z` 태그를 생성하고, GitHub Release를 작성하고, 차트를 `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`에 배포합니다.
 
 즉: lint + test가 모든 변경사항을 게이트합니다; *릴리즈* 자체는 단순한
 리뷰된 PR (버전 범프) — AI는 조언만 하고, 머지가 배포합니다.

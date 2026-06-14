@@ -63,7 +63,7 @@ proposal".
 
 6. **Merge** — this triggers `release-chart.yaml`, which tags `vX.Y.Z`, writes
    the GitHub Release, and publishes the chart to both the OCI registry
-   (`oci://ghcr.io/<owner>/hermes-agent`) and the GitHub Pages Helm repo
+   (`oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`) and the GitHub Pages Helm repo
    (`https://<owner>.github.io/hermes-agent-helm`):
 
    ```bash

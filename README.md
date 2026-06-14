@@ -140,7 +140,7 @@ principles are in [AGENTS.md](AGENTS.md).
   Adjust the version if you disagree, then merge. (Or skip the proposal and bump
   `Chart.yaml` yourself / comment `/version vX.Y.Z`.) Once that PR merges to
   `main`, [release-chart.yaml](.github/workflows/release-chart.yaml) tags `vX.Y.Z`, writes the
-  GitHub Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent`.
+  GitHub Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`.
 
 So: lint + test gate every change; the *release* itself is just a normal
 reviewed PR (the version bump) — the AI only advises, merging is what ships. See

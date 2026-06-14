@@ -3,7 +3,7 @@ CHART_NAME := hermes-agent
 NS    := hermes-agent
 RELEASE := hermes-agent
 VALUES := $(CHART)/values.example.yaml
-OCI_REGISTRY ?= oci://ghcr.io/jyje
+OCI_REGISTRY ?= oci://ghcr.io/jyje/hermes-agent-helm
 
 CHART_VERSION = $(shell grep -E '^version:' $(CHART)/Chart.yaml | awk '{print $$2}' | tr -d '"')
 

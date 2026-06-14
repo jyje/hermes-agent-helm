@@ -95,7 +95,7 @@ recommended value and refreshed \`CHANGELOG.md\`. To release:
    - comment \`/version vX.Y.Z\` on this PR to have the bot set it for you.
 3. **Merge to \`main\`.** That triggers \`release-chart.yaml\`, which tags \`v${NEW_VERSION}\`,
    writes the GitHub Release notes, and pushes the chart to
-   \`oci://ghcr.io/<owner>/hermes-agent\`.
+   \`oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent\`.
 4. **Regenerate this proposal** anytime by re-running the **📋 propose-release**
    workflow (Actions tab → "📋 propose-release" → "Run workflow"). It updates this
    same PR in place — it won't open a duplicate.
