@@ -25,7 +25,9 @@ jobs:
         id: ver
         run: |
           VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
+          NAME="$(grep -E '^name:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
           echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "chart_name=$NAME" >> "$GITHUB_OUTPUT"
           if git rev-parse -q --verify "refs/tags/v$VER" >/dev/null; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "::notice::v$VER already released — nothing to do."
@@ -48,8 +50,17 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.ver.outputs.version }}
-          name: ${{ github.event.repository.name }} v${{ steps.ver.outputs.version }}
+          name: ${{ steps.ver.outputs.chart_name }} v${{ steps.ver.outputs.version }}
           body_path: RELEASE_NOTES.md
+
+      - name: Ensure release title (action-gh-release may reuse a stale release without it)
+        if: steps.ver.outputs.exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit "v${{ steps.ver.outputs.version }}" \
+            --repo "${{ github.repository }}" \
+            --title "${{ steps.ver.outputs.chart_name }} v${{ steps.ver.outputs.version }}"
 
       - name: Setup Helm
         if: steps.ver.outputs.exists == 'false'
