@@ -53,9 +53,14 @@ PR yourself.
 Once any of the above merges to `main`,
 [release-chart.yaml](.github/workflows/release-chart.yaml) sees the new version, and if no
 `vX.Y.Z` tag exists yet it creates the tag + GitHub Release (git-cliff notes)
-and pushes the chart to `oci://ghcr.io/<owner>/hermes-agent`. Commits that touch
-`Chart.yaml` for other reasons (e.g. `appVersion`, description) are safe — the
-tag-existence guard makes them no-ops.
+and publishes the chart to **both**:
+
+- `oci://ghcr.io/<owner>/hermes-agent` (OCI artifact), and
+- the classic Helm repository at `https://<owner>.github.io/hermes-agent-helm`
+  (published to the `gh-pages` branch, `index.yaml` merged with prior releases).
+
+Commits that touch `Chart.yaml` for other reasons (e.g. `appVersion`,
+description) are safe — the tag-existence guard makes them no-ops.
 
 > `appVersion` tracks the upstream Hermes image (date-based, e.g. `v2026.6.5`)
 > and is bumped manually; only the chart `version` drives releases.

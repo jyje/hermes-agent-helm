@@ -44,6 +44,20 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent \
 ```
 
 Pin `--version` to a [released chart version](https://github.com/jyje/hermes-agent-helm/releases).
+
+Prefer a classic Helm repository instead? The same releases are also published
+to GitHub Pages:
+
+```bash
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+helm install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --version 0.0.1 \
+  --set-string env.OPENAI_API_KEY='sk-...' \
+  --wait
+```
+
 To install from this repo's source instead (e.g. to try an unreleased
 change), see [Quick start](#quick-start) below.
 

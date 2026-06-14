@@ -63,6 +63,34 @@ jobs:
             | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
           helm push dist/hermes-agent-*.tgz "oci://ghcr.io/${{ github.repository_owner }}"
 
+      - name: Checkout existing Helm repo index (gh-pages)
+        if: steps.ver.outputs.exists == 'false'
+        uses: actions/checkout@v6
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages-index
+
+      - name: Build Helm repo index
+        if: steps.ver.outputs.exists == 'false'
+        run: |
+          mkdir -p .deploy
+          cp dist/hermes-agent-*.tgz .deploy/
+          if [ -f gh-pages-index/index.yaml ]; then
+            helm repo index .deploy --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }} \
+              --merge gh-pages-index/index.yaml
+          else
+            helm repo index .deploy --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          fi
+
+      - name: Publish Helm repo to GitHub Pages
+        if: steps.ver.outputs.exists == 'false'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .deploy
+          keep_files: true
+
       - name: Clean up release/next branch (post-merge)
         if: steps.ver.outputs.exists == 'false'
         run: |
