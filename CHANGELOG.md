@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this chart are documented here.
-## [unreleased]
+## [0.0.2] - 2026-06-14
 
 ### Bug Fixes
 
@@ -19,6 +19,7 @@ All notable changes to this chart are documented here.
 - ✨ feat(ci): add a model pool for the chat round-trip test and fix slow helm test ([`254712e`](https://github.com/jyje/hermes-agent-helm/commit/254712e4669cb59d2e19eabe3ab1e30f9f7bf98b)) — @jyje
 - ✨ feat(ci): add AI-assisted release-proposal pipeline ([`486293c`](https://github.com/jyje/hermes-agent-helm/commit/486293c4d09b080fedcd0578a0f1e9f2931441c4)) — @jyje
 - ✨ feat(ci): support explicit version override in release proposal ([`72f2b5f`](https://github.com/jyje/hermes-agent-helm/commit/72f2b5ffe826b3a46203e4de7d8a9f7c5c55d956)) — @jyje
+- ✨ feat(ci): credit each changelog entry to its commit author ([`62ef69c`](https://github.com/jyje/hermes-agent-helm/commit/62ef69c642e4cad4f169eb06006f0427b77955d4)) — @jyje
 
 ### Miscellaneous
 
