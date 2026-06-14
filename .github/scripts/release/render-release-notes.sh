@@ -1,22 +1,34 @@
 #!/usr/bin/env bash
-# Assemble the GitHub Release body: install snippets (latest / this version /
-# OCI) + the changelog section for this version (extracted from CHANGELOG.md,
-# so it matches the release-proposal PR exactly). Contributors are not
-# included here — GitHub renders a native contributors block on the release
-# page already.
+# Assemble the GitHub Release body: chart description (from Chart.yaml,
+# single source of truth) + install snippets (latest / this version / OCI) +
+# the changelog section for this version (extracted from CHANGELOG.md, so it
+# matches the release-proposal PR exactly). Contributors are not included
+# here — GitHub renders a native contributors block on the release page
+# already.
 #
-# Usage: render-release-notes.sh <owner/repo> <chart_name> <version> <changelog_section_file>
+# Usage: render-release-notes.sh <owner/repo> <chart_name> <version> <changelog_section_file> <chart_yaml_path>
 set -euo pipefail
 
 REPO="${1:?owner/repo}"
 CHART_NAME="${2:?chart name}"
 VERSION="${3:?version}"
 CHANGELOG_FILE="${4:?changelog section file}"
+CHART_YAML="${5:?Chart.yaml path}"
 
 OWNER="${REPO%%/*}"
 REPO_NAME="${REPO#*/}"
 
+DESCRIPTION="$(awk '
+  /^description: \|/ { found=1; next }
+  found && /^[^ ]/ { exit }
+  found { sub(/^  /, ""); print }
+' "$CHART_YAML")"
+
 cat <<EOF
+${DESCRIPTION}
+
+---
+
 ## Install
 
 ### Latest (Helm repo)

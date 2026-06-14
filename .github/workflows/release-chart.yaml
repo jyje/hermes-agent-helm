@@ -53,6 +53,7 @@ jobs:
           bash .github/scripts/release/render-release-notes.sh \
             "${{ github.repository }}" "${{ steps.ver.outputs.chart_name }}" \
             "${{ steps.ver.outputs.version }}" CHANGELOG_SECTION.md \
+            charts/hermes-agent/Chart.yaml \
             > RELEASE_NOTES.md
 
       - name: Create tag + GitHub Release
