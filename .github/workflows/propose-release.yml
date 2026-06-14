@@ -164,7 +164,7 @@ jobs:
             charts/hermes-agent/Chart.yaml
             charts/hermes-agent/README.md
             CHANGELOG.md
-          commit-message: "chore(release): propose v${{ steps.ver.outputs.new }}"
+          commit-message: "🔧 chore(release): propose v${{ steps.ver.outputs.new }}"
           title: "🚀 Release v${{ steps.ver.outputs.new }}"
           body-path: ${{ env.OUT }}/PR_BODY.md
           labels: release

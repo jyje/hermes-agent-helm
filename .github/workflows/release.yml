@@ -49,7 +49,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.version }}
-          name: v${{ steps.ver.outputs.version }}
+          name: ${{ github.event.repository.name }} v${{ steps.ver.outputs.version }}
           body_path: RELEASE_NOTES.md
 
       - name: Setup Helm
@@ -63,3 +63,8 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" \
             | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
           helm push dist/hermes-agent-*.tgz "oci://ghcr.io/${{ github.repository_owner }}"
+
+      - name: Clean up release/next branch (post-merge)
+        if: steps.ver.outputs.exists == 'false'
+        run: |
+          git push origin --delete release/next 2>/dev/null || true
