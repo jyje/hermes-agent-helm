@@ -13,8 +13,12 @@ name: propose-release
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Exact version to propose, e.g. 0.0.2 (overrides the AI recommendation; leave blank to let the AI/heuristic decide)"
+        type: string
+        default: ""
       bump:
-        description: "Version bump level (auto = use the AI/heuristic recommendation)"
+        description: "Version bump level (ignored if 'version' is set; auto = use the AI/heuristic recommendation)"
         type: choice
         default: auto
         options: [auto, patch, minor, major]
@@ -58,20 +62,26 @@ jobs:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
         run: python3 .github/scripts/release/advise.py "$OUT"
 
-      - name: Resolve bump level + next version
+      - name: Resolve next version + selection source
         id: ver
         run: |
-          override="${{ inputs.bump }}"
-          if [ "$override" = "auto" ]; then
-            bump="$(python3 -c "import json;print(json.load(open('$OUT/advice.json'))['bump'])")"
-          else
-            bump="$override"
-          fi
+          version_in="${{ inputs.version }}"
+          bump_in="${{ inputs.bump }}"
           bump_from="$(python3 -c "import json;print(json.load(open('$OUT/context.json'))['bump_from'])")"
-          new="$(bash .github/scripts/release/semver.sh next "$bump_from" "$bump")"
-          echo "bump=$bump"          >> "$GITHUB_OUTPUT"
-          echo "new=$new"            >> "$GITHUB_OUTPUT"
-          echo "::notice::proposing v$new (bump=$bump from $bump_from)"
+
+          # Precedence: explicit version > explicit bump level > AI/heuristic.
+          # Anything other than the plain AI recommendation is a maintainer choice.
+          if [ -n "$version_in" ]; then
+            new="${version_in#v}"; selection=manual
+          elif [ "$bump_in" != "auto" ]; then
+            new="$(bash .github/scripts/release/semver.sh next "$bump_from" "$bump_in")"; selection=manual
+          else
+            bump="$(python3 -c "import json;print(json.load(open('$OUT/advice.json'))['bump'])")"
+            new="$(bash .github/scripts/release/semver.sh next "$bump_from" "$bump")"; selection=ai
+          fi
+          echo "new=$new"             >> "$GITHUB_OUTPUT"
+          echo "selection=$selection" >> "$GITHUB_OUTPUT"
+          echo "::notice::proposing v$new (selection=$selection, from v$bump_from)"
 
       - name: Install helm-docs
         env:
@@ -137,7 +147,8 @@ jobs:
       - name: Render PR body
         run: |
           bash .github/scripts/release/render-pr-body.sh \
-            "$OUT" "${{ steps.ver.outputs.new }}" "$OUT/contributors.md" > "$OUT/PR_BODY.md"
+            "$OUT" "${{ steps.ver.outputs.new }}" "$OUT/contributors.md" \
+            "${{ steps.ver.outputs.selection }}" > "$OUT/PR_BODY.md"
 
       - name: Create or update the release PR
         uses: peter-evans/create-pull-request@v6

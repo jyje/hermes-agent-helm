@@ -51,9 +51,21 @@ jobs:
           ref: ${{ steps.pr.outputs.ref }}
           fetch-depth: 0
 
-      - name: Bump Chart.yaml version
+      - name: Install helm-docs
+        env:
+          HELM_DOCS_VERSION: "1.14.2"
         run: |
-          sed -i "s/^version: .*/version: ${{ steps.parse.outputs.version }}/" charts/hermes-agent/Chart.yaml
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz" \
+            | tar -xz helm-docs
+          sudo install helm-docs /usr/local/bin/
+
+      - name: Bump Chart.yaml version + refresh CHANGELOG.md + chart docs
+        run: |
+          ver="${{ steps.parse.outputs.version }}"
+          sed -i "s/^version: .*/version: ${ver}/" charts/hermes-agent/Chart.yaml
+          # Keep the chart README's version badge in sync so ci.yml's docs-drift
+          # check passes on the PR.
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
 
       - name: Update CHANGELOG.md
         uses: orhun/git-cliff-action@v4
@@ -65,9 +77,32 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add charts/hermes-agent/Chart.yaml CHANGELOG.md
+          git add charts/hermes-agent/Chart.yaml charts/hermes-agent/README.md CHANGELOG.md
           git commit -m "chore(release): bump chart version to ${{ steps.parse.outputs.version }}"
           git push origin HEAD:${{ steps.pr.outputs.ref }}
+
+      - name: Sync release PR title to the chosen version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ver = '${{ steps.parse.outputs.version }}';
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            // Only retitle the release proposal PR, not arbitrary feature PRs.
+            const isRelease = pr.data.labels.some(l => l.name === 'release')
+              || /Release v/i.test(pr.data.title);
+            if (isRelease) {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                title: `🚀 Release v${ver}`,
+              });
+              core.info(`retitled PR #${context.issue.number} -> 🚀 Release v${ver}`);
+            }
 
       - name: React to comment
         uses: actions/github-script@v7

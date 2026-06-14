@@ -2,12 +2,15 @@
 # Assemble the release-proposal PR body from the deterministic context, the AI
 # advice, and a pre-built contributors block. All command help is in English.
 #
-# Usage: render-pr-body.sh <OUT_DIR> <new_version> <contributors_md_file>
+# Usage: render-pr-body.sh <OUT_DIR> <selected_version> <contributors_md_file> [selection]
+#   selection: "ai" (selected == AI recommendation) | "manual" (maintainer override)
 set -euo pipefail
 
+HERE="$(cd "$(dirname "$0")" && pwd)"
 OUT="${1:?out dir}"
 NEW_VERSION="${2:?new version}"
 CONTRIB_FILE="${3:-/dev/null}"
+SELECTION="${4:-ai}"
 
 ctx="$OUT/context.json"
 advice="$OUT/advice.json"
@@ -28,6 +31,17 @@ diffstat="$(get "$ctx" diffstat)"
 src_label="🤖 NVIDIA NIM (\`$model\`)"
 [ "$source" = "heuristic" ] && src_label="📐 heuristic fallback (no model consulted)"
 
+# What the AI would have shipped (for transparency, even on a manual override).
+ai_version="$(bash "$HERE/semver.sh" next "$bump_from" "$bump")"
+
+if [ "$SELECTION" = "manual" ]; then
+  version_rows="| **Selected version** | **v${NEW_VERSION}** — maintainer override |
+| **AI suggestion** | \`${bump}\` → v${ai_version} (not taken) — ${src_label} |"
+else
+  version_rows="| **Recommended bump** | \`${bump}\` → **v${NEW_VERSION}** (from v${bump_from}) |
+| **Recommendation by** | ${src_label} |"
+fi
+
 cat <<EOF
 ## 🚀 Release proposal: v${NEW_VERSION}
 
@@ -37,8 +51,7 @@ cat <<EOF
 
 | | |
 |---|---|
-| **Recommended bump** | \`${bump}\` → **v${NEW_VERSION}** (from v${bump_from}) |
-| **Recommendation by** | ${src_label} |
+${version_rows}
 | **Previous release** | ${last_release:-（none yet）} |
 | **Commits in range** | ${commit_count} |
 | **Chart diff** | ${diffstat:-（no chart changes detected）} |
