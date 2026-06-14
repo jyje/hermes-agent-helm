@@ -35,13 +35,6 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Determine previous release tag
-        if: steps.ver.outputs.exists == 'false'
-        id: prev
-        run: |
-          PREV="$(git tag --merged HEAD 'v[0-9]*' | sort -V | tail -1 || true)"
-          echo "tag=$PREV" >> "$GITHUB_OUTPUT"
-
       - name: Extract changelog section for this version
         if: steps.ver.outputs.exists == 'false'
         run: |
@@ -54,35 +47,12 @@ jobs:
             found { print }
           ' CHANGELOG.md > CHANGELOG_SECTION.md
 
-      - name: Build contributors list
-        if: steps.ver.outputs.exists == 'false'
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const fs = require('fs');
-            const { owner, repo } = context.repo;
-            const prevTag = '${{ steps.prev.outputs.tag }}';
-            const logins = new Set();
-            try {
-              const cmp = await github.rest.repos.compareCommitsWithBasehead({
-                owner, repo,
-                basehead: `${prevTag}...${context.sha}`,
-              });
-              for (const c of cmp.data.commits || []) {
-                if (c.author && c.author.login) logins.add(c.author.login);
-              }
-            } catch (e) {
-              core.warning(`compare API failed: ${e.message}`);
-            }
-            const md = [...logins].sort().map(l => `@${l}`).join(', ') || '(none)';
-            fs.writeFileSync('CONTRIBUTORS.md', md);
-
       - name: Render release notes
         if: steps.ver.outputs.exists == 'false'
         run: |
           bash .github/scripts/release/render-release-notes.sh \
             "${{ github.repository }}" "${{ steps.ver.outputs.chart_name }}" \
-            "${{ steps.ver.outputs.version }}" CHANGELOG_SECTION.md CONTRIBUTORS.md \
+            "${{ steps.ver.outputs.version }}" CHANGELOG_SECTION.md \
             > RELEASE_NOTES.md
 
       - name: Create tag + GitHub Release
