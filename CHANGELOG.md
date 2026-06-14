@@ -1,6 +1,26 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.1.0] - 2026-06-14
+
+### Bug Fixes
+
+- 🛠️ fix(release): remove workflow_dispatch trigger ([`d877004`](https://github.com/jyje/hermes-agent-helm/commit/d8770049e5a36a7aa39cb88759075996d6a3cbe7)) — @jyje
+
+### Features
+
+- ✨ feat(release): publish chart to GitHub Pages as a classic Helm repo ([`1d25c80`](https://github.com/jyje/hermes-agent-helm/commit/1d25c8069948e7bc78e9074cfdfc142ca3631b16)) — @jyje
+- ✨ feat(pages): generate per-chart docs pages for GitHub Pages ([`4611de2`](https://github.com/jyje/hermes-agent-helm/commit/4611de25f0bec8f0b7eddf2da3ab14464e4f2a72)) — @jyje
+- ✨ feat(skills): add release-flow ([`921794a`](https://github.com/jyje/hermes-agent-helm/commit/921794a080703916a715197abef3156ef459e47e)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(ci): add ⚡ emoji to version-comment workflow display name ([`e5573a2`](https://github.com/jyje/hermes-agent-helm/commit/e5573a222a8cdfcfd4de5e7942139ad1a9aa14f0)) — @jyje
+
+### Refactor
+
+- ♻️ refactor(ci): rename workflows for clearer roles and kebab-case filenames ([`bf1c8d4`](https://github.com/jyje/hermes-agent-helm/commit/bf1c8d4c82754677a3dc4c1d7cbb8f1b21e776b6)) — @jyje
+
 ## [0.0.3] - 2026-06-14
 
 ### Bug Fixes
