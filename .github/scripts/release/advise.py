@@ -31,6 +31,16 @@ API_KEY = os.environ.get("NVIDIA_API_KEY", "").strip()
 TIMEOUT = int(os.environ.get("NIM_TIMEOUT", "60"))
 MAX_RETRIES = int(os.environ.get("NIM_MAX_RETRIES", "2"))
 
+# Reasoning models spend a large share of `max_tokens` on hidden "thinking"
+# tokens before emitting the JSON answer, so they need a much bigger budget
+# than plain instruct models or the answer gets cut off mid-string (and the
+# JSON parse fails). Per-model defaults; NIM_MAX_TOKENS overrides for any model.
+MODEL_MAX_TOKENS = {
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": 8192,
+}
+DEFAULT_MAX_TOKENS = 8192
+MAX_TOKENS = int(os.environ.get("NIM_MAX_TOKENS", MODEL_MAX_TOKENS.get(NIM_MODEL, DEFAULT_MAX_TOKENS)))
+
 ARTIFACTHUB_KINDS = ("added", "changed", "deprecated", "removed", "fixed", "security")
 
 SYSTEM_PROMPT = """\
@@ -152,7 +162,7 @@ def call_nim(ctx: dict, changelog: str, diff: str) -> dict:
             {"role": "user", "content": user},
         ],
         "temperature": 0.2,
-        "max_tokens": 1024,
+        "max_tokens": MAX_TOKENS,
     }
     req = urllib.request.Request(
         NIM_URL,
