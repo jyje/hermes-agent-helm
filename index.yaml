@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: added
+          description: Add AI‑propose Artifact Hub changes entries
+        - kind: changed
+          description: Increase NIM max_tokens budget for reasoning models
+        - kind: fixed
+          description: Fix OCI artifact path to ghcr.io/jyje/hermes-agent-helm/hermes-agent
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.5
+    created: "2026-06-14T11:21:08.568272232Z"
+    description: 'Community-powered Hermes Agent on Kubernetes. This chart deploys
+      the Hermes Agent, a versatile agent framework that can be configurable for any
+      LLM provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, or any
+      OpenAI-compatible proxy such as LiteLLM). config.yaml is managed via ConfigMap
+      and the .env via Secret. '
+    digest: 9bb6ec7967a4c510cd27beaab411d55f2c765acbad0f1c5ae823fdc960939667
+    home: https://github.com/jyje/hermes-agent-helm
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.0.tgz
+    version: 0.1.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: added
           description: Initial chart (StatefulSet/Deployment + ConfigMap + Secret) for Hermes Agent on any LLM provider.
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -33,4 +69,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.0.4.tgz
     version: 0.0.4
-generated: "2026-06-14T09:34:23.574526616Z"
+generated: "2026-06-14T11:21:08.567285861Z"
