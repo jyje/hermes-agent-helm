@@ -3,9 +3,9 @@
 # jyje/hermes-agent-helm
 
 <p>
-  <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
-  &nbsp;&nbsp;<sup><b> ➕ </b></sup>&nbsp;&nbsp;
   <img height="96" src="https://helm.sh/img/boat.svg" alt="Helm"/>
+  &nbsp;&nbsp;<sup><b> ➕ </b></sup>&nbsp;&nbsp;
+  <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
 </p>
 
 ⚓ A community-powered, lightweight Helm chart to run **Hermes Agent** on Kubernetes
