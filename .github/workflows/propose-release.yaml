@@ -100,6 +100,8 @@ jobs:
         run: |
           new="${{ steps.ver.outputs.new }}"
           sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
+          python3 .github/scripts/release/update-artifacthub-changes.py \
+            charts/hermes-agent/Chart.yaml "$OUT/advice.json"
           git-cliff --tag "v${new}" -o CHANGELOG.md
           # Regenerate the chart README so its version badge matches Chart.yaml —
           # otherwise validate-chart.yaml's docs-drift check fails on the release PR.

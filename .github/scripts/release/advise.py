@@ -29,6 +29,9 @@ NIM_URL = os.environ.get("NIM_URL", "https://integrate.api.nvidia.com/v1/chat/co
 NIM_MODEL = os.environ.get("NIM_MODEL", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning")
 API_KEY = os.environ.get("NVIDIA_API_KEY", "").strip()
 TIMEOUT = int(os.environ.get("NIM_TIMEOUT", "60"))
+MAX_RETRIES = int(os.environ.get("NIM_MAX_RETRIES", "2"))
+
+ARTIFACTHUB_KINDS = ("added", "changed", "deprecated", "removed", "fixed", "security")
 
 SYSTEM_PROMPT = """\
 You are a release manager for a Helm chart (chart name: hermes-agent) that \
@@ -47,10 +50,16 @@ new opt-in capability.
 change the chart's interface.
 - Pre-1.0.0 (0.y.z) is still a real interface; do not invent breaking changes \
 that the diff doesn't show. Prefer the smallest correct bump.
+- Also propose 1-3 entries for the chart's `annotations.artifacthub.io/changes` \
+list (Artifact Hub "Changes" tab for this release). Each entry has a `kind` \
+(one of added, changed, deprecated, removed, fixed, security) and a short, \
+user-facing `description` (<=160 chars, imperative, no commit links).
 
 Respond with ONLY a JSON object, no prose, no markdown fence:
 {"bump":"major|minor|patch","summary":"<=80 words, what changed for users",\
-"reasoning":"1-3 sentences citing the concrete change that drives the bump"}"""
+"reasoning":"1-3 sentences citing the concrete change that drives the bump",\
+"artifacthub_changes":[{"kind":"added|changed|deprecated|removed|fixed|security",\
+"description":"<=160 chars, user-facing"}]}"""
 
 
 def read(out: str, name: str) -> str:
@@ -60,6 +69,15 @@ def read(out: str, name: str) -> str:
             return f.read()
     except FileNotFoundError:
         return ""
+
+
+def first_change_line(changelog: str) -> str:
+    """First changelog bullet, stripped of its trailing (commit link) — author suffix."""
+    for line in changelog.splitlines():
+        line = line.strip()
+        if line.startswith("- "):
+            return re.sub(r"\s*\(\[.*$", "", line[2:]).strip()
+    return "See CHANGELOG.md for details."
 
 
 def heuristic(ctx: dict, changelog: str, why: str) -> dict:
@@ -74,14 +92,33 @@ def heuristic(ctx: dict, changelog: str, why: str) -> dict:
         bump = "minor"
     else:
         bump = "patch"
+    kind_for_bump = {"major": "changed", "minor": "added", "patch": "fixed"}
     return {
         "bump": bump,
         "summary": "Automated heuristic summary (AI advisor unavailable). "
         "See the changelog below for the full list of changes.",
         "reasoning": f"Heuristic bump: {why}",
+        "artifacthub_changes": [
+            {"kind": kind_for_bump[bump], "description": first_change_line(changelog)}
+        ],
         "source": "heuristic",
         "model": None,
     }
+
+
+def sanitize_artifacthub_changes(raw) -> list[dict]:
+    out = []
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind", "")).lower().strip()
+        desc = str(item.get("description", "")).strip()
+        if kind not in ARTIFACTHUB_KINDS or not desc:
+            continue
+        if len(desc) > 160:
+            desc = desc[:157].rstrip() + "..."
+        out.append({"kind": kind, "description": desc})
+    return out[:3]
 
 
 def extract_json(s: str) -> dict:
@@ -136,12 +173,18 @@ def call_nim(ctx: dict, changelog: str, diff: str) -> dict:
     bump = str(data.get("bump", "")).lower().strip()
     if bump not in ("major", "minor", "patch"):
         raise ValueError(f"model returned invalid bump: {bump!r}")
+    artifacthub_changes = sanitize_artifacthub_changes(data.get("artifacthub_changes"))
+    if not artifacthub_changes:
+        raise ValueError(
+            f"model returned no usable artifacthub_changes: {data.get('artifacthub_changes')!r}"
+        )
     return {
         "bump": bump,
         "summary": str(data.get("summary", "")).strip()
         or "(model returned no summary)",
         "reasoning": str(data.get("reasoning", "")).strip()
         or "(model returned no reasoning)",
+        "artifacthub_changes": artifacthub_changes,
         "source": "nim",
         "model": NIM_MODEL,
     }
@@ -156,10 +199,18 @@ def main() -> int:
     if not API_KEY:
         advice = heuristic(ctx, changelog, "NVIDIA_API_KEY not set")
     else:
-        try:
-            advice = call_nim(ctx, changelog, diff)
-        except Exception as e:  # advisory step — ANY failure must degrade, not crash
-            advice = heuristic(ctx, changelog, f"NIM call failed: {type(e).__name__}: {e}")
+        advice = None
+        last_err: Exception | None = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                advice = call_nim(ctx, changelog, diff)
+                break
+            except Exception as e:  # malformed response — worth a retry
+                last_err = e
+                print(f"NIM advice attempt {attempt + 1}/{MAX_RETRIES} failed: "
+                      f"{type(e).__name__}: {e}", file=sys.stderr)
+        if advice is None:  # advisory step — ANY failure must degrade, not crash
+            advice = heuristic(ctx, changelog, f"NIM call failed: {type(last_err).__name__}: {last_err}")
 
     with open(os.path.join(out, "advice.json"), "w", encoding="utf-8") as f:
         json.dump(advice, f, indent=2)
