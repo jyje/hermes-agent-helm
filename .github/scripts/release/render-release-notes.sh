@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Assemble the GitHub Release body: install snippets (latest / this version /
+# OCI) + the changelog section for this version (extracted from CHANGELOG.md,
+# so it matches the release-proposal PR exactly) + contributors.
+#
+# Usage: render-release-notes.sh <owner/repo> <chart_name> <version> <changelog_section_file> <contributors_file>
+set -euo pipefail
+
+REPO="${1:?owner/repo}"
+CHART_NAME="${2:?chart name}"
+VERSION="${3:?version}"
+CHANGELOG_FILE="${4:?changelog section file}"
+CONTRIB_FILE="${5:-/dev/null}"
+
+OWNER="${REPO%%/*}"
+REPO_NAME="${REPO#*/}"
+
+cat <<EOF
+## Install
+
+### Latest (Helm repo)
+\`\`\`bash
+helm repo add ${CHART_NAME} https://${OWNER}.github.io/${REPO_NAME}
+helm repo update
+helm install ${CHART_NAME} ${CHART_NAME}/${CHART_NAME} \\
+  --namespace ${CHART_NAME} --create-namespace \\
+  --set-string env.OPENAI_API_KEY='sk-...' \\
+  --wait
+\`\`\`
+
+### This version (v${VERSION})
+\`\`\`bash
+helm install ${CHART_NAME} ${CHART_NAME}/${CHART_NAME} --version ${VERSION} \\
+  --namespace ${CHART_NAME} --create-namespace \\
+  --set-string env.OPENAI_API_KEY='sk-...' \\
+  --wait
+\`\`\`
+
+### OCI
+\`\`\`bash
+helm install ${CHART_NAME} oci://ghcr.io/${REPO}/${CHART_NAME} --version ${VERSION} \\
+  --namespace ${CHART_NAME} --create-namespace \\
+  --set-string env.OPENAI_API_KEY='sk-...' \\
+  --wait
+\`\`\`
+
+---
+
+## Changelog
+$(cat "$CHANGELOG_FILE")
+
+---
+
+## Contributors
+
+$(cat "$CONTRIB_FILE")
+EOF

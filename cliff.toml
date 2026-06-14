@@ -12,7 +12,7 @@ body = """
 ## [unreleased]
 {% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
-### {{ group | upper_first }}
+### {{ group | split(pat="_") | last }}
 {% for commit in commits %}
 - {{ commit.message | split(pat="\n") | first | trim | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/jyje/hermes-agent-helm/commit/{{ commit.id }})) — {% if commit.remote.username %}@{{ commit.remote.username }}{% else %}{{ commit.author.name }}{% endif %}\
 {% endfor %}
@@ -30,19 +30,23 @@ commit_preprocessors = [
 ]
 filter_unconventional = false
 split_commits = false
+# Group names are prefixed with a sort key (group_by sorts keys
+# alphabetically) so the rendered order reflects importance: Features ->
+# Bug Fixes -> Security -> Performance -> Refactor -> Documentation -> Build
+# -> Tests -> Removed -> Miscellaneous. The template strips the "NN_" prefix.
 commit_parsers = [
-  { message = "^\\S+\\s+init", group = "Initial Release" },
-  { message = "^\\S+\\s+feat", group = "Features" },
-  { message = "^\\S+\\s+(fix|bug)", group = "Bug Fixes" },
-  { message = "^\\S+\\s+perf", group = "Performance" },
-  { message = "^\\S+\\s+refactor", group = "Refactor" },
-  { message = "^\\S+\\s+(docs|article|typo)", group = "Documentation" },
-  { message = "^\\S+\\s+build", group = "Build" },
-  { message = "^\\S+\\s+test", group = "Tests" },
-  { message = "^\\S+\\s+security", group = "Security" },
-  { message = "^\\S+\\s+remove", group = "Removed" },
+  { message = "^\\S+\\s+init", group = "00_Initial Release" },
+  { message = "^\\S+\\s+feat", group = "01_Features" },
+  { message = "^\\S+\\s+(fix|bug)", group = "02_Bug Fixes" },
+  { message = "^\\S+\\s+security", group = "03_Security" },
+  { message = "^\\S+\\s+perf", group = "04_Performance" },
+  { message = "^\\S+\\s+refactor", group = "05_Refactor" },
+  { message = "^\\S+\\s+(docs|article|typo)", group = "06_Documentation" },
+  { message = "^\\S+\\s+build", group = "07_Build" },
+  { message = "^\\S+\\s+test", group = "08_Tests" },
+  { message = "^\\S+\\s+remove", group = "09_Removed" },
   { message = "^\\S+\\s+chore\\(release\\)", skip = true },
-  { message = "^\\S+\\s+(chore|dep|style)", group = "Miscellaneous" },
+  { message = "^\\S+\\s+(chore|dep|style)", group = "10_Miscellaneous" },
 ]
 protect_breaking_commits = true
 filter_commits = false
