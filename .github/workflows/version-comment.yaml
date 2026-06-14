@@ -32,7 +32,7 @@ jobs:
 
       - name: Resolve PR head
         id: pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const pr = await github.rest.pulls.get({
@@ -85,7 +85,7 @@ jobs:
           git push origin HEAD:${{ steps.pr.outputs.ref }}
 
       - name: Sync release PR title to the chosen version
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const ver = '${{ steps.parse.outputs.version }}';
@@ -108,7 +108,7 @@ jobs:
             }
 
       - name: React to comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
