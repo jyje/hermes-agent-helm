@@ -8,7 +8,7 @@ description: |
 type: application
 
 # Chart version (bump on chart changes).
-version: 0.0.1
+version: 0.0.2
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
