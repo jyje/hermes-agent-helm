@@ -14,7 +14,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {% for commit in commits %}
-- {{ commit.message | upper_first }}\
+- {{ commit.message | split(pat="\n") | first | trim | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/jyje/hermes-agent-helm/commit/{{ commit.id }}))\
 {% endfor %}
 {% endfor %}\n
 """

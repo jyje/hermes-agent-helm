@@ -1,85 +1,55 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [unreleased]
+
+### Bug Fixes
+
+- 🛠️ fix(ci): run the chart test Job directly instead of via helm test ([`7dc8eec`](https://github.com/jyje/hermes-agent-helm/commit/7dc8eec193ddd2ed9e815b29c4ae6776bfe49aa0))
+- 🛠️ fix(ci): avoid duplicate auth header in propose-release PR step ([`b1674d2`](https://github.com/jyje/hermes-agent-helm/commit/b1674d25ce201b1451c2030276c4b4501c7dc84f))
+- 🛠️ fix(ci): regenerate chart docs in the release proposal ([`d6ebf6f`](https://github.com/jyje/hermes-agent-helm/commit/d6ebf6f366984d3986f2ebb64989d61a99058549))
+
+### Documentation
+
+- 📄 docs(readme): revamp READMEs, add brand logo and messenger/provider examples ([`0183005`](https://github.com/jyje/hermes-agent-helm/commit/01830056ce4244c0d30bb2dbaeb6bdc2b6584025))
+
+### Features
+
+- ✨ feat(ci): add a model pool for the chat round-trip test and fix slow helm test ([`254712e`](https://github.com/jyje/hermes-agent-helm/commit/254712e4669cb59d2e19eabe3ab1e30f9f7bf98b))
+- ✨ feat(ci): add AI-assisted release-proposal pipeline ([`486293c`](https://github.com/jyje/hermes-agent-helm/commit/486293c4d09b080fedcd0578a0f1e9f2931441c4))
+
+### Miscellaneous
+
+- 🔧 chore(ci): add debug output for the helm test job-discovery loop ([`da80da0`](https://github.com/jyje/hermes-agent-helm/commit/da80da0e3760b7b76c1e7fc9957e76ad3108acca))
+- 🔧 chore(ci): bump checkout/setup-helm to node24-based versions ([`f034208`](https://github.com/jyje/hermes-agent-helm/commit/f034208568c5e6248660cecb65a9dbc27fb2d553))
+
 ## [0.0.1] - 2026-06-14
 
 ### Bug Fixes
 
-- 🛠️ fix(ci): force-kill hermes doctor on timeout and simplify round-trip prompt
+- 🛠️ fix(ci): force-kill hermes doctor on timeout and simplify round-trip prompt ([`cd1ebcc`](https://github.com/jyje/hermes-agent-helm/commit/cd1ebccee9da949664e72839a5e9478d8a5cc8b4))
+- 🛠️ fix(ci): only run helm CI on chart or workflow changes ([`99220b1`](https://github.com/jyje/hermes-agent-helm/commit/99220b1ad9dbf20567cda560c5e7950189f64510))
+- 🛠️ fix(ci): switch chat round-trip test from Gemini to NVIDIA NIM ([`048c71d`](https://github.com/jyje/hermes-agent-helm/commit/048c71dee39da1844b120a2b5d2dbdec818badd2))
 
-Add -k 10 to the timeout wrapping hermes doctor in the test Job so a
-non-responsive process is SIGKILL'd 10s after SIGTERM, instead of letting
-the helm test hook run close to its 12m ceiling. Also simplify the
-real-model round-trip prompt to "Just say hi." with a word-boundary check,
-avoiding an overly specific instruction-following requirement.
-- 🛠️ fix(ci): only run helm CI on chart or workflow changes
+### Build
 
-Add path filters so the helm lint/test workflow only runs when
-charts/hermes-agent-helm/** or its own workflow file changes, avoiding
-unnecessary CI runs for unrelated repo changes (e.g. docs/examples).
+- 🔨 build(changelog): fix git-cliff parsing for gitmoji commit messages and generate CHANGELOG.md ([`1aeb9ca`](https://github.com/jyje/hermes-agent-helm/commit/1aeb9ca4dcd3d74d9be05a36b5e83df9fbd6be46))
 
 ### Documentation
 
-- 📄 docs(chart): document upgrade path across a chart rename
-
-Add a guide for upgrading an existing release from the old chart name to
-hermes-agent-helm, covering the fullname/PVC-name shift and the immutable
-volumeClaimTemplates chart-version label, with the cascade=orphan +
-nameOverride fix sequence verified end-to-end on a live cluster.
+- 📄 docs(chart): document upgrade path across a chart rename ([`cee164c`](https://github.com/jyje/hermes-agent-helm/commit/cee164c6ca34a8ff5996fde406d6c345f4a3d9ff))
 
 ### Features
 
-- ✨ feat(chart): allow choosing StatefulSet or Deployment via controller.type
-
-Extract the shared Pod spec into a podTemplate helper and add
-controller.type (statefulset|deployment) to values.yaml. Deployment mode
-skips the headless Service, creates a standalone PVC, and forces a Recreate
-strategy when persistence is enabled to avoid ReadWriteOnce volume races.
-- ✨ feat(chart): default to Deployment controller and add extraResources for GitOps secrets
-
-Switch controller.type default to "deployment" for resource flexibility on
-single-replica workloads, add a strongly-worded comment that replicaCount must
-not be changed, and add an extraResources mechanism (object or string
-manifests, both tpl-rendered) so a SealedSecret can be injected and referenced
-via extraEnvFrom — documented with a LiteLLM example in values.example.yaml.
-
-### Refactor
-
-- ♻️ refactor(chart): rename hermes-agent chart to hermes-agent-helm
-
-Rename charts/hermes-agent to charts/hermes-agent-helm (Chart.yaml name,
-template helper prefixes, Makefile, CI/release workflows, docs, and
-examples) so the published OCI package becomes ghcr.io/jyje/hermes-agent-helm.
-
-Also add an AppVersion fallback for image.tag via new
-hermes-agent-helm.image/testImage helpers, add a Korean README, and stop
-ignoring .claude/ so chart-helper skills are tracked.
-- ♻️ refactor(chart): rename chart to hermes-agent, reset version to 0.0.1
-
-Rename charts/hermes-agent-helm to charts/hermes-agent (Chart.yaml name,
-template helper prefixes, Makefile, CI/release/version-comment workflows,
-docs, and examples updated accordingly). Chart version resets to 0.0.1;
-appVersion stays pinned to the latest upstream image tag (v2026.6.5).
-
-Generalize provider docs and values.example.yaml away from a specific
-deployment (no hardcoded FQDNs/StorageClass), presenting LiteLLM and Gemini
-as example provider options. README/AGENTS/CONTRIBUTING updated to describe
-the StatefulSet/Deployment (controller.type) choice.
-
-Add an opt-in hermes chat round-trip to the Helm test Job
-(tests.chat.enabled), which prints the prompt/response transcript to the
-test pod's logs; CI now exercises this against Gemini when a key is
-available.
-
-## [0.1.0] - 2026-06-13
+- ✨ feat(chart): allow choosing StatefulSet or Deployment via controller.type ([`8db240b`](https://github.com/jyje/hermes-agent-helm/commit/8db240b47ec6d733ec4111eac00c467f9c2021f7))
+- ✨ feat(chart): default to Deployment controller and add extraResources for GitOps secrets ([`7be636b`](https://github.com/jyje/hermes-agent-helm/commit/7be636b30909a313de89c8da9cc82e043b5effa2))
 
 ### Initial Release
 
-- 🎉 init: setup project and ci
+- 🎉 init: setup project and ci ([`62d764b`](https://github.com/jyje/hermes-agent-helm/commit/62d764b8548ed2415474483023abe995a7cbf6d2))
 
-Add the hermes-agent Helm chart (StatefulSet, ConfigMap/Secret-based config
-overrides, provider-agnostic LLM config, optional Helm test job), install/
-publish examples (Git + OCI/ghcr, ArgoCD), and the dev/main release pipeline
-(kind + Gemini CI, version-bump-triggered tag + OCI publish, /version PR
-comment ChatOps trigger).
+### Refactor
+
+- ♻️ refactor(chart): rename hermes-agent chart to hermes-agent-helm ([`27d01e4`](https://github.com/jyje/hermes-agent-helm/commit/27d01e4c8a7b1f71890a93590048e109f4e8d95f))
+- ♻️ refactor(chart): rename chart to hermes-agent, reset version to 0.0.1 ([`0dd89ef`](https://github.com/jyje/hermes-agent-helm/commit/0dd89efe3e66a34f78f90fc3c023f24de2f06014))
 
