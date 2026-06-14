@@ -32,31 +32,28 @@ A **community-powered** chart, not an official Nous Research release.
 
 ## Getting started
 
-The chart is published as an **OCI artifact** — no `helm repo add` needed,
-just point Helm at the registry:
-
-```bash
-helm install hermes-agent oci://ghcr.io/jyje/hermes-agent \
-  --namespace hermes-agent --create-namespace \
-  --version 0.0.1 \
-  --set-string env.OPENAI_API_KEY='sk-...' \
-  --wait
-```
-
-Pin `--version` to a [released chart version](https://github.com/jyje/hermes-agent-helm/releases).
-
-Prefer a classic Helm repository instead? The same releases are also published
-to GitHub Pages:
+Add the Helm repository (published to GitHub Pages) and install:
 
 ```bash
 helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
 helm repo update
 helm install hermes-agent hermes-agent/hermes-agent \
   --namespace hermes-agent --create-namespace \
-  --version 0.0.1 \
   --set-string env.OPENAI_API_KEY='sk-...' \
   --wait
 ```
+
+Each release is also published as an OCI artifact, so you can install
+directly from the registry without `helm repo add`:
+
+```bash
+helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' \
+  --wait
+```
+
+Optionally pin `--version` to a specific [released chart version](https://github.com/jyje/hermes-agent-helm/releases) instead of latest.
 
 To install from this repo's source instead (e.g. to try an unreleased
 change), see [Quick start](#quick-start) below.

@@ -60,6 +60,11 @@ as a **Secret**.
 
 ## Workflow
 
+- **Multi-language docs stay in sync.** `README.md` (English) and `README-ko.md`
+  (Korean) must describe the same thing. When you edit one, apply the
+  equivalent edit to the other in the same change — don't leave them
+  diverging. If another language edition is added later, the same rule
+  applies to it too.
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
   `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
 - Validate with `make lint` and `make template`.
