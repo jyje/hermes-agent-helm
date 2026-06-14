@@ -1,14 +1,18 @@
 <div align="center">
 
-# jyje/hermes-agent
+# jyje/hermes-agent-helm
 
-<img width="640" src="https://raw.githubusercontent.com/NousResearch/hermes-agent/main/assets/banner.png" alt="Hermes Agent"/>
+<p>
+  <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
+  &nbsp;&nbsp;<sup><b> ➕ </b></sup>&nbsp;&nbsp;
+  <img height="96" src="https://helm.sh/img/boat.svg" alt="Helm"/>
+</p>
 
 ⚓ A community-powered, lightweight Helm chart to run **Hermes Agent** on Kubernetes
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jyje/hermes-agent-helm?style=social)](https://github.com/jyje/hermes-agent-helm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Helm](https://img.shields.io/badge/Helm-3-0F1689?logo=helm&logoColor=white)](https://helm.sh)
+[![Helm](https://img.shields.io/badge/Helm-3%2B-0F1689?logo=helm&logoColor=white)](https://helm.sh)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
 [English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
@@ -21,37 +25,54 @@
 
 ## Summary
 
-`hermes-agent` is a **community-powered** Helm chart that packages
-[Hermes Agent](https://github.com/NousResearch/hermes-agent)
-(`nousresearch/hermes-agent`) as a Kubernetes **Deployment or StatefulSet**
-(`controller.type`), with `config.yaml` managed as a **ConfigMap** and `.env`
-as a **Secret**. It is not an official Nous Research release — it's
-maintained in the open by the community.
+Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
+with one `helm install` — works with any LLM provider Hermes supports, scales
+down to a single small node, and is verified to actually run, not just render.
+A **community-powered** chart, not an official Nous Research release.
 
-## Provider-agnostic
+## Getting started
 
-The whole point of this chart is that it does **not** lock you to any vendor or
-endpoint. Hermes supports many LLM providers — `openai`, `anthropic`, `google`,
-`openrouter`, and any OpenAI-compatible endpoint such as
-[LiteLLM](https://github.com/BerriAI/litellm). Chart defaults stay neutral
-(point at a provider's public endpoint); you wire it to whatever you run purely
-through `values.yaml`. No provider is baked into the templates.
+The chart is published as an **OCI artifact** — no `helm repo add` needed,
+just point Helm at the registry:
 
-## Lightweight
+```bash
+helm install hermes-agent oci://ghcr.io/jyje/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --version 0.0.1 \
+  --set-string env.OPENAI_API_KEY='sk-...' \
+  --wait
+```
 
-Defaults target **small clusters** (homelab / single-node / edge). Resource
-requests and limits are intentionally modest, and the workload runs a single
-replica with a small persistent volume. Scale `resources`, `replicaCount`, and
-`persistence.size` up via values when you need more.
+Pin `--version` to a [released chart version](https://github.com/jyje/hermes-agent-helm/releases).
+To install from this repo's source instead (e.g. to try an unreleased
+change), see [Quick start](#quick-start) below.
 
-## Layout
+## Why this chart
+
+- **Provider-agnostic.** `openai-api`, `anthropic`, `gemini`, `openrouter`,
+  `nvidia`, `deepseek`, or any OpenAI-compatible endpoint (e.g.
+  [LiteLLM](https://github.com/BerriAI/litellm)) — all via `values.yaml`, no
+  provider baked into the templates.
+- **Lightweight.** Sized for homelab / single-node / edge clusters: one
+  replica, modest resource requests, a small PVC. Scale up via `resources` and
+  `persistence.size` when you need more.
+- **Verified end-to-end.** CI installs the chart on an ephemeral **kind**
+  cluster and runs the bundled test Job (`hermes doctor`), plus a **live
+  `hermes chat` round-trip** against a real NVIDIA NIM account — not a mock.
+  🔜 Telegram/Discord round-trip verification is still a placeholder.
+
+For the full resource breakdown, configuration model, and provider-by-provider
+install examples (including messenger integrations), see
+[charts/hermes-agent/README.md](charts/hermes-agent/README.md).
+
+## Repository layout
 
 ```
 charts/hermes-agent/                     # the Helm chart (see its README for the full values table)
 charts/hermes-agent/values.example.yaml  # example overrides (custom OpenAI-compatible provider + persistence)
 examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
 examples/argocd/                         # ArgoCD Application + safe multi-instance guide
-.github/workflows/                       # ci (lint + docs drift + kind test) and release (version bump -> tag -> ghcr OCI)
+.github/workflows/                       # ci (lint + docs-drift + real round-trip on kind) and release (version bump -> tag -> ghcr OCI)
 CONTRIBUTING.md                          # branch model (dev/main + tags) + release-on-version-bump
 AGENTS.md                                # design principles & workflow for contributors
 Makefile                                 # docs / lint / template / install / test / package / push
@@ -81,28 +102,35 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
-## Docs
+See [charts/hermes-agent/README.md](charts/hermes-agent/README.md) for the full
+values table and provider-by-provider install examples.
 
-Chart docs are generated with [helm-docs](https://github.com/norwoodj/helm-docs)
-from `charts/hermes-agent/README.md.gotmpl` + the `# --` annotations in
-`values.yaml`:
+## Development
 
-```bash
-make docs   # regenerate charts/hermes-agent/README.md
-```
+Branch model, release process, and local checks (`make lint` / `make docs` /
+`make test`) are covered in [CONTRIBUTING.md](CONTRIBUTING.md); chart design
+principles are in [AGENTS.md](AGENTS.md).
 
-## Releasing
+## CI/CD
 
-The chart `version` in `Chart.yaml` is the source of truth. Bump it (+ `make
-changelog`) and merge to `main`; CI tags `vX.Y.Z`, writes release notes
-(git-cliff), and publishes the chart to `oci://ghcr.io/<owner>` (GitHub
-Packages). The `.tgz` is built in CI, never committed. Register the OCI repo once
-on [Artifact Hub](https://artifacthub.io/) — `Chart.yaml` already carries the
-`artifacthub.io/*` annotations.
+- **Every PR and every push to `dev`/`main`** runs [ci.yml](.github/workflows/ci.yml):
+  `helm lint`, `helm template`, a chart-docs drift check, and a full install +
+  test on an ephemeral **kind** cluster (real `hermes chat` round-trip when an
+  `NVIDIA_API_KEY` secret is available).
+- **Releases are version-bump-driven, not tag-push-driven.** Run
+  [propose-release.yml](.github/workflows/propose-release.yml) (Actions →
+  "propose-release"): it diffs `main` against the last release tag, builds the
+  changelog **deterministically** (git-cliff), asks **NVIDIA NIM** to recommend
+  a semver bump + summary (graceful heuristic fallback when no key), and
+  opens/updates a single **release PR** crediting every commit & PR author.
+  Adjust the version if you disagree, then merge. (Or skip the proposal and bump
+  `Chart.yaml` yourself / comment `/version vX.Y.Z`.) Once that PR merges to
+  `main`, [release.yml](.github/workflows/release.yml) tags `vX.Y.Z`, writes the
+  GitHub Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent`.
 
-Branches: `dev` (experimental) → `main` (PR target, releases cut here). See
-[CONTRIBUTING.md](CONTRIBUTING.md) for the flow and
-[examples/helm/](examples/helm/) for install/publish details.
+So: lint + test gate every change; the *release* itself is just a normal
+reviewed PR (the version bump) — the AI only advises, merging is what ships. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the full release playbook.
 
 ---
 

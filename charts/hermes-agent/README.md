@@ -58,14 +58,14 @@ for your provider at install/upgrade time, or supply a values file.
 ### Install options: LLM provider
 
 This is the main thing you configure at install time — *which* LLM backend
-Hermes talks to. (Messenger integrations such as Telegram/Discord are not yet
-covered by this chart; planned for a future release.)
+Hermes talks to. (For chat platforms, see
+[Messenger integrations](#messenger-integrations-telegram--discord) below.)
 
 - **Built-in provider** — set `config.model.provider` to one of Hermes'
   built-in keys (`openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`,
   `deepseek`, `lmstudio`, …) and `config.model.default` to a model id for that
   provider. Supply the matching key under `env` (`OPENAI_API_KEY`,
-  `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, …).
+  `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `NVIDIA_API_KEY`, …).
 
   ```bash
   # OpenAI
@@ -80,12 +80,62 @@ covered by this chart; planned for a future release.)
     --set-string config.model.default=gemini-2.5-flash \
     --set-string env.GOOGLE_API_KEY='<your-key>' \
     --set-string env.OPENAI_API_KEY=unused --wait
+
+  # NVIDIA NIM (this is the provider CI exercises end-to-end)
+  helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
+    --set-string config.model.provider=nvidia \
+    --set-string config.model.default=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning \
+    --set-string env.NVIDIA_API_KEY='nvapi-...' \
+    --set-string env.OPENAI_API_KEY=unused --wait
   ```
 
 - **Custom OpenAI-compatible provider** (LiteLLM, vLLM, LM Studio, …) — register
   it under `config.providers.<id>` (`base_url`, `key_env`) and point
   `config.model.provider` at that `<id>`. See
   `charts/hermes-agent/values.example.yaml` for a full LiteLLM example.
+
+### Messenger integrations (Telegram / Discord)
+
+`hermes gateway run` (the workload's command) connects whatever chat platforms
+it finds **credentials** for — so wiring a messenger is just a matter of
+supplying its bot token. The token is sensitive, so put it under `.Values.env`
+(rendered into the Secret); the non-secret knobs (allowed users, home channel)
+can go under `.Values.extraEnv` (plain env). Setting the token is enough to
+**auto-enable** the platform — no `config.yaml` change required.
+
+> **Verification status:** the chart renders the right Secret/env and the agent
+> picks the platform up, but a live end-to-end Discord/Telegram round-trip is
+> **not yet verified in CI** (placeholder — only the NVIDIA NIM LLM round-trip
+> is). Provide a real bot token to try it in your own cluster.
+
+- **Discord** — create a bot at the
+  [Discord Developer Portal](https://discord.com/developers/applications),
+  enable the **Message Content Intent**, and invite it to your server.
+
+  ```bash
+  helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
+    --set-string config.model.provider=nvidia \
+    --set-string config.model.default=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning \
+    --set-string env.NVIDIA_API_KEY='nvapi-...' \
+    --set-string env.OPENAI_API_KEY=unused \
+    --set-string env.DISCORD_BOT_TOKEN='<bot-token>' --wait
+  ```
+
+  Optional non-secret knobs (via `extraEnv`, or `--set`):
+
+  | env var | meaning |
+  | --- | --- |
+  | `DISCORD_ALLOWED_USERS` | comma-separated user IDs allowed to talk to the bot |
+  | `DISCORD_ALLOW_ALL_USERS` | `true` to allow anyone (dev only) |
+  | `DISCORD_HOME_CHANNEL` | channel ID for cron / notification delivery |
+  | `DISCORD_HOME_CHANNEL_NAME` | display name for that home channel |
+
+- **Telegram** — create a bot via [@BotFather](https://t.me/BotFather) and set
+  `env.TELEGRAM_BOT_TOKEN` (optionally `TELEGRAM_HOME_CHANNEL`,
+  `TELEGRAM_ALLOWED_USERS` via `extraEnv`).
+
+See `charts/hermes-agent/values.example.yaml` for a copy-pasteable messenger
+block.
 
 ## Test
 
