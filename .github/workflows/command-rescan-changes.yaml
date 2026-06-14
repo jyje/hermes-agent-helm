@@ -1,4 +1,4 @@
-name: 🔄 rescan-changes
+name: ⚡️ rescan-changes
 
 # ChatOps trigger: a maintainer comments `/rescan` on the release proposal PR
 # (branch release/next) to pick up commits pushed to `main` after the PR was
