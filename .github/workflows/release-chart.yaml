@@ -83,6 +83,19 @@ jobs:
             helm repo index .deploy --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
           fi
 
+      - name: Build chart doc pages
+        if: steps.ver.outputs.exists == 'false'
+        run: |
+          chart_links=""
+          for chart_dir in charts/*/; do
+            chart_name="$(basename "$chart_dir")"
+            mkdir -p ".deploy/$chart_name"
+            cp "$chart_dir/README.md" ".deploy/$chart_name/README.md"
+            sed "s#{{CHART_NAME}}#$chart_name#g" pages/chart.html > ".deploy/$chart_name/index.html"
+            chart_links="$chart_links    <li><a href=\"./$chart_name/\">$chart_name</a></li>\n"
+          done
+          sed "s#{{CHARTS}}#$chart_links#" pages/index.html > .deploy/index.html
+
       - name: Publish Helm repo to GitHub Pages
         if: steps.ver.outputs.exists == 'false'
         uses: peaceiris/actions-gh-pages@v4
