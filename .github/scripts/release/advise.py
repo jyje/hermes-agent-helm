@@ -128,7 +128,10 @@ def call_nim(ctx: dict, changelog: str, diff: str) -> dict:
     )
     with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
         body = json.loads(resp.read().decode())
-    content = body["choices"][0]["message"]["content"]
+    msg = body["choices"][0]["message"]
+    # Reasoning models sometimes return content=null with the text in
+    # reasoning_content; fall back to that, then to empty string.
+    content = msg.get("content") or msg.get("reasoning_content") or ""
     data = extract_json(content)
     bump = str(data.get("bump", "")).lower().strip()
     if bump not in ("major", "minor", "patch"):
@@ -155,8 +158,7 @@ def main() -> int:
     else:
         try:
             advice = call_nim(ctx, changelog, diff)
-        except (urllib.error.URLError, urllib.error.HTTPError, ValueError,
-                KeyError, json.JSONDecodeError, TimeoutError) as e:
+        except Exception as e:  # advisory step — ANY failure must degrade, not crash
             advice = heuristic(ctx, changelog, f"NIM call failed: {type(e).__name__}: {e}")
 
     with open(os.path.join(out, "advice.json"), "w", encoding="utf-8") as f:
