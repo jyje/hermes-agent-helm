@@ -42,7 +42,7 @@ jobs:
             || { echo "::error::charts/hermes-agent/README.md is stale — run 'make docs' and commit"; exit 1; }
 
   test:
-    # Isolated install + helm test on an ephemeral kind cluster (no real cluster).
+    # Isolated install + test on an ephemeral kind cluster (no real cluster).
     # If an NVIDIA_API_KEY secret is present (non-fork runs), also do a real model
     # round-trip through NVIDIA NIM; otherwise doctor-only. NIM is used (rather
     # than Gemini) because its free tier has enough headroom for repeated CI runs
@@ -53,6 +53,7 @@ jobs:
     # with a per-model timeout (tests.chat.timeout) and passes as soon as one
     # succeeds, since any single free-tier model can be flaky/overloaded.
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
@@ -76,68 +77,45 @@ jobs:
               --set tests.chat.enabled=true \
               --set tests.chat.failOnError=true \
               --set "tests.chat.models={$CI_MODELS}" \
-              --wait --timeout 12m
+              --wait --timeout 5m
           else
             echo "No NVIDIA_API_KEY secret — installing with placeholder (doctor-only)"
             helm upgrade --install hermes-agent charts/hermes-agent \
               --namespace hermes-agent --create-namespace \
               --set-string env.OPENAI_API_KEY=sk-test \
-              --wait --timeout 12m
+              --wait --timeout 5m
           fi
 
-      - name: Helm test (hermes doctor, + chat round-trip if a model key is available)
+      - name: Run install test (hermes doctor, + chat round-trip if a model key is available)
+        timeout-minutes: 6
         run: |
-          # `helm test`'s internal Job-watch can wait out the full --timeout even
-          # after the test Job has already succeeded (a watch/resync race for
-          # fast-finishing Jobs). Run it in the background and poll the Job's
-          # status directly so we move on as soon as it actually completes,
-          # while keeping --timeout as the failure fallback.
-          echo "runner date: $(date -u)"
-          helm test hermes-agent -n hermes-agent --timeout 12m &
-          helm_pid=$!
+          # The chart's test is a Helm hook Job. We deliberately do NOT use
+          # `helm test`: its hook create+watch can stall for many minutes on a
+          # CI runner (observed: ~12m before the Job was even created). Instead,
+          # render the same Job from the installed release (real values) and run
+          # it directly, then poll its status — creation is immediate and timing
+          # is deterministic.
+          ns=hermes-agent
+          job=hermes-agent-test
 
-          job=""
-          for i in $(seq 1 60); do
-            job=$(kubectl get job -n hermes-agent -l app.kubernetes.io/component=test \
-              -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-            if [ -n "$job" ]; then
-              echo "found job/$job after ${i}s (runner date: $(date -u))"
-              break
-            fi
-            if [ $((i % 10)) -eq 0 ]; then
-              echo "::group::debug: no test job yet after ${i}s (runner date: $(date -u))"
-              kubectl get jobs,pods -n hermes-agent -o wide --show-labels || true
-              kubectl get events -n hermes-agent --sort-by=.lastTimestamp || true
-              echo "::endgroup::"
-            fi
-            sleep 1
-          done
-          if [ -z "$job" ]; then
-            echo "::error::test Job not found"
-            echo "::group::debug: final cluster state (runner date: $(date -u))"
-            kubectl get jobs,pods -n hermes-agent -o wide --show-labels || true
-            kubectl get events -n hermes-agent --sort-by=.lastTimestamp || true
-            echo "::endgroup::"
-            wait "$helm_pid" || true
-            echo "helm test exited (runner date: $(date -u))"
-            exit 1
-          fi
+          helm get hooks hermes-agent -n "$ns" > /tmp/test-hooks.yaml
+          kubectl delete job "$job" -n "$ns" --ignore-not-found
+          kubectl create -n "$ns" -f /tmp/test-hooks.yaml
 
-          echo "Watching job/$job"
-          result=""
-          for i in $(seq 1 360); do
-            succeeded=$(kubectl get job "$job" -n hermes-agent -o jsonpath='{.status.succeeded}' 2>/dev/null || true)
-            failed=$(kubectl get job "$job" -n hermes-agent -o jsonpath='{.status.failed}' 2>/dev/null || true)
-            if [ "$succeeded" = "1" ]; then result=success; break; fi
-            if [ "$failed" = "1" ]; then result=failed; break; fi
+          # Pass on Complete, fail on Failed (whichever the Job reaches first).
+          result=timeout
+          for _ in $(seq 1 150); do
+            conds=$(kubectl get job "$job" -n "$ns" \
+              -o jsonpath='{.status.conditions[?(@.status=="True")].type}' 2>/dev/null || true)
+            case "$conds" in
+              *Complete*) result=success; break ;;
+              *Failed*)   result=failed;  break ;;
+            esac
             sleep 2
           done
-          echo "job/$job result: ${result:-timeout} after $((i * 2))s (runner date: $(date -u))"
 
-          kill "$helm_pid" 2>/dev/null || true
-          wait "$helm_pid" 2>/dev/null || true
-
-          [ "$result" = "success" ]
+          echo "test job result: $result"
+          [ "$result" = success ]
 
       - name: Show test logs (incl. chat round-trip transcript)
         if: always()
