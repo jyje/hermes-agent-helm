@@ -92,19 +92,34 @@ jobs:
           # fast-finishing Jobs). Run it in the background and poll the Job's
           # status directly so we move on as soon as it actually completes,
           # while keeping --timeout as the failure fallback.
+          echo "runner date: $(date -u)"
           helm test hermes-agent -n hermes-agent --timeout 12m &
           helm_pid=$!
 
           job=""
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             job=$(kubectl get job -n hermes-agent -l app.kubernetes.io/component=test \
               -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-            if [ -n "$job" ]; then break; fi
+            if [ -n "$job" ]; then
+              echo "found job/$job after ${i}s (runner date: $(date -u))"
+              break
+            fi
+            if [ $((i % 10)) -eq 0 ]; then
+              echo "::group::debug: no test job yet after ${i}s (runner date: $(date -u))"
+              kubectl get jobs,pods -n hermes-agent -o wide --show-labels || true
+              kubectl get events -n hermes-agent --sort-by=.lastTimestamp || true
+              echo "::endgroup::"
+            fi
             sleep 1
           done
           if [ -z "$job" ]; then
             echo "::error::test Job not found"
+            echo "::group::debug: final cluster state (runner date: $(date -u))"
+            kubectl get jobs,pods -n hermes-agent -o wide --show-labels || true
+            kubectl get events -n hermes-agent --sort-by=.lastTimestamp || true
+            echo "::endgroup::"
             wait "$helm_pid" || true
+            echo "helm test exited (runner date: $(date -u))"
             exit 1
           fi
 
@@ -117,6 +132,7 @@ jobs:
             if [ "$failed" = "1" ]; then result=failed; break; fi
             sleep 2
           done
+          echo "job/$job result: ${result:-timeout} after $((i * 2))s (runner date: $(date -u))"
 
           kill "$helm_pid" 2>/dev/null || true
           wait "$helm_pid" 2>/dev/null || true
