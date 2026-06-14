@@ -43,12 +43,14 @@ jobs:
 
   test:
     # Isolated install + helm test on an ephemeral kind cluster (no real cluster).
-    # If a GOOGLE_API_KEY secret is present (non-fork runs), also do a real model
-    # round-trip through Google AI Studio (Gemini); otherwise doctor-only.
+    # If an NVIDIA_API_KEY secret is present (non-fork runs), also do a real model
+    # round-trip through NVIDIA NIM; otherwise doctor-only. NIM is used (rather
+    # than Gemini) because its free tier has enough headroom for repeated CI runs
+    # without hitting per-day quota errors.
     runs-on: ubuntu-latest
     env:
-      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-      CI_MODEL: gemini-2.5-flash
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      CI_MODEL: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
     steps:
       - uses: actions/checkout@v4
 
@@ -56,21 +58,21 @@ jobs:
 
       - uses: helm/kind-action@v1
 
-      - name: Install chart (Gemini if a key is available, else placeholder)
+      - name: Install chart (NVIDIA NIM if a key is available, else placeholder)
         run: |
-          if [ -n "$GOOGLE_API_KEY" ]; then
-            echo "Installing with Gemini provider ($CI_MODEL)"
+          if [ -n "$NVIDIA_API_KEY" ]; then
+            echo "Installing with NVIDIA NIM provider ($CI_MODEL)"
             helm upgrade --install hermes-agent charts/hermes-agent \
               --namespace hermes-agent --create-namespace \
-              --set config.model.provider=gemini \
+              --set config.model.provider=nvidia \
               --set-string config.model.default="$CI_MODEL" \
-              --set-string env.GOOGLE_API_KEY="$GOOGLE_API_KEY" \
+              --set-string env.NVIDIA_API_KEY="$NVIDIA_API_KEY" \
               --set-string env.OPENAI_API_KEY=unused \
               --set tests.chat.enabled=true \
               --set tests.chat.failOnError=true \
               --wait --timeout 12m
           else
-            echo "No GOOGLE_API_KEY secret — installing with placeholder (doctor-only)"
+            echo "No NVIDIA_API_KEY secret — installing with placeholder (doctor-only)"
             helm upgrade --install hermes-agent charts/hermes-agent \
               --namespace hermes-agent --create-namespace \
               --set-string env.OPENAI_API_KEY=sk-test \

@@ -1,9 +1,9 @@
 # hermes-agent
 
-Community-powered Hermes Agent on Kubernetes as a Deployment (or StatefulSet),
-configurable for any LLM provider Hermes supports (OpenAI, Anthropic, Gemini,
-OpenRouter, or any OpenAI-compatible proxy such as LiteLLM). config.yaml is
-managed via ConfigMap and the .env via Secret.
+Community-powered Hermes Agent on Kubernetes. This chart deploys the Hermes Agent,
+a versatile agent framework that can be configurable for any LLM provider Hermes
+supports (OpenAI, Anthropic, Gemini, OpenRouter, or any OpenAI-compatible proxy
+such as LiteLLM). config.yaml is managed via ConfigMap and the .env via Secret.
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
 
@@ -119,7 +119,7 @@ helm test hermes-agent -n hermes-agent
 kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 ```
 
-Sample output (Gemini, prompt `tests.chat.prompt` default "Just say hi."):
+Sample output (NVIDIA NIM, prompt `tests.chat.prompt` default "Just say hi."):
 
 ```
 [5/5] hermes chat round-trip (timeout 180s)
@@ -139,7 +139,7 @@ Initializing agent...
 
 By default a failed/empty round-trip is **non-fatal** (logged only); set
 `tests.chat.failOnError=true` to make it fail the test job (this is what CI
-does when a `GOOGLE_API_KEY` secret is available).
+does when an `NVIDIA_API_KEY` secret is available).
 
 ## Configuration model
 
