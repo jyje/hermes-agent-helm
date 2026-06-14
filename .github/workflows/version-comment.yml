@@ -18,7 +18,7 @@ jobs:
       github.event.issue.pull_request != null &&
       startsWith(github.event.comment.body, '/version ') &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Parse version from comment
         id: parse
@@ -55,7 +55,8 @@ jobs:
         env:
           HELM_DOCS_VERSION: "1.14.2"
         run: |
-          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz" \
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; esac
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${arch}.tar.gz" \
             | tar -xz helm-docs
           sudo install helm-docs /usr/local/bin/
 

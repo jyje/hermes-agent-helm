@@ -13,7 +13,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v6
 
@@ -31,7 +31,8 @@ jobs:
         env:
           HELM_DOCS_VERSION: "1.14.2"
         run: |
-          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz" \
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; esac
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${arch}.tar.gz" \
             | tar -xz helm-docs
           sudo install helm-docs /usr/local/bin/
 
@@ -52,7 +53,7 @@ jobs:
     # different model ids). The test Job tries each via `hermes chat -m <model>`
     # with a per-model timeout (tests.chat.timeout) and passes as soon as one
     # succeeds, since any single free-tier model can be flaky/overloaded.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
