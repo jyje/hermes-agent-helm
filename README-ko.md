@@ -8,7 +8,7 @@
   <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
 </p>
 
-⚓ Kubernetes에서 **Hermes Agent**를 실행하기 위한 커뮤니티 기반의 경량 Helm 차트
+👩🏻‍💻 A Helm chart to run **Hermes Agent** on Kubernetes, community-powered, lightweight
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jyje/hermes-agent-helm?style=social)](https://github.com/jyje/hermes-agent-helm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
