@@ -39,6 +39,10 @@ jobs:
         with:
           ref: main
           fetch-depth: 0   # full history + tags for the diff/changelog baseline
+          # Don't leave a persisted auth header — it collides with the token
+          # create-pull-request uses to push (git "Duplicate header: Authorization").
+          # The read-only git/git-cliff steps here need no credentials.
+          persist-credentials: false
 
       - name: Install git-cliff
         run: |
