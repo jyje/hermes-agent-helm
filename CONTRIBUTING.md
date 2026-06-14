@@ -37,10 +37,15 @@ Review it, adjust the version if you disagree with the recommendation (edit
 
 Dry-run the same proposal locally (no PR, no push) with `make propose`.
 
+If more commits land on `main` while the proposal PR is open, comment
+`/rescan` on it. [command-rescan-changes.yaml](.github/workflows/command-rescan-changes.yaml)
+re-runs `propose-release.yaml`, refreshing the changelog, AI advice, and
+version recommendation in place.
+
 ### 2. `/version vX.Y.Z` PR comment
 
 A maintainer (OWNER/MEMBER/COLLABORATOR) comments `/version vX.Y.Z` on any PR.
-[event-version-comment.yaml](.github/workflows/event-version-comment.yaml) bumps `Chart.yaml`,
+[command-version-change.yaml](.github/workflows/command-version-change.yaml) bumps `Chart.yaml`,
 regenerates `CHANGELOG.md`, and pushes to that PR branch.
 
 ### 3. Manual bump

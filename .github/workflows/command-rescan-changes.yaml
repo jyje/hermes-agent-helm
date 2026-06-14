@@ -1,0 +1,59 @@
+name: 🔄 rescan-changes
+
+# ChatOps trigger: a maintainer comments `/rescan` on the release proposal PR
+# (branch release/next) to pick up commits pushed to `main` after the PR was
+# opened. It re-runs propose-release.yaml, which regenerates the changelog,
+# AI advice, version recommendation, and chart docs in place (idempotent —
+# same release/next branch + PR).
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  actions: write
+  pull-requests: write
+
+jobs:
+  rescan:
+    if: |
+      github.event.issue.pull_request != null &&
+      github.event.comment.body == '/rescan' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - name: Require the release proposal PR
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const isRelease = pr.data.labels.some(l => l.name === 'release')
+              || /Release v/i.test(pr.data.title);
+            if (!isRelease) {
+              core.setFailed('`/rescan` is only valid on the release proposal PR');
+            }
+
+      - name: Re-trigger propose-release.yaml
+        uses: actions/github-script@v9
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'propose-release.yaml',
+              ref: 'main',
+            });
+
+      - name: React to comment
+        uses: actions/github-script@v9
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket',
+            });

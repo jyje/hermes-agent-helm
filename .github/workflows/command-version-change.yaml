@@ -1,4 +1,4 @@
-name: ⚡ version-comment
+name: ⚡ version-change
 
 # ChatOps trigger: a maintainer comments `/version vX.Y.Z` on a PR. This bumps
 # `version` in charts/hermes-agent/Chart.yaml, refreshes CHANGELOG.md
