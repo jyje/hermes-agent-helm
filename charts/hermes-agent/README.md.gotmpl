@@ -121,10 +121,10 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 Sample output (NVIDIA NIM, prompt `tests.chat.prompt` default "Just say hi."):
 
 ```
-[5/5] hermes chat round-trip (timeout 180s)
+[5/5] hermes chat round-trip
 --- prompt ---
 Just say hi.
---- response ---
+--- model: (config default) (timeout 180s) ---
 Query: Just say hi.
 Initializing agent...
 ────────────────────────────────────────
@@ -139,6 +139,12 @@ Initializing agent...
 By default a failed/empty round-trip is **non-fatal** (logged only); set
 `tests.chat.failOnError=true` to make it fail the test job (this is what CI
 does when an `NVIDIA_API_KEY` secret is available).
+
+For free-tier providers where a single model can be flaky/overloaded, set
+`tests.chat.models` to a list of `provider/model` ids — the test Job tries
+each in order via `hermes chat -m <id> --provider <config.model.provider>`
+(its own `tests.chat.timeout` per attempt) and passes as soon as one succeeds.
+This is what CI does (a small pool of free NVIDIA NIM models).
 
 ## Configuration model
 

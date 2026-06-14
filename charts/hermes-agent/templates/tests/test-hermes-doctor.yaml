@@ -100,20 +100,41 @@ spec:
               fi
 
               {{- if .Values.tests.chat.enabled }}
-              echo "[5/5] hermes chat round-trip (timeout {{ .Values.tests.chat.timeout }}s)"
+              echo "[5/5] hermes chat round-trip"
               echo "--- prompt ---"
               echo {{ .Values.tests.chat.prompt | quote }}
-              echo "--- response ---"
+
+              chat_ok=false
+              {{- if .Values.tests.chat.models }}
+              for model in {{ .Values.tests.chat.models | join " " }}; do
+                echo "--- model: $model (timeout {{ .Values.tests.chat.timeout }}s) ---"
+                set +e
+                timeout -k 10 {{ .Values.tests.chat.timeout }} hermes chat \
+                  -m "$model" --provider {{ .Values.config.model.provider | quote }} \
+                  -q {{ .Values.tests.chat.prompt | quote }} \
+                  --max-turns {{ .Values.tests.chat.maxTurns }} | tee /tmp/chat-response.txt
+                chat_status=$?
+                set -e
+                if [ $chat_status -eq 0 ] && [ -s /tmp/chat-response.txt ]; then
+                  chat_ok=true
+                  echo "--- model $model succeeded ---"
+                  break
+                fi
+                echo "--- model $model failed, trying next ---"
+              done
+              {{- else }}
+              echo "--- model: (config default) (timeout {{ .Values.tests.chat.timeout }}s) ---"
               set +e
               timeout -k 10 {{ .Values.tests.chat.timeout }} hermes chat \
                 -q {{ .Values.tests.chat.prompt | quote }} \
                 --max-turns {{ .Values.tests.chat.maxTurns }} | tee /tmp/chat-response.txt
               chat_status=$?
               set -e
+              [ $chat_status -eq 0 ] && [ -s /tmp/chat-response.txt ] && chat_ok=true
+              {{- end }}
               echo "--- end response ---"
-              if [ "{{ .Values.tests.chat.failOnError }}" = "true" ]; then
-                [ $chat_status -eq 0 ] && [ -s /tmp/chat-response.txt ] \
-                  || { echo "  FAIL: hermes chat round-trip failed or returned no output"; exit 1; }
+              if [ "{{ .Values.tests.chat.failOnError }}" = "true" ] && [ "$chat_ok" != "true" ]; then
+                echo "  FAIL: hermes chat round-trip failed or returned no output"; exit 1
               fi
               {{- end }}
 

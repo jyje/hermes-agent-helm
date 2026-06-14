@@ -122,10 +122,10 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 Sample output (NVIDIA NIM, prompt `tests.chat.prompt` default "Just say hi."):
 
 ```
-[5/5] hermes chat round-trip (timeout 180s)
+[5/5] hermes chat round-trip
 --- prompt ---
 Just say hi.
---- response ---
+--- model: (config default) (timeout 180s) ---
 Query: Just say hi.
 Initializing agent...
 ────────────────────────────────────────
@@ -140,6 +140,12 @@ Initializing agent...
 By default a failed/empty round-trip is **non-fatal** (logged only); set
 `tests.chat.failOnError=true` to make it fail the test job (this is what CI
 does when an `NVIDIA_API_KEY` secret is available).
+
+For free-tier providers where a single model can be flaky/overloaded, set
+`tests.chat.models` to a list of `provider/model` ids — the test Job tries
+each in order via `hermes chat -m <id> --provider <config.model.provider>`
+(its own `tests.chat.timeout` per attempt) and passes as soon as one succeeds.
+This is what CI does (a small pool of free NVIDIA NIM models).
 
 ## Configuration model
 
@@ -206,13 +212,14 @@ OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` | Name to use; generated from fullname when empty. |
-| tests | object | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | ------------------------------------------------------------------------- |
-| tests.chat | object | `{"enabled":false,"failOnError":false,"maxTurns":1,"prompt":"Just say hi.","timeout":180}` | ------------------------------------------------------------------------- |
+| tests | object | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | ------------------------------------------------------------------------- |
+| tests.chat | object | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` | ------------------------------------------------------------------------- |
 | tests.chat.enabled | bool | `false` | Run a `hermes chat` round-trip and log the conversation. |
 | tests.chat.failOnError | bool | `false` | When true, a failed/empty round-trip fails the test job. |
 | tests.chat.maxTurns | int | `1` | Max agent turns for the round-trip. |
+| tests.chat.models | list | `[]` | Optional pool of `provider/model` ids to try in order (via `hermes chat    -m <id> --provider config.model.provider`), each with its own `timeout`.    Passes as soon as one succeeds — useful for free-tier models that are    sometimes overloaded. Leave empty to use `config.model.default` as-is    (single attempt, no `-m`/`--provider` override). |
 | tests.chat.prompt | string | `"Just say hi."` | Prompt sent to the agent. |
-| tests.chat.timeout | int | `180` | Seconds to allow the round-trip to run before timing out. |
+| tests.chat.timeout | int | `180` | Seconds to allow each round-trip attempt to run before timing out. |
 | tests.doctorStrict | bool | `false` | When true, `hermes doctor` issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes --version, seeded config) fail. |
 | tests.doctorTimeout | int | `120` | Seconds to allow `hermes doctor` to run before timing out. |
 | tolerations | list | `[]` |  |

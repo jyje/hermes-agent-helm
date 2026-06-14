@@ -228,10 +228,16 @@ tests:
     prompt: "Just say hi."
     # -- Max agent turns for the round-trip.
     maxTurns: 1
-    # -- Seconds to allow the round-trip to run before timing out.
+    # -- Seconds to allow each round-trip attempt to run before timing out.
     timeout: 180
     # -- When true, a failed/empty round-trip fails the test job.
     failOnError: false
+    # -- Optional pool of `provider/model` ids to try in order (via `hermes chat
+    #    -m <id> --provider config.model.provider`), each with its own `timeout`.
+    #    Passes as soon as one succeeds — useful for free-tier models that are
+    #    sometimes overloaded. Leave empty to use `config.model.default` as-is
+    #    (single attempt, no `-m`/`--provider` override).
+    models: []
   resources:
     requests:
       cpu: 100m

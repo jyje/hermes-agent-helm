@@ -47,10 +47,15 @@ jobs:
     # round-trip through NVIDIA NIM; otherwise doctor-only. NIM is used (rather
     # than Gemini) because its free tier has enough headroom for repeated CI runs
     # without hitting per-day quota errors.
+    #
+    # CI_MODELS is a pool of small/free NIM models (same provider/credentials,
+    # different model ids). The test Job tries each via `hermes chat -m <model>`
+    # with a per-model timeout (tests.chat.timeout) and passes as soon as one
+    # succeeds, since any single free-tier model can be flaky/overloaded.
     runs-on: ubuntu-latest
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-      CI_MODEL: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+      CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
     steps:
       - uses: actions/checkout@v4
 
@@ -61,15 +66,16 @@ jobs:
       - name: Install chart (NVIDIA NIM if a key is available, else placeholder)
         run: |
           if [ -n "$NVIDIA_API_KEY" ]; then
-            echo "Installing with NVIDIA NIM provider ($CI_MODEL)"
+            echo "Installing with NVIDIA NIM provider, model pool: $CI_MODELS"
             helm upgrade --install hermes-agent charts/hermes-agent \
               --namespace hermes-agent --create-namespace \
               --set config.model.provider=nvidia \
-              --set-string config.model.default="$CI_MODEL" \
+              --set-string config.model.default="${CI_MODELS%%,*}" \
               --set-string env.NVIDIA_API_KEY="$NVIDIA_API_KEY" \
               --set-string env.OPENAI_API_KEY=unused \
               --set tests.chat.enabled=true \
               --set tests.chat.failOnError=true \
+              --set "tests.chat.models={$CI_MODELS}" \
               --wait --timeout 12m
           else
             echo "No NVIDIA_API_KEY secret — installing with placeholder (doctor-only)"
@@ -80,7 +86,42 @@ jobs:
           fi
 
       - name: Helm test (hermes doctor, + chat round-trip if a model key is available)
-        run: helm test hermes-agent -n hermes-agent --timeout 12m
+        run: |
+          # `helm test`'s internal Job-watch can wait out the full --timeout even
+          # after the test Job has already succeeded (a watch/resync race for
+          # fast-finishing Jobs). Run it in the background and poll the Job's
+          # status directly so we move on as soon as it actually completes,
+          # while keeping --timeout as the failure fallback.
+          helm test hermes-agent -n hermes-agent --timeout 12m &
+          helm_pid=$!
+
+          job=""
+          for i in $(seq 1 30); do
+            job=$(kubectl get job -n hermes-agent -l app.kubernetes.io/component=test \
+              -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+            if [ -n "$job" ]; then break; fi
+            sleep 1
+          done
+          if [ -z "$job" ]; then
+            echo "::error::test Job not found"
+            wait "$helm_pid" || true
+            exit 1
+          fi
+
+          echo "Watching job/$job"
+          result=""
+          for i in $(seq 1 360); do
+            succeeded=$(kubectl get job "$job" -n hermes-agent -o jsonpath='{.status.succeeded}' 2>/dev/null || true)
+            failed=$(kubectl get job "$job" -n hermes-agent -o jsonpath='{.status.failed}' 2>/dev/null || true)
+            if [ "$succeeded" = "1" ]; then result=success; break; fi
+            if [ "$failed" = "1" ]; then result=failed; break; fi
+            sleep 2
+          done
+
+          kill "$helm_pid" 2>/dev/null || true
+          wait "$helm_pid" 2>/dev/null || true
+
+          [ "$result" = "success" ]
 
       - name: Show test logs (incl. chat round-trip transcript)
         if: always()
