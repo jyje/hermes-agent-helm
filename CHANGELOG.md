@@ -1,6 +1,28 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.1.0] - 2026-06-14
+
+### Bug Fixes
+
+- 🛠️ fix(release): correct OCI artifact path to ghcr.io/jyje/hermes-agent-helm/hermes-agent ([`76cf8e4`](https://github.com/jyje/hermes-agent-helm/commit/76cf8e4925f46de2a807a62ba48fb080b146e34f)) — @jyje
+- 🛠️ fix(release): increase NIM max_tokens budget for reasoning models ([`556c687`](https://github.com/jyje/hermes-agent-helm/commit/556c687ade6fb9d0d620d4cc4bbd7e27e8f71ee7)) — @jyje
+
+### Documentation
+
+- 📄 docs(readme): lead with the Helm repo install and default to latest ([`800054f`](https://github.com/jyje/hermes-agent-helm/commit/800054f3f8fdba3ea4f84c0e12cf75028c88b51c)) — @jyje
+
+### Features
+
+- ✨ feat(release): AI-propose artifacthub.io/changes entries ([`5ec3644`](https://github.com/jyje/hermes-agent-helm/commit/5ec3644fa3125c1ab213fb1c6a915b0b1e02dcda)) — @jyje
+- ✨ feat(ci): add /rescan PR command and rename event- to command- prefix ([`f596803`](https://github.com/jyje/hermes-agent-helm/commit/f5968031ea28722c16e6087deaa4b183e04d0f05)) — @jyje
+
+### Miscellaneous
+
+- 🔧 chore(ci): skip the kind round-trip test on version-only changes ([`766f565`](https://github.com/jyje/hermes-agent-helm/commit/766f56519fe5b273b11abd741f04288b4b8821fc)) — @jyje
+- 🎨 style(pages): unify theme between the index and chart docs pages ([`ff2a224`](https://github.com/jyje/hermes-agent-helm/commit/ff2a224c7c282f61a86093803edeb1e1e6718214)) — @jyje
+- 🔧 chore(scripts): add .gitignore for Python cache ([`c8e5ae4`](https://github.com/jyje/hermes-agent-helm/commit/c8e5ae482fa9fbb2fe695f0ec0162ddbca7af75c)) — @jyje
+
 ## [0.0.4] - 2026-06-14
 
 ### Bug Fixes
