@@ -1,0 +1,148 @@
+name: cron-fetch-image
+
+# Watches the upstream container image (nousresearch/hermes-agent on Docker Hub)
+# for new DATE-based tags (vYYYY.M.D, occasionally with a 4th segment) and, when
+# a tag newer than the chart's current appVersion appears, opens a PR that bumps
+# Chart.yaml's appVersion (the single source of truth — image.tag falls back to
+# it) and regenerates the chart README via helm-docs so validate-chart stays
+# green. The chart `version` bump, CHANGELOG, and release are handled separately
+# by propose-release.yaml once this PR is merged into main.
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write        # push the image/<tag> branch
+  pull-requests: write   # open the bump PR
+
+jobs:
+  check-image-version:
+    name: 🔍 Check Upstream Image
+    runs-on: ubuntu-26.04-arm
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      IMAGE: 'nousresearch/hermes-agent'
+      CHART: 'charts/hermes-agent'
+      HELM_DOCS_VERSION: '1.14.2'
+      UPDATE_NEEDED: 'false'
+      CURRENT_VERSION: ''
+      TARGET_VERSION: ''
+      PR_EXISTS: 'false'
+      HAS_OPEN_VERSION_PR: 'false'
+      BRANCH_EXISTS: 'false'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Fetch all Docker Hub tags
+        id: fetch_tags
+        run: |
+          url="https://hub.docker.com/v2/repositories/${IMAGE}/tags?page_size=100"
+          : > raw_tags.txt
+          while [ -n "$url" ] && [ "$url" != "null" ]; do
+            resp=$(curl -sL "$url")
+            echo "$resp" | jq -r '.results[].name' >> raw_tags.txt
+            url=$(echo "$resp" | jq -r '.next')
+          done
+          # Keep only date-based tags (vYYYY.M.D[.N]); drop latest/main.
+          grep -E '^v[0-9]{4}\.[0-9]+\.[0-9]+(\.[0-9]+)?$' raw_tags.txt \
+            | sort -uV > image_tags.txt
+          echo "Found $(wc -l < image_tags.txt) date-based tags"
+
+      - name: Determine target version vs current appVersion
+        id: pick_target
+        run: |
+          CURRENT_VERSION=$(grep -E '^appVersion:' "${CHART}/Chart.yaml" \
+            | sed -E 's/^appVersion:[[:space:]]*"?([^"]+)"?.*/\1/')
+          echo "Current appVersion: $CURRENT_VERSION"
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+
+          # Every tag strictly newer than CURRENT_VERSION (works even if CURRENT
+          # is not itself present in the tag list).
+          : > newer_versions.txt
+          while IFS= read -r t; do
+            [ "$t" = "$CURRENT_VERSION" ] && continue
+            newest=$(printf '%s\n%s\n' "$CURRENT_VERSION" "$t" | sort -V | tail -n1)
+            [ "$newest" = "$t" ] && echo "$t" >> newer_versions.txt
+          done < image_tags.txt
+
+          TARGET_VERSION=$(sort -V newer_versions.txt | tail -n1)
+          if [ -z "$TARGET_VERSION" ]; then
+            echo "Up to date; no tag newer than $CURRENT_VERSION."
+            echo "UPDATE_NEEDED=false" >> $GITHUB_ENV
+          else
+            echo "Target (newest) version: $TARGET_VERSION"
+            echo "TARGET_VERSION=$TARGET_VERSION" >> $GITHUB_ENV
+            echo "UPDATE_NEEDED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Check for existing PRs
+        if: env.UPDATE_NEEDED == 'true'
+        run: |
+          PR_TITLE="⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}"
+          gh pr list --state open --base main --json title > pr_list.json
+          # PR for this specific version already open?
+          jq -e ".[] | select(.title == \"$PR_TITLE\")" pr_list.json >/dev/null 2>&1 \
+            && echo "PR_EXISTS=true" >> $GITHUB_ENV || echo "PR_EXISTS=false" >> $GITHUB_ENV
+          # Any open image-bump PR (avoid multiple open ones → merge conflicts
+          # when the first is merged).
+          OPEN_COUNT=$(jq -r '.[].title' pr_list.json \
+            | grep -cE '^⬆️ dep\(image\): bump hermes-agent image to v[0-9]{4}\.[0-9]+\.[0-9]+(\.[0-9]+)?$' || true)
+          if [ "${OPEN_COUNT:-0}" -ge 1 ]; then
+            echo "HAS_OPEN_VERSION_PR=true" >> $GITHUB_ENV
+          else
+            echo "HAS_OPEN_VERSION_PR=false" >> $GITHUB_ENV
+          fi
+
+      - name: Check for existing branch
+        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false'
+        run: |
+          if git ls-remote --exit-code --heads origin "image/${{ env.TARGET_VERSION }}" >/dev/null 2>&1; then
+            echo "BRANCH_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "BRANCH_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Install helm-docs
+        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+        run: |
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; esac
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${arch}.tar.gz" \
+            | tar -xz helm-docs
+          sudo install helm-docs /usr/local/bin/
+
+      - name: Create branch and bump appVersion
+        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "image/${{ env.TARGET_VERSION }}" main
+
+          # appVersion is the single source of truth (image.tag defaults to it).
+          sed -i -E "s|^appVersion:.*|appVersion: \"${{ env.TARGET_VERSION }}\"|" "${CHART}/Chart.yaml"
+          # Keep the generated README's AppVersion badge in sync (validate-chart
+          # fails on a stale README).
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+
+          git add "${CHART}/Chart.yaml" "${CHART}/README.md"
+          git commit \
+            -m "⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}" \
+            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it) and regenerate the README badge." \
+            --allow-empty
+          git push origin "image/${{ env.TARGET_VERSION }}"
+
+      - name: Create PR
+        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+        run: |
+          NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
+          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated — adjust them manually if you know the matching Hermes release." \
+            "$IMAGE" "$IMAGE" "${{ env.CURRENT_VERSION }}" "${{ env.TARGET_VERSION }}" "$NEW_LIST")
+          gh pr create \
+            --title "⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "image/${{ env.TARGET_VERSION }}" \
+            --assignee "${{ github.repository_owner }}"
