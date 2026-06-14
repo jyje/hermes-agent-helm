@@ -1,9 +1,6 @@
 # hermes-agent
 
-Community-powered Hermes Agent on Kubernetes. This chart deploys the Hermes Agent,
-a versatile agent framework that can be configurable for any LLM provider Hermes
-supports (OpenAI, Anthropic, Gemini, OpenRouter, or any OpenAI-compatible proxy
-such as LiteLLM). config.yaml is managed via ConfigMap and the .env via Secret.
+Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
 ![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
 
