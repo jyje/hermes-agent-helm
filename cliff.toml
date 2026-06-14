@@ -21,21 +21,28 @@ body = """
 trim = true
 
 [git]
-conventional_commits = true
+# Commit messages follow the gitmoji format: "<emoji> <type>(<domain>): <title>"
+# (see .claude/skills/git-commit-helper), not bare Conventional Commits, so the
+# parsers below match on the "<type>(" part after the leading emoji.
+conventional_commits = false
+commit_preprocessors = [
+  { pattern = '\n*Co-Authored-By:.*', replace = "" },
+]
 filter_unconventional = false
 split_commits = false
 commit_parsers = [
-  { message = "^feat", group = "Features" },
-  { message = "^fix", group = "Bug Fixes" },
-  { message = "^perf", group = "Performance" },
-  { message = "^refactor", group = "Refactor" },
-  { message = "^docs", group = "Documentation" },
-  { message = "^ci", group = "CI/CD" },
-  { message = "^build", group = "Build" },
-  { message = "^test", group = "Tests" },
-  { message = "^chore\\(release\\)", skip = true },
-  { message = "^chore", group = "Miscellaneous" },
-  { body = ".*security", group = "Security" },
+  { message = "^\\S+\\s+init", group = "Initial Release" },
+  { message = "^\\S+\\s+feat", group = "Features" },
+  { message = "^\\S+\\s+(fix|bug)", group = "Bug Fixes" },
+  { message = "^\\S+\\s+perf", group = "Performance" },
+  { message = "^\\S+\\s+refactor", group = "Refactor" },
+  { message = "^\\S+\\s+(docs|article|typo)", group = "Documentation" },
+  { message = "^\\S+\\s+build", group = "Build" },
+  { message = "^\\S+\\s+test", group = "Tests" },
+  { message = "^\\S+\\s+security", group = "Security" },
+  { message = "^\\S+\\s+remove", group = "Removed" },
+  { message = "^\\S+\\s+chore\\(release\\)", skip = true },
+  { message = "^\\S+\\s+(chore|dep|style)", group = "Miscellaneous" },
 ]
 protect_breaking_commits = true
 filter_commits = false
