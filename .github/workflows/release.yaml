@@ -54,7 +54,7 @@ jobs:
 
       - name: Setup Helm
         if: steps.ver.outputs.exists == 'false'
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Package & push to ghcr (OCI)
         if: steps.ver.outputs.exists == 'false'
