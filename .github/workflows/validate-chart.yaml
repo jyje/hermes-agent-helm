@@ -12,6 +12,35 @@ on:
       - ".github/workflows/validate-chart.yaml"
 
 jobs:
+  changes:
+    # Detects whether this push/PR only touches Chart.yaml's version (plus the
+    # generated docs/changelog that follow it) — a release-bump commit. In that
+    # case the chart's behavior is unchanged, so the heavy `test` job below
+    # (ephemeral kind cluster + real round-trip) is skipped.
+    runs-on: ubuntu-26.04-arm
+    outputs:
+      functional: ${{ steps.filter.outputs.functional }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: filter
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            echo "functional=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "$base" "${{ github.sha }}")"
+          echo "Changed files:"
+          echo "$changed"
+          if echo "$changed" | grep -vE '^(charts/hermes-agent/(Chart\.yaml|README\.md)|CHANGELOG\.md)$' | grep -q .; then
+            echo "functional=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "functional=false" >> "$GITHUB_OUTPUT"
+          fi
+
   lint:
     runs-on: ubuntu-26.04-arm
     steps:
@@ -53,6 +82,8 @@ jobs:
     # different model ids). The test Job tries each via `hermes chat -m <model>`
     # with a per-model timeout (tests.chat.timeout) and passes as soon as one
     # succeeds, since any single free-tier model can be flaky/overloaded.
+    needs: changes
+    if: needs.changes.outputs.functional == 'true'
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
