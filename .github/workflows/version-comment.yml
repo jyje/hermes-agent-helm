@@ -72,6 +72,8 @@ jobs:
         with:
           config: cliff.toml
           args: --tag v${{ steps.parse.outputs.version }} -o CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
 
       - name: Commit & push
         run: |

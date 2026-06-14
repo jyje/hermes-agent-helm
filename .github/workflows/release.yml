@@ -42,6 +42,7 @@ jobs:
           args: --unreleased --tag v${{ steps.ver.outputs.version }} --strip all
         env:
           OUTPUT: RELEASE_NOTES.md
+          GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
 
       - name: Create tag + GitHub Release
         if: steps.ver.outputs.exists == 'false'

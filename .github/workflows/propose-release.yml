@@ -55,6 +55,8 @@ jobs:
           git-cliff --version
 
       - name: Collect release context (deterministic)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
         run: bash .github/scripts/release/collect.sh "$OUT"
 
       - name: AI advice (NVIDIA NIM, graceful fallback)
@@ -92,6 +94,8 @@ jobs:
           sudo install helm-docs /usr/local/bin/
 
       - name: Bump Chart.yaml + refresh CHANGELOG.md + chart docs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
         run: |
           new="${{ steps.ver.outputs.new }}"
           sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml

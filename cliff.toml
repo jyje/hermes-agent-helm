@@ -14,7 +14,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {% for commit in commits %}
-- {{ commit.message | split(pat="\n") | first | trim | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/jyje/hermes-agent-helm/commit/{{ commit.id }}))\
+- {{ commit.message | split(pat="\n") | first | trim | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/jyje/hermes-agent-helm/commit/{{ commit.id }})) — {% if commit.remote.username %}@{{ commit.remote.username }}{% else %}{{ commit.author.name }}{% endif %}\
 {% endfor %}
 {% endfor %}\n
 """
@@ -49,3 +49,10 @@ filter_commits = false
 tag_pattern = "v[0-9]*"
 topo_order = false
 sort_commits = "oldest"
+
+# GitHub integration: maps each commit to its GitHub author so the changelog can
+# show a real @username (commit.remote.username). Needs a GITHUB_TOKEN at
+# generation time; without one the template falls back to the git author name.
+[remote.github]
+owner = "jyje"
+repo = "hermes-agent-helm"
