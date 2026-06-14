@@ -156,7 +156,7 @@ jobs:
             "${{ steps.ver.outputs.selection }}" > "$OUT/PR_BODY.md"
 
       - name: Create or update the release PR
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           base: main
           branch: release/next            # fixed branch -> updates in place (idempotent)
