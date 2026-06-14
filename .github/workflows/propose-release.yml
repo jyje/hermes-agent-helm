@@ -73,11 +73,22 @@ jobs:
           echo "new=$new"            >> "$GITHUB_OUTPUT"
           echo "::notice::proposing v$new (bump=$bump from $bump_from)"
 
-      - name: Bump Chart.yaml + refresh CHANGELOG.md
+      - name: Install helm-docs
+        env:
+          HELM_DOCS_VERSION: "1.14.2"
+        run: |
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz" \
+            | tar -xz helm-docs
+          sudo install helm-docs /usr/local/bin/
+
+      - name: Bump Chart.yaml + refresh CHANGELOG.md + chart docs
         run: |
           new="${{ steps.ver.outputs.new }}"
           sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
           git-cliff --tag "v${new}" -o CHANGELOG.md
+          # Regenerate the chart README so its version badge matches Chart.yaml —
+          # otherwise ci.yml's docs-drift check fails on the release PR.
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
 
       - name: Build contributors block
         uses: actions/github-script@v7
@@ -135,6 +146,7 @@ jobs:
           branch: release/next            # fixed branch -> updates in place (idempotent)
           add-paths: |
             charts/hermes-agent/Chart.yaml
+            charts/hermes-agent/README.md
             CHANGELOG.md
           commit-message: "chore(release): propose v${{ steps.ver.outputs.new }}"
           title: "🚀 Release v${{ steps.ver.outputs.new }}"
