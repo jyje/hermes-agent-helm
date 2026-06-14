@@ -7,7 +7,7 @@ OCI_REGISTRY ?= oci://ghcr.io/jyje
 
 CHART_VERSION = $(shell grep -E '^version:' $(CHART)/Chart.yaml | awk '{print $$2}' | tr -d '"')
 
-.PHONY: docs lint template install test uninstall package push changelog help
+.PHONY: docs lint template install test uninstall package push changelog propose help
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -40,3 +40,13 @@ push: package ## Push the packaged chart to the OCI registry (GitHub Packages)
 
 changelog: ## Regenerate CHANGELOG.md (git-cliff) for the current Chart.yaml version
 	git cliff --tag v$(CHART_VERSION) -o CHANGELOG.md
+
+propose: ## Dry-run the release proposal locally (collect + AI advice + PR body; no PR)
+	@bash .github/scripts/release/collect.sh dist/release
+	@python3 .github/scripts/release/advise.py dist/release
+	@bump=$$(python3 -c "import json;print(json.load(open('dist/release/advice.json'))['bump'])"); \
+	  from=$$(python3 -c "import json;print(json.load(open('dist/release/context.json'))['bump_from'])"); \
+	  new=$$(bash .github/scripts/release/semver.sh next $$from $$bump); \
+	  printf -- "- (local dry-run: contributors resolved in CI)\n" > dist/release/contributors.md; \
+	  echo "=== proposing v$$new (bump=$$bump from $$from) ==="; \
+	  bash .github/scripts/release/render-pr-body.sh dist/release $$new dist/release/contributors.md

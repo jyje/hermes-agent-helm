@@ -13,31 +13,53 @@ No long-lived `rc`/`release` branches — a release is a tag/event.
 ## How to cut a release
 
 The chart **`version` in `charts/hermes-agent/Chart.yaml` is the source of truth**.
+A release is just a reviewed PR that bumps that version; **merging it to `main`
+is what ships**. There are three ways to produce that bump — pick one:
 
-1. Bump `version` (e.g. `0.0.1` → `0.1.0`) following semver.
-2. Refresh the changelog: `make changelog` (git-cliff) and commit `CHANGELOG.md`
-   together with the version bump.
-3. Merge to `main`. CI ([release.yml](.github/workflows/release.yml)) sees the
-   new version, and if no `vX.Y.Z` tag exists yet it:
-   - creates the tag + GitHub Release (notes from git-cliff), and
-   - packages and pushes the chart to `oci://ghcr.io/<owner>/charts`.
+### 1. AI-assisted proposal (recommended)
 
-Commits that touch `Chart.yaml` for other reasons (e.g. `appVersion`,
-description) are safe — the tag-existence guard makes them no-ops.
+Run [propose-release.yml](.github/workflows/propose-release.yml) via
+`workflow_dispatch` (Actions tab → "propose-release" → "Run workflow"). It:
+
+- diffs `main` against the last release tag and builds the changelog
+  **deterministically** (git / git-cliff) — no AI in this part;
+- asks **NVIDIA NIM** to recommend a semver bump and write a summary (falls
+  back to a transparent heuristic when no `NVIDIA_API_KEY` secret is present);
+- bumps `Chart.yaml` + refreshes `CHANGELOG.md`, and opens/updates a single
+  **release PR** (branch `release/next`, idempotent) that credits every commit
+  and PR author and includes step-by-step ship instructions.
+
+Review it, adjust the version if you disagree with the recommendation (edit
+`Chart.yaml` on the branch, or comment `/version vX.Y.Z`), then merge.
+
+> The AI only **advises**. The changelog, diff, contributors, and the version
+> arithmetic are all deterministic; you make the final call by merging.
+
+Dry-run the same proposal locally (no PR, no push) with `make propose`.
+
+### 2. `/version vX.Y.Z` PR comment
+
+A maintainer (OWNER/MEMBER/COLLABORATOR) comments `/version vX.Y.Z` on any PR.
+[version-comment.yml](.github/workflows/version-comment.yml) bumps `Chart.yaml`,
+regenerates `CHANGELOG.md`, and pushes to that PR branch.
+
+### 3. Manual bump
+
+Bump `version` in `Chart.yaml`, run `make changelog`, commit both, and open a
+PR yourself.
+
+### What merging does
+
+Once any of the above merges to `main`,
+[release.yml](.github/workflows/release.yml) sees the new version, and if no
+`vX.Y.Z` tag exists yet it creates the tag + GitHub Release (git-cliff notes)
+and pushes the chart to `oci://ghcr.io/<owner>/hermes-agent`. Commits that touch
+`Chart.yaml` for other reasons (e.g. `appVersion`, description) are safe — the
+tag-existence guard makes them no-ops. You can also re-run `release.yml` via
+`workflow_dispatch` to retry a failed publish.
 
 > `appVersion` tracks the upstream Hermes image (date-based, e.g. `v2026.6.5`)
 > and is bumped manually; only the chart `version` drives releases.
-
-### Triggering a release
-
-- **Manually**: run [release.yml](.github/workflows/release.yml) via
-  `workflow_dispatch` (Actions tab → "release" → "Run workflow"). Useful for
-  re-running a publish after a failed step.
-- **`/version vX.Y.Z` PR comment**: a maintainer (OWNER/MEMBER/COLLABORATOR)
-  can comment `/version vX.Y.Z` on a PR. [version-comment.yml](.github/workflows/version-comment.yml)
-  bumps `charts/hermes-agent/Chart.yaml` `version` to `X.Y.Z`, regenerates
-  `CHANGELOG.md` (git-cliff), and pushes that commit to the PR branch. Merging
-  the PR to `main` then triggers `release.yml` as usual.
 
 ## Conventional Commits (recommended)
 

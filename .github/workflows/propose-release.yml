@@ -1,0 +1,139 @@
+name: propose-release
+
+# Opens (or updates) a single "release proposal" PR for the current state of
+# `main`. The changelog, diff, change signals, and contributors are produced
+# deterministically by git / git-cliff; only the version recommendation and the
+# human summary are AI-assisted (NVIDIA NIM, with a heuristic fallback when no
+# key is available). Nothing is published here — merging the PR triggers
+# release.yml, which is what actually tags + pushes the chart.
+#
+# Trigger is workflow_dispatch only: it is maintainer-initiated and never runs
+# on untrusted PR events, so the NIM secret and write permissions are never
+# exposed to forks.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump level (auto = use the AI/heuristic recommendation)"
+        type: choice
+        default: auto
+        options: [auto, patch, minor, major]
+
+permissions:
+  contents: write        # push the release/next branch
+  pull-requests: write   # open / update the proposal PR
+
+concurrency:
+  group: propose-release
+  cancel-in-progress: true
+
+env:
+  GIT_CLIFF_VERSION: "2.13.1"
+  OUT: dist/release
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0   # full history + tags for the diff/changelog baseline
+
+      - name: Install git-cliff
+        run: |
+          curl -sSL "https://github.com/orhun/git-cliff/releases/download/v${GIT_CLIFF_VERSION}/git-cliff-${GIT_CLIFF_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz --strip-components=1 -C /usr/local/bin "git-cliff-${GIT_CLIFF_VERSION}/git-cliff"
+          git-cliff --version
+
+      - name: Collect release context (deterministic)
+        run: bash .github/scripts/release/collect.sh "$OUT"
+
+      - name: AI advice (NVIDIA NIM, graceful fallback)
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: python3 .github/scripts/release/advise.py "$OUT"
+
+      - name: Resolve bump level + next version
+        id: ver
+        run: |
+          override="${{ inputs.bump }}"
+          if [ "$override" = "auto" ]; then
+            bump="$(python3 -c "import json;print(json.load(open('$OUT/advice.json'))['bump'])")"
+          else
+            bump="$override"
+          fi
+          bump_from="$(python3 -c "import json;print(json.load(open('$OUT/context.json'))['bump_from'])")"
+          new="$(bash .github/scripts/release/semver.sh next "$bump_from" "$bump")"
+          echo "bump=$bump"          >> "$GITHUB_OUTPUT"
+          echo "new=$new"            >> "$GITHUB_OUTPUT"
+          echo "::notice::proposing v$new (bump=$bump from $bump_from)"
+
+      - name: Bump Chart.yaml + refresh CHANGELOG.md
+        run: |
+          new="${{ steps.ver.outputs.new }}"
+          sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
+          git-cliff --tag "v${new}" -o CHANGELOG.md
+
+      - name: Build contributors block
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const ctx = JSON.parse(fs.readFileSync(`${process.env.OUT}/context.json`, 'utf8'));
+            const { owner, repo } = context.repo;
+
+            // Commit authors (GitHub logins) via the compare API over the range.
+            const commitLogins = new Set();
+            try {
+              const cmp = await github.rest.repos.compareCommitsWithBasehead({
+                owner, repo,
+                basehead: `${ctx.last_release || ctx.base_ref}...main`,
+              });
+              for (const c of cmp.data.commits || []) {
+                if (c.author && c.author.login) commitLogins.add(c.author.login);
+              }
+            } catch (e) {
+              core.warning(`compare API failed: ${e.message}`);
+            }
+
+            // Pull requests referenced in the range -> author + title.
+            const prLines = [];
+            for (const n of ctx.pr_refs || []) {
+              try {
+                const pr = await github.rest.pulls.get({ owner, repo, pull_number: n });
+                const a = pr.data.user ? `@${pr.data.user.login}` : '(unknown)';
+                prLines.push(`- #${n} ${pr.data.title} — ${a}`);
+                if (pr.data.user) commitLogins.add(pr.data.user.login);
+              } catch (e) {
+                core.warning(`pr #${n} lookup failed: ${e.message}`);
+              }
+            }
+
+            let md = '';
+            const commits = [...commitLogins].sort();
+            md += commits.length
+              ? `**Commit authors:** ${commits.map(l => `@${l}`).join(', ')}\n`
+              : `**Commit authors:** ${(ctx.commit_contributors || []).join(', ') || '(none)'}\n`;
+            if (prLines.length) md += `\n**Pull requests:**\n${prLines.join('\n')}\n`;
+            fs.writeFileSync(`${process.env.OUT}/contributors.md`, md);
+            core.info(md);
+
+      - name: Render PR body
+        run: |
+          bash .github/scripts/release/render-pr-body.sh \
+            "$OUT" "${{ steps.ver.outputs.new }}" "$OUT/contributors.md" > "$OUT/PR_BODY.md"
+
+      - name: Create or update the release PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: main
+          branch: release/next            # fixed branch -> updates in place (idempotent)
+          add-paths: |
+            charts/hermes-agent/Chart.yaml
+            CHANGELOG.md
+          commit-message: "chore(release): propose v${{ steps.ver.outputs.new }}"
+          title: "🚀 Release v${{ steps.ver.outputs.new }}"
+          body-path: ${{ env.OUT }}/PR_BODY.md
+          labels: release
+          delete-branch: true
