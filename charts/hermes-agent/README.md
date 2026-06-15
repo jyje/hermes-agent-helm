@@ -18,7 +18,8 @@ It deploys:
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
   (no inbound port — the gateway is outbound); for `deployment`: a standalone
-  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard
+  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard,
+  and an **optional** Ingress in front of it (`ingress.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 Hermes supports many LLM providers via **built-in provider keys**
@@ -222,6 +223,12 @@ the full upstream config (which would drift across Hermes versions).
   produces with `extraEnvFrom` (applied after the chart's own Secret, so it
   wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
   SealedSecret + `extraEnvFrom` GitOps example.
+- **Dashboard Ingress** — the management dashboard (`service.port`, default
+  9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
+  warns **exposes API keys on the network**. Set `service.enabled: true` and
+  `ingress.enabled: true` only behind authentication (e.g. an
+  oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
+  `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
 ## More examples
 
@@ -269,6 +276,13 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | image.repository | string | `"nousresearch/hermes-agent"` |  |
 | image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
+| ingress.annotations | object | `{}` |  |
+| ingress.className | string | `""` |  |
+| ingress.enabled | bool | `false` | Create an Ingress resource. |
+| ingress.hosts[0].host | string | `"hermes-agent.example.com"` |  |
+| ingress.hosts[0].paths[0].path | string | `"/"` |  |
+| ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| ingress.tls | list | `[]` |  |
 | nameOverride | string | `""` | Override the chart name used in resource names. |
 | nodeSelector | object | `{}` |  |
 | persistence | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"mountPath":"/opt/data","size":"5Gi","storageClass":""}` | ------------------------------------------------------------------------- |

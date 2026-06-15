@@ -164,6 +164,26 @@ service:
   port: 9119
   annotations: {}
 
+# Ingress for the management dashboard. Requires `service.enabled: true` AND
+# the dashboard running with --insecure (see the `service` comment above for
+# the API-key exposure warning) — only enable this behind authentication
+# (e.g. an ingress-level oauth2-proxy/basic-auth annotation) or on a private
+# network.
+ingress:
+  # -- Create an Ingress resource.
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: hermes-agent.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: hermes-agent-tls
+  #    hosts:
+  #      - hermes-agent.example.com
+
 # Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64).
 resources:
   requests:
