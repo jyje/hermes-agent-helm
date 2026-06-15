@@ -1,9 +1,24 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.2.0] - 2026-06-15
 
-> **Note:** v0.0.1 through v0.1.0 were consolidated into v0.1.1; their
-> history is preserved below under a single entry.
+### Features
+
+- ✨ feat(release): prepend chart description to release notes ([`1826b0e`](https://github.com/jyje/hermes-agent-helm/commit/1826b0ec9208370479663da79096d1fda57b85f9)) — @jyje
+- ✨ feat(ci): add cron-fetch-image to track upstream hermes-agent image ([`88558e6`](https://github.com/jyje/hermes-agent-helm/commit/88558e65ad3489485c99c48375fe92a3b70ad15a)) — @jyje
+- ✨ feat(ci): notify Discord on healthy chart CI via hermes send (#12) ([`c204909`](https://github.com/jyje/hermes-agent-helm/commit/c2049090e9998e91d6bf29d2748194333b3024f8)) — @jyje
+- ✨ feat(chart): add Ingress support and expand values/ArgoCD examples (#13) ([`38f22d8`](https://github.com/jyje/hermes-agent-helm/commit/38f22d85ecff4d6651cececbd1a862d25885d512)) — @jyje
+
+### Documentation
+
+- 📄 docs(chart): refresh chart description to reflect current overview ([`3d2b61d`](https://github.com/jyje/hermes-agent-helm/commit/3d2b61d573fab7b6e86032054313d5e093eae9fa)) — @jyje
+- 📄 docs: update README to unify description of Hermes Agent Helm chart ([`f615749`](https://github.com/jyje/hermes-agent-helm/commit/f6157491ab83ef460f8a1de1ca63cfa4418726e1)) — @jyje
+- 📄 docs(chart): prepend repo tagline to chart description ([`6f071b7`](https://github.com/jyje/hermes-agent-helm/commit/6f071b72354efce90469366d7ccfe5dc753acd76)) — @jyje
+
+### Miscellaneous
+
+- 🔧 chore(changelog): consolidate v0.0.1-v0.1.0 history into v0.1.1 ([`a33a14b`](https://github.com/jyje/hermes-agent-helm/commit/a33a14b5466e1b07820e56f24a3f784a8162648d)) — @jyje
 
 ## [0.1.1] - 2026-06-14
 
@@ -28,7 +43,6 @@ All notable changes to this chart are documented here.
 - ✨ feat(release): name GitHub Releases after the chart, not the repo ([`97c1f89`](https://github.com/jyje/hermes-agent-helm/commit/97c1f89e28aaf45f3f5dd45494532fcc0378e7ac)) — @jyje
 - ✨ feat(release): add install/changelog/contributors release notes template ([`4f07f8c`](https://github.com/jyje/hermes-agent-helm/commit/4f07f8cf6d009bc7b608f28d8d1c1b68e1eb5d1a)) — @jyje
 - ✨ feat(workflow): update rescan-changes name to use a lightning bolt emoji ([`2059ef2`](https://github.com/jyje/hermes-agent-helm/commit/2059ef245e5773eb5c28f387a973cb10b0f1bb5f)) — @jyje
-- ✨ feat(release): prepend chart description to release notes ([`1826b0e`](https://github.com/jyje/hermes-agent-helm/commit/1826b0ec9208370479663da79096d1fda57b85f9)) — @jyje
 
 ### Bug Fixes
 
@@ -59,8 +73,6 @@ All notable changes to this chart are documented here.
 - 📄 docs(chart): document upgrade path across a chart rename ([`cee164c`](https://github.com/jyje/hermes-agent-helm/commit/cee164c6ca34a8ff5996fde406d6c345f4a3d9ff)) — @jyje
 - 📄 docs(readme): revamp READMEs, add brand logo and messenger/provider examples ([`0183005`](https://github.com/jyje/hermes-agent-helm/commit/01830056ce4244c0d30bb2dbaeb6bdc2b6584025)) — @jyje
 - 📄 docs(readme): lead with the Helm repo install and default to latest ([`800054f`](https://github.com/jyje/hermes-agent-helm/commit/800054f3f8fdba3ea4f84c0e12cf75028c88b51c)) — @jyje
-- 📄 docs(chart): refresh chart description to reflect current overview ([`3d2b61d`](https://github.com/jyje/hermes-agent-helm/commit/3d2b61d573fab7b6e86032054313d5e093eae9fa)) — @jyje
-- 📄 docs: update README to unify description of Hermes Agent Helm chart ([`f615749`](https://github.com/jyje/hermes-agent-helm/commit/f6157491ab83ef460f8a1de1ca63cfa4418726e1)) — @jyje
 
 ### Build
 
@@ -77,3 +89,4 @@ All notable changes to this chart are documented here.
 - 🔧 chore(ci): skip the kind round-trip test on version-only changes ([`766f565`](https://github.com/jyje/hermes-agent-helm/commit/766f56519fe5b273b11abd741f04288b4b8821fc)) — @jyje
 - 🎨 style(pages): unify theme between the index and chart docs pages ([`ff2a224`](https://github.com/jyje/hermes-agent-helm/commit/ff2a224c7c282f61a86093803edeb1e1e6718214)) — @jyje
 - 🔧 chore(scripts): add .gitignore for Python cache ([`c8e5ae4`](https://github.com/jyje/hermes-agent-helm/commit/c8e5ae482fa9fbb2fe695f0ec0162ddbca7af75c)) — @jyje
+
