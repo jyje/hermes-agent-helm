@@ -29,7 +29,8 @@ driven by `values.yaml` — point it at a hosted API or an in-cluster proxy.
 
 > The provider key `openai` is **not** valid in Hermes (it aliases to
 > OpenRouter). Use `openai-api` for api.openai.com, or a custom provider for a
-> proxy — see `values.example.yaml`.
+> proxy — see `values-litellm.yaml` / `values-litellm-k8s.yaml` in
+> ["More examples"](#more-examples).
 
 The agent's command execution uses the **`local` backend** (commands run inside
 the pod; the pod is the sandbox). The `docker` backend is intentionally **not
@@ -90,8 +91,9 @@ Hermes talks to. (For chat platforms, see
 
 - **Custom OpenAI-compatible provider** (LiteLLM, vLLM, LM Studio, …) — register
   it under `config.providers.<id>` (`base_url`, `key_env`) and point
-  `config.model.provider` at that `<id>`. See
-  `charts/hermes-agent/values.example.yaml` for a full LiteLLM example.
+  `config.model.provider` at that `<id>`. See `values-litellm.yaml` (remote
+  proxy) or `values-litellm-k8s.yaml` (in-cluster) in
+  ["More examples"](#more-examples).
 
 ### Messenger integrations (Telegram / Discord)
 
@@ -137,8 +139,8 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
   `env.TELEGRAM_BOT_TOKEN` (optionally `TELEGRAM_HOME_CHANNEL`,
   `TELEGRAM_ALLOWED_USERS` via `extraEnv`).
 
-See `charts/hermes-agent/values.example.yaml` for a copy-pasteable messenger
-block.
+See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
+["More examples"](#more-examples) for copy-pasteable messenger blocks.
 
 ## Test
 
@@ -218,10 +220,8 @@ the full upstream config (which would drift across Hermes versions).
   For GitOps, avoid committing real keys in `env` — instead deploy a
   `SealedSecret` (or similar) via `extraResources` and reference the Secret it
   produces with `extraEnvFrom` (applied after the chart's own Secret, so it
-  wins). See `values.example.yaml`.
-
-See `charts/hermes-agent/values.example.yaml` for a complete example (custom
-OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
+  wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
+  SealedSecret + `extraEnvFrom` GitOps example.
 
 ## More examples
 
@@ -263,7 +263,7 @@ Deploying via ArgoCD instead of plain `helm`/`-f`? See
 | env | object | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` | ------------------------------------------------------------------------- |
 | extraEnv | list | `[]` | Plain (non-secret) env vars injected directly on the container. |
 | extraEnvFrom | list | `[]` | Extra envFrom sources (reference existing ConfigMaps/Secrets). |
-| extraResources | list | `[]` | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see values.example.yaml).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see values.example.yaml). |
+| extraResources | list | `[]` | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). |
 | fullnameOverride | string | `""` | Fully override the generated resource name (release-name-chart). |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"nousresearch/hermes-agent"` |  |

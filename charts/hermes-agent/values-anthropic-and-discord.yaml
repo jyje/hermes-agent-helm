@@ -5,7 +5,7 @@
 #
 # All secrets below are DUMMY placeholders. Do NOT commit real keys: override
 # them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom
-# (see charts/hermes-agent/values.example.yaml).
+# (see examples/argocd/).
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \

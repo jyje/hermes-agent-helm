@@ -81,9 +81,8 @@ install examples (including messenger integrations), see
 ```
 charts/hermes-agent/                     # the Helm chart (see its README for the full values table)
 charts/hermes-agent/values-*.yaml        # ready-to-adapt examples: providers, Discord/Telegram, LiteLLM (see chart README "More examples")
-charts/hermes-agent/values.example.yaml  # reference overrides (custom OpenAI-compatible provider + persistence + GitOps SealedSecret pattern)
 examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
-examples/argocd/                         # ArgoCD Application + safe multi-instance guide
+examples/argocd/                         # ArgoCD Application examples (one per values-*.yaml) + GitOps/SealedSecret pattern
 .github/workflows/                       # ci (lint + docs-drift + real round-trip on kind) and release (version bump -> tag -> ghcr OCI)
 CONTRIBUTING.md                          # branch model (dev/main + tags) + release-on-version-bump
 AGENTS.md                                # design principles & workflow for contributors

@@ -64,7 +64,7 @@ serviceAccount:
 #
 # Hermes supports many providers (openai, anthropic, google, openrouter, and any
 # OpenAI-compatible endpoint). Defaults use the provider's public endpoint —
-# override to point anywhere (see values.example.yaml for an in-cluster proxy).
+# override to point anywhere (see values-litellm.yaml / values-litellm-k8s.yaml).
 # ---------------------------------------------------------------------------
 config:
   model:
@@ -76,7 +76,7 @@ config:
     # NOTE: `openai` is NOT valid (it aliases to openrouter).
     # For an OpenAI-compatible proxy (LiteLLM / vLLM / LM Studio / ...), register
     # a custom provider under `config.providers` below and set this to that key
-    # (see values.example.yaml).
+    # (see values-litellm.yaml / values-litellm-k8s.yaml).
     provider: openai-api
   # Custom OpenAI-compatible providers, keyed by provider id. Empty by default.
   #   providers:
@@ -130,10 +130,10 @@ extraEnvFrom: []
 
 # -- Extra raw manifests rendered as-is alongside this chart's resources.
 #    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
-#    may be either an object or a multiline string (see values.example.yaml).
+#    may be either an object or a multiline string (see examples/argocd/).
 #    Useful for things this chart doesn't model directly, e.g. a SealedSecret
 #    that a sealed-secrets controller decrypts into a Secret referenced via
-#    `extraEnvFrom` (see values.example.yaml).
+#    `extraEnvFrom` (see examples/argocd/).
 extraResources: []
 
 # ---------------------------------------------------------------------------
@@ -218,7 +218,7 @@ tests:
   # configured provider. The full conversation (prompt + response) is printed
   # to the test Job's logs. Requires a working provider key in `env`/`config`
   # (e.g. config.model.provider=gemini + env.GOOGLE_API_KEY, or a LiteLLM-style
-  # custom provider — see values.example.yaml). Off by default since the
+  # custom provider — see values-litellm.yaml). Off by default since the
   # placeholder key cannot reach a real provider.
   # ---------------------------------------------------------------------------
   chat:

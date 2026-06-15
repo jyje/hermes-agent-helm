@@ -78,9 +78,8 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
 ```
 charts/hermes-agent/                     # Helm 차트 (전체 값 테이블은 README 참고)
 charts/hermes-agent/values-*.yaml        # 즉시 사용 가능한 예제: 제공자별, Discord/Telegram, LiteLLM (차트 README "More examples" 참고)
-charts/hermes-agent/values.example.yaml  # 참조용 오버라이드 (커스텀 OpenAI 호환 제공자 + 영속성 + GitOps SealedSecret 패턴)
 examples/helm/                           # Git 및 OCI(ghcr.io)에서 설치 + 배포 가이드
-examples/argocd/                         # ArgoCD Application + 안전한 다중 인스턴스 가이드
+examples/argocd/                         # ArgoCD Application 예제 (values-*.yaml별 1개) + GitOps/SealedSecret 패턴
 .github/workflows/                       # ci (lint + docs-drift + kind에서 실제 라운드트립) 및 release (버전 범프 -> 태그 -> ghcr OCI)
 CONTRIBUTING.md                          # 브랜치 모델 (dev/main + tags) + 버전 범프 기반 릴리즈
 AGENTS.md                                # 기여자용 설계 원칙 & 워크플로우
