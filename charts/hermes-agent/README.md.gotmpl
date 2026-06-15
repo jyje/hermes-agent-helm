@@ -41,6 +41,13 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 > Image tags are **date-based** (e.g. `v2026.6.5` == Hermes v0.16.0); the image
 > is multi-arch (amd64 + arm64), so it runs on Raspberry Pi clusters.
 
+> **Scaling note.** Hermes is a single-instance personal agent, so this chart
+> pins `replicaCount: 1` and there is no multi-replica mode (see the
+> `replicaCount` note in the [values table](#values)). To grow, scale *up* (more
+> `resources`, larger `persistence.size`) — and when one agent isn't enough, run
+> several instances and group them into a **team** that shares one gateway
+> channel. See [Hermes teams](../../docs/teams.md).
+
 ## Install
 
 ```bash
@@ -142,6 +149,10 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 
 See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ["More examples"](#more-examples) for copy-pasteable messenger blocks.
+
+> Want **several agents in one shared channel**? Point each instance at the same
+> `DISCORD_HOME_CHANNEL` (different `DISCORD_BOT_TOKEN` each) to form a Hermes
+> team — see [Hermes teams](../../docs/teams.md).
 
 ## Test
 

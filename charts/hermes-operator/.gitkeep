@@ -1,0 +1,21 @@
+# hermes-operator chart — exploratory placeholder (TBA)
+#
+# Not committed to yet. The recommended way to run a Hermes "team" today is
+# an ArgoCD ApplicationSet over ../hermes-agent/ (roster as data, this chart
+# as the template) — see ../../docs/teams.md.
+#
+# A dedicated operator (Agent / AgentTeam CRDs, developed in a separate,
+# external repo) would only be worth building if that ApplicationSet's
+# templating-only model falls short in practice, e.g.:
+#   - a single object reporting team-wide status
+#     (kubectl get agentteam <name> -> "3/4 members healthy")
+#   - admission-time validation of team-level invariants
+#     (e.g. "every member shares one DISCORD_HOME_CHANNEL")
+#   - active reconciliation / state machines (e.g. role reassignment on
+#     member failure)
+#
+# If/when that happens, this directory would host the chart that installs
+# the operator (CRDs + controller + RBAC) — the controller itself would live
+# in its own repo.
+#
+# See ../../README.md#roadmap. Nothing here yet.
