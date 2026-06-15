@@ -89,6 +89,13 @@ jobs:
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
+      # Optional live Discord verification: when a real bot token (secret) and a
+      # home channel id (variable) are present on trusted runs, the workload is
+      # installed with Discord enabled and, after the chart test passes, sends a
+      # one-shot "CI healthy" message via `hermes send` (best-effort, non-gating).
+      # Absent on fork PRs (secrets are not exposed there) → the step is skipped.
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+      DISCORD_HOME_CHANNEL: ${{ vars.DISCORD_HOME_CHANNEL }}
     steps:
       - uses: actions/checkout@v6
 
@@ -98,6 +105,16 @@ jobs:
 
       - name: Install chart (NVIDIA NIM if a key is available, else placeholder)
         run: |
+          # When a Discord bot token is available (trusted runs), enable Discord
+          # on the workload so the post-test step can do a live `hermes send`.
+          DISCORD_ARGS=""
+          if [ -n "$DISCORD_BOT_TOKEN" ]; then
+            echo "DISCORD_BOT_TOKEN present — enabling Discord on the workload"
+            DISCORD_ARGS="--set-string env.DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN"
+            if [ -n "$DISCORD_HOME_CHANNEL" ]; then
+              DISCORD_ARGS="$DISCORD_ARGS --set extraEnv[0].name=DISCORD_HOME_CHANNEL --set-string extraEnv[0].value=$DISCORD_HOME_CHANNEL"
+            fi
+          fi
           if [ -n "$NVIDIA_API_KEY" ]; then
             echo "Installing with NVIDIA NIM provider, model pool: $CI_MODELS"
             helm upgrade --install hermes-agent charts/hermes-agent \
@@ -109,12 +126,14 @@ jobs:
               --set tests.chat.enabled=true \
               --set tests.chat.failOnError=true \
               --set "tests.chat.models={$CI_MODELS}" \
+              $DISCORD_ARGS \
               --wait --timeout 5m
           else
             echo "No NVIDIA_API_KEY secret — installing with placeholder (doctor-only)"
             helm upgrade --install hermes-agent charts/hermes-agent \
               --namespace hermes-agent --create-namespace \
               --set-string env.OPENAI_API_KEY=sk-test \
+              $DISCORD_ARGS \
               --wait --timeout 5m
           fi
 
@@ -148,6 +167,20 @@ jobs:
 
           echo "test job result: $result"
           [ "$result" = success ]
+
+      - name: Notify Discord that chart CI is healthy (trusted runs with a token)
+        # Live end-to-end Discord verification + the "CI healthy" ping itself:
+        # exec into the running workload and use `hermes send` (no gateway loop
+        # needed for bot-token platforms). Best-effort — a Discord hiccup must
+        # not redden CI, so this never gates.
+        if: success() && env.DISCORD_BOT_TOKEN != ''
+        continue-on-error: true
+        run: |
+          pod=$(kubectl get pod -n hermes-agent -l app.kubernetes.io/name=hermes-agent \
+            -o jsonpath='{.items[0].metadata.name}')
+          msg="✅ hermes-agent chart CI passed — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} (run ${GITHUB_RUN_ID})"
+          echo "Sending Discord notification via workload pod: $pod"
+          kubectl exec -n hermes-agent "$pod" -- hermes send --to discord "$msg"
 
       - name: Show test logs (incl. chat round-trip transcript)
         if: always()
