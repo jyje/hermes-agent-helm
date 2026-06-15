@@ -9,6 +9,7 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 
 | Application file | Mirrors | Required Secret |
 | --- | --- | --- |
+| [`hermes-agent.yaml`](hermes-agent.yaml) | chart defaults (`values.yaml`) | `hermes-agent-secrets` (`OPENAI_API_KEY`) |
 | [`hermes-agent-openai.yaml`](hermes-agent-openai.yaml) | `values-openai.yaml` | `hermes-agent-openai-secrets` (`OPENAI_API_KEY`) |
 | [`hermes-agent-anthropic.yaml`](hermes-agent-anthropic.yaml) | `values-anthropic.yaml` | `hermes-agent-anthropic-secrets` (`ANTHROPIC_API_KEY`) |
 | [`hermes-agent-gemini.yaml`](hermes-agent-gemini.yaml) | `values-gemini.yaml` | `hermes-agent-gemini-secrets` (`GOOGLE_API_KEY`) |
@@ -18,6 +19,9 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-anthropic-and-discord.yaml`](hermes-agent-anthropic-and-discord.yaml) | `values-anthropic-and-discord.yaml` | `hermes-agent-anthropic-discord-secrets` (`ANTHROPIC_API_KEY`, `DISCORD_BOT_TOKEN`) |
 | [`hermes-agent-openai-and-telegram.yaml`](hermes-agent-openai-and-telegram.yaml) | `values-openai-and-telegram.yaml` | `hermes-agent-openai-telegram-secrets` (`OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`) |
 | [`hermes-agent-nvidia-nim-and-discord.yaml`](hermes-agent-nvidia-nim-and-discord.yaml) | `values-nvidia-nim-and-discord.yaml` | `hermes-agent-nim-discord-secrets` (`NVIDIA_API_KEY`, `DISCORD_BOT_TOKEN`) |
+
+`hermes-agent.yaml` is the bare-minimum starting point — pure chart defaults
+plus the secret wiring; copy it and add a `valuesObject` to customize.
 
 `hermes-agent-litellm-k8s.yaml` is the most complete example: it demonstrates
 the full GitOps pattern (SealedSecret via `extraResources` + `extraEnvFrom` +

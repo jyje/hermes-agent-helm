@@ -1,0 +1,41 @@
+# The simplest starting point: pure chart defaults (OpenAI api.openai.com,
+# gpt-4o-mini — see charts/hermes-agent/values.yaml), only wiring the
+# required secret via extraEnvFrom. Copy this file and add a valuesObject
+# (see the other hermes-agent-*.yaml examples) to customize provider,
+# messengers, persistence, etc.
+#
+# Before applying, create the Secret this Application references:
+#   kubectl create secret generic hermes-agent-secrets -n hermes-agent \
+#     --from-literal=OPENAI_API_KEY='sk-<real>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # KEEP IT EQUAL TO spec.source.helm.releaseName below.
+  name: hermes-agent
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jyje/hermes-agent-helm
+    targetRevision: main
+    path: charts/hermes-agent
+    helm:
+      # MUST equal metadata.name (see examples/argocd/README.md).
+      releaseName: hermes-agent
+      valuesObject:
+        # Real key comes from the Secret via extraEnvFrom below; this
+        # placeholder is never used.
+        env:
+          OPENAI_API_KEY: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
