@@ -1,0 +1,79 @@
+# Mirrors charts/hermes-agent/values-litellm-k8s.yaml, PLUS the full GitOps
+# secret-delivery pattern: a SealedSecret (rendered via extraResources) that
+# the sealed-secrets controller decrypts into a Secret, referenced via
+# extraEnvFrom. Nothing here is a real secret — `encryptedData` below is a
+# placeholder; replace it with the output of `kubeseal` for YOUR cluster.
+#
+# Adjust providers.litellm.base_url to your LiteLLM Service name/namespace:
+#   http://<service>.<namespace>.svc.cluster.local:<port>/v1
+#
+#   kubeseal --raw --scope namespace-wide \
+#     --namespace hermes-agent --name hermes-agent-litellm-k8s-secrets \
+#     --from-file=OPENAI_API_KEY=<(printf '%s' 'sk-<your-litellm-proxy-key>')
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-agent-litellm-k8s
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jyje/hermes-agent-helm
+    targetRevision: main
+    path: charts/hermes-agent
+    helm:
+      releaseName: hermes-agent-litellm-k8s
+      valuesObject:
+        config:
+          # Register the in-cluster proxy as a custom OpenAI-compatible
+          # provider. The key ("litellm") is the provider id referenced by
+          # model.provider below.
+          providers:
+            litellm:
+              # DUMMY — service "litellm" in namespace "litellm", default chart port.
+              base_url: http://litellm.litellm.svc.cluster.local:4000/v1
+              key_env: OPENAI_API_KEY      # env var that holds the proxy key
+              discover_models: true        # populate the model picker from /v1/models
+          model:
+            provider: litellm
+            # Must match a model name exposed by the proxy (see /v1/models).
+            default: openai/gpt-oss-120b
+          terminal:
+            backend: local
+        # Keep the chart's own Secret a harmless placeholder; the SealedSecret
+        # below decrypts into hermes-agent-litellm-k8s-secrets, and
+        # extraEnvFrom (applied AFTER the chart's own envFrom) overrides it.
+        env:
+          OPENAI_API_KEY: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-litellm-k8s-secrets
+        # Persistence on a non-default StorageClass (e.g. a Raspberry Pi
+        # cluster's local-path / hostpath provisioner).
+        persistence:
+          storageClass: local-path
+          size: 5Gi
+        extraResources:
+          - apiVersion: bitnami.com/v1alpha1
+            kind: SealedSecret
+            metadata:
+              name: hermes-agent-litellm-k8s-secrets
+              namespace: "{{ .Release.Namespace }}"
+            spec:
+              encryptedData:
+                # Replace with `kubeseal` output for YOUR cluster — see header.
+                OPENAI_API_KEY: AgDUMMY_replace_with_kubeseal_output==
+              template:
+                metadata:
+                  name: hermes-agent-litellm-k8s-secrets
+                  namespace: "{{ .Release.Namespace }}"
+                type: Opaque
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

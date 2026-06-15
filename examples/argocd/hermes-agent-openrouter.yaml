@@ -1,0 +1,44 @@
+# Mirrors charts/hermes-agent/values-openrouter.yaml: OpenRouter (one key,
+# many upstream models).
+#
+# Before applying, create the Secret this Application references:
+#   kubectl create secret generic hermes-agent-openrouter-secrets -n hermes-agent \
+#     --from-literal=OPENROUTER_API_KEY='sk-or-<real>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-agent-openrouter
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jyje/hermes-agent-helm
+    targetRevision: main
+    path: charts/hermes-agent
+    helm:
+      releaseName: hermes-agent-openrouter
+      valuesObject:
+        config:
+          model:
+            provider: openrouter
+            # OpenRouter model id (vendor/model) — see https://openrouter.ai/models.
+            default: openai/gpt-4o-mini
+          terminal:
+            backend: local
+        env:
+          # Real key comes from the Secret via extraEnvFrom below.
+          OPENROUTER_API_KEY: "set-via-extraEnvFrom"
+          # Unused by the openrouter provider; overrides the chart's OpenAI placeholder.
+          OPENAI_API_KEY: "unused"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-openrouter-secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

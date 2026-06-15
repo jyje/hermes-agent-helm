@@ -3,12 +3,31 @@
 These Application manifests deploy `hermes-agent` via ArgoCD safely —
 including **multiple instances in the same namespace without collisions**.
 
-The bundled `valuesObject` mirrors
-[`values-litellm-k8s.yaml`](../../charts/hermes-agent/values-litellm-k8s.yaml)
-(LiteLLM proxy in the same cluster). Swap it for the contents of any other
+Each file mirrors the corresponding
 [`charts/hermes-agent/values-*.yaml`](../../charts/hermes-agent/README.md#more-examples)
-example — built-in providers (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA
-NIM), or the Discord/Telegram combos — to match your setup.
+example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
+
+| Application file | Mirrors | Required Secret |
+| --- | --- | --- |
+| [`hermes-agent-openai.yaml`](hermes-agent-openai.yaml) | `values-openai.yaml` | `hermes-agent-openai-secrets` (`OPENAI_API_KEY`) |
+| [`hermes-agent-anthropic.yaml`](hermes-agent-anthropic.yaml) | `values-anthropic.yaml` | `hermes-agent-anthropic-secrets` (`ANTHROPIC_API_KEY`) |
+| [`hermes-agent-gemini.yaml`](hermes-agent-gemini.yaml) | `values-gemini.yaml` | `hermes-agent-gemini-secrets` (`GOOGLE_API_KEY`) |
+| [`hermes-agent-openrouter.yaml`](hermes-agent-openrouter.yaml) | `values-openrouter.yaml` | `hermes-agent-openrouter-secrets` (`OPENROUTER_API_KEY`) |
+| [`hermes-agent-litellm.yaml`](hermes-agent-litellm.yaml) | `values-litellm.yaml` | `hermes-agent-litellm-secrets` (`OPENAI_API_KEY`, proxy key) |
+| [`hermes-agent-litellm-k8s.yaml`](hermes-agent-litellm-k8s.yaml) | `values-litellm-k8s.yaml` | `hermes-agent-litellm-k8s-secrets` via **SealedSecret** (`extraResources`) |
+| [`hermes-agent-anthropic-and-discord.yaml`](hermes-agent-anthropic-and-discord.yaml) | `values-anthropic-and-discord.yaml` | `hermes-agent-anthropic-discord-secrets` (`ANTHROPIC_API_KEY`, `DISCORD_BOT_TOKEN`) |
+| [`hermes-agent-openai-and-telegram.yaml`](hermes-agent-openai-and-telegram.yaml) | `values-openai-and-telegram.yaml` | `hermes-agent-openai-telegram-secrets` (`OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`) |
+| [`hermes-agent-nvidia-nim-and-discord.yaml`](hermes-agent-nvidia-nim-and-discord.yaml) | `values-nvidia-nim-and-discord.yaml` | `hermes-agent-nim-discord-secrets` (`NVIDIA_API_KEY`, `DISCORD_BOT_TOKEN`) |
+
+`hermes-agent-litellm-k8s.yaml` is the most complete example: it demonstrates
+the full GitOps pattern (SealedSecret via `extraResources` + `extraEnvFrom` +
+non-default `persistence.storageClass`). The others use a plain Secret created
+out-of-band (see each file's header comment for the exact `kubectl create
+secret` command).
+
+All Applications target `destination.namespace: hermes-agent` and use distinct
+`releaseName`s — they can be applied together in the same namespace without
+colliding (see below).
 
 ## The one rule: unique `fullname` per instance
 
@@ -38,23 +57,27 @@ for tracking, switch it to annotation tracking:
 
 ## Secrets (do not commit keys)
 
-Keep the chart's `env.OPENAI_API_KEY` as a placeholder and inject the real key
-from a Secret created out-of-band (or via sealed-secrets / external-secrets):
+Keep the chart's `env.<KEY>` values as placeholders and inject the real
+key(s) from a Secret created out-of-band (or via sealed-secrets /
+external-secrets). Each Application's header comment has the exact command,
+e.g.:
 
 ```bash
 kubectl create namespace hermes-agent
-kubectl create secret generic hermes-agent-provider-key -n hermes-agent \
+kubectl create secret generic hermes-agent-openai-secrets -n hermes-agent \
   --from-literal=OPENAI_API_KEY='sk-<your-key>'
 ```
 
 `extraEnvFrom` references that Secret; since it is applied after the chart's own
-env Secret, its `OPENAI_API_KEY` wins.
+env Secret, its values win.
 
 ## Apply
 
 ```bash
-kubectl apply -f examples/argocd/hermes-agent.application.yaml
+kubectl apply -f examples/argocd/hermes-agent-openai.yaml
 ```
+
+(Swap in any other file from the table above.)
 
 ## Multiple instances in the same namespace
 

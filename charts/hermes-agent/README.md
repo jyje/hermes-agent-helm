@@ -244,8 +244,8 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See
-[`examples/argocd/`](../../examples/argocd/) — its `valuesObject` mirrors
-`values-litellm-k8s.yaml` and can be swapped for any of the examples above.
+[`examples/argocd/`](../../examples/argocd/) — it has one Application manifest
+per example above, each with its `extraEnvFrom`-based secret pattern.
 
 ## Values
 
