@@ -22,7 +22,10 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-nvidia-nim-and-discord.yaml`](hermes-agent-nvidia-nim-and-discord.yaml) | `values-nvidia-nim-and-discord.yaml` | `hermes-agent-nim-discord-secrets` (`NVIDIA_API_KEY`, `DISCORD_BOT_TOKEN`) |
 
 `hermes-agent.yaml` is the bare-minimum starting point — pure chart defaults
-plus the secret wiring; copy it and add a `valuesObject` to customize.
+plus the secret wiring; copy it and add a `valuesObject` to customize. It also
+shows the **OCI registry** source form (`repoURL`/`chart`/`targetRevision`
+pointing at `ghcr.io`) instead of Git — all other examples use the Git form
+(`repoURL`/`targetRevision`/`path`); swap freely between the two.
 
 `hermes-agent-litellm-k8s.yaml` is the most complete example: it demonstrates
 the full GitOps pattern (SealedSecret via `extraResources` + `extraEnvFrom` +

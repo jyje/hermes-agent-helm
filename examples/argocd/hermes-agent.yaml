@@ -4,6 +4,12 @@
 # (see the other hermes-agent-*.yaml examples) to customize provider,
 # messengers, persistence, etc.
 #
+# Pulls the chart from the OCI registry (ghcr.io) instead of Git — see
+# examples/helm/README.md for the equivalent `helm` CLI invocation. ArgoCD
+# must have this OCI registry registered as a repository first
+# (Settings > Repositories, type "helm", enableOCI: true; no credentials
+# needed for this public chart). Bump targetRevision to track new releases.
+#
 # Before applying, create the Secret this Application references:
 #   kubectl create secret generic hermes-agent-secrets -n hermes-agent \
 #     --from-literal=OPENAI_API_KEY='sk-<real>'
@@ -16,9 +22,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/jyje/hermes-agent-helm
-    targetRevision: main
-    path: charts/hermes-agent
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    targetRevision: 0.1.1
     helm:
       # MUST equal metadata.name (see examples/argocd/README.md).
       releaseName: hermes-agent
