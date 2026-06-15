@@ -18,7 +18,7 @@ config:
     # Built-in provider key for NVIDIA NIM (build.nvidia.com).
     provider: nvidia
     # NIM model id — pick one your account can reach from build.nvidia.com.
-    default: meta/llama-3.1-8b-instruct
+    default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
   terminal:
     backend: local
 
