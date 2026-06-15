@@ -1,11 +1,10 @@
 # hermes-agent
 
-Community-powered Hermes Agent on Kubernetes. This chart deploys the Hermes Agent,
-a versatile agent framework that can be configurable for any LLM provider Hermes
-supports (OpenAI, Anthropic, Gemini, OpenRouter, or any OpenAI-compatible proxy
-such as LiteLLM). config.yaml is managed via ConfigMap and the .env via Secret.
+👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
+Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
+
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
 
 ## Overview
 
@@ -19,7 +18,8 @@ It deploys:
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
   (no inbound port — the gateway is outbound); for `deployment`: a standalone
-  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard
+  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard,
+  and an **optional** Ingress in front of it (`ingress.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 Hermes supports many LLM providers via **built-in provider keys**
@@ -30,7 +30,8 @@ driven by `values.yaml` — point it at a hosted API or an in-cluster proxy.
 
 > The provider key `openai` is **not** valid in Hermes (it aliases to
 > OpenRouter). Use `openai-api` for api.openai.com, or a custom provider for a
-> proxy — see `values.example.yaml`.
+> proxy — see `values-litellm.yaml` / `values-litellm-k8s.yaml` in
+> ["More examples"](#more-examples).
 
 The agent's command execution uses the **`local` backend** (commands run inside
 the pod; the pod is the sandbox). The `docker` backend is intentionally **not
@@ -91,8 +92,9 @@ Hermes talks to. (For chat platforms, see
 
 - **Custom OpenAI-compatible provider** (LiteLLM, vLLM, LM Studio, …) — register
   it under `config.providers.<id>` (`base_url`, `key_env`) and point
-  `config.model.provider` at that `<id>`. See
-  `charts/hermes-agent/values.example.yaml` for a full LiteLLM example.
+  `config.model.provider` at that `<id>`. See `values-litellm.yaml` (remote
+  proxy) or `values-litellm-k8s.yaml` (in-cluster) in
+  ["More examples"](#more-examples).
 
 ### Messenger integrations (Telegram / Discord)
 
@@ -104,9 +106,13 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 **auto-enable** the platform — no `config.yaml` change required.
 
 > **Verification status:** the chart renders the right Secret/env and the agent
-> picks the platform up, but a live end-to-end Discord/Telegram round-trip is
-> **not yet verified in CI** (placeholder — only the NVIDIA NIM LLM round-trip
-> is). Provide a real bot token to try it in your own cluster.
+> picks the platform up. On trusted CI runs where the `DISCORD_BOT_TOKEN` and
+> `DISCORD_HOME_CHANNEL` secrets are configured, CI does a full live
+> round-trip — `hermes send` to that channel, then reads the channel back via
+> the Discord API to confirm the message arrived — and **fails if it can't be
+> verified** (the bot needs *View Channel* + *Read Message History*). Fork PRs
+> skip it since secrets aren't exposed. Telegram is still placeholder-only.
+> Provide a real bot token to try either in your own cluster.
 
 - **Discord** — create a bot at the
   [Discord Developer Portal](https://discord.com/developers/applications),
@@ -134,8 +140,8 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
   `env.TELEGRAM_BOT_TOKEN` (optionally `TELEGRAM_HOME_CHANNEL`,
   `TELEGRAM_ALLOWED_USERS` via `extraEnv`).
 
-See `charts/hermes-agent/values.example.yaml` for a copy-pasteable messenger
-block.
+See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
+["More examples"](#more-examples) for copy-pasteable messenger blocks.
 
 ## Test
 
@@ -215,52 +221,86 @@ the full upstream config (which would drift across Hermes versions).
   For GitOps, avoid committing real keys in `env` — instead deploy a
   `SealedSecret` (or similar) via `extraResources` and reference the Secret it
   produces with `extraEnvFrom` (applied after the chart's own Secret, so it
-  wins). See `values.example.yaml`.
+  wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
+  SealedSecret + `extraEnvFrom` GitOps example.
+- **Dashboard Ingress** — the management dashboard (`service.port`, default
+  9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
+  warns **exposes API keys on the network**. Set `service.enabled: true` and
+  `ingress.enabled: true` only behind authentication (e.g. an
+  oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
+  `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
-See `charts/hermes-agent/values.example.yaml` for a complete example (custom
-OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
+## More examples
+
+Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
+(e.g. a Raspberry Pi / arm64 k3s cluster). All secrets in these files are
+**dummy placeholders** — override them at install time with `--set-string` (see
+the command in each file's header comment), or via the SealedSecret +
+`extraEnvFrom` pattern above.
+
+| File | Model provider | Extras |
+| --- | --- | --- |
+| [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
+| [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
+| [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
+| [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
+| [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | — |
+| [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
+| [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
+| [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
+| [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
+| [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
+
+Deploying via ArgoCD instead of plain `helm`/`-f`? See
+[`examples/argocd/`](../../examples/argocd/) — it has one Application manifest
+per example above, each with its `extraEnvFrom`-based secret pattern.
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` |  |
-| args[0] | string | `"gateway"` |  |
-| args[1] | string | `"run"` |  |
+| affinity | object | `{}` | Affinity rules for Pod scheduling. |
+| args | list | `["gateway","run"]` | Arguments appended to `command`. |
 | bootstrap.enabled | bool | `true` | Seed the rendered config.yaml into HERMES_HOME via an init container. |
 | bootstrap.overwrite | bool | `true` | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). |
-| command[0] | string | `"hermes"` |  |
+| command | list | `["hermes"]` | Container entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart loop. So run the long-lived gateway explicitly; inside the s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on crash). Append `--no-supervise` only if you want to bypass s6. |
 | config | object | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` | ------------------------------------------------------------------------- |
 | controller | object | `{"type":"deployment"}` | ------------------------------------------------------------------------- |
 | controller.type | string | `"deployment"` | Workload kind: "deployment" or "statefulset". |
 | env | object | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` | ------------------------------------------------------------------------- |
 | extraEnv | list | `[]` | Plain (non-secret) env vars injected directly on the container. |
 | extraEnvFrom | list | `[]` | Extra envFrom sources (reference existing ConfigMaps/Secrets). |
-| extraResources | list | `[]` | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see values.example.yaml).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see values.example.yaml). |
+| extraResources | list | `[]` | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). |
 | fullnameOverride | string | `""` | Fully override the generated resource name (release-name-chart). |
-| image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"nousresearch/hermes-agent"` |  |
-| image.tag | string | `""` |  |
-| imagePullSecrets | list | `[]` |  |
+| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
+| image.repository | string | `"nousresearch/hermes-agent"` | Container image repository (multi-arch: amd64 + arm64). |
+| image.tag | string | `""` | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. |
+| imagePullSecrets | list | `[]` | Image pull secrets for private registries. |
+| ingress.annotations | object | `{}` | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). |
+| ingress.className | string | `""` | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. |
+| ingress.enabled | bool | `false` | Create an Ingress resource. |
+| ingress.hosts | list | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` | Host/path rules, all routed to the Service port above. |
+| ingress.tls | list | `[]` | TLS configuration for the Ingress. |
 | nameOverride | string | `""` | Override the chart name used in resource names. |
-| nodeSelector | object | `{}` |  |
+| nodeSelector | object | `{}` | Node selector for Pod scheduling. |
 | persistence | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"mountPath":"/opt/data","size":"5Gi","storageClass":""}` | ------------------------------------------------------------------------- |
 | persistence.storageClass | string | `""` | StorageClass for the volumeClaimTemplate. Empty = cluster default. |
-| podAnnotations | object | `{}` |  |
-| podLabels | object | `{}` |  |
-| podSecurityContext | object | `{}` |  |
-| probes.liveness | object | `{}` |  |
-| probes.readiness | object | `{}` |  |
+| podAnnotations | object | `{}` | Annotations to add to the Pod. |
+| podLabels | object | `{}` | Labels to add to the Pod. |
+| podSecurityContext | object | `{}` | Pod-level securityContext. Left empty by default to stay compatible with the image's s6-overlay init (which starts as root and drops privileges itself). Add hardening here once verified for your environment. |
+| probes | object | `{"liveness":{},"readiness":{}}` | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 |
+| probes.liveness | object | `{}` | Liveness probe spec. Empty = no liveness probe. |
+| probes.readiness | object | `{}` | Readiness probe spec. Empty = no readiness probe. |
 | replicaCount | int | `1` | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. |
-| resources.limits.cpu | string | `"1"` |  |
-| resources.limits.memory | string | `"1Gi"` |  |
-| resources.requests.cpu | string | `"100m"` |  |
-| resources.requests.memory | string | `"256Mi"` |  |
-| securityContext | object | `{}` |  |
+| resources | object | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). |
+| securityContext | object | `{}` | Container-level securityContext. Same caveat as `podSecurityContext` above. |
 | service | object | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` | ------------------------------------------------------------------------- |
+| service.annotations | object | `{}` | Annotations to add to the Service. |
 | service.enabled | bool | `false` | Create a ClusterIP Service (only useful if you expose the dashboard). |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `true` |  |
+| service.port | int | `9119` | Service port (and the dashboard's container port). |
+| service.type | string | `"ClusterIP"` | Service type. |
+| serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount. |
+| serviceAccount.create | bool | `true` | Create a ServiceAccount for the pod. |
 | serviceAccount.name | string | `""` | Name to use; generated from fullname when empty. |
 | tests | object | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | ------------------------------------------------------------------------- |
 | tests.chat | object | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` | ------------------------------------------------------------------------- |
@@ -272,7 +312,10 @@ OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
 | tests.chat.timeout | int | `180` | Seconds to allow each round-trip attempt to run before timing out. |
 | tests.doctorStrict | bool | `false` | When true, `hermes doctor` issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes --version, seeded config) fail. |
 | tests.doctorTimeout | int | `120` | Seconds to allow `hermes doctor` to run before timing out. |
-| tolerations | list | `[]` |  |
+| tests.enabled | bool | `true` | Render the chart test Job. |
+| tests.image | object | `{"pullPolicy":"","repository":"","tag":""}` | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). |
+| tests.resources | object | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource requests/limits for the test Job's container. |
+| tolerations | list | `[]` | Tolerations for Pod scheduling. |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
