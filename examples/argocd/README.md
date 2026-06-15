@@ -171,8 +171,9 @@ kubectl apply -f examples/argocd/hermes-agent-nvidia-nim-and-discord-sealedsecre
 # the controller should decrypt the SealedSecret into a Secret:
 kubectl get sealedsecret,secret -n hermes-agent hermes-agent-nim-discord-sealedsecret-secrets
 
-# and the pod should pick up both keys via extraEnvFrom:
-kubectl exec -n hermes-agent deploy/hermes-agent-nvidia-nim-and-discord-sealedsecret -- \
+# and the pod should pick up both keys via extraEnvFrom (fullnameOverride:
+# hermes-agent keeps resource names short — see the file's valuesObject):
+kubectl exec -n hermes-agent deploy/hermes-agent -- \
   env | grep -E '^(NVIDIA_API_KEY|DISCORD_BOT_TOKEN)='
 ```
 
