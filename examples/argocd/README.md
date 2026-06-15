@@ -11,6 +11,7 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | --- | --- | --- |
 | [`hermes-agent.yaml`](hermes-agent.yaml) | chart defaults (`values.yaml`) | `hermes-agent-secrets` (`OPENAI_API_KEY`) |
 | [`hermes-agent-openai.yaml`](hermes-agent-openai.yaml) | `values-openai.yaml` | `hermes-agent-openai-secrets` (`OPENAI_API_KEY`) |
+| [`hermes-agent-openai-sealedsecret.yaml`](hermes-agent-openai-sealedsecret.yaml) | `values-openai.yaml` + GitOps | `hermes-agent-openai-sealedsecret-secrets` via **SealedSecret** (`extraResources`) |
 | [`hermes-agent-anthropic.yaml`](hermes-agent-anthropic.yaml) | `values-anthropic.yaml` | `hermes-agent-anthropic-secrets` (`ANTHROPIC_API_KEY`) |
 | [`hermes-agent-gemini.yaml`](hermes-agent-gemini.yaml) | `values-gemini.yaml` | `hermes-agent-gemini-secrets` (`GOOGLE_API_KEY`) |
 | [`hermes-agent-openrouter.yaml`](hermes-agent-openrouter.yaml) | `values-openrouter.yaml` | `hermes-agent-openrouter-secrets` (`OPENROUTER_API_KEY`) |
