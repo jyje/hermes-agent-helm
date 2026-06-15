@@ -99,6 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
         run: |
           new="${{ steps.ver.outputs.new }}"
+          old="$(python3 -c "import json;print(json.load(open('$OUT/context.json'))['bump_from'])")"
           sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
           python3 .github/scripts/release/update-artifacthub-changes.py \
             charts/hermes-agent/Chart.yaml "$OUT/advice.json"
@@ -106,6 +107,8 @@ jobs:
           # Regenerate the chart README so its version badge matches Chart.yaml —
           # otherwise validate-chart.yaml's docs-drift check fails on the release PR.
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+          # Keep the OCI install-example versions in examples/helm/README.md in sync.
+          sed -i "s/${old}/${new}/g" examples/helm/README.md
 
       - name: Build contributors block
         uses: actions/github-script@v9
@@ -165,6 +168,7 @@ jobs:
           add-paths: |
             charts/hermes-agent/Chart.yaml
             charts/hermes-agent/README.md
+            examples/helm/README.md
             CHANGELOG.md
           commit-message: "🔧 chore(release): propose v${{ steps.ver.outputs.new }}"
           title: "🚀 Release v${{ steps.ver.outputs.new }}"

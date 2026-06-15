@@ -53,10 +53,12 @@ as a **Secret**.
   controls re-seed (true) vs seed-if-absent (false). Secrets go in via `envFrom`
   (env wins over config.yaml), not a `.env` file. Never try to reproduce the
   full upstream config in the chart.
-- **Environment-specific config lives in `charts/hermes-agent/values.example.yaml`**
-  (a sample setup: a custom OpenAI-compatible provider such as LiteLLM, plus
-  persistent storage with a non-default StorageClass). Per-environment values
-  do not belong in the chart defaults.
+- **Environment-specific config lives in `charts/hermes-agent/values-*.yaml`**
+  (ready-to-adapt examples: every built-in provider, Discord/Telegram combos,
+  and a custom OpenAI-compatible provider such as LiteLLM in/out of cluster —
+  see the chart README's "More examples" table) and in `examples/argocd/`
+  (the GitOps/SealedSecret + `extraEnvFrom` + persistence pattern). Per-environment
+  values do not belong in the chart defaults.
 
 ## Workflow
 

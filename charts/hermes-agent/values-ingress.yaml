@@ -1,0 +1,51 @@
+# values-ingress.yaml
+#
+# Exposes the Hermes management dashboard (service.port, default 9119) via an
+# Ingress. The upstream warns this dashboard EXPOSES API KEYS on the network,
+# so it MUST sit behind authentication — this example uses nginx's basic-auth
+# annotations. Adjust `ingressClassName` / annotations for your controller
+# (Traefik, HAProxy, ...).
+#
+# Dummy key — override at install time. The basic-auth Secret referenced by
+# the annotation below must be created separately:
+#
+#   htpasswd -cb /tmp/auth admin '<your-password>'
+#   kubectl create secret generic hermes-agent-dashboard-auth -n hermes-agent \
+#     --from-file=auth=/tmp/auth
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-ingress.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-<real>' --wait
+
+config:
+  model:
+    provider: openai-api
+    default: gpt-4o-mini
+  terminal:
+    backend: local
+
+env:
+  OPENAI_API_KEY: "sk-DUMMY_replace_me_000000000000000000000000"
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9119
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: hermes-agent-dashboard-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Hermes Agent Dashboard"
+  hosts:
+    - host: hermes-agent.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: hermes-agent-tls
+  #    hosts:
+  #      - hermes-agent.example.com

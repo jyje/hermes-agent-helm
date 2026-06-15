@@ -1,0 +1,46 @@
+# Mirrors charts/hermes-agent/values-openai.yaml: OpenAI (api.openai.com).
+#
+# Before applying, create the Secret this Application references:
+#   kubectl create secret generic hermes-agent-openai-secrets -n hermes-agent \
+#     --from-literal=OPENAI_API_KEY='sk-<real>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # KEEP IT EQUAL TO spec.source.helm.releaseName below.
+  name: hermes-agent-openai
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
+    helm:
+      # MUST equal metadata.name (see examples/argocd/README.md).
+      releaseName: hermes-agent-openai
+      valuesObject:
+        config:
+          model:
+            # NOTE: the built-in key is `openai-api` (api.openai.com).
+            # `openai` is NOT valid here — it aliases to OpenRouter.
+            provider: openai-api
+            default: gpt-4o-mini
+          terminal:
+            backend: local
+        # Real key comes from the Secret via extraEnvFrom below; this
+        # placeholder is never used.
+        env:
+          OPENAI_API_KEY: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-openai-secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

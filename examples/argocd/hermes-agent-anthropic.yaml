@@ -1,0 +1,45 @@
+# Mirrors charts/hermes-agent/values-anthropic.yaml: Anthropic (Claude).
+#
+# Before applying, create the Secret this Application references:
+#   kubectl create secret generic hermes-agent-anthropic-secrets -n hermes-agent \
+#     --from-literal=ANTHROPIC_API_KEY='sk-ant-<real>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-agent-anthropic
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
+    helm:
+      releaseName: hermes-agent-anthropic
+      valuesObject:
+        config:
+          model:
+            provider: anthropic
+            # A current Claude model id — see https://docs.anthropic.com for
+            # the list (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).
+            default: claude-sonnet-4-6
+          terminal:
+            backend: local
+        env:
+          # Real key comes from the Secret via extraEnvFrom below.
+          ANTHROPIC_API_KEY: "set-via-extraEnvFrom"
+          # Unused by the anthropic provider; overrides the chart's OpenAI placeholder.
+          OPENAI_API_KEY: "unused"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-anthropic-secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

@@ -22,14 +22,18 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 
-# environment-specific (custom OpenAI-compatible provider, e.g. LiteLLM)
+# environment-specific (pick a ready-made example, e.g. LiteLLM, Anthropic+Discord, ...)
 helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
-  -f charts/hermes-agent/values.example.yaml \
+  -f charts/hermes-agent/values-litellm-k8s.yaml \
   --set-string env.OPENAI_API_KEY='sk-<your-key>' --wait
 
 helm test hermes-agent -n hermes-agent
 ```
+
+> See [`charts/hermes-agent/README.md`](../../charts/hermes-agent/README.md#more-examples)
+> for the full table of `values-*.yaml` examples (providers, Discord/Telegram,
+> LiteLLM).
 
 > Release name `hermes-agent` (== chart name) keeps resources clean
 > (`hermes-agent-0`, not `hermes-agent-hermes-agent-0`).
@@ -44,13 +48,13 @@ form Artifact Hub lists.
 ```bash
 # public chart: no login needed to pull
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.0.1 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.1.1 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 
 # with an env-specific values file (download or keep your own)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.0.1 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.1.1 \
   --namespace hermes-agent --create-namespace \
   -f my-values.yaml --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -58,8 +62,8 @@ helm upgrade --install hermes-agent \
 Inspect before installing:
 
 ```bash
-helm show values oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.0.1
-helm show readme oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.0.1
+helm show values oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.1.1
+helm show readme oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.1.1
 ```
 
 If the package is private, log in first:
@@ -99,7 +103,7 @@ kubectl delete sts "$RELEASE" -n "$NS" --cascade=orphan
 
 # 3) upgrade to the new chart, pinning nameOverride to the old name
 helm upgrade --install "$RELEASE" ./charts/hermes-agent -n "$NS" \
-  -f charts/hermes-agent/values.example.yaml \
+  -f charts/hermes-agent/values-litellm-k8s.yaml \
   --set nameOverride="$RELEASE" \
   --set-string env.OPENAI_API_KEY='sk-<your-key>'
 
@@ -126,7 +130,7 @@ kubectl create secret generic hermes-agent-provider-key -n hermes-agent \
   --from-literal=OPENAI_API_KEY='sk-<your-key>'
 
 helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
-  --version 0.0.1 -n hermes-agent --create-namespace \
+  --version 0.1.1 -n hermes-agent --create-namespace \
   --set 'extraEnvFrom[0].secretRef.name=hermes-agent-provider-key'
 ```
 
@@ -141,14 +145,14 @@ helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-
 
 ```bash
 # 1) package (also runs docs + lint via the Makefile target)
-make package                      # -> dist/hermes-agent-0.0.1.tgz
+make package                      # -> dist/hermes-agent-0.1.1.tgz
 
 # 2) login to ghcr (PAT needs write:packages)
 echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u jyje --password-stdin
 
 # 3) push as an OCI artifact
-helm push dist/hermes-agent-0.0.1.tgz oci://ghcr.io/jyje/hermes-agent-helm
-#   -> ghcr.io/jyje/hermes-agent-helm/hermes-agent:0.0.1
+helm push dist/hermes-agent-0.1.1.tgz oci://ghcr.io/jyje/hermes-agent-helm
+#   -> ghcr.io/jyje/hermes-agent-helm/hermes-agent:0.1.1
 
 # (Makefile shortcut)
 make push
@@ -161,9 +165,10 @@ settings) so Artifact Hub and users can pull anonymously.
 
 1. artifacthub.io → Control Panel → Add → **Helm charts** repository.
 2. URL: `oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent`
-3. (Recommended) Verify ownership: push `artifacthub-repo.yml` (in this folder)
-   to the same OCI path so Artifact Hub can confirm you own the repo. The
-   `artifacthub.io/*` annotations already in `Chart.yaml` populate the listing.
+3. (Recommended) Verify ownership: push [`artifacthub-repo.yml`](../../artifacthub-repo.yml)
+   (repo root) to the same OCI path so Artifact Hub can confirm you own the
+   repo. The `artifacthub.io/*` annotations already in `Chart.yaml` populate
+   the listing.
 
 > Chart version vs app version: bump `version` in `Chart.yaml` for chart
 > changes; `appVersion` tracks the Hermes image tag (date-based, e.g.

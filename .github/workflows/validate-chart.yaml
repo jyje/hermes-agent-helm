@@ -35,7 +35,7 @@ jobs:
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
           echo "Changed files:"
           echo "$changed"
-          if echo "$changed" | grep -vE '^(charts/hermes-agent/(Chart\.yaml|README\.md)|CHANGELOG\.md)$' | grep -q .; then
+          if echo "$changed" | grep -vE '^(charts/hermes-agent/(Chart\.yaml|README\.md)|examples/helm/README\.md|CHANGELOG\.md)$' | grep -q .; then
             echo "functional=true" >> "$GITHUB_OUTPUT"
           else
             echo "functional=false" >> "$GITHUB_OUTPUT"

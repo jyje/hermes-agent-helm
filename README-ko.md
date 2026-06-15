@@ -77,9 +77,9 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
 
 ```
 charts/hermes-agent/                     # Helm 차트 (전체 값 테이블은 README 참고)
-charts/hermes-agent/values.example.yaml  # 예제 오버라이드 (커스텀 OpenAI 호환 제공자 + 영속성)
+charts/hermes-agent/values-*.yaml        # 즉시 사용 가능한 예제: 제공자별, Discord/Telegram, LiteLLM (차트 README "More examples" 참고)
 examples/helm/                           # Git 및 OCI(ghcr.io)에서 설치 + 배포 가이드
-examples/argocd/                         # ArgoCD Application + 안전한 다중 인스턴스 가이드
+examples/argocd/                         # ArgoCD Application 예제 (values-*.yaml별 1개) + GitOps/SealedSecret 패턴
 .github/workflows/                       # ci (lint + docs-drift + kind에서 실제 라운드트립) 및 release (버전 범프 -> 태그 -> ghcr OCI)
 CONTRIBUTING.md                          # 브랜치 모델 (dev/main + tags) + 버전 범프 기반 릴리즈
 AGENTS.md                                # 기여자용 설계 원칙 & 워크플로우
@@ -103,14 +103,16 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 helm test hermes-agent -n hermes-agent
 kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 
-# 또는 환경별 values 파일 사용
+# 또는 준비된 예제로 바로 시작 (제공자, Discord/Telegram, LiteLLM 등)
 helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
-  -f charts/hermes-agent/values.example.yaml \
-  --set-string env.OPENAI_API_KEY='sk-...' --wait
+  -f charts/hermes-agent/values-anthropic-and-discord.yaml \
+  --set-string env.ANTHROPIC_API_KEY='sk-ant-...' \
+  --set-string env.DISCORD_BOT_TOKEN='...' --wait
 ```
 
-전체 값 테이블과 제공자별 설치 예제는
+전체 값 테이블, "More examples" 표(모든 지원 제공자 + Discord/Telegram + LiteLLM용
+`values-*.yaml`), 그리고 [ArgoCD 예제](examples/argocd/)는
 [charts/hermes-agent/README.md](charts/hermes-agent/README.md)를 참고하세요.
 
 ## 개발
