@@ -103,9 +103,13 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 **auto-enable** the platform — no `config.yaml` change required.
 
 > **Verification status:** the chart renders the right Secret/env and the agent
-> picks the platform up, but a live end-to-end Discord/Telegram round-trip is
-> **not yet verified in CI** (placeholder — only the NVIDIA NIM LLM round-trip
-> is). Provide a real bot token to try it in your own cluster.
+> picks the platform up. On trusted CI runs where the `DISCORD_BOT_TOKEN` and
+> `DISCORD_HOME_CHANNEL` secrets are configured, CI does a full live
+> round-trip — `hermes send` to that channel, then reads the channel back via
+> the Discord API to confirm the message arrived — and **fails if it can't be
+> verified** (the bot needs *View Channel* + *Read Message History*). Fork PRs
+> skip it since secrets aren't exposed. Telegram is still placeholder-only.
+> Provide a real bot token to try either in your own cluster.
 
 - **Discord** — create a bot at the
   [Discord Developer Portal](https://discord.com/developers/applications),
