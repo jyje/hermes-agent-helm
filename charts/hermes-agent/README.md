@@ -249,6 +249,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
+| [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See
 [`examples/argocd/`](../../examples/argocd/) — it has one Application manifest
@@ -293,8 +294,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | probes.liveness | object | `{}` |  |
 | probes.readiness | object | `{}` |  |
 | replicaCount | int | `1` | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. |
-| resources.limits.cpu | string | `"1"` |  |
-| resources.limits.memory | string | `"1Gi"` |  |
+| resources.limits.cpu | string | `"2"` |  |
+| resources.limits.memory | string | `"2Gi"` |  |
 | resources.requests.cpu | string | `"100m"` |  |
 | resources.requests.memory | string | `"256Mi"` |  |
 | securityContext | object | `{}` |  |
