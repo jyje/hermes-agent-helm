@@ -7,20 +7,26 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
+  # -- Container image repository (multi-arch: amd64 + arm64).
   repository: nousresearch/hermes-agent
-  # Upstream uses DATE-based tags (e.g. v2026.6.5 == Hermes v0.16.0), plus
-  # `latest` / `main`. There is no semver tag. Multi-arch (amd64 + arm64).
+  # -- Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" ==
+  # Hermes v0.16.0), plus `latest` / `main`. There is no semver tag.
+  # Empty defaults to `.Chart.AppVersion`.
   tag: ""
+  # -- Image pull policy.
   pullPolicy: IfNotPresent
 
+# -- Image pull secrets for private registries.
 imagePullSecrets: []
 
-# Entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which
-# exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart
-# loop. So run the long-lived gateway explicitly; inside the s6-overlay image
-# `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on
-# crash). Append `--no-supervise` only if you want to bypass s6.
+# -- Container entrypoint. The image's DEFAULT CMD is the interactive `hermes`
+# chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing
+# a restart loop. So run the long-lived gateway explicitly; inside the
+# s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6
+# service (auto-restart on crash). Append `--no-supervise` only if you want to
+# bypass s6.
 command: ["hermes"]
+# -- Arguments appended to `command`.
 args: ["gateway", "run"]
 
 # ---------------------------------------------------------------------------
@@ -49,9 +55,11 @@ controller:
 replicaCount: 1
 
 serviceAccount:
+  # -- Create a ServiceAccount for the pod.
   create: true
   # -- Name to use; generated from fullname when empty.
   name: ""
+  # -- Annotations to add to the ServiceAccount.
   annotations: {}
 
 # ---------------------------------------------------------------------------
@@ -160,8 +168,11 @@ persistence:
 service:
   # -- Create a ClusterIP Service (only useful if you expose the dashboard).
   enabled: false
+  # -- Service type.
   type: ClusterIP
+  # -- Service port (and the dashboard's container port).
   port: 9119
+  # -- Annotations to add to the Service.
   annotations: {}
 
 # Ingress for the management dashboard. Requires `service.enabled: true` AND
@@ -172,39 +183,45 @@ service:
 ingress:
   # -- Create an Ingress resource.
   enabled: false
+  # -- IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default.
   className: ""
+  # -- Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules).
   annotations: {}
+  # -- Host/path rules, all routed to the Service port above.
   hosts:
     - host: hermes-agent.example.com
       paths:
         - path: /
           pathType: Prefix
+  # -- TLS configuration for the Ingress.
   tls: []
   #  - secretName: hermes-agent-tls
   #    hosts:
   #      - hermes-agent.example.com
 
-# Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64).
+# -- Container resource requests/limits. Lightweight defaults aimed at small
+# clusters (incl. Raspberry Pi / arm64).
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
+    cpu: "100m"
+    memory: "256Mi"
   limits:
-    cpu: "1"
-    memory: 1Gi
+    cpu: "2"
+    memory: "2Gi"
 
-# Pod/container security contexts are left empty by default to stay compatible
-# with the image's s6-overlay init (which starts as root and drops privileges
+# -- Pod-level securityContext. Left empty by default to stay compatible with
+# the image's s6-overlay init (which starts as root and drops privileges
 # itself). Add hardening here once verified for your environment.
 podSecurityContext: {}
 #  fsGroup: 1000
 
+# -- Container-level securityContext. Same caveat as `podSecurityContext` above.
 securityContext: {}
 #  allowPrivilegeEscalation: false
 #  capabilities:
 #    drop: [ALL]
 
-# Health probes. Empty = none. The image's s6-overlay already supervises and
+# -- Health probes. Empty = none. The image's s6-overlay already supervises and
 # auto-restarts the gateway in-container, so k8s probes are optional. Provide a
 # full probe spec to enable, e.g. an exec check:
 #   liveness:
@@ -212,7 +229,9 @@ securityContext: {}
 #     initialDelaySeconds: 30
 #     periodSeconds: 30
 probes:
+  # -- Liveness probe spec. Empty = no liveness probe.
   liveness: {}
+  # -- Readiness probe spec. Empty = no readiness probe.
   readiness: {}
 
 # ---------------------------------------------------------------------------
@@ -221,10 +240,11 @@ probes:
 # default; set tests.enabled=false to skip it entirely.
 # ---------------------------------------------------------------------------
 tests:
+  # -- Render the chart test Job.
   enabled: true
+  # -- Image used by the test Job. Empty fields fall back to the main
+  # `image.*` (so the hermes CLI + doctor are available and arch matches).
   image:
-    # Empty fields fall back to the main `image.*` (so the hermes CLI + doctor
-    # are available and arch matches).
     repository: ""
     tag: ""
     pullPolicy: ""
@@ -258,6 +278,7 @@ tests:
     #    sometimes overloaded. Leave empty to use `config.model.default` as-is
     #    (single attempt, no `-m`/`--provider` override).
     models: []
+  # -- Resource requests/limits for the test Job's container.
   resources:
     requests:
       cpu: 100m
@@ -266,9 +287,14 @@ tests:
       cpu: "1"
       memory: 512Mi
 
+# -- Annotations to add to the Pod.
 podAnnotations: {}
+# -- Labels to add to the Pod.
 podLabels: {}
 
+# -- Node selector for Pod scheduling.
 nodeSelector: {}
+# -- Tolerations for Pod scheduling.
 tolerations: []
+# -- Affinity rules for Pod scheduling.
 affinity: {}
