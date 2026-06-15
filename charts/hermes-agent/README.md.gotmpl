@@ -103,8 +103,8 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 **auto-enable** the platform — no `config.yaml` change required.
 
 > **Verification status:** the chart renders the right Secret/env and the agent
-> picks the platform up. On trusted CI runs where a `DISCORD_BOT_TOKEN` secret
-> and `DISCORD_HOME_CHANNEL` variable are configured, CI does a full live
+> picks the platform up. On trusted CI runs where the `DISCORD_BOT_TOKEN` and
+> `DISCORD_HOME_CHANNEL` secrets are configured, CI does a full live
 > round-trip — `hermes send` to that channel, then reads the channel back via
 > the Discord API to confirm the message arrived — and **fails if it can't be
 > verified** (the bot needs *View Channel* + *Read Message History*). Fork PRs

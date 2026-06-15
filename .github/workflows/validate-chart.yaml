@@ -89,13 +89,13 @@ jobs:
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
-      # Optional live Discord verification: when a real bot token (secret) and a
-      # home channel id (variable) are present on trusted runs, the workload is
-      # installed with Discord enabled and, after the chart test passes, sends a
-      # one-shot "CI healthy" message via `hermes send` (best-effort, non-gating).
-      # Absent on fork PRs (secrets are not exposed there) → the step is skipped.
+      # Optional live Discord verification: when the bot token and home channel
+      # id secrets are present on trusted runs, the workload is installed with
+      # Discord enabled and, after the chart test passes, CI sends a one-shot
+      # "CI healthy" message via `hermes send` and reads the channel back to
+      # confirm delivery. Absent on fork PRs (secrets not exposed) → step skipped.
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-      DISCORD_HOME_CHANNEL: ${{ vars.DISCORD_HOME_CHANNEL }}
+      DISCORD_HOME_CHANNEL: ${{ secrets.DISCORD_HOME_CHANNEL }}
     steps:
       - uses: actions/checkout@v6
 
