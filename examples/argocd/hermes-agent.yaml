@@ -24,7 +24,10 @@ spec:
   source:
     repoURL: ghcr.io/jyje/hermes-agent-helm
     chart: hermes-agent
-    targetRevision: 0.1.1
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
     helm:
       # MUST equal metadata.name (see examples/argocd/README.md).
       releaseName: hermes-agent
@@ -40,8 +43,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: hermes-agent
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    automated: {}
     syncOptions:
       - CreateNamespace=true

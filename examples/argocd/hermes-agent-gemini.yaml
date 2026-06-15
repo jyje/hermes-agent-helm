@@ -11,9 +11,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/jyje/hermes-agent-helm
-    targetRevision: main
-    path: charts/hermes-agent
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
     helm:
       releaseName: hermes-agent-gemini
       valuesObject:
@@ -35,8 +38,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: hermes-agent
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    automated: {}
     syncOptions:
       - CreateNamespace=true
