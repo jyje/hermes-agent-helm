@@ -3,6 +3,13 @@
 These Application manifests deploy `hermes-agent` via ArgoCD safely —
 including **multiple instances in the same namespace without collisions**.
 
+The bundled `valuesObject` mirrors
+[`values-litellm-k8s.yaml`](../../charts/hermes-agent/values-litellm-k8s.yaml)
+(LiteLLM proxy in the same cluster). Swap it for the contents of any other
+[`charts/hermes-agent/values-*.yaml`](../../charts/hermes-agent/README.md#more-examples)
+example — built-in providers (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA
+NIM), or the Discord/Telegram combos — to match your setup.
+
 ## The one rule: unique `fullname` per instance
 
 Every chart resource is named from the Helm **fullname**

@@ -243,6 +243,10 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 
+Deploying via ArgoCD instead of plain `helm`/`-f`? See
+[`examples/argocd/`](../../examples/argocd/) — its `valuesObject` mirrors
+`values-litellm-k8s.yaml` and can be swapped for any of the examples above.
+
 {{ template "chart.requirementsSection" . }}
 
 {{ template "chart.valuesHeader" . }}

@@ -80,7 +80,8 @@ install examples (including messenger integrations), see
 
 ```
 charts/hermes-agent/                     # the Helm chart (see its README for the full values table)
-charts/hermes-agent/values.example.yaml  # example overrides (custom OpenAI-compatible provider + persistence)
+charts/hermes-agent/values-*.yaml        # ready-to-adapt examples: providers, Discord/Telegram, LiteLLM (see chart README "More examples")
+charts/hermes-agent/values.example.yaml  # reference overrides (custom OpenAI-compatible provider + persistence + GitOps SealedSecret pattern)
 examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
 examples/argocd/                         # ArgoCD Application + safe multi-instance guide
 .github/workflows/                       # ci (lint + docs-drift + real round-trip on kind) and release (version bump -> tag -> ghcr OCI)
@@ -106,15 +107,18 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 helm test hermes-agent -n hermes-agent
 kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 
-# or use an environment-specific values file
+# or start from a ready-made example (provider, Discord/Telegram, LiteLLM, ...)
 helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
-  -f charts/hermes-agent/values.example.yaml \
-  --set-string env.OPENAI_API_KEY='sk-...' --wait
+  -f charts/hermes-agent/values-anthropic-and-discord.yaml \
+  --set-string env.ANTHROPIC_API_KEY='sk-ant-...' \
+  --set-string env.DISCORD_BOT_TOKEN='...' --wait
 ```
 
 See [charts/hermes-agent/README.md](charts/hermes-agent/README.md) for the full
-values table and provider-by-provider install examples.
+values table, the "More examples" table (`values-*.yaml` for every supported
+provider plus Discord/Telegram and LiteLLM), and an
+[ArgoCD example](examples/argocd/).
 
 ## Development
 
