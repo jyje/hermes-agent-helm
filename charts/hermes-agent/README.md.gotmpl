@@ -104,8 +104,10 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 
 > **Verification status:** the chart renders the right Secret/env and the agent
 > picks the platform up. On trusted CI runs where a `DISCORD_BOT_TOKEN` secret
-> and `DISCORD_HOME_CHANNEL` variable are configured, CI also does a live
-> `hermes send` round-trip to that channel (best-effort, non-gating); fork PRs
+> and `DISCORD_HOME_CHANNEL` variable are configured, CI does a full live
+> round-trip — `hermes send` to that channel, then reads the channel back via
+> the Discord API to confirm the message arrived — and **fails if it can't be
+> verified** (the bot needs *View Channel* + *Read Message History*). Fork PRs
 > skip it since secrets aren't exposed. Telegram is still placeholder-only.
 > Provide a real bot token to try either in your own cluster.
 

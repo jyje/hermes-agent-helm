@@ -168,19 +168,47 @@ jobs:
           echo "test job result: $result"
           [ "$result" = success ]
 
-      - name: Notify Discord that chart CI is healthy (trusted runs with a token)
-        # Live end-to-end Discord verification + the "CI healthy" ping itself:
-        # exec into the running workload and use `hermes send` (no gateway loop
-        # needed for bot-token platforms). Best-effort — a Discord hiccup must
-        # not redden CI, so this never gates.
-        if: success() && env.DISCORD_BOT_TOKEN != ''
-        continue-on-error: true
+      - name: Notify Discord and verify delivery (trusted runs with a token)
+        # Full live round-trip: send the "CI healthy" message via `hermes send`
+        # from the running workload (no gateway loop needed for bot-token
+        # platforms), then read the channel back through the Discord API and
+        # confirm our unique marker is present. This GATES on trusted runs — if
+        # the send fails or the message can't be verified, CI fails. Fork PRs
+        # skip it (no secret). The bot needs View Channel + Read Message History
+        # on DISCORD_HOME_CHANNEL for the read-back.
+        if: success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
         run: |
+          set -euo pipefail
           pod=$(kubectl get pod -n hermes-agent -l app.kubernetes.io/name=hermes-agent \
             -o jsonpath='{.items[0].metadata.name}')
-          msg="✅ hermes-agent chart CI passed — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} (run ${GITHUB_RUN_ID})"
-          echo "Sending Discord notification via workload pod: $pod"
+          nonce="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          msg="✅ hermes-agent chart CI passed — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} [${nonce}]"
+          echo "Sending via workload pod: $pod"
           kubectl exec -n hermes-agent "$pod" -- hermes send --to discord "$msg"
+
+          echo "Verifying delivery by reading the channel back…"
+          ok=false
+          for _ in $(seq 1 10); do
+            sleep 3
+            code=$(curl -sS -o /tmp/discord-msgs.json -w '%{http_code}' \
+              -H "Authorization: Bot ${DISCORD_BOT_TOKEN}" \
+              "https://discord.com/api/v10/channels/${DISCORD_HOME_CHANNEL}/messages?limit=20" \
+              || echo "000")
+            if [ "$code" != "200" ]; then
+              echo "  read-back HTTP $code (bot needs View Channel + Read Message History); retrying…"
+              continue
+            fi
+            if jq -e --arg n "$nonce" '.[] | select(.content | contains($n))' \
+                /tmp/discord-msgs.json >/dev/null 2>&1; then
+              ok=true; break
+            fi
+            echo "  marker not visible yet; retrying…"
+          done
+          if [ "$ok" != "true" ]; then
+            echo "::error::Discord message was sent but could not be verified in the channel"
+            exit 1
+          fi
+          echo "Verified: the CI notification is present in the Discord channel."
 
       - name: Show test logs (incl. chat round-trip transcript)
         if: always()
