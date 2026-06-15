@@ -1,11 +1,11 @@
-# values.example.openrouter.yaml
+# values-openrouter.yaml
 #
 # Hermes Agent using OpenRouter (one key, many upstream models).
 # Dummy key — override at install time.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
-#     -f charts/hermes-agent/values.example.openrouter.yaml \
+#     -f charts/hermes-agent/values-openrouter.yaml \
 #     --set-string env.OPENROUTER_API_KEY='sk-or-<real>' --wait
 
 config:

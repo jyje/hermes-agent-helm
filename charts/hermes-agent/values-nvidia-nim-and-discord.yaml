@@ -1,4 +1,4 @@
-# values.example.nvidia-nim-and-discord.yaml
+# values-nvidia-nim-and-discord.yaml
 #
 # Hermes Agent on a Raspberry Pi cluster (arm64), talking to NVIDIA NIM for the
 # model AND running as a Discord bot — both wired in one file.
@@ -9,7 +9,7 @@
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
-#     -f charts/hermes-agent/values.example.nvidia-nim-and-discord.yaml \
+#     -f charts/hermes-agent/values-nvidia-nim-and-discord.yaml \
 #     --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
 #     --set-string env.DISCORD_BOT_TOKEN='<real-bot-token>' --wait
 

@@ -233,11 +233,13 @@ the command in each file's header comment), or via the SealedSecret +
 
 | File | Model provider | Extras |
 | --- | --- | --- |
-| [`values.example.nvidia-nim-and-discord.yaml`](values.example.nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
-| [`values.example.openai.yaml`](values.example.openai.yaml) | OpenAI (`openai-api`) | — |
-| [`values.example.anthropic.yaml`](values.example.anthropic.yaml) | Anthropic (Claude) | — |
-| [`values.example.gemini.yaml`](values.example.gemini.yaml) | Google Gemini | — |
-| [`values.example.openrouter.yaml`](values.example.openrouter.yaml) | OpenRouter | — |
+| [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
+| [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
+| [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
+| [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
+| [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | — |
+| [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
+| [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
 
 {{ template "chart.requirementsSection" . }}
 
