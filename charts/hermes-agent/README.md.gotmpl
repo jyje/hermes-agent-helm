@@ -223,6 +223,22 @@ the full upstream config (which would drift across Hermes versions).
 See `charts/hermes-agent/values.example.yaml` for a complete example (custom
 OpenAI-compatible proxy + persistent storage with a non-default StorageClass).
 
+## More examples
+
+Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
+(e.g. a Raspberry Pi / arm64 k3s cluster). All secrets in these files are
+**dummy placeholders** — override them at install time with `--set-string` (see
+the command in each file's header comment), or via the SealedSecret +
+`extraEnvFrom` pattern above.
+
+| File | Model provider | Extras |
+| --- | --- | --- |
+| [`values.example.nvidia-nim-and-discord.yaml`](values.example.nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
+| [`values.example.openai.yaml`](values.example.openai.yaml) | OpenAI (`openai-api`) | — |
+| [`values.example.anthropic.yaml`](values.example.anthropic.yaml) | Anthropic (Claude) | — |
+| [`values.example.gemini.yaml`](values.example.gemini.yaml) | Google Gemini | — |
+| [`values.example.openrouter.yaml`](values.example.openrouter.yaml) | OpenRouter | — |
+
 {{ template "chart.requirementsSection" . }}
 
 {{ template "chart.valuesHeader" . }}

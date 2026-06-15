@@ -1,11 +1,11 @@
-# values-gemini.yaml
+# values.example.gemini.yaml
 #
 # Hermes Agent using Google Gemini as the model provider.
 # Dummy key — override at install time.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
-#     -f examples/values/values-gemini.yaml \
+#     -f charts/hermes-agent/values.example.gemini.yaml \
 #     --set-string env.GOOGLE_API_KEY='<real>' --wait
 
 config:
