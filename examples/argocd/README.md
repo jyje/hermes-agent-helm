@@ -20,12 +20,15 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-anthropic-and-discord.yaml`](hermes-agent-anthropic-and-discord.yaml) | `values-anthropic-and-discord.yaml` | `hermes-agent-anthropic-discord-secrets` (`ANTHROPIC_API_KEY`, `DISCORD_BOT_TOKEN`) |
 | [`hermes-agent-openai-and-telegram.yaml`](hermes-agent-openai-and-telegram.yaml) | `values-openai-and-telegram.yaml` | `hermes-agent-openai-telegram-secrets` (`OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`) |
 | [`hermes-agent-nvidia-nim-and-discord.yaml`](hermes-agent-nvidia-nim-and-discord.yaml) | `values-nvidia-nim-and-discord.yaml` | `hermes-agent-nim-discord-secrets` (`NVIDIA_API_KEY`, `DISCORD_BOT_TOKEN`) |
+| [`hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml`](hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml) | `values-nvidia-nim-and-discord.yaml` + GitOps | `hermes-agent-nim-discord-sealedsecret-secrets` via **SealedSecret** (`extraResources`, `NVIDIA_API_KEY` + `DISCORD_BOT_TOKEN`) |
 
 `hermes-agent.yaml` is the bare-minimum starting point — pure chart defaults
-plus the secret wiring; copy it and add a `valuesObject` to customize. It also
-shows the **OCI registry** source form (`repoURL`/`chart`/`targetRevision`
-pointing at `ghcr.io`) instead of Git — all other examples use the Git form
-(`repoURL`/`targetRevision`/`path`); swap freely between the two.
+plus the secret wiring; copy it and add a `valuesObject` to customize.
+
+All examples use the **OCI registry** source form (`repoURL`/`chart`/
+`targetRevision` pointing at `ghcr.io`). A Git source form
+(`repoURL`/`targetRevision`/`path`) works too if you'd rather track a chart
+checked into a Git repo — swap freely between the two.
 
 `hermes-agent-litellm-k8s.yaml` is the most complete example: it demonstrates
 the full GitOps pattern (SealedSecret via `extraResources` + `extraEnvFrom` +
@@ -78,6 +81,104 @@ kubectl create secret generic hermes-agent-openai-secrets -n hermes-agent \
 
 `extraEnvFrom` references that Secret; since it is applied after the chart's own
 env Secret, its values win.
+
+### SealedSecret walkthrough (NVIDIA NIM + Discord)
+
+[`hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml`](hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml)
+is the GitOps variant of
+[`hermes-agent-nvidia-nim-and-discord.yaml`](hermes-agent-nvidia-nim-and-discord.yaml):
+instead of creating a plain Secret out-of-band, it ships a
+[bitnami **SealedSecret**](https://github.com/bitnami-labs/sealed-secrets) in
+`extraResources`. The sealed-secrets controller decrypts it in-cluster into a
+regular Secret (`hermes-agent-nim-discord-sealedsecret-secrets`), which
+`extraEnvFrom` then mounts. The encrypted blob is safe to commit to Git — only
+the controller's private key (held by your cluster) can decrypt it.
+
+This walkthrough seals **two** keys at once (`NVIDIA_API_KEY` and
+`DISCORD_BOT_TOKEN`). For a single key, see the simpler `kubeseal --raw
+--from-file` form used in
+[`hermes-agent-openai-sealedsecret.yaml`](hermes-agent-openai-sealedsecret.yaml).
+
+**Prerequisites:**
+- The [sealed-secrets controller](https://github.com/bitnami-labs/sealed-secrets)
+  is installed in the target cluster (e.g. `helm install sealed-secrets
+  sealed-secrets/sealed-secrets -n kube-system`).
+- The `kubeseal` CLI is installed locally, matching (or able to fetch) the
+  controller's public certificate.
+
+**1. Write a plaintext Secret manifest — do not apply it:**
+
+```bash
+cat > /tmp/hermes-agent-nim-discord-secret.yaml <<'EOF'
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hermes-agent-nim-discord-sealedsecret-secrets
+  namespace: hermes-agent
+type: Opaque
+stringData:
+  NVIDIA_API_KEY: "nvapi-<your-real-key>"
+  DISCORD_BOT_TOKEN: "<your-real-bot-token>"
+EOF
+```
+
+**2. Seal it.** `kubeseal -o yaml` reads a Secret manifest and emits the
+SealedSecret equivalent, encrypting every entry in `data`/`stringData` with the
+controller's public key (fetched automatically from the cluster, or pass
+`--cert <pub-cert.pem>` for an offline cert):
+
+```bash
+kubeseal --scope namespace-wide \
+  -o yaml < /tmp/hermes-agent-nim-discord-secret.yaml \
+  > /tmp/hermes-agent-nim-discord-sealedsecret.yaml
+```
+
+This produces a `SealedSecret` with `spec.encryptedData.NVIDIA_API_KEY` and
+`spec.encryptedData.DISCORD_BOT_TOKEN`, each a long `AgB...` / `AgD...` base64
+blob. `--scope namespace-wide` lets the SealedSecret be renamed/moved within
+`hermes-agent` without re-sealing — matches the convention used by the other
+SealedSecret examples in this directory.
+
+**3. Splice the two `encryptedData` values** into
+`hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml`'s
+`extraResources[0].spec.encryptedData`, replacing the
+`AgDUMMY_replace_with_kubeseal_output==` placeholders:
+
+```yaml
+extraResources:
+  - apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: hermes-agent-nim-discord-sealedsecret-secrets
+    spec:
+      encryptedData:
+        NVIDIA_API_KEY: AgB...      # <- from step 2
+        DISCORD_BOT_TOKEN: AgD...   # <- from step 2
+      template:
+        metadata:
+          name: hermes-agent-nim-discord-sealedsecret-secrets
+        type: Opaque
+```
+
+Also fill in real values for `extraEnv[].value` (`DISCORD_HOME_CHANNEL`,
+`DISCORD_ALLOWED_USERS`) and pick an NVIDIA NIM model your account can reach.
+
+**4. Apply the Application and verify:**
+
+```bash
+kubectl apply -f examples/argocd/hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml
+
+# the controller should decrypt the SealedSecret into a Secret:
+kubectl get sealedsecret,secret -n hermes-agent hermes-agent-nim-discord-sealedsecret-secrets
+
+# and the pod should pick up both keys via extraEnvFrom:
+kubectl exec -n hermes-agent deploy/hermes-agent-nvidia-nim-and-discord-sealedsecret -- \
+  env | grep -E '^(NVIDIA_API_KEY|DISCORD_BOT_TOKEN)='
+```
+
+If `kubectl get secret` shows no Secret, check the controller's logs
+(`kubectl logs -n kube-system -l app.kubernetes.io/name=sealed-secrets`) — the
+most common cause is sealing with the wrong cluster's certificate.
 
 ## Apply
 
