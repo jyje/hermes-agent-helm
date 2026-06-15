@@ -1,0 +1,104 @@
+# values.example.yaml
+#
+# Sample overrides: Hermes Agent talking to a custom OpenAI-compatible proxy
+# (e.g. LiteLLM, vLLM) and using persistent storage with a non-default
+# StorageClass.
+#
+# Namespace is chosen entirely via the CLI. Use release name == chart name so
+# resources are named `hermes-agent-*` (not `hermes-agent-hermes-agent-*`), e.g.:
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values.example.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-<your-key>'
+#   helm test hermes-agent -n hermes-agent
+
+# Register a custom OpenAI-compatible provider (e.g. an in-cluster LiteLLM
+# proxy). The key ("litellm") is the provider id referenced by model.provider.
+#
+# To use a built-in provider instead (e.g. Gemini), drop this `providers`
+# block and set:
+#   config:
+#     model:
+#       provider: gemini
+#       default: gemini-2.5-flash
+#   env:
+#     GOOGLE_API_KEY: "<your-gemini-key>"
+config:
+  providers:
+    litellm:
+      # FQDN/URL of your OpenAI-compatible proxy.
+      base_url: http://litellm.example.svc.cluster.local:4000/v1
+      key_env: OPENAI_API_KEY      # env var that holds the proxy key
+      discover_models: true        # populate the model picker from /v1/models
+  model:
+    provider: litellm
+    # Must match a model name exposed by the proxy (see /v1/models).
+    default: openai/gpt-oss-120b
+  terminal:
+    backend: local
+  agent:
+    max_turns: 90
+    gateway_timeout: 1800
+
+# Proxy/provider key. Prefer overriding on the CLI with --set-string, or use
+# the SealedSecret pattern below, instead of committing a real key here.
+env:
+  OPENAI_API_KEY: "sk-REPLACE_ME"
+
+  # --- Messenger integrations (optional) ----------------------------------
+  # `hermes gateway run` connects whatever chat platforms it has credentials
+  # for. Setting a bot token here (it lands in the Secret) is enough to
+  # auto-enable that platform — no config.yaml change needed. Non-secret knobs
+  # (allowed users, home channel) belong under `extraEnv` below, not here.
+  #
+  # Discord: create a bot at https://discord.com/developers/applications,
+  # enable the "Message Content Intent", and invite it to your server.
+  # DISCORD_BOT_TOKEN: "<discord-bot-token>"
+  #
+  # Telegram: create a bot via @BotFather.
+  # TELEGRAM_BOT_TOKEN: "<telegram-bot-token>"
+
+# Plain (non-secret) env vars injected directly on the container. Good place for
+# the messenger knobs that aren't secrets.
+extraEnv: []
+#  - name: DISCORD_ALLOWED_USERS      # comma-separated user IDs allowed to talk
+#    value: "111111111111111111,222222222222222222"
+#  - name: DISCORD_HOME_CHANNEL       # channel ID for cron / notification delivery
+#    value: "333333333333333333"
+#  - name: DISCORD_ALLOW_ALL_USERS    # allow anyone to trigger the bot (dev only)
+#    value: "false"
+
+# ---------------------------------------------------------------------------
+# Recommended for GitOps: inject the provider key via a SealedSecret (sealed
+# with `kubeseal` for THIS release namespace) instead of `env` above, then
+# point `extraEnvFrom` at the Secret it decrypts into. `extraEnvFrom` is
+# applied after the chart's own env Secret, so its OPENAI_API_KEY wins over
+# the placeholder.
+# ---------------------------------------------------------------------------
+# extraResources:
+#   - apiVersion: bitnami.com/v1alpha1
+#     kind: SealedSecret
+#     metadata:
+#       name: hermes-agent-provider-key
+#       namespace: hermes-agent
+#     spec:
+#       encryptedData:
+#         OPENAI_API_KEY: AgB...   # `kubeseal` output, scoped to this name+namespace
+#       template:
+#         metadata:
+#           name: hermes-agent-provider-key
+#           namespace: hermes-agent
+#         type: Opaque
+#
+# extraEnvFrom:
+#   - secretRef:
+#       name: hermes-agent-provider-key
+
+# Persistence with a non-default StorageClass.
+persistence:
+  enabled: true
+  storageClass: my-storage-class
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /opt/data
