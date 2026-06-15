@@ -17,13 +17,14 @@ spec:
       # multiple Applications target the SAME namespace.
       releaseName: hermes-agent
       valuesObject:
+        # Same setup as charts/hermes-agent/values-litellm-k8s.yaml: a LiteLLM
+        # proxy running in the same cluster, reached via Service DNS. Swap for
+        # any of the other charts/hermes-agent/values-*.yaml examples (built-in
+        # providers, Discord/Telegram, ...) if you don't need a custom proxy.
         config:
-          # Example: a custom OpenAI-compatible provider (e.g. an in-cluster
-          # LiteLLM proxy). Swap for a built-in provider key (gemini, anthropic,
-          # openai-api, ...) if you don't need a custom proxy.
           providers:
             litellm:
-              base_url: http://litellm.example.svc.cluster.local:4000/v1
+              base_url: http://litellm.litellm.svc.cluster.local:4000/v1
               key_env: OPENAI_API_KEY
               discover_models: true
           model:
