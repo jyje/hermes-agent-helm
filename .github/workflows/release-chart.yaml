@@ -126,10 +126,10 @@ jobs:
             [ -n "$icon" ] && icon_html="<img src=\"$icon\" alt=\"\">"
 
             chart_links="$chart_links      <li class=\"chart-card\">
-        <a href=\"./$chart_name/\">${icon_html}<span>$chart_name</span><span class=\"chart-version\">v$version</span></a>
-        <p>$description</p>
-      </li>
-"
+            <a href=\"./$chart_name/\">${icon_html}<span>$chart_name</span><span class=\"chart-version\">v$version</span></a>
+            <p>$description</p>
+          </li>
+          "
           done
           content="$(cat pages/index.html)"
           content="${content//'{{CHARTS}}'/$chart_links}"
