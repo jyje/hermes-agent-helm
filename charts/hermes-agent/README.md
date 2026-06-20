@@ -18,6 +18,32 @@ Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Con
 
 [English](README.md) · [한국어](README-ko.md)
 
+## TL;DR
+
+```bash
+# OCI (recommended)
+helm upgrade --install hermes-agent \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.4.0 \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+```bash
+# Classic Helm repo
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+helm upgrade --install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+- **ArgoCD** — ready-to-apply `Application` manifests, one per provider/messenger
+  combo: [`examples/argocd/`](../../examples/argocd/).
+- **GitOps without committing real secrets** — SealedSecret + `extraEnvFrom`
+  walkthrough: [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
+
+Details, provider/messenger options, and the full values reference below ↓
+
 ## Overview
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes.

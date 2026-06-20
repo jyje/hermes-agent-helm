@@ -18,6 +18,32 @@ Hermes Agent — 멀티 제공자 LLM 에이전트 프레임워크 — 를 Kuber
 
 [English](README.md) · [한국어](README-ko.md)
 
+## TL;DR
+
+```bash
+# OCI (권장)
+helm upgrade --install hermes-agent \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.4.0 \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+```bash
+# 클래식 Helm 저장소
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+helm upgrade --install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+- **ArgoCD** — 제공자/메신저 조합별로 바로 적용 가능한 `Application` 매니페스트:
+  [`examples/argocd/`](../../examples/argocd/).
+- **실제 시크릿을 커밋하지 않는 GitOps** — SealedSecret + `extraEnvFrom` 가이드:
+  [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
+
+자세한 내용, 제공자/메신저 옵션, 전체 values 레퍼런스는 아래에서 ↓
+
 ## 개요
 
 Kubernetes에서 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 실행합니다.
