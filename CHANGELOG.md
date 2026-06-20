@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.3.0] - 2026-06-20
+
+### Features
+
+- ✨ feat(chart): run test job automatically as ArgoCD PostSync hook ([`17097da`](https://github.com/jyje/hermes-agent-helm/commit/17097dab9a3f459c9ca3346c8801bc80633e783a)) — @jyje
+
+### Documentation
+
+- 📄 docs(readme): document team scaling via ArgoCD ApplicationSet and add roadmap ([`34f30bd`](https://github.com/jyje/hermes-agent-helm/commit/34f30bdcdf25495ff02ffd9a448dae3766e86e7e)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(chart): add centered logo header and rename chart README title ([`96a210b`](https://github.com/jyje/hermes-agent-helm/commit/96a210b2ffd77348425dfdfb6ccfef4e0e086c2b)) — @jyje
+- ⬆️ dep(image): bump hermes-agent image to v2026.6.19 ([`71705be`](https://github.com/jyje/hermes-agent-helm/commit/71705be2750b6764444902161cea83d3a0d269f2)) — @github-actions[bot]
+
 ## [0.2.0] - 2026-06-15
 
 ### Features
