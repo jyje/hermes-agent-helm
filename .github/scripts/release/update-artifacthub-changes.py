@@ -52,8 +52,13 @@ def main() -> int:
     content_indent = indent + "  "
     new_block = [f"{indent}artifacthub.io/changes: |\n"]
     for c in changes:
-        new_block.append(f"{content_indent}- kind: {c['kind']}\n")
-        new_block.append(f"{content_indent}  description: {c['description']}\n")
+        # Artifact Hub's annotation parser rejects unquoted strings containing
+        # YAML-special characters (colons, brackets, etc.) — e.g. our own
+        # conventional commit subjects ("feat(release): ...") always have a
+        # colon. json.dumps (ensure_ascii=False) yields a double-quoted scalar
+        # that's valid YAML and keeps emoji/unicode readable.
+        new_block.append(f"{content_indent}- kind: {json.dumps(c['kind'], ensure_ascii=False)}\n")
+        new_block.append(f"{content_indent}  description: {json.dumps(c['description'], ensure_ascii=False)}\n")
 
     lines[start:end] = new_block
     with open(chart_path, "w", encoding="utf-8") as f:
