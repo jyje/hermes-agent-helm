@@ -110,6 +110,7 @@ jobs:
         run: |
           chart_links=""
           for chart_dir in charts/*/; do
+            [ -f "$chart_dir/Chart.yaml" ] || continue
             chart_name="$(basename "$chart_dir")"
             mkdir -p ".deploy/$chart_name"
             cp "$chart_dir/README.md" ".deploy/$chart_name/README.md"
