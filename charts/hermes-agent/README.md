@@ -251,6 +251,38 @@ the full upstream config (which would drift across Hermes versions).
   oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
+## Environment variables
+
+This chart only walks through the [provider](#install-options-llm-provider)
+and [messenger](#messenger-integrations-telegram--discord) variables needed to
+get started — Hermes itself reads many more from its environment. Any of them
+can be set the same way as the ones above: secrets under `.Values.env`
+(Secret), non-secret knobs under `.Values.extraEnv` (plain env), or via
+`extraEnvFrom` for externally-managed secrets (see
+[Configuration model](#configuration-model)).
+
+Full reference (kept current with each Hermes release):
+**[Environment Variables — Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
+
+A few more commonly-used ones, current as of image `v2026.6.19`:
+
+| Variable | Purpose |
+| --- | --- |
+| `DEEPSEEK_API_KEY` | DeepSeek provider |
+| `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
+| `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
+| `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack bot (Socket Mode) |
+| `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
+| `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
+| `HERMES_MAX_ITERATIONS` | Tool-calling loop limit (default: 90) |
+| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 900s) |
+| `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
+| `HERMES_TIMEZONE` | IANA timezone override |
+
+> **Not env-configurable:** context compression, fallback providers, and
+> provider routing live in `config.yaml` only (under `.Values.config`), with
+> no environment variable equivalent.
+
 ## More examples
 
 Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
