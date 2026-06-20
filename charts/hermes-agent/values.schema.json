@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "hermes-agent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["image", "env"],
+  "properties": {
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository"],
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": { "name": { "type": "string" } }
+      }
+    },
+
+    "command": { "type": "array", "items": { "type": "string" } },
+    "args": { "type": "array", "items": { "type": "string" } },
+
+    "controller": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["deployment", "statefulset"] }
+      }
+    },
+    "replicaCount": { "type": "integer", "minimum": 1 },
+
+    "serviceAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "annotations": { "type": "object" }
+      }
+    },
+
+    "config": {
+      "type": "object",
+      "description": "Partial override merged into Hermes' own config.yaml schema — left open-ended on purpose so future upstream keys aren't rejected.",
+      "additionalProperties": true,
+      "properties": {
+        "model": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "default": { "type": "string" },
+            "provider": { "type": "string" }
+          }
+        },
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "base_url": { "type": "string" },
+              "key_env": { "type": "string" },
+              "discover_models": { "type": "boolean" }
+            }
+          }
+        },
+        "terminal": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "backend": { "type": "string" }
+          }
+        },
+        "agent": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "max_turns": { "type": "integer" },
+            "gateway_timeout": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "bootstrap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "overwrite": { "type": "boolean" }
+      }
+    },
+
+    "env": {
+      "type": "object",
+      "description": "Rendered into a Secret; keys are provider/platform env var names (OPENAI_API_KEY, DISCORD_BOT_TOKEN, ...), so left free-form.",
+      "additionalProperties": { "type": "string" }
+    },
+    "extraEnv": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": true,
+        "properties": { "name": { "type": "string" } }
+      }
+    },
+    "extraEnvFrom": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "extraResources": {
+      "type": "array",
+      "items": {
+        "oneOf": [{ "type": "object" }, { "type": "string" }]
+      }
+    },
+
+    "persistence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "storageClass": { "type": "string" },
+        "accessModes": { "type": "array", "items": { "type": "string" } },
+        "size": { "type": "string" },
+        "mountPath": { "type": "string" }
+      }
+    },
+
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "type": { "type": "string" },
+        "port": { "type": "integer" },
+        "annotations": { "type": "object" }
+      }
+    },
+
+    "ingress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "className": { "type": "string" },
+        "annotations": { "type": "object" },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "host": { "type": "string" },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "path": { "type": "string" },
+                    "pathType": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tls": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requests": { "type": "object" },
+        "limits": { "type": "object" }
+      }
+    },
+
+    "podSecurityContext": { "type": "object" },
+    "securityContext": { "type": "object" },
+
+    "probes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "liveness": { "type": "object" },
+        "readiness": { "type": "object" }
+      }
+    },
+
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": { "type": "string" },
+            "tag": { "type": "string" },
+            "pullPolicy": { "type": "string" }
+          }
+        },
+        "doctorStrict": { "type": "boolean" },
+        "doctorTimeout": { "type": "integer" },
+        "chat": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "prompt": { "type": "string" },
+            "maxTurns": { "type": "integer" },
+            "timeout": { "type": "integer" },
+            "failOnError": { "type": "boolean" },
+            "models": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requests": { "type": "object" },
+            "limits": { "type": "object" }
+          }
+        }
+      }
+    },
+
+    "podAnnotations": { "type": "object" },
+    "podLabels": { "type": "object" },
+    "nodeSelector": { "type": "object" },
+    "tolerations": { "type": "array" },
+    "affinity": { "type": "object" }
+  }
+}
