@@ -5,6 +5,44 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: added
+          description: Add hermes-agent-env-rule feature for environment‑based rules
+        - kind: added
+          description: Add Korean translation of the chart README
+        - kind: added
+          description: Add Environment variables section to the README documentation
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.19
+    created: "2026-06-20T22:59:20.069325675Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
+      LLM agent framework — on Kubernetes. Configure any provider Hermes supports
+      (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy
+      such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health
+      check. "
+    digest: cc288f434a1bf6f295324ddaf206606a8c8782539f583b19e62066d4023b8b7d
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.4.0.tgz
+    version: 0.4.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: added
           description: New configuration values such as extraEnv, extraEnvFrom, and extraResources added to the chart's values table.
         - kind: changed
           description: Reordered description and default columns in the values table for clearer documentation.
@@ -147,4 +185,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-20T11:57:03.228952682Z"
+generated: "2026-06-20T22:59:20.068065281Z"
