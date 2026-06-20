@@ -115,9 +115,25 @@ jobs:
             mkdir -p ".deploy/$chart_name"
             cp "$chart_dir/README.md" ".deploy/$chart_name/README.md"
             sed "s#{{CHART_NAME}}#$chart_name#g" pages/chart.html > ".deploy/$chart_name/index.html"
-            chart_links="$chart_links    <li><a href=\"./$chart_name/\">$chart_name</a></li>\n"
+
+            version="$(yq '.version' "$chart_dir/Chart.yaml")"
+            description="$(yq '.description' "$chart_dir/Chart.yaml" | sed -n '1p')"
+            description="${description//&/&amp;}"
+            description="${description//</&lt;}"
+            description="${description//>/&gt;}"
+            icon="$(yq '.icon // ""' "$chart_dir/Chart.yaml")"
+            icon_html=""
+            [ -n "$icon" ] && icon_html="<img src=\"$icon\" alt=\"\">"
+
+            chart_links="$chart_links      <li class=\"chart-card\">
+        <a href=\"./$chart_name/\">${icon_html}<span>$chart_name</span><span class=\"chart-version\">v$version</span></a>
+        <p>$description</p>
+      </li>
+"
           done
-          sed "s#{{CHARTS}}#$chart_links#" pages/index.html > .deploy/index.html
+          content="$(cat pages/index.html)"
+          content="${content//'{{CHARTS}}'/$chart_links}"
+          printf '%s' "$content" > .deploy/index.html
 
       - name: Publish Helm repo to GitHub Pages
         if: steps.ver.outputs.exists == 'false'
