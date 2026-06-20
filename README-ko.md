@@ -15,7 +15,7 @@
 [![Helm](https://img.shields.io/badge/Helm-3%2B-0F1689?logo=helm&logoColor=white)](https://helm.sh)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
-[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -77,7 +77,7 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
   🔜 Telegram/Discord 라운드트립 검증은 아직 준비 중.
 
 자세한 리소스 구조, 설정 모델, 제공자별 설치 예제(메신저 통합 포함)는
-[charts/hermes-agent/README.md](charts/hermes-agent/README.md)를 참고하세요.
+[charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
 
 ## 리포지토리 구조
 
@@ -121,7 +121,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 전체 값 테이블, "More examples" 표(모든 지원 제공자 + Discord/Telegram + LiteLLM용
 `values-*.yaml`), 그리고 [ArgoCD 예제](examples/argocd/)는
-[charts/hermes-agent/README.md](charts/hermes-agent/README.md)를 참고하세요.
+[charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
 
 ## 개발
 

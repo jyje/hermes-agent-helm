@@ -62,13 +62,19 @@ as a **Secret**.
 
 ## Workflow
 
-- **Multi-language docs stay in sync.** `README.md` (English) and `README-ko.md`
-  (Korean) must describe the same thing. When you edit one, apply the
-  equivalent edit to the other in the same change — don't leave them
+- **Multi-language docs stay in sync.** Every `README.md` (English) has a
+  `README-ko.md` (Korean) twin — at the repo root, under `charts/hermes-agent/`,
+  and under `docs/` (`teams.md`/`teams-ko.md`, `roadmap.md`/`roadmap-ko.md`).
+  Each pair must describe the same thing. When you edit one, apply the
+  equivalent edit to its twin in the same change — don't leave them
   diverging. If another language edition is added later, the same rule
-  applies to it too.
+  applies to it too. Exception: the chart README's auto-generated `## Values`
+  table (see below) stays English-only in both files to avoid a second
+  hand-translated copy drifting from `values.yaml`.
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
   `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
+  This only updates `README.md`; if the change affects prose covered in
+  `README-ko.md` (not just the values table), update that by hand too.
 - Validate with `make lint` and `make template`.
 - Package for release with `make package` (runs docs + lint, then
   `helm package`). `Chart.yaml` carries `artifacthub.io/*` annotations for the

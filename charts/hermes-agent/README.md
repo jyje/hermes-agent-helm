@@ -16,6 +16,8 @@ Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Con
 
 ![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
 
+[English](README.md) · [한국어](README-ko.md)
+
 ## Overview
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes.
