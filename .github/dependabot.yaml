@@ -10,6 +10,9 @@ updates:
       interval: "weekly"
     labels:
       - "github-actions"
+    commit-message:
+      prefix: "🤖 ci"
+      include: "scope"
 
   # Helm charts
   - package-ecosystem: "helm"
@@ -19,3 +22,6 @@ updates:
       interval: "weekly"
     labels:
       - "github-actions"
+    commit-message:
+      prefix: "🤖 ci"
+      include: "scope"

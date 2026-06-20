@@ -46,6 +46,15 @@ Only use the following approved types and emojis:
 | ✅      | `test`     | Add, update, or pass tests |
 | 🔨      | `build`    | Add or update development scripts |
 
+#### Automated / Bot Commits
+Commits created entirely by automation (e.g., Dependabot, Renovate) without direct user or agent involvement use a dedicated pairing, kept separate from the manual mapping above:
+
+| Gitmoji | Type | Description |
+| :------ | :--- | :---------- |
+| 🤖      | `ci` | Added automatically by a bot/automation (e.g., Dependabot), not by direct user intervention |
+
+This pairing is configured directly in the automation tool itself (e.g., `commit-message.prefix` in `dependabot.yml`), not generated through this skill's workflow.
+
 ---
 
 ## 3. Workflow Requirements
