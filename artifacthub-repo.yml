@@ -7,7 +7,7 @@
 # (For a classic HTTP Helm repo, place this file next to index.yaml instead.)
 #
 # repositoryID is shown in Artifact Hub after you add the repo in the Control Panel.
-repositoryID: REPLACE_WITH_ARTIFACT_HUB_REPO_ID
+repositoryID: 454b88f6-edb1-45df-9c82-8ce73d1e672d
 owners:
   - name: jyje
     email: jyjeon@outlook.com
