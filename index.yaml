@@ -5,6 +5,44 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: added
+          description: New configuration values such as extraEnv, extraEnvFrom, and extraResources added to the chart's values table.
+        - kind: changed
+          description: Reordered description and default columns in the values table for clearer documentation.
+        - kind: fixed
+          description: Fixed YAML indentation in the README generation script, resolving a build‑step error.
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.19
+    created: "2026-06-20T11:57:03.23015482Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
+      LLM agent framework — on Kubernetes. Configure any provider Hermes supports
+      (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy
+      such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health
+      check. "
+    digest: c90946de6b328d891065a0ac4100c9ac8bce8004a02f96149dd194400b8a172d
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.3.1.tgz
+    version: 0.3.1
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: added
           description: Add ArgoCD PostSync hook to test job for automatic execution after each sync
         - kind: changed
           description: Update README with centered logo header and new chart title
@@ -109,4 +147,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-20T20:12:30.387208+09:00"
+generated: "2026-06-20T11:57:03.228952682Z"
