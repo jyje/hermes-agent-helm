@@ -5,6 +5,44 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: added
+          description: Add ArgoCD PostSync hook to test job for automatic execution after each sync
+        - kind: changed
+          description: Update README with centered logo header and new chart title
+        - kind: changed
+          description: Bump Docker image version to v2026.6.19
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.19
+    created: "2026-06-20T20:12:30.391388+09:00"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
+      LLM agent framework — on Kubernetes. Configure any provider Hermes supports
+      (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy
+      such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health
+      check. "
+    digest: 1906bd08399fbffddc85bc7cc2e0f0fa9322127b27dde278a2e63f7589229c54
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.3.0.tgz
+    version: 0.3.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: added
           description: ✨ feat(release): prepend chart description to release notes
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -71,4 +109,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-15T14:59:58.747760885Z"
+generated: "2026-06-20T20:12:30.387208+09:00"

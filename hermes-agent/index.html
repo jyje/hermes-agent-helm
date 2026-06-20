@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>hermes-agent — Helm chart docs</title>
+  <meta name="description" content="Helm chart docs for hermes-agent, part of the hermes-agent-helm chart repository.">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%B5%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.min.css">
   <style>
     :root { color-scheme: light dark; }
@@ -16,30 +20,80 @@
       max-width: 880px;
       margin: 2rem auto;
       padding: 0 1.5rem 4rem;
+      --fgColor-accent: #0f1689;
     }
     .topbar {
       padding: 0.75rem 1.5rem;
       border-bottom: 1px solid #d0d7de;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
     }
-    .topbar a { color: #0969da; text-decoration: none; }
+    .topbar a { color: #0f1689; text-decoration: none; }
+    .topbar a:hover { text-decoration: underline; }
+    .topbar .sep { color: var(--fgColor-muted, #59636e); margin: 0 0.35rem; }
+    .topbar .current { color: var(--fgColor-muted, #59636e); }
+
+    .skeleton { display: grid; gap: 0.6rem; padding-top: 0.5rem; }
+    .skeleton .line {
+      height: 0.9rem;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #eaeef2 25%, #f3f5f7 37%, #eaeef2 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    .skeleton .line.short { width: 40%; }
+    @keyframes shimmer {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0 50%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton .line { animation: none; }
+    }
+
+    .fetch-error {
+      border: 1px solid var(--borderColor-default, #d0d7de);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+    }
+    .fetch-error p:first-child { margin-top: 0; }
+
     @media (prefers-color-scheme: dark) {
       body { background-color: #0d1117; color: #f0f6fc; }
+      .markdown-body { --fgColor-accent: #8b93ff; }
       .topbar { border-bottom-color: #3d444d; }
-      .topbar a { color: #4493f8; }
+      .topbar a { color: #8b93ff; }
+      .skeleton .line {
+        background: linear-gradient(90deg, #1c2230 25%, #242b3a 37%, #1c2230 63%);
+        background-size: 400% 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="topbar"><a href="../">&larr; hermes-agent-helm chart repository</a></div>
-  <article id="content" class="markdown-body">Loading hermes-agent docs…</article>
+  <div class="topbar">
+    <a href="../">⛵ hermes-agent-helm</a><span class="sep">/</span><span class="current">hermes-agent</span>
+  </div>
+  <article id="content" class="markdown-body">
+    <div class="skeleton" aria-busy="true" aria-label="Loading hermes-agent docs">
+      <div class="line" style="width: 60%; height: 1.6rem;"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line short"></div>
+    </div>
+  </article>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     fetch('./README.md')
-      .then(r => r.text())
+      .then(r => { if (!r.ok) throw new Error('not found'); return r.text(); })
       .then(md => { document.getElementById('content').innerHTML = marked.parse(md); })
-      .catch(() => { document.getElementById('content').textContent = 'Failed to load README.md'; });
+      .catch(() => {
+        document.getElementById('content').innerHTML =
+          '<div class="fetch-error">' +
+          '<p>Couldn’t load the README for <strong>hermes-agent</strong>.</p>' +
+          '<p><a href="https://github.com/jyje/hermes-agent-helm/tree/main/charts/hermes-agent">View it on GitHub instead</a>.</p>' +
+          '</div>';
+      });
   </script>
 </body>
 </html>

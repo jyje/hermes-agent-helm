@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>hermes-agent-helm Helm chart repository</title>
+  <meta name="description" content="Community-powered, lightweight Helm charts for running Hermes Agent on Kubernetes.">
+  <meta property="og:title" content="hermes-agent-helm Helm chart repository">
+  <meta property="og:description" content="Community-powered, lightweight Helm charts for running Hermes Agent on Kubernetes.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%B5%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.min.css">
   <style>
     :root { color-scheme: light dark; }
@@ -16,16 +23,60 @@
       max-width: 880px;
       margin: 2rem auto;
       padding: 0 1.5rem 4rem;
+      --fgColor-accent: #0f1689;
     }
     .badges img { height: 20px; margin-right: 4px; }
+
+    .chart-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+    .chart-card {
+      border: 1px solid var(--borderColor-default, #d0d7de);
+      border-radius: 6px;
+      padding: 0.9rem 1rem;
+      transition: border-color 0.15s ease;
+    }
+    .chart-card:hover { border-color: #0f1689; }
+    .chart-card a {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .chart-card img {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+    .chart-card .chart-version {
+      font-family: var(--fontStack-monospace);
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--fgColor-muted, #59636e);
+    }
+    .chart-card p {
+      margin: 0.35rem 0 0;
+      font-size: 0.875rem;
+      color: var(--fgColor-muted, #59636e);
+    }
+
     @media (prefers-color-scheme: dark) {
       body { background-color: #0d1117; color: #f0f6fc; }
+      .markdown-body { --fgColor-accent: #8b93ff; }
+      .chart-card:hover { border-color: #8b93ff; }
     }
   </style>
 </head>
 <body>
   <article class="markdown-body">
-    <h1>⚓ hermes-agent-helm Helm chart repository</h1>
+    <h1>⛵ hermes-agent-helm Helm chart repository</h1>
 
     <p class="badges">
       <a href="https://github.com/jyje/hermes-agent-helm"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github"></a>
@@ -57,9 +108,12 @@ helm install hermes-agent hermes-agent/hermes-agent \
     </p>
 
     <h2>Charts</h2>
-    <ul>
-    <li><a href="./hermes-agent/">hermes-agent</a></li>
-
+    <ul class="chart-list">
+      <li class="chart-card">
+            <a href="./hermes-agent/"><img src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt=""><span>hermes-agent</span><span class="chart-version">v0.3.0</span></a>
+            <p>👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight</p>
+          </li>
+          
     </ul>
 
     <h2>Index</h2>

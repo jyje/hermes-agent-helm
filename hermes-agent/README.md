@@ -1,10 +1,20 @@
-# hermes-agent
+<div align="center">
+
+# hermes-agent-helm/hermes-agent
+
+<p>
+  <img height="96" src="https://helm.sh/img/boat.svg" alt="Helm"/>
+  &nbsp;&nbsp;<sup><b> ➕ </b></sup>&nbsp;&nbsp;
+  <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
+</p>
+
+</div>
 
 👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight
 
 Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.5](https://img.shields.io/badge/AppVersion-v2026.6.5-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
 
 ## Overview
 
@@ -40,6 +50,13 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 
 > Image tags are **date-based** (e.g. `v2026.6.5` == Hermes v0.16.0); the image
 > is multi-arch (amd64 + arm64), so it runs on Raspberry Pi clusters.
+
+> **Scaling note.** Hermes is a single-instance personal agent, so this chart
+> pins `replicaCount: 1` and there is no multi-replica mode (see the
+> `replicaCount` note in the [values table](#values)). To grow, scale *up* (more
+> `resources`, larger `persistence.size`) — and when one agent isn't enough, run
+> several instances and group them into a **team** that shares one gateway
+> channel. See [Hermes teams](../../docs/teams.md).
 
 ## Install
 
@@ -142,6 +159,10 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 
 See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ["More examples"](#more-examples) for copy-pasteable messenger blocks.
+
+> Want **several agents in one shared channel**? Point each instance at the same
+> `DISCORD_HOME_CHANNEL` (different `DISCORD_BOT_TOKEN` each) to form a Hermes
+> team — see [Hermes teams](../../docs/teams.md).
 
 ## Test
 
