@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 0.3.0
+version: 0.3.1
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -35,8 +35,8 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: added
-      description: Add ArgoCD PostSync hook to test job for automatic execution after each sync
+      description: New configuration values such as extraEnv, extraEnvFrom, and extraResources added to the chart's values table.
     - kind: changed
-      description: Update README with centered logo header and new chart title
-    - kind: changed
-      description: Bump Docker image version to v2026.6.19
+      description: Reordered description and default columns in the values table for clearer documentation.
+    - kind: fixed
+      description: Fixed YAML indentation in the README generation script, resolving a build‑step error.

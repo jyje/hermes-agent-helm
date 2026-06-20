@@ -1,6 +1,22 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.3.1] - 2026-06-20
+
+### Features
+
+- ✨ feat(pages): render chart cards with version, description, and icon ([`a5a4da3`](https://github.com/jyje/hermes-agent-helm/commit/a5a4da31595c6121e6209dee0829b862d17e2150)) — @jyje
+
+### Bug Fixes
+
+- 🛠️ fix(pages): correct YAML indentation in release-chart docs build step ([`564680c`](https://github.com/jyje/hermes-agent-helm/commit/564680cd96edaabeea57fdb033437bb1af081dc5)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(pages): give index and chart docs pages their own visual identity ([`c717ffe`](https://github.com/jyje/hermes-agent-helm/commit/c717ffe1e37ffbfcab73344140c8b589cf4b1691)) — @jyje
+- 🎨 style(chart): move Description column before Default in values table ([`1862dd9`](https://github.com/jyje/hermes-agent-helm/commit/1862dd9d963bc8b35dc41b4dc827e2794ea0ffc7)) — @jyje
+- 🔧 chore(skills): add .agents symlink for cross-agent skill discovery ([`d305285`](https://github.com/jyje/hermes-agent-helm/commit/d30528572c120bfd06ae3504beb9f4b7d38d51e1)) — @jyje
+
 ## [0.3.0] - 2026-06-20
 
 ### Features
