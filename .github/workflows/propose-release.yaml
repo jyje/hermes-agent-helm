@@ -39,7 +39,7 @@ jobs:
   propose:
     runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0   # full history + tags for the diff/changelog baseline
