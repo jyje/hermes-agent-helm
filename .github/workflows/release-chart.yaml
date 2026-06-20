@@ -128,6 +128,6 @@ jobs:
           keep_files: true
 
       - name: Clean up release/next branch (post-merge)
-        if: steps.ver.outputs.exists == 'false'
+        if: always() && steps.ver.outputs.exists == 'false'
         run: |
           git push origin --delete release/next 2>/dev/null || true
