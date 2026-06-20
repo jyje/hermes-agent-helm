@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.4.0] - 2026-06-20
+
+### Features
+
+- ✨ feat(skills): add hermes-agent-env-rule ([`1744dd1`](https://github.com/jyje/hermes-agent-helm/commit/1744dd1e3dcf92581d11fb28e27f1bdebd506e5e)) — @jyje
+- ✨ feat(ci): tag dependabot commits with a dedicated bot prefix ([`52e9541`](https://github.com/jyje/hermes-agent-helm/commit/52e9541fdfbfc6ac1a9da48c98a11be893ff57a1)) — @jyje
+- ✨ feat(ci): authenticate bot PRs via a GitHub App to skip approval gate ([`20dea61`](https://github.com/jyje/hermes-agent-helm/commit/20dea6169f8a35e5e3cb9886c2e8f1b0624aa8cc)) — @jyje
+
+### Documentation
+
+- 📄 docs(chart): add Environment variables section to README ([`afa9d7a`](https://github.com/jyje/hermes-agent-helm/commit/afa9d7a7f4b2dd617216bd3f0876942de4b0aab5)) — @jyje
+- 📄 docs(chart): add Korean translation of the chart README ([`830ab12`](https://github.com/jyje/hermes-agent-helm/commit/830ab128a184b6590273ad044fb2b3b3438e35d3)) — @jyje
+
 ## [0.3.1] - 2026-06-20
 
 ### Features
