@@ -278,6 +278,38 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 
 {{ template "chart.requirementsSection" . }}
 
+{{/* Same as helm-docs' built-in chart.valuesTable, with Description moved one column left of Default. */}}
+{{ define "chart.valuesTable" }}
+{{ if .Sections.Sections }}
+{{ range .Sections.Sections }}
+
+### {{ .SectionName }}
+
+| Key | Type | Description | Default |
+|-----|------|-------------|---------|
+  {{- range .SectionItems }}
+| {{ .Key }} | {{ .Type }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} |
+  {{- end }}
+{{- end }}
+{{ if .Sections.DefaultSection.SectionItems}}
+
+### {{ .Sections.DefaultSection.SectionName }}
+
+| Key | Type | Description | Default |
+|-----|------|-------------|---------|
+  {{- range .Sections.DefaultSection.SectionItems }}
+| {{ .Key }} | {{ .Type }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} |
+  {{- end }}
+{{ end }}
+{{ else }}
+| Key | Type | Description | Default |
+|-----|------|-------------|---------|
+  {{- range .Values }}
+| {{ .Key }} | {{ .Type }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} |
+  {{- end }}
+{{ end }}
+{{ end }}
+
 {{ template "chart.valuesHeader" . }}
 
 {{ template "chart.valuesTable" . }}

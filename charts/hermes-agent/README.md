@@ -278,65 +278,65 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 
 ## Values
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| affinity | object | `{}` | Affinity rules for Pod scheduling. |
-| args | list | `["gateway","run"]` | Arguments appended to `command`. |
-| bootstrap.enabled | bool | `true` | Seed the rendered config.yaml into HERMES_HOME via an init container. |
-| bootstrap.overwrite | bool | `true` | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). |
-| command | list | `["hermes"]` | Container entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart loop. So run the long-lived gateway explicitly; inside the s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on crash). Append `--no-supervise` only if you want to bypass s6. |
-| config | object | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` | ------------------------------------------------------------------------- |
-| controller | object | `{"type":"deployment"}` | ------------------------------------------------------------------------- |
-| controller.type | string | `"deployment"` | Workload kind: "deployment" or "statefulset". |
-| env | object | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` | ------------------------------------------------------------------------- |
-| extraEnv | list | `[]` | Plain (non-secret) env vars injected directly on the container. |
-| extraEnvFrom | list | `[]` | Extra envFrom sources (reference existing ConfigMaps/Secrets). |
-| extraResources | list | `[]` | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). |
-| fullnameOverride | string | `""` | Fully override the generated resource name (release-name-chart). |
-| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
-| image.repository | string | `"nousresearch/hermes-agent"` | Container image repository (multi-arch: amd64 + arm64). |
-| image.tag | string | `""` | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. |
-| imagePullSecrets | list | `[]` | Image pull secrets for private registries. |
-| ingress.annotations | object | `{}` | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). |
-| ingress.className | string | `""` | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. |
-| ingress.enabled | bool | `false` | Create an Ingress resource. |
-| ingress.hosts | list | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` | Host/path rules, all routed to the Service port above. |
-| ingress.tls | list | `[]` | TLS configuration for the Ingress. |
-| nameOverride | string | `""` | Override the chart name used in resource names. |
-| nodeSelector | object | `{}` | Node selector for Pod scheduling. |
-| persistence | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"mountPath":"/opt/data","size":"5Gi","storageClass":""}` | ------------------------------------------------------------------------- |
-| persistence.storageClass | string | `""` | StorageClass for the volumeClaimTemplate. Empty = cluster default. |
-| podAnnotations | object | `{}` | Annotations to add to the Pod. |
-| podLabels | object | `{}` | Labels to add to the Pod. |
-| podSecurityContext | object | `{}` | Pod-level securityContext. Left empty by default to stay compatible with the image's s6-overlay init (which starts as root and drops privileges itself). Add hardening here once verified for your environment. |
-| probes | object | `{"liveness":{},"readiness":{}}` | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 |
-| probes.liveness | object | `{}` | Liveness probe spec. Empty = no liveness probe. |
-| probes.readiness | object | `{}` | Readiness probe spec. Empty = no readiness probe. |
-| replicaCount | int | `1` | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. |
-| resources | object | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). |
-| securityContext | object | `{}` | Container-level securityContext. Same caveat as `podSecurityContext` above. |
-| service | object | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` | ------------------------------------------------------------------------- |
-| service.annotations | object | `{}` | Annotations to add to the Service. |
-| service.enabled | bool | `false` | Create a ClusterIP Service (only useful if you expose the dashboard). |
-| service.port | int | `9119` | Service port (and the dashboard's container port). |
-| service.type | string | `"ClusterIP"` | Service type. |
-| serviceAccount.annotations | object | `{}` | Annotations to add to the ServiceAccount. |
-| serviceAccount.create | bool | `true` | Create a ServiceAccount for the pod. |
-| serviceAccount.name | string | `""` | Name to use; generated from fullname when empty. |
-| tests | object | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` | ------------------------------------------------------------------------- |
-| tests.chat | object | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` | ------------------------------------------------------------------------- |
-| tests.chat.enabled | bool | `false` | Run a `hermes chat` round-trip and log the conversation. |
-| tests.chat.failOnError | bool | `false` | When true, a failed/empty round-trip fails the test job. |
-| tests.chat.maxTurns | int | `1` | Max agent turns for the round-trip. |
-| tests.chat.models | list | `[]` | Optional pool of `provider/model` ids to try in order (via `hermes chat    -m <id> --provider config.model.provider`), each with its own `timeout`.    Passes as soon as one succeeds — useful for free-tier models that are    sometimes overloaded. Leave empty to use `config.model.default` as-is    (single attempt, no `-m`/`--provider` override). |
-| tests.chat.prompt | string | `"Just say hi."` | Prompt sent to the agent. |
-| tests.chat.timeout | int | `180` | Seconds to allow each round-trip attempt to run before timing out. |
-| tests.doctorStrict | bool | `false` | When true, `hermes doctor` issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes --version, seeded config) fail. |
-| tests.doctorTimeout | int | `120` | Seconds to allow `hermes doctor` to run before timing out. |
-| tests.enabled | bool | `true` | Render the chart test Job. |
-| tests.image | object | `{"pullPolicy":"","repository":"","tag":""}` | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). |
-| tests.resources | object | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource requests/limits for the test Job's container. |
-| tolerations | list | `[]` | Tolerations for Pod scheduling. |
+| Key | Type | Description | Default |
+|-----|------|-------------|---------|
+| affinity | object | Affinity rules for Pod scheduling. | `{}` |
+| args | list | Arguments appended to `command`. | `["gateway","run"]` |
+| bootstrap.enabled | bool | Seed the rendered config.yaml into HERMES_HOME via an init container. | `true` |
+| bootstrap.overwrite | bool | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). | `true` |
+| command | list | Container entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart loop. So run the long-lived gateway explicitly; inside the s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on crash). Append `--no-supervise` only if you want to bypass s6. | `["hermes"]` |
+| config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
+| controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
+| controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
+| env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
+| extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
+| extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
+| extraResources | list | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). | `[]` |
+| fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
+| image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
+| image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
+| image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
+| imagePullSecrets | list | Image pull secrets for private registries. | `[]` |
+| ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
+| ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |
+| ingress.enabled | bool | Create an Ingress resource. | `false` |
+| ingress.hosts | list | Host/path rules, all routed to the Service port above. | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` |
+| ingress.tls | list | TLS configuration for the Ingress. | `[]` |
+| nameOverride | string | Override the chart name used in resource names. | `""` |
+| nodeSelector | object | Node selector for Pod scheduling. | `{}` |
+| persistence | object | ------------------------------------------------------------------------- | `{"accessModes":["ReadWriteOnce"],"enabled":true,"mountPath":"/opt/data","size":"5Gi","storageClass":""}` |
+| persistence.storageClass | string | StorageClass for the volumeClaimTemplate. Empty = cluster default. | `""` |
+| podAnnotations | object | Annotations to add to the Pod. | `{}` |
+| podLabels | object | Labels to add to the Pod. | `{}` |
+| podSecurityContext | object | Pod-level securityContext. Left empty by default to stay compatible with the image's s6-overlay init (which starts as root and drops privileges itself). Add hardening here once verified for your environment. | `{}` |
+| probes | object | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 | `{"liveness":{},"readiness":{}}` |
+| probes.liveness | object | Liveness probe spec. Empty = no liveness probe. | `{}` |
+| probes.readiness | object | Readiness probe spec. Empty = no readiness probe. | `{}` |
+| replicaCount | int | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. | `1` |
+| resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
+| securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |
+| service | object | ------------------------------------------------------------------------- | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` |
+| service.annotations | object | Annotations to add to the Service. | `{}` |
+| service.enabled | bool | Create a ClusterIP Service (only useful if you expose the dashboard). | `false` |
+| service.port | int | Service port (and the dashboard's container port). | `9119` |
+| service.type | string | Service type. | `"ClusterIP"` |
+| serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
+| serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
+| serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
+| tests | object | ------------------------------------------------------------------------- | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
+| tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
+| tests.chat.enabled | bool | Run a `hermes chat` round-trip and log the conversation. | `false` |
+| tests.chat.failOnError | bool | When true, a failed/empty round-trip fails the test job. | `false` |
+| tests.chat.maxTurns | int | Max agent turns for the round-trip. | `1` |
+| tests.chat.models | list | Optional pool of `provider/model` ids to try in order (via `hermes chat    -m <id> --provider config.model.provider`), each with its own `timeout`.    Passes as soon as one succeeds — useful for free-tier models that are    sometimes overloaded. Leave empty to use `config.model.default` as-is    (single attempt, no `-m`/`--provider` override). | `[]` |
+| tests.chat.prompt | string | Prompt sent to the agent. | `"Just say hi."` |
+| tests.chat.timeout | int | Seconds to allow each round-trip attempt to run before timing out. | `180` |
+| tests.doctorStrict | bool | When true, `hermes doctor` issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes --version, seeded config) fail. | `false` |
+| tests.doctorTimeout | int | Seconds to allow `hermes doctor` to run before timing out. | `120` |
+| tests.enabled | bool | Render the chart test Job. | `true` |
+| tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
+| tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
+| tolerations | list | Tolerations for Pod scheduling. | `[]` |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
