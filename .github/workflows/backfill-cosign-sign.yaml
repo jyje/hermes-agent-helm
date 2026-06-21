@@ -14,6 +14,7 @@ on:
 
 permissions:
   id-token: write   # mint a Sigstore OIDC token for keyless cosign signing
+  packages: write   # push the signature alongside the chart on ghcr
 
 jobs:
   sign:
@@ -21,6 +22,11 @@ jobs:
     steps:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
+
+      - name: Log in to ghcr
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Sign each version (keyless, Sigstore)
         run: |
