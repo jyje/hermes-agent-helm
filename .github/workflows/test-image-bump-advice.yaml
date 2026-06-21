@@ -1,0 +1,54 @@
+name: 🧪 test-image-bump-advice
+
+# One-off utility: dry-run advise-image-bump.py against real upstream release
+# notes using the real NVIDIA_API_KEY secret, without touching main or
+# creating any branch/PR. Prints the rendered advice to the job log. Delete
+# this file once it has been run successfully.
+on:
+  workflow_dispatch:
+    inputs:
+      from_version:
+        description: "Upstream version BEFORE the range (exclusive)"
+        type: string
+        default: "v2026.6.5"
+      to_version:
+        description: "Upstream version AT the end of the range (inclusive)"
+        type: string
+        default: "v2026.6.19"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Collect upstream release notes for the test range
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : > upstream_release_notes.md
+          for v in "${{ inputs.from_version }}" "${{ inputs.to_version }}"; do
+            body="$(gh api "repos/NousResearch/hermes-agent/releases/tags/$v" --jq '.body // empty' 2>/dev/null || true)"
+            if [ -n "$body" ]; then
+              { echo "## $v"; echo; echo "$body"; echo; } >> upstream_release_notes.md
+            fi
+          done
+          wc -l upstream_release_notes.md
+          cat charts/hermes-agent/values.yaml > chart_context.txt
+
+      - name: Run advise-image-bump.py (real NVIDIA_API_KEY)
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NIM_MODEL: "nvidia/nemotron-3-ultra-550b-a55b"
+        run: |
+          python3 .github/scripts/release/advise-image-bump.py \
+            upstream_release_notes.md chart_context.txt image_bump_advice.json
+
+      - name: Render advice
+        run: |
+          echo "::group::Rendered PR-body block"
+          python3 .github/scripts/release/render-image-bump-advice.py image_bump_advice.json
+          echo "::endgroup::"
