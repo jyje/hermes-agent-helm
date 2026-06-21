@@ -24,10 +24,14 @@ DESCRIPTION="$(awk '
   found { sub(/^  /, ""); print }
 ' "$CHART_YAML")"
 
+APP_VERSION="$(grep -E '^appVersion:' "$CHART_YAML" | sed -E 's/^appVersion:[[:space:]]*"?([^"]+)"?.*/\1/')"
+
 cat <<EOF
 ${DESCRIPTION}
 
 ---
+
+**AppVersion:** \`${APP_VERSION}\` — the Hermes Agent image this chart version deploys.
 
 ## Install
 

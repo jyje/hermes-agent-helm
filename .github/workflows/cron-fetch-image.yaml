@@ -122,6 +122,29 @@ jobs:
             echo "BRANCH_EXISTS=false" >> $GITHUB_ENV
           fi
 
+      - name: Collect upstream release notes (current appVersion -> target)
+        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+        run: |
+          : > upstream_release_notes.md
+          while IFS= read -r v; do
+            body="$(gh api "repos/NousResearch/hermes-agent/releases/tags/$v" --jq '.body // empty' 2>/dev/null || true)"
+            if [ -n "$body" ]; then
+              { echo "## $v"; echo; echo "$body"; echo; } >> upstream_release_notes.md
+            fi
+          done < newer_versions.txt
+          cat "${CHART}/values.yaml" > chart_context.txt
+
+      - name: AI advice on chart-relevant upstream changes (NVIDIA NIM)
+        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NIM_MODEL: "nvidia/nemotron-3-ultra-550b-a55b"
+        run: |
+          python3 .github/scripts/release/advise-image-bump.py \
+            upstream_release_notes.md chart_context.txt image_bump_advice.json
+          python3 .github/scripts/release/render-image-bump-advice.py \
+            image_bump_advice.json > image_bump_advice.md
+
       - name: Install helm-docs
         if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
         run: |
@@ -154,8 +177,8 @@ jobs:
         if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
         run: |
           NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
-          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated — adjust them manually if you know the matching Hermes release." \
-            "$IMAGE" "$IMAGE" "${{ env.CURRENT_VERSION }}" "${{ env.TARGET_VERSION }}" "$NEW_LIST")
+          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n%s\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated — adjust them manually if you know the matching Hermes release." \
+            "$IMAGE" "$IMAGE" "${{ env.CURRENT_VERSION }}" "${{ env.TARGET_VERSION }}" "$NEW_LIST" "$(cat image_bump_advice.md)")
           gh pr create \
             --title "⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}" \
             --body "$PR_BODY" \
