@@ -1,4 +1,4 @@
-name: cron-fetch-image
+name: ⏰ cron-fetch-image
 
 # Watches the upstream container image (nousresearch/hermes-agent on Docker Hub)
 # for new DATE-based tags (vYYYY.M.D, occasionally with a 4th segment). When a
