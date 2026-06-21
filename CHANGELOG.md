@@ -1,6 +1,23 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.4.1] - 2026-06-21
+
+### Features
+
+- ✨ feat(chart): add values.schema.json for upfront values validation ([`7722e44`](https://github.com/jyje/hermes-agent-helm/commit/7722e444441f5a7702ccd4cd89db0f4195b3c47f)) — @jyje
+
+### Bug Fixes
+
+- 🛠️ fix(release): quote artifacthub.io/changes entries to satisfy Artifact Hub ([`809e00f`](https://github.com/jyje/hermes-agent-helm/commit/809e00f2018ad3103c33090477ac0512b54c6db4)) — @jyje
+- 🛠️ fix(release): keep the Korean chart README's version in sync too ([`07944be`](https://github.com/jyje/hermes-agent-helm/commit/07944be61bc658901e198b663197a1e1f3e5363d)) — @jyje
+
+### Documentation
+
+- 📄 docs: add Artifact Hub badge to the project README ([`fc951f0`](https://github.com/jyje/hermes-agent-helm/commit/fc951f02705ea45423566172f15f214afd90d679)) — @jyje
+- 📄 docs(chart): add a TL;DR install block to the top of the chart README ([`d99e531`](https://github.com/jyje/hermes-agent-helm/commit/d99e531111ebb09f8f7b78a332918a16d9fa96e0)) — @jyje
+- 📄 docs(chart): move quick-start content above, details below ([`8db8327`](https://github.com/jyje/hermes-agent-helm/commit/8db8327b95b8fd1b068bc4b81d40517d8536b9bd)) — @jyje
+
 ## [0.4.0] - 2026-06-20
 
 ### Features

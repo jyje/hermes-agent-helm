@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 0.4.0
+version: 0.4.1
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -34,9 +34,9 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: added
-      description: Add hermes-agent-env-rule feature for environment‑based rules
-    - kind: added
-      description: Add Korean translation of the chart README
-    - kind: added
-      description: Add Environment variables section to the README documentation
+    - kind: "added"
+      description: "Add values.schema.json for upfront values validation"
+    - kind: "changed"
+      description: "Update README with TL;DR install block and quick‑start content"
+    - kind: "fixed"
+      description: "Quote Artifact Hub changes entries to satisfy Artifact Hub validation"
