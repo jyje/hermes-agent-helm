@@ -14,7 +14,7 @@
 
 Hermes Agent — 멀티 제공자 LLM 에이전트 프레임워크 — 를 Kubernetes에서 실행하세요. Hermes가 지원하는 모든 제공자(OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, 또는 LiteLLM/vLLM 같은 OpenAI 호환 프록시)를 `values.yaml`만으로 설정할 수 있고, 내장된 `helm test` 헬스체크도 함께 제공됩니다.
 
-![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 

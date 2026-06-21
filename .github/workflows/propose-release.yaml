@@ -122,6 +122,9 @@ jobs:
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
           # Keep the OCI install-example versions in examples/helm/README.md in sync.
           sed -i "s/${old}/${new}/g" examples/helm/README.md
+          # Same for the chart's Korean README — it has no .gotmpl (hand-translated
+          # prose), so its version badge/OCI example would otherwise go stale.
+          sed -i "s/${old}/${new}/g" charts/hermes-agent/README-ko.md
 
       - name: Build contributors block
         uses: actions/github-script@v9
