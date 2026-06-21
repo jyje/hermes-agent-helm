@@ -1,6 +1,24 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.4.2] - 2026-06-21
+
+### Features
+
+- ✨ feat(release): sign published charts with cosign (keyless) ([`bd133be`](https://github.com/jyje/hermes-agent-helm/commit/bd133be6e0ebb5f6269ba63dc666f2a282fcb551)) — @jyje
+
+### Bug Fixes
+
+- 🛠️ fix(release): log in to ghcr before signing in the backfill workflow ([`9b893f8`](https://github.com/jyje/hermes-agent-helm/commit/9b893f8554df38202856593196f7b9cc92fe9a9d)) — @jyje
+
+### Build
+
+- 🔨 build(release): add one-off cosign backfill workflow ([`fb1d002`](https://github.com/jyje/hermes-agent-helm/commit/fb1d002c1ab3ab18d59af5ff0cb73e17ff27c646)) — @jyje
+
+### Removed
+
+- 🗑️ remove(release): drop the one-off cosign backfill workflow ([`a4240f7`](https://github.com/jyje/hermes-agent-helm/commit/a4240f703479e1a0c37f21a95e73568bc5835c95)) — @jyje
+
 ## [0.4.1] - 2026-06-21
 
 ### Features
