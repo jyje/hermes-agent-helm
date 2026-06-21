@@ -104,6 +104,10 @@ def extract_json(s: str) -> dict:
 
 
 def call_nim(release_notes: str, chart_context: str) -> dict:
+    """Streamed call — a large model over a large input/output can run long
+    enough that NIM's gateway resets a non-streaming connection before the
+    first (and only) response chunk arrives. Streaming keeps the connection
+    alive with a steady trickle of chunks instead."""
     user = (
         f"=== UPSTREAM RELEASE NOTES (current appVersion -> target) ===\n{release_notes}\n\n"
         f"=== WHAT THE CHART ALREADY EXPOSES ===\n{chart_context}\n"
@@ -116,6 +120,7 @@ def call_nim(release_notes: str, chart_context: str) -> dict:
         ],
         "temperature": 0.2,
         "max_tokens": MAX_TOKENS,
+        "stream": True,
     }
     req = urllib.request.Request(
         NIM_URL,
@@ -123,13 +128,30 @@ def call_nim(release_notes: str, chart_context: str) -> dict:
         headers={
             "Authorization": f"Bearer {API_KEY}",
             "Content-Type": "application/json",
+            "Accept": "text/event-stream",
         },
         method="POST",
     )
+    content_parts: list[str] = []
+    reasoning_parts: list[str] = []
     with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-        body = json.loads(resp.read().decode())
-    msg = body["choices"][0]["message"]
-    content = msg.get("content") or msg.get("reasoning_content") or ""
+        for raw_line in resp:
+            line = raw_line.decode("utf-8", errors="replace").strip()
+            if not line or not line.startswith("data:"):
+                continue
+            chunk_str = line[len("data:"):].strip()
+            if chunk_str == "[DONE]":
+                break
+            chunk = json.loads(chunk_str)
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            delta = choices[0].get("delta") or {}
+            if delta.get("content"):
+                content_parts.append(delta["content"])
+            if delta.get("reasoning_content"):
+                reasoning_parts.append(delta["reasoning_content"])
+    content = "".join(content_parts) or "".join(reasoning_parts)
     data = extract_json(content)
     items = sanitize_items(data.get("items"))
     return {"items": items, "source": "nim", "model": NIM_MODEL}
