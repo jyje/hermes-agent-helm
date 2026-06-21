@@ -26,7 +26,7 @@ import urllib.request
 NIM_URL = os.environ.get("NIM_URL", "https://integrate.api.nvidia.com/v1/chat/completions")
 NIM_MODEL = os.environ.get("NIM_MODEL", "nvidia/nemotron-3-ultra-550b-a55b")
 API_KEY = os.environ.get("NVIDIA_API_KEY", "").strip()
-TIMEOUT = int(os.environ.get("NIM_TIMEOUT", "120"))
+TIMEOUT = int(os.environ.get("NIM_TIMEOUT", "300"))
 MAX_RETRIES = int(os.environ.get("NIM_MAX_RETRIES", "2"))
 MAX_TOKENS = int(os.environ.get("NIM_MAX_TOKENS", "8192"))
 
