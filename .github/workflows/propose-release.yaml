@@ -188,7 +188,7 @@ jobs:
             examples/helm/README.md
             CHANGELOG.md
           commit-message: "🔧 chore(release): propose v${{ steps.ver.outputs.new }}"
-          title: "🚀 Release v${{ steps.ver.outputs.new }}"
+          title: "🚀 release(hermes-agent): merge v${{ steps.ver.outputs.new }} release proposal"
           body-path: ${{ env.OUT }}/PR_BODY.md
           labels: release
           delete-branch: true

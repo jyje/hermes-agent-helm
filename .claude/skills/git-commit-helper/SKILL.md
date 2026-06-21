@@ -45,6 +45,7 @@ Only use the following approved types and emojis:
 | ⚡      | `perf`     | Improve performance |
 | ✅      | `test`     | Add, update, or pass tests |
 | 🔨      | `build`    | Add or update development scripts |
+| 🚀      | `release`  | Cut or merge a release (e.g. the release-proposal PR title/merge commit) |
 
 #### Automated / Bot Commits
 Commits created entirely by automation (e.g., Dependabot, Renovate) without direct user or agent involvement use a dedicated pairing, kept separate from the manual mapping above:

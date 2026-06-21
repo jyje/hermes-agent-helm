@@ -42,7 +42,7 @@ jobs:
               pull_number: context.issue.number,
             });
             const isRelease = pr.data.labels.some(l => l.name === 'release')
-              || /Release v/i.test(pr.data.title);
+              || /release proposal/i.test(pr.data.title);
             if (!isRelease) {
               core.setFailed('`/version` is only valid on the release proposal PR');
             }
