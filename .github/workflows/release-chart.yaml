@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write   # create tag + GitHub Release
   packages: write   # push to ghcr
+  id-token: write   # mint a Sigstore OIDC token for keyless cosign signing
 
 jobs:
   release-chart:
@@ -84,6 +85,16 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" \
             | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
           helm push dist/hermes-agent-*.tgz "oci://ghcr.io/${{ github.repository }}"
+
+      - name: Install cosign
+        if: steps.ver.outputs.exists == 'false'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign the chart (keyless, Sigstore)
+        if: steps.ver.outputs.exists == 'false'
+        run: |
+          cosign sign --yes \
+            "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"
 
       - name: Checkout existing Helm repo index (gh-pages)
         if: steps.ver.outputs.exists == 'false'
