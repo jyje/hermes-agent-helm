@@ -42,7 +42,34 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 - **실제 시크릿을 커밋하지 않는 GitOps** — SealedSecret + `extraEnvFrom` 가이드:
   [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
 
-자세한 내용, 제공자/메신저 옵션, 전체 values 레퍼런스는 아래에서 ↓
+## 제공자 설정
+
+`config.model.provider`를 내장 키로 설정하고, 해당 키를 `env` 아래에 제공하세요:
+
+| 제공자 | `config.model.provider` | 키 env var | 예제 |
+| --- | --- | --- | --- |
+| OpenAI | `openai-api` | `OPENAI_API_KEY` | [`values-openai.yaml`](values-openai.yaml) |
+| Anthropic (Claude) | `anthropic` | `ANTHROPIC_API_KEY` | [`values-anthropic.yaml`](values-anthropic.yaml) |
+| Google Gemini | `gemini` | `GOOGLE_API_KEY` | [`values-gemini.yaml`](values-gemini.yaml) |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
+| NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
+| 커스텀 (LiteLLM / vLLM / LM Studio) | `config.providers` 아래 직접 정의한 id | 프록시마다 다름 | [`values-litellm.yaml`](values-litellm.yaml) |
+
+> `openai`(접미사 없음)는 **유효하지 않은** 제공자 키입니다 — OpenRouter의
+> 별칭으로 처리됩니다. `openai-api`를 사용하세요.
+
+제공자별 전체 `--set` 예시와 메신저(Discord/Telegram) 설정 가이드는 아래
+[제공자 & 메신저 설정](#제공자--메신저-설정)을 참고하세요.
+
+## 테스트
+
+```bash
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+설치 후 `hermes doctor` 스타일 헬스체크 Job을 실행합니다. 실제 제공자
+라운드트립까지 검증하려면 아래 [고급 테스트](#고급-테스트)를 참고하세요.
 
 ## 개요
 
@@ -59,17 +86,6 @@ Kubernetes에서 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를
   (`ingress.enabled`)를 가질 수 있습니다
 - `hermes doctor` 스타일 체크를 실행하는 **Helm test** Job(`helm test`)
 
-Hermes는 **내장 제공자 키**(`openai-api`, `anthropic`, `gemini`, `openrouter`,
-`nvidia`, `deepseek`, `lmstudio`, …)를 통해 여러 LLM 제공자를 지원합니다.
-**OpenAI 호환 프록시**(LiteLLM, vLLM, LM Studio)를 사용하려면 `config.providers`
-아래 등록하고 키로 참조하세요. 이 차트는 전적으로 `values.yaml`로 구동되므로,
-호스팅 API든 클러스터 내 프록시든 자유롭게 지정할 수 있습니다.
-
-> 제공자 키 `openai`는 Hermes에서 **유효하지 않습니다**(OpenRouter의 별칭으로
-> 처리됩니다). api.openai.com에는 `openai-api`를 사용하거나, 프록시에는 커스텀
-> 제공자를 사용하세요 — ["More examples"](#more-examples)의
-> `values-litellm.yaml` / `values-litellm-k8s.yaml`을 참고하세요.
-
 에이전트의 명령 실행은 **`local` 백엔드**를 사용합니다(명령이 파드 내부에서
 실행되며, 파드 자체가 샌드박스입니다). `docker` 백엔드는 의도적으로 **클러스터
 내에서 지원하지 않습니다** — Docker 데몬/소켓이 필요한데, containerd 클러스터
@@ -85,7 +101,9 @@ Hermes는 **내장 제공자 키**(`openai-api`, `anthropic`, `gemini`, `openrou
 > 하나의 gateway 채널을 공유하는 **팀**으로 묶으세요. [Hermes 팀](../../docs/teams-ko.md)을
 > 참고하세요.
 
-## 설치
+## 제공자 & 메신저 설정
+
+로컬 차트 체크아웃으로 설치하는 경우(예: 아직 릴리즈되지 않은 변경 시도):
 
 ```bash
 helm upgrade --install hermes-agent ./charts/hermes-agent \
@@ -192,20 +210,13 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 > `DISCORD_HOME_CHANNEL`을 가리키게 하고(각각 다른 `DISCORD_BOT_TOKEN`) Hermes
 > 팀을 구성하세요 — [Hermes 팀](../../docs/teams-ko.md)을 참고하세요.
 
-## 테스트
+## 고급 테스트
 
-설치 후, 번들된 Helm test를 실행하세요(Job, 훅 `helm.sh/hook: test`):
-
-```bash
-helm test hermes-agent -n hermes-agent
-# 테스트는 Job이므로, 출력은 라벨로 조회하세요 (`helm test --logs`가 아님):
-kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
-```
-
-이 테스트는 `hermes --version`을 실행하고, 시드된 `config.yaml`을 검증하며,
-docker 가용성을 확인하고(백엔드가 `local`이므로 정보 제공용), `hermes doctor`를
-실행합니다. `--set tests.enabled=false`로 끄거나, `--set tests.doctorStrict=true`로
-doctor 실패를 치명적 오류로 만들 수 있습니다.
+[`helm test`](#테스트) Job(훅 `helm.sh/hook: test`)은 `hermes --version`을
+실행하고, 시드된 `config.yaml`을 검증하며, docker 가용성을 확인하고(백엔드가
+`local`이므로 정보 제공용), `hermes doctor`를 실행합니다. `--set
+tests.enabled=false`로 끄거나, `--set tests.doctorStrict=true`로 doctor
+실패를 치명적 오류로 만들 수 있습니다.
 
 ### 제공자 엔드-투-엔드 검증 (`tests.chat.enabled`)
 
