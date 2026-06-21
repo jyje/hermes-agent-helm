@@ -1,60 +1,50 @@
 name: cron-fetch-image
 
 # Watches the upstream container image (nousresearch/hermes-agent on Docker Hub)
-# for new DATE-based tags (vYYYY.M.D, occasionally with a 4th segment) and, when
-# a tag newer than the chart's current appVersion appears, opens a PR that bumps
-# Chart.yaml's appVersion (the single source of truth — image.tag falls back to
-# it) and regenerates the chart README via helm-docs so validate-chart stays
-# green. The chart `version` bump, CHANGELOG, and release are handled separately
-# by propose-release.yaml once this PR is merged into main.
+# for new DATE-based tags (vYYYY.M.D, occasionally with a 4th segment). When a
+# tag newer than the chart's current appVersion appears, two independent jobs
+# run in parallel:
+#   - bump-pr: opens a PR that bumps Chart.yaml's appVersion (the single
+#     source of truth — image.tag falls back to it) and regenerates the chart
+#     README via helm-docs, so validate-chart stays green. Ships immediately —
+#     it doesn't wait on the AI review.
+#   - upstream-review: asks NVIDIA NIM which upstream changes (across every
+#     release note between the current and target appVersion) the CHART
+#     itself should react to, and files one GitHub Issue per item, labeled
+#     `upstream-review` + a priority. The maintainer triages each
+#     independently — accept (branch + implement) or reject (close it).
+# The chart `version` bump, CHANGELOG, and release are handled separately by
+# propose-release.yaml once the bump-pr is merged into main.
 on:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
-permissions:
-  contents: write        # push the image/<tag> branch
-  pull-requests: write   # open the bump PR
+concurrency:
+  group: cron-fetch-image
+  cancel-in-progress: false
+
+env:
+  IMAGE: 'nousresearch/hermes-agent'
+  CHART: 'charts/hermes-agent'
 
 jobs:
-  check-image-version:
+  check:
     name: 🔍 Check Upstream Image
     runs-on: ubuntu-26.04-arm
-    env:
-      IMAGE: 'nousresearch/hermes-agent'
-      CHART: 'charts/hermes-agent'
-      HELM_DOCS_VERSION: '1.14.2'
-      UPDATE_NEEDED: 'false'
-      CURRENT_VERSION: ''
-      TARGET_VERSION: ''
-      PR_EXISTS: 'false'
-      HAS_OPEN_VERSION_PR: 'false'
-      BRANCH_EXISTS: 'false'
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+      current_version: ${{ steps.pick_target.outputs.current_version }}
+      target_version: ${{ steps.pick_target.outputs.target_version }}
     steps:
-      # PRs/pushes made with the default GITHUB_TOKEN are attributed to
-      # github-actions[bot], which now requires a maintainer to manually
-      # approve the resulting "validate-chart" run on every push (GitHub's
-      # June 2026 bot-PR-approval policy). An installation token for our own
-      # GitHub App is attributed to a trusted, write-access identity instead,
-      # so it skips that approval gate.
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - name: Export GH_TOKEN for gh CLI steps
-        run: echo "GH_TOKEN=${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
-
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           ref: main
-          token: ${{ steps.app-token.outputs.token }}
 
       - name: Fetch all Docker Hub tags
-        id: fetch_tags
         run: |
           url="https://hub.docker.com/v2/repositories/${IMAGE}/tags?page_size=100"
           : > raw_tags.txt
@@ -74,7 +64,7 @@ jobs:
           CURRENT_VERSION=$(grep -E '^appVersion:' "${CHART}/Chart.yaml" \
             | sed -E 's/^appVersion:[[:space:]]*"?([^"]+)"?.*/\1/')
           echo "Current appVersion: $CURRENT_VERSION"
-          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
 
           # Every tag strictly newer than CURRENT_VERSION (works even if CURRENT
           # is not itself present in the tag list).
@@ -88,42 +78,164 @@ jobs:
           TARGET_VERSION=$(sort -V newer_versions.txt | tail -n1)
           if [ -z "$TARGET_VERSION" ]; then
             echo "Up to date; no tag newer than $CURRENT_VERSION."
-            echo "UPDATE_NEEDED=false" >> $GITHUB_ENV
+            echo "update_needed=false" >> "$GITHUB_OUTPUT"
           else
             echo "Target (newest) version: $TARGET_VERSION"
-            echo "TARGET_VERSION=$TARGET_VERSION" >> $GITHUB_ENV
-            echo "UPDATE_NEEDED=true" >> $GITHUB_ENV
+            echo "target_version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
+            echo "update_needed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check for existing PRs
-        if: env.UPDATE_NEEDED == 'true'
+        id: check_pr
+        if: steps.pick_target.outputs.update_needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          PR_TITLE="⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}"
-          gh pr list --state open --base main --json title > pr_list.json
+          PR_TITLE="⬆️ dep(image): bump hermes-agent image to ${{ steps.pick_target.outputs.target_version }}"
+          gh pr list --repo "${{ github.repository }}" --state open --base main --json title > pr_list.json
           # PR for this specific version already open?
-          jq -e ".[] | select(.title == \"$PR_TITLE\")" pr_list.json >/dev/null 2>&1 \
-            && echo "PR_EXISTS=true" >> $GITHUB_ENV || echo "PR_EXISTS=false" >> $GITHUB_ENV
+          if jq -e ".[] | select(.title == \"$PR_TITLE\")" pr_list.json >/dev/null 2>&1; then
+            echo "pr_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pr_exists=false" >> "$GITHUB_OUTPUT"
+          fi
           # Any open image-bump PR (avoid multiple open ones → merge conflicts
           # when the first is merged).
           OPEN_COUNT=$(jq -r '.[].title' pr_list.json \
             | grep -cE '^⬆️ dep\(image\): bump hermes-agent image to v[0-9]{4}\.[0-9]+\.[0-9]+(\.[0-9]+)?$' || true)
           if [ "${OPEN_COUNT:-0}" -ge 1 ]; then
-            echo "HAS_OPEN_VERSION_PR=true" >> $GITHUB_ENV
+            echo "has_open_version_pr=true" >> "$GITHUB_OUTPUT"
           else
-            echo "HAS_OPEN_VERSION_PR=false" >> $GITHUB_ENV
+            echo "has_open_version_pr=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check for existing branch
-        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false'
+        id: check_branch
+        if: steps.pick_target.outputs.update_needed == 'true' && steps.check_pr.outputs.pr_exists == 'false' && steps.check_pr.outputs.has_open_version_pr == 'false'
         run: |
-          if git ls-remote --exit-code --heads origin "image/${{ env.TARGET_VERSION }}" >/dev/null 2>&1; then
-            echo "BRANCH_EXISTS=true" >> $GITHUB_ENV
+          if git ls-remote --exit-code --heads origin "image/${{ steps.pick_target.outputs.target_version }}" >/dev/null 2>&1; then
+            echo "branch_exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "BRANCH_EXISTS=false" >> $GITHUB_ENV
+            echo "branch_exists=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Combine into a single proceed gate
+        id: gate
+        run: |
+          if [ "${{ steps.pick_target.outputs.update_needed }}" = "true" ] \
+             && [ "${{ steps.check_pr.outputs.pr_exists }}" != "true" ] \
+             && [ "${{ steps.check_pr.outputs.has_open_version_pr }}" != "true" ] \
+             && [ "${{ steps.check_branch.outputs.branch_exists }}" != "true" ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload version-range artifact
+        if: steps.gate.outputs.proceed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: newer-versions
+          path: newer_versions.txt
+          retention-days: 1
+
+  bump-pr:
+    name: ⬆️ Open version-bump PR
+    needs: check
+    if: needs.check.outputs.proceed == 'true'
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      HELM_DOCS_VERSION: '1.14.2'
+      CURRENT_VERSION: ${{ needs.check.outputs.current_version }}
+      TARGET_VERSION: ${{ needs.check.outputs.target_version }}
+    steps:
+      # PRs/pushes made with the default GITHUB_TOKEN are attributed to
+      # github-actions[bot], which now requires a maintainer to manually
+      # approve the resulting "validate-chart" run on every push (GitHub's
+      # June 2026 bot-PR-approval policy). An installation token for our own
+      # GitHub App is attributed to a trusted, write-access identity instead,
+      # so it skips that approval gate.
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Export GH_TOKEN for gh CLI steps
+        run: echo "GH_TOKEN=${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: newer-versions
+
+      - name: Install helm-docs
+        run: |
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; esac
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${arch}.tar.gz" \
+            | tar -xz helm-docs
+          sudo install helm-docs /usr/local/bin/
+
+      - name: Create branch and bump appVersion
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "image/${TARGET_VERSION}" main
+
+          # appVersion is the single source of truth (image.tag falls back to it).
+          sed -i -E "s|^appVersion:.*|appVersion: \"${TARGET_VERSION}\"|" "${CHART}/Chart.yaml"
+          # Keep the generated README's AppVersion badge in sync (validate-chart
+          # fails on a stale README).
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+
+          git add "${CHART}/Chart.yaml" "${CHART}/README.md"
+          git commit \
+            -m "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
+            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it) and regenerate the README badge." \
+            --allow-empty
+          git push origin "image/${TARGET_VERSION}"
+
+      - name: Create PR
+        run: |
+          NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
+          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> An AI-assisted review of upstream changes relevant to this chart is filing separate tracking issues — see issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`. Triage those independently of this PR.\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated — adjust them manually if you know the matching Hermes release." \
+            "$IMAGE" "$IMAGE" "$CURRENT_VERSION" "$TARGET_VERSION" "$NEW_LIST" "$TARGET_VERSION")
+          gh pr create \
+            --title "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "image/${TARGET_VERSION}" \
+            --assignee "${{ github.repository_owner }}"
+
+  upstream-review:
+    name: 🤖 AI review of upstream changes
+    needs: check
+    if: needs.check.outputs.proceed == 'true'
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+      issues: write
+    env:
+      TARGET_VERSION: ${{ needs.check.outputs.target_version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: newer-versions
+
       - name: Collect upstream release notes (current appVersion -> target)
-        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
         run: |
           : > upstream_release_notes.md
           while IFS= read -r v; do
@@ -135,53 +247,22 @@ jobs:
           cat "${CHART}/values.yaml" > chart_context.txt
 
       - name: AI advice on chart-relevant upstream changes (NVIDIA NIM)
-        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NIM_MODEL: "nvidia/nemotron-3-ultra-550b-a55b"
         run: |
           python3 .github/scripts/release/advise-image-bump.py \
             upstream_release_notes.md chart_context.txt image_bump_advice.json
-          python3 .github/scripts/release/render-image-bump-advice.py \
-            image_bump_advice.json > image_bump_advice.md
 
-      - name: Install helm-docs
-        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+      - name: Ensure tracking labels exist
         run: |
-          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; esac
-          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${arch}.tar.gz" \
-            | tar -xz helm-docs
-          sudo install helm-docs /usr/local/bin/
+          gh label create "upstream-review" --repo "${{ github.repository }}" \
+            --color "5319e7" --description "Filed from an upstream image-bump review" --force
+          gh label create "priority:high" --repo "${{ github.repository }}" --color "b60205" --force
+          gh label create "priority:medium" --repo "${{ github.repository }}" --color "fbca04" --force
+          gh label create "priority:low" --repo "${{ github.repository }}" --color "0e8a16" --force
 
-      - name: Create branch and bump appVersion
-        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
+      - name: File one issue per action item
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "image/${{ env.TARGET_VERSION }}" main
-
-          # appVersion is the single source of truth (image.tag defaults to it).
-          sed -i -E "s|^appVersion:.*|appVersion: \"${{ env.TARGET_VERSION }}\"|" "${CHART}/Chart.yaml"
-          # Keep the generated README's AppVersion badge in sync (validate-chart
-          # fails on a stale README).
-          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
-
-          git add "${CHART}/Chart.yaml" "${CHART}/README.md"
-          git commit \
-            -m "⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}" \
-            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it) and regenerate the README badge." \
-            --allow-empty
-          git push origin "image/${{ env.TARGET_VERSION }}"
-
-      - name: Create PR
-        if: env.UPDATE_NEEDED == 'true' && env.PR_EXISTS == 'false' && env.HAS_OPEN_VERSION_PR == 'false' && env.BRANCH_EXISTS == 'false'
-        run: |
-          NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
-          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n%s\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated — adjust them manually if you know the matching Hermes release." \
-            "$IMAGE" "$IMAGE" "${{ env.CURRENT_VERSION }}" "${{ env.TARGET_VERSION }}" "$NEW_LIST" "$(cat image_bump_advice.md)")
-          gh pr create \
-            --title "⬆️ dep(image): bump hermes-agent image to ${{ env.TARGET_VERSION }}" \
-            --body "$PR_BODY" \
-            --base main \
-            --head "image/${{ env.TARGET_VERSION }}" \
-            --assignee "${{ github.repository_owner }}"
+          python3 .github/scripts/release/file-image-bump-issues.py \
+            image_bump_advice.json "${TARGET_VERSION}" "${{ github.repository }}"
