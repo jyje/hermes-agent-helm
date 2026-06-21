@@ -14,9 +14,63 @@
 
 Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
+![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
+
+## TL;DR
+
+```bash
+# OCI (recommended)
+helm upgrade --install hermes-agent \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.4.1 \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+```bash
+# Classic Helm repo
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+helm upgrade --install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+- **ArgoCD** — ready-to-apply `Application` manifests, one per provider/messenger
+  combo: [`examples/argocd/`](../../examples/argocd/).
+- **GitOps without committing real secrets** — SealedSecret + `extraEnvFrom`
+  walkthrough: [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
+
+## Configure your provider
+
+Set `config.model.provider` to a built-in key, supply its key under `env`:
+
+| Provider | `config.model.provider` | Key env var | Example |
+| --- | --- | --- | --- |
+| OpenAI | `openai-api` | `OPENAI_API_KEY` | [`values-openai.yaml`](values-openai.yaml) |
+| Anthropic (Claude) | `anthropic` | `ANTHROPIC_API_KEY` | [`values-anthropic.yaml`](values-anthropic.yaml) |
+| Google Gemini | `gemini` | `GOOGLE_API_KEY` | [`values-gemini.yaml`](values-gemini.yaml) |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
+| NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
+| Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
+
+> `openai` (no suffix) is **not** a valid provider key — it aliases to
+> OpenRouter. Use `openai-api`.
+
+Full provider walkthrough (`--set` examples per provider) and messenger
+(Discord/Telegram) setup: see [Provider & messenger setup](#provider--messenger-setup)
+below.
+
+## Test
+
+```bash
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+Runs a `hermes doctor`-style health check Job after install. To also verify a
+real provider round-trip, see [Advanced testing](#advanced-testing) below.
 
 ## Overview
 
@@ -34,17 +88,6 @@ It deploys:
   and an **optional** Ingress in front of it (`ingress.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
-Hermes supports many LLM providers via **built-in provider keys**
-(`openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`, `deepseek`,
-`lmstudio`, …). For an **OpenAI-compatible proxy** (LiteLLM, vLLM, LM Studio),
-register it under `config.providers` and reference it by key. The chart is fully
-driven by `values.yaml` — point it at a hosted API or an in-cluster proxy.
-
-> The provider key `openai` is **not** valid in Hermes (it aliases to
-> OpenRouter). Use `openai-api` for api.openai.com, or a custom provider for a
-> proxy — see `values-litellm.yaml` / `values-litellm-k8s.yaml` in
-> ["More examples"](#more-examples).
-
 The agent's command execution uses the **`local` backend** (commands run inside
 the pod; the pod is the sandbox). The `docker` backend is intentionally **not
 supported in-cluster** — it requires a Docker daemon/socket, absent on
@@ -60,7 +103,9 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 > several instances and group them into a **team** that shares one gateway
 > channel. See [Hermes teams](../../docs/teams.md).
 
-## Install
+## Provider & messenger setup
+
+Installing from a local chart checkout (e.g. to try an unreleased change):
 
 ```bash
 helm upgrade --install hermes-agent ./charts/hermes-agent \
@@ -166,20 +211,13 @@ See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 > `DISCORD_HOME_CHANNEL` (different `DISCORD_BOT_TOKEN` each) to form a Hermes
 > team — see [Hermes teams](../../docs/teams.md).
 
-## Test
+## Advanced testing
 
-After install, run the bundled Helm test (a Job, hook `helm.sh/hook: test`):
-
-```bash
-helm test hermes-agent -n hermes-agent
-# the test is a Job, so fetch its output by label (not `helm test --logs`):
-kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
-```
-
-It runs `hermes --version`, verifies the seeded `config.yaml`, checks docker
-availability (informational, since the backend is `local`), and runs
-`hermes doctor`. Disable with `--set tests.enabled=false`; make doctor failures
-fatal with `--set tests.doctorStrict=true`.
+The [`helm test`](#test) Job (hook `helm.sh/hook: test`) runs `hermes
+--version`, verifies the seeded `config.yaml`, checks docker availability
+(informational, since the backend is `local`), and runs `hermes doctor`.
+Disable it with `--set tests.enabled=false`; make doctor failures fatal with
+`--set tests.doctorStrict=true`.
 
 ### Verifying a provider end-to-end (`tests.chat.enabled`)
 
