@@ -189,7 +189,7 @@ auth:
     # -- Login image. stdlib-only Python; no extra dependencies are installed.
     image:
       repository: python
-      tag: "3.12-slim"
+      tag: "3.13-slim"
     # -- Resources for the login init container.
     resources: {}
     # Catalog of device-flow-capable providers. The chart ships sane defaults;

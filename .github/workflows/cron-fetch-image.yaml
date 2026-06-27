@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload version-range artifact
         if: steps.gate.outputs.proceed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: newer-versions
           path: newer_versions.txt
@@ -160,7 +160,7 @@ jobs:
       # so it skips that approval gate.
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
@@ -173,7 +173,7 @@ jobs:
           ref: main
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: newer-versions
 
@@ -192,14 +192,31 @@ jobs:
 
           # appVersion is the single source of truth (image.tag falls back to it).
           sed -i -E "s|^appVersion:.*|appVersion: \"${TARGET_VERSION}\"|" "${CHART}/Chart.yaml"
-          # Keep the generated README's AppVersion badge in sync (validate-chart
-          # fails on a stale README).
+
+          # Sync the OAuth init-container Python image to the version the upstream
+          # container actually runs. The upstream Dockerfile declares it via a
+          # `uv:*-python<X.Y>-*` base image; we extract it and write X.Y-slim
+          # into values.yaml so the init container always matches the runtime.
+          DOCKERFILE=$(curl -fsSL \
+            "https://raw.githubusercontent.com/NousResearch/hermes-agent/${TARGET_VERSION}/Dockerfile" \
+            2>/dev/null || true)
+          DOCKER_PY=$(printf '%s' "$DOCKERFILE" \
+            | grep -oE 'python[0-9]+\.[0-9]+' | head -1 | sed 's/python//')
+          if [ -n "$DOCKER_PY" ]; then
+            sed -i -E "s|(      tag: \")[0-9]+\.[0-9]+[^\"]*\"|\1${DOCKER_PY}-slim\"|" \
+              "${CHART}/values.yaml"
+            echo "Init-container Python synced to ${DOCKER_PY}-slim (from upstream Dockerfile)"
+          else
+            echo "::warning::Could not detect Python version from upstream Dockerfile; values.yaml unchanged"
+          fi
+
+          # Keep the generated README in sync (validate-chart fails on a stale README).
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
 
-          git add "${CHART}/Chart.yaml" "${CHART}/README.md"
+          git add "${CHART}/Chart.yaml" "${CHART}/README.md" "${CHART}/values.yaml"
           git commit \
             -m "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
-            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it) and regenerate the README badge." \
+            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it), sync the OAuth init-container Python version from the upstream Dockerfile, and regenerate the README badge." \
             --allow-empty
           git push origin "image/${TARGET_VERSION}"
 
@@ -231,7 +248,7 @@ jobs:
         with:
           ref: main
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: newer-versions
 
