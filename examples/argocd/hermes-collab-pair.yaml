@@ -1,0 +1,146 @@
+# Mirrors charts/hermes-agent/values-multi-agent-collab.yaml: a COLLABORATING
+# PAIR of Hermes agents (planner + builder) that hand the conversation to each
+# other by @mention in one shared Discord channel, with the four loop-brake env
+# vars that stop them from ping-ponging forever. Full walkthrough:
+# docs/collaboration.md.
+#
+# Two Applications, one per agent — distinct releaseName/metadata.name keep the
+# fullnames unique so they coexist in one namespace (see README.md → "the one
+# rule"). The pair shares DISCORD_HOME_CHANNEL + DISCORD_ALLOWED_USERS + the four
+# loop-brake knobs; each has its own bot token and its own environment_hint that
+# names the OTHER agent's Discord user ID.
+#
+# Before applying, create one Secret per agent (one bot per agent):
+#   kubectl create secret generic hermes-planner-discord-secrets -n hermes-team \
+#     --from-literal=OPENAI_API_KEY='sk-<litellm-proxy-key>' \
+#     --from-literal=DISCORD_BOT_TOKEN='<planner-bot-token>'
+#   kubectl create secret generic hermes-builder-discord-secrets -n hermes-team \
+#     --from-literal=DISCORD_BOT_TOKEN='<builder-bot-token>'
+# (For GitOps, wire these as SealedSecrets via extraResources instead — see
+#  hermes-agent-litellm-k8s.yaml / hermes-agent-github-copilot.yaml.)
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-planner          # == releaseName below → unique fullname
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    targetRevision: "*"          # pin to an exact version for reproducible upgrades
+    helm:
+      releaseName: hermes-planner
+      valuesObject:
+        fullnameOverride: hermes-planner
+        # planner runs on a shared LiteLLM proxy (OpenAI-compatible).
+        config:
+          providers:
+            litellm:
+              base_url: https://litellm.example.com/v1
+              key_env: OPENAI_API_KEY
+              discover_models: true
+          model:
+            provider: litellm
+            default: openai/gpt-oss-120b
+          terminal:
+            backend: local
+          agent:
+            # Names the PARTNER (builder) and how to hand over / stop.
+            environment_hint: |
+              You are "planner", one of two collaborating Hermes agents in this
+              Discord channel. Your job is to scope and plan the work. Your
+              partner is "builder", Discord user ID <BUILDER_BOT_USER_ID>. To
+              hand over, put an explicit <@BUILDER_BOT_USER_ID> mention in the
+              BODY of your message. When a topic is done, do NOT mention builder
+              — address the human and end your turn, so the exchange stops.
+        env:
+          OPENAI_API_KEY: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-planner-discord-secrets   # OPENAI_API_KEY + DISCORD_BOT_TOKEN
+        # SHARED across the pair: same channel, same users, same loop brake. The
+        # builder Application below MUST repeat this block verbatim — YAML anchors
+        # do not cross the `---` document boundary, so it cannot be aliased here.
+        extraEnv:
+          - { name: DISCORD_HOME_CHANNEL, value: "000000000000000000" }
+          - { name: DISCORD_ALLOWED_USERS, value: "111111111111111111" }
+          - { name: DISCORD_ALLOW_BOTS, value: "mentions" }
+          - { name: DISCORD_THREAD_REQUIRE_MENTION, value: "true" }
+          - { name: DISCORD_REPLY_TO_MODE, value: "off" }
+          - { name: DISCORD_ALLOW_MENTION_REPLIED_USER, value: "false" }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-team
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-builder
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    targetRevision: "*"
+    helm:
+      releaseName: hermes-builder
+      valuesObject:
+        fullnameOverride: hermes-builder
+        # builder uses GitHub Copilot via device-flow — a DIFFERENT backend from
+        # planner. Collaboration only requires a shared channel, not a shared
+        # model. The gho_ token is minted at startup; nothing to seal but the bot
+        # token. See hermes-agent-github-copilot.yaml.
+        config:
+          model:
+            provider: copilot
+            default: claude-sonnet-4.5
+          terminal:
+            backend: local
+          agent:
+            environment_hint: |
+              You are "builder", one of two collaborating Hermes agents in this
+              Discord channel. Your job is to implement what planner scopes. Your
+              partner is "planner", Discord user ID <PLANNER_BOT_USER_ID>. To
+              hand over, put an explicit <@PLANNER_BOT_USER_ID> mention in the
+              BODY of your message. When a topic is done, do NOT mention planner
+              — address the human and end your turn, so the exchange stops.
+        auth:
+          deviceFlow:
+            enabled: true
+            provider: github-copilot
+            notify: discord            # posts the verification link to the channel
+        env:
+          OPENAI_API_KEY: "unused"     # builder authenticates via device flow
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-builder-discord-secrets    # DISCORD_BOT_TOKEN only
+        # IDENTICAL to planner's shared block — same channel + same loop brake.
+        # Repeated in full because YAML anchors don't cross `---` boundaries.
+        extraEnv:
+          - { name: DISCORD_HOME_CHANNEL, value: "000000000000000000" }
+          - { name: DISCORD_ALLOWED_USERS, value: "111111111111111111" }
+          - { name: DISCORD_ALLOW_BOTS, value: "mentions" }
+          - { name: DISCORD_THREAD_REQUIRE_MENTION, value: "true" }
+          - { name: DISCORD_REPLY_TO_MODE, value: "off" }
+          - { name: DISCORD_ALLOW_MENTION_REPLIED_USER, value: "false" }
+        # device-flow needs a volume to persist the minted token across restarts.
+        persistence:
+          enabled: true
+          storageClass: ""
+          accessModes:
+            - ReadWriteOnce
+          size: 5Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-team
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

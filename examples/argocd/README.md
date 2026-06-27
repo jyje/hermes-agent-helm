@@ -23,9 +23,16 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml`](hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml) | `values-nvidia-nim-and-discord.yaml` + GitOps | `hermes-agent-nim-discord-sealedsecret-secrets` via **SealedSecret** (`extraResources`, `NVIDIA_API_KEY` + `DISCORD_BOT_TOKEN`) |
 | [`hermes-agent-github-copilot.yaml`](hermes-agent-github-copilot.yaml) | `values-github-copilot.yaml` + GitOps | `hermes-agent-copilot-secrets` via **SealedSecret** (`DISCORD_BOT_TOKEN` only — Copilot token minted at runtime via **OAuth device flow**) |
 | [`hermes-agent-ingress.yaml`](hermes-agent-ingress.yaml) | `values-ingress.yaml` | `hermes-agent-ingress-secrets` (`OPENAI_API_KEY`) + `hermes-agent-dashboard-auth` (nginx basic-auth) |
+| [`hermes-collab-pair.yaml`](hermes-collab-pair.yaml) | `values-multi-agent-collab.yaml` (×2: planner+builder) | `hermes-planner-discord-secrets` + `hermes-builder-discord-secrets` — a **collaborating pair** that hands off by `@mention`; see [docs/collaboration.md](../../docs/collaboration.md) |
 
 `hermes-agent.yaml` is the bare-minimum starting point — pure chart defaults
 plus the secret wiring; copy it and add a `valuesObject` to customize.
+
+`hermes-collab-pair.yaml` is the only multi-Application example: **two** agents
+(a `planner` on LiteLLM and a `builder` on Copilot device-flow) sharing one
+Discord channel and handing off by `@mention`. See
+[docs/collaboration.md](../../docs/collaboration.md) for the handoff protocol and
+the four loop-brake env vars.
 
 All examples use the **OCI registry** source form (`repoURL`/`chart`/
 `targetRevision` pointing at `ghcr.io`). A Git source form
