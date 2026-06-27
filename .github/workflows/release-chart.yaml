@@ -90,6 +90,15 @@ jobs:
         if: steps.ver.outputs.exists == 'false'
         uses: sigstore/cosign-installer@v3
 
+      - name: Log in to ghcr for cosign
+        if: steps.ver.outputs.exists == 'false'
+        # `helm registry login` above only writes Helm's own registry config;
+        # cosign reads the Docker keychain (~/.docker/config.json). Without this
+        # login cosign cannot push the signature and fails with UNAUTHORIZED.
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | cosign login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Sign the chart (keyless, Sigstore)
         if: steps.ver.outputs.exists == 'false'
         run: |
