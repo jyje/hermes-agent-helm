@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this chart are documented here.
-## [0.5.0] - 2026-06-27
+## [0.5.1] - 2026-06-27
 
 ### Features
 
@@ -14,6 +14,7 @@ All notable changes to this chart are documented here.
 - 🛠️ fix(release): adopt a dedicated 🚀 release type for the release PR title ([`3195301`](https://github.com/jyje/hermes-agent-helm/commit/319530142ead99cae19b9a0770cd7879e758a9b6)) — @jyje
 - 🛠️ fix(release): raise the image-bump advisor's NIM timeout to 300s ([`eceb1ad`](https://github.com/jyje/hermes-agent-helm/commit/eceb1ad1038c38fe011ecae4b76c73b0b16156c4)) — @jyje
 - 🛠️ fix(release): stream the image-bump advisor's NIM call ([`2cda2d0`](https://github.com/jyje/hermes-agent-helm/commit/2cda2d02e3b1c0f668b731f795dae77a2679d432)) — @jyje
+- 🛠️ fix(release): authenticate cosign to ghcr before signing (#25) ([`4dec2e6`](https://github.com/jyje/hermes-agent-helm/commit/4dec2e68beb16013c0d496f665ea91a9b3bc0b1f)) — @jyje
 
 ### Build
 
