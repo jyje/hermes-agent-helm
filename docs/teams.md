@@ -64,7 +64,9 @@ bus:
 > reliable team pattern is **humans plus one or more role-scoped agents in a
 > shared channel**, each agent addressed by `@mention`. Treat the channel as the
 > source of truth; richer cross-agent context injection is on the upstream
-> roadmap.
+> roadmap. For the concrete recipe — how two agents hand the conversation to
+> each other by `@mention`, and how to stop them looping forever — see
+> [collaboration.md](collaboration.md).
 
 ## Build a Hermes team on Discord
 
@@ -208,6 +210,8 @@ Per-team knowledge that everyone should share goes in context files
 
 ## See also
 
+- [collaboration.md](collaboration.md) — the next step: make the grouped agents
+  hand off by `@mention` and stop them looping (the bot-to-bot recipe).
 - [Chart README](../charts/hermes-agent/README.md) — full values table, the
   `replicaCount` single-writer rationale, and Discord/Telegram env vars.
 - [Roadmap](roadmap.md) — the ApplicationSet-based team pattern, and

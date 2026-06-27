@@ -204,6 +204,8 @@ spec:
 
 ## 함께 보기
 
+- [collaboration-ko.md](collaboration-ko.md) — 다음 단계: 묶인 에이전트들이
+  `@mention`으로 핸드오프하고 무한루프를 멈추게 하기(봇 대 봇 레시피).
 - [차트 README](../charts/hermes-agent/README.md) — 전체 값 테이블,
   `replicaCount` 단일 writer 근거, Discord/Telegram 환경변수.
 - [로드맵](roadmap-ko.md) — ApplicationSet 기반 팀 패턴, 그리고
