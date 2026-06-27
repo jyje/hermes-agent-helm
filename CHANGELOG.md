@@ -1,6 +1,32 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.0] - 2026-06-27
+
+### Features
+
+- ✨ feat(release): show AppVersion in release notes, AI-review upstream bumps ([`52d3aac`](https://github.com/jyje/hermes-agent-helm/commit/52d3aac1c1e3a3e45e445f6f23d267fa0bac4a83)) — @jyje
+- ✨ feat(release): split image-bump into parallel PR + AI issue-filing jobs ([`7845a73`](https://github.com/jyje/hermes-agent-helm/commit/7845a7338e6649e00618dca5585176e21ce87651)) — @jyje
+- ✨ feat(chart): add OAuth device-flow login init container (#23) ([`09f11d4`](https://github.com/jyje/hermes-agent-helm/commit/09f11d4d15a520ee85bb24987c034f68dbbf7a1c)) — @jyje
+
+### Bug Fixes
+
+- 🛠️ fix(release): adopt a dedicated 🚀 release type for the release PR title ([`3195301`](https://github.com/jyje/hermes-agent-helm/commit/319530142ead99cae19b9a0770cd7879e758a9b6)) — @jyje
+- 🛠️ fix(release): raise the image-bump advisor's NIM timeout to 300s ([`eceb1ad`](https://github.com/jyje/hermes-agent-helm/commit/eceb1ad1038c38fe011ecae4b76c73b0b16156c4)) — @jyje
+- 🛠️ fix(release): stream the image-bump advisor's NIM call ([`2cda2d0`](https://github.com/jyje/hermes-agent-helm/commit/2cda2d02e3b1c0f668b731f795dae77a2679d432)) — @jyje
+
+### Build
+
+- 🔨 build(release): add one-off test workflow for the image-bump advisor ([`e506bc5`](https://github.com/jyje/hermes-agent-helm/commit/e506bc57237bff2f9b405b6962bafac1038a2ec7)) — @jyje
+
+### Removed
+
+- 🗑️ remove(release): drop the one-off image-bump advisor test workflow ([`0b1d419`](https://github.com/jyje/hermes-agent-helm/commit/0b1d419ecf1cabbcde86dceff894d25cb9699fbe)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(workflow): add a clock emoji to cron-fetch-image's display name ([`7116965`](https://github.com/jyje/hermes-agent-helm/commit/71169657ed162b36017802429c9bc47fb5628744)) — @jyje
+
 ## [0.4.2] - 2026-06-21
 
 ### Features
