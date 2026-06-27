@@ -129,6 +129,63 @@
       }
     },
 
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "deviceFlow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "provider": { "type": "string" },
+            "notify": { "type": "string", "enum": ["discord", "logs"] },
+            "timeoutSeconds": { "type": "integer", "minimum": 1 },
+            "forceRelogin": { "type": "boolean" },
+            "tokenOwner": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "uid": { "type": "integer" },
+                "gid": { "type": "integer" }
+              }
+            },
+            "image": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "repository": { "type": "string" },
+                "tag": { "type": "string" }
+              }
+            },
+            "resources": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "requests": { "type": "object" },
+                "limits": { "type": "object" }
+              }
+            },
+            "providers": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["clientId", "tokenEnv"],
+                "properties": {
+                  "clientId": { "type": "string" },
+                  "scope": { "type": "string" },
+                  "authHost": { "type": "string" },
+                  "tokenEnv": { "type": "string" },
+                  "validateUrl": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "persistence": {
       "type": "object",
       "additionalProperties": false,

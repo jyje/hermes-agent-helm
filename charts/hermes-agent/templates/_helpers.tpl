@@ -108,8 +108,9 @@ spec:
   {{- end }}
   securityContext:
     {{- toYaml .Values.podSecurityContext | nindent 4 }}
-  {{- if .Values.bootstrap.enabled }}
+  {{- if or .Values.bootstrap.enabled .Values.auth.deviceFlow.enabled }}
   initContainers:
+    {{- if .Values.bootstrap.enabled }}
     # Seed the partial config.yaml into HERMES_HOME (the writable volume) so
     # Hermes merges it over its built-in defaults. Hermes also writes to its
     # home at runtime, so config is not mounted read-only.
@@ -136,6 +137,64 @@ spec:
           readOnly: true
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
+    {{- end }}
+    {{- if .Values.auth.deviceFlow.enabled }}
+    {{- $df := .Values.auth.deviceFlow }}
+    {{- $p := index $df.providers $df.provider }}
+    {{- if not $p }}{{ fail (printf "auth.deviceFlow.provider %q has no matching entry under auth.deviceFlow.providers" $df.provider) }}{{- end }}
+    # Bootstrap the selected provider's credential via the OAuth device flow
+    # before the agent starts. Idempotent: skips if a valid token already
+    # exists on the volume. Runs as the Hermes runtime uid so the token file it
+    # writes to $HERMES_HOME/.env is readable by the agent.
+    - name: auth-device-login
+      image: "{{ $df.image.repository }}:{{ $df.image.tag }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      command: ["python3", "/login/device_login.py"]
+      env:
+        - name: HERMES_HOME
+          value: {{ .Values.persistence.mountPath | quote }}
+        - name: OAUTH_CLIENT_ID
+          value: {{ $p.clientId | quote }}
+        - name: OAUTH_SCOPE
+          value: {{ $p.scope | default "read:user" | quote }}
+        - name: AUTH_HOST
+          value: {{ $p.authHost | default "github.com" | quote }}
+        - name: TOKEN_ENV
+          value: {{ $p.tokenEnv | quote }}
+        - name: VALIDATE_URL
+          value: {{ $p.validateUrl | default "" | quote }}
+        - name: NOTIFY
+          value: {{ $df.notify | quote }}
+        - name: LOGIN_TIMEOUT_SECONDS
+          value: {{ $df.timeoutSeconds | quote }}
+        - name: FORCE_RELOGIN
+          value: {{ $df.forceRelogin | quote }}
+        - name: CHOWN_UID
+          value: {{ $df.tokenOwner.uid | quote }}
+        - name: CHOWN_GID
+          value: {{ $df.tokenOwner.gid | quote }}
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      envFrom:
+        - secretRef:
+            name: {{ include "hermes-agent.fullname" . }}-env
+        {{- with .Values.extraEnvFrom }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $df.resources }}
+      resources:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumeMounts:
+        - name: login-script
+          mountPath: /login
+          readOnly: true
+        - name: data
+          mountPath: {{ .Values.persistence.mountPath }}
+    {{- end }}
   {{- end }}
   containers:
     - name: hermes-agent
@@ -181,6 +240,12 @@ spec:
     - name: config
       configMap:
         name: {{ include "hermes-agent.fullname" . }}-config
+    {{- end }}
+    {{- if .Values.auth.deviceFlow.enabled }}
+    - name: login-script
+      configMap:
+        name: {{ include "hermes-agent.fullname" . }}-login
+        defaultMode: 0555
     {{- end }}
     {{- if .Values.persistence.enabled }}
     {{- if eq .Values.controller.type "deployment" }}

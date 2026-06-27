@@ -145,6 +145,73 @@ extraEnvFrom: []
 extraResources: []
 
 # ---------------------------------------------------------------------------
+# auth -> Interactive credential bootstrap.
+#
+# By default the agent authenticates with the static provider key from `env`
+# (rendered into the `-env` Secret). `auth.deviceFlow` is an alternative for
+# providers that issue short-lived/OAuth tokens you cannot paste ahead of time:
+# it performs the **OAuth 2.0 Device Authorization Grant (RFC 8628)** at pod
+# startup, surfaces the verification URL + user code to a human (e.g. via the
+# agent's Discord bot, mobile-friendly), waits for approval, and persists the
+# resulting token to `HERMES_HOME/.env` — exactly where Hermes natively reads
+# it. The token survives restarts on the persistent volume; re-login only
+# happens when it is missing or revoked.
+#
+# Currently supports **github-copilot** (Hermes provider id `copilot`), whose
+# API rejects PATs and requires a `gho_`/`ghu_` device-flow token.
+# ---------------------------------------------------------------------------
+auth:
+  deviceFlow:
+    # -- Bootstrap a provider credential via the OAuth device flow at startup.
+    #    When false, the agent uses the static key from `env`/`extraEnvFrom`.
+    enabled: false
+    # -- Which provider profile to authenticate. Must be a key under
+    #    `providers` below. Only one device-flow login runs at a time.
+    provider: github-copilot
+    # -- Where to deliver the verification URL + user code for human approval.
+    #    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +
+    #    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`). The code is always
+    #    also printed to the init container logs as a fallback.
+    notify: discord
+    # -- Seconds to wait for the human to authorize before the init container
+    #    fails (and retries). Keep below the provider's device-code validity.
+    timeoutSeconds: 870
+    # -- Force a fresh login even if a token already exists on the volume.
+    forceRelogin: false
+    # -- uid/gid that should own the written token file. The login init
+    #    container runs as root so it can write to any storage class reliably,
+    #    then chowns the token to this owner. Set it to the Hermes runtime uid —
+    #    the upstream image's s6-overlay runs the agent as uid/gid 10000 — so the
+    #    non-root agent can read the credential.
+    tokenOwner:
+      uid: 10000
+      gid: 10000
+    # -- Login image. stdlib-only Python; no extra dependencies are installed.
+    image:
+      repository: python
+      tag: "3.12-slim"
+    # -- Resources for the login init container.
+    resources: {}
+    # Catalog of device-flow-capable providers. The chart ships sane defaults;
+    # the selected one (`provider` above) is what runs. Add an entry to support
+    # another provider (each provider uses its own OAuth authorization server).
+    providers:
+      github-copilot:
+        # -- OAuth client id for the device grant. The shared opencode/Copilot-CLI
+        #    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py).
+        clientId: "Ov23li8tweQw6odWQebz"
+        # -- OAuth scope requested in the device grant.
+        scope: "read:user"
+        # -- Host serving the device-code + token endpoints (GitHub-style paths).
+        authHost: github.com
+        # -- .env key Hermes reads this provider's token from (resolution order
+        #    COPILOT_GITHUB_TOKEN > GH_TOKEN > GITHUB_TOKEN).
+        tokenEnv: COPILOT_GITHUB_TOKEN
+        # -- Optional endpoint to verify an existing token is still live; on
+        #    401/403 the init container re-runs the login. Empty = skip the check.
+        validateUrl: https://api.github.com/copilot_internal/v2/token
+
+# ---------------------------------------------------------------------------
 # Persistence: HERMES_HOME state lives here.
 # ---------------------------------------------------------------------------
 persistence:
