@@ -211,6 +211,42 @@ See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 > `DISCORD_HOME_CHANNEL` (different `DISCORD_BOT_TOKEN` each) to form a Hermes
 > team — see [Hermes teams](../../docs/teams.md).
 
+## Login via OAuth device flow (GitHub Copilot)
+
+Some providers issue short-lived OAuth tokens you cannot paste ahead of time —
+**GitHub Copilot** is the headline case: its token API rejects PATs and wants a
+`gho_`/`ghu_` device-flow token. Set `auth.deviceFlow.enabled=true` and the
+chart adds an **`auth-device-login` init container** that performs the
+[OAuth 2.0 Device Authorization Grant (RFC 8628)](https://datatracker.ietf.org/doc/html/rfc8628)
+at pod startup, surfaces the verification URL + user code for a human to
+approve (your Discord home channel by default — phone-friendly), waits, then
+persists the resulting token to `HERMES_HOME/.env` exactly where Hermes reads
+it. The token lives on the persistent volume, so it is reused across restarts;
+re-login only happens when it is missing or revoked (skip-if-valid).
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-github-copilot.yaml \
+  --set-string env.DISCORD_BOT_TOKEN='<bot-token>' --wait
+# then approve the prompt posted to Discord (or read it from the logs):
+kubectl logs sts/hermes-agent -n hermes-agent -c auth-device-login -f
+```
+
+Notes:
+
+- **Requires `persistence.enabled=true`** — without a volume the token is lost
+  on restart and you would re-approve every time.
+- **`notify`** is `discord` (reuses `DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL`)
+  or `logs` (verification prompt printed to the init container logs only).
+- The init container runs as **root** so it can write to any storage class, then
+  **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
+  `10000` — the upstream image's runtime user) so the non-root agent can read it.
+- **Catalog model:** `auth.deviceFlow.providers` is a map keyed by provider id
+  (each with its own `clientId`/`authHost`/`tokenEnv`/…); `auth.deviceFlow.provider`
+  selects which one runs. Only `github-copilot` ships today — add a map entry to
+  support another device-flow provider. The Copilot `clientId` default is the
+  shared client Hermes upstream itself uses.
+
 ## Advanced testing
 
 The [`helm test`](#test) Job (hook `helm.sh/hook: test`) runs `hermes
@@ -334,6 +370,7 @@ the command in each file's header comment), or via the SealedSecret +
 | File | Model provider | Extras |
 | --- | --- | --- |
 | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
+| [`values-github-copilot.yaml`](values-github-copilot.yaml) | GitHub Copilot (`copilot`) | **OAuth device-flow login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
