@@ -41,6 +41,9 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   [`examples/argocd/`](../../examples/argocd/).
 - **실제 시크릿을 커밋하지 않는 GitOps** — SealedSecret + `extraEnvFrom` 가이드:
   [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
+- **에이전트 팀** — 여러 인스턴스를 `@mention`으로 대화를 넘기도록 연결:
+  [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml),
+  [팀 구성](../../docs/teams-ko.md) + [협업 가이드](../../docs/collaboration-ko.md) 참고.
 
 ## 제공자 설정
 

@@ -41,6 +41,9 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   combo: [`examples/argocd/`](../../examples/argocd/).
 - **GitOps without committing real secrets** — SealedSecret + `extraEnvFrom`
   walkthrough: [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
+- **Agent team** — run multiple instances that hand off by `@mention` over a shared channel:
+  [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml),
+  see [Teams](../../docs/teams.md) + [Collaboration guide](../../docs/collaboration.md).
 
 ## Configure your provider
 
