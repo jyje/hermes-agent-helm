@@ -75,6 +75,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+    const CHART_BASE = 'https://github.com/jyje/hermes-agent-helm/blob/main/charts/{{CHART_NAME}}/';
+    marked.use({
+      walkTokens(token) {
+        if ((token.type === 'link' || token.type === 'image') && token.href) {
+          if (!token.href.match(/^(https?:|#|mailto:)/)) {
+            try { token.href = new URL(token.href, CHART_BASE).toString(); } catch(e) {}
+          }
+        }
+      }
+    });
+
     fetch('./README.md')
       .then(r => { if (!r.ok) throw new Error('not found'); return r.text(); })
       .then(md => { document.getElementById('content').innerHTML = marked.parse(md); })
