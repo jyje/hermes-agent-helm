@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.4] - 2026-06-28
+
+### Miscellaneous
+
+- 🔧 chore(readme): use raw.githubusercontent.com absolute url for banner image ([`a284745`](https://github.com/jyje/hermes-agent-helm/commit/a284745264533f13e1306be3ba1aca194b0fc03a)) — @jyje
+- 🎨 style(pages): add banner image to helm repo index page ([`36e7508`](https://github.com/jyje/hermes-agent-helm/commit/36e750829574e52fb810a4d440c77045b86bfe27)) — @jyje
+- 🎨 style(readme): define banner image by height (240px) instead of width ([`362e32e`](https://github.com/jyje/hermes-agent-helm/commit/362e32e06d7c3b2caebf10944eeca1a23e606586)) — @jyje
+- 🔧 chore(ci): rename app-id to client-id in create-github-app-token steps ([`c233f59`](https://github.com/jyje/hermes-agent-helm/commit/c233f597da9015f96e72956800d8318ae210ce7b)) — @jyje
+
 ## [0.5.3] - 2026-06-28
 
 ### Documentation
