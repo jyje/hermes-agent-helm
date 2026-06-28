@@ -2,7 +2,7 @@
 
 # hermes-agent-helm/hermes-agent
 
-<img height="96" src="https://raw.githubusercontent.com/cncf/artwork/main/projects/kubernetes/icon/color/kubernetes-icon-color.png" alt="Kubernetes" align="middle"/>&nbsp;<font size="7"><b>×&nbsp;</b></font>&nbsp;<img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent" align="middle"/>
+<img width="480" src="../../docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
 
 </div>
 
