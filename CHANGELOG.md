@@ -1,6 +1,22 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.3] - 2026-06-28
+
+### Documentation
+
+- 📄 docs(chart): add GitHub Copilot to the provider table ([`8e2ffe1`](https://github.com/jyje/hermes-agent-helm/commit/8e2ffe11fc00742cc666a1218e9eeaf8bea6e0c6)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(readme): replace Helm boat logo with Kubernetes icon ([`affe113`](https://github.com/jyje/hermes-agent-helm/commit/affe113b16b2e250f6394c28f4f08461f27867ed)) — @jyje
+- 🎨 style(readme): vertically center the + sign between logos using a table ([`a2d410e`](https://github.com/jyje/hermes-agent-helm/commit/a2d410ea1eadbf6f215d536e11bbc821d0f98459)) — @jyje
+- 🎨 style(readme): replace ➕ with enlarged × sign ([`cfe2e32`](https://github.com/jyje/hermes-agent-helm/commit/cfe2e325fa499462f3235f017353efa13f8e4271)) — @jyje
+- 🎨 style(readme): replace kubernetes logo svg with png for github rendering ([`f262e12`](https://github.com/jyje/hermes-agent-helm/commit/f262e1233c55864282f483f75bd9dd5a5865eac7)) — @jyje
+- 🎨 style(readme): remove table wrapper, use inline img align for logo row ([`609dd0c`](https://github.com/jyje/hermes-agent-helm/commit/609dd0c54aaca3dee06e887cf3206bb181b2e485)) — @jyje
+- 🎨 style(readme): increase × font size to max html size (7) ([`1566a37`](https://github.com/jyje/hermes-agent-helm/commit/1566a3705667fe8fa4218693c9de34192576ef63)) — @jyje
+- 🎨 style(readme): replace inline logo html with single banner image ([`9422c46`](https://github.com/jyje/hermes-agent-helm/commit/9422c4670335e80bc7f0c63fd66e4a14eecf3bc5)) — @jyje
+
 ## [0.5.2] - 2026-06-28
 
 ### Features
