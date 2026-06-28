@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Add GitHub Copilot provider documentation entry"
+        - kind: "changed"
+          description: "Replace Helm boat logo with Kubernetes icon and adjust logo styling"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.19
+    created: "2026-06-28T08:09:55.692751426Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
+      LLM agent framework — on Kubernetes. Configure any provider Hermes supports
+      (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy
+      such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health
+      check. "
+    digest: afadc71e41351149b0d6dce0a12598981eccfba3b53d9192efb2f97eb52f1591
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.5.3.tgz
+    version: 0.5.3
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Added values-multi-agent-collab.yaml for collaborative agent pair deployments with shared Discord channel and loop‑brake settings."
         - kind: "changed"
           description: "Updated auth.deviceFlow.image tag from 3.12-slim to 3.13-slim in values.yaml."
@@ -295,4 +331,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-28T07:01:24.480205119Z"
+generated: "2026-06-28T08:09:55.690867227Z"

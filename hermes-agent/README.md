@@ -2,11 +2,7 @@
 
 # hermes-agent-helm/hermes-agent
 
-<p>
-  <img height="96" src="https://helm.sh/img/boat.svg" alt="Helm"/>
-  &nbsp;&nbsp;<sup><b> ➕ </b></sup>&nbsp;&nbsp;
-  <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
-</p>
+<img width="480" src="../../docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
 
 </div>
 
@@ -14,7 +10,7 @@
 
 Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.5.2](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
+![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -23,7 +19,7 @@ Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Con
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.5.2 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.5.3 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -56,6 +52,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | Google Gemini | `gemini` | `GOOGLE_API_KEY` | [`values-gemini.yaml`](values-gemini.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
+| GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
 
 > `openai` (no suffix) is **not** a valid provider key — it aliases to
