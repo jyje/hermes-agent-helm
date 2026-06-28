@@ -16,20 +16,13 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README-ko.md) · [팀](docs/teams-ko.md) · [협업 가이드](docs/collaboration-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
 
 ---
 
 **이 프로젝트가 도움이 되셨나요? 별(⭐)을 눌러주세요 — 다른 분들이 찾는 데 도움이 됩니다.**
 
 </div>
-
-## TL;DR
-
-| 할 수 있는 것 | 방법 |
-|---|---|
-| **단일 에이전트** — 어떤 LLM 제공자든, 하나의 Hermes 인스턴스 | `helm install` — [시작하기](#시작하기) 참고 |
-| **에이전트 팀** — `@mention`으로 대화를 넘기는 다중 인스턴스 | 릴리즈 여러 개 배포 후 연결 — [팀 구성](docs/teams-ko.md) + [협업 가이드](docs/collaboration-ko.md) 참고 |
 
 ## 요약
 

@@ -16,20 +16,13 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README.md) · [Teams](docs/teams.md) · [Collaboration](docs/collaboration.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md)
 
 ---
 
 **Found this useful? Please give it a ⭐ — it helps others find it.**
 
 </div>
-
-## TL;DR
-
-| What | How |
-|---|---|
-| **Single agent** — one Hermes instance, any LLM provider | `helm install` — see [Getting started](#getting-started) |
-| **Agent team** — multiple instances that hand off by `@mention` | Deploy several releases, wire them together — see [Teams](docs/teams.md) + [Collaboration guide](docs/collaboration.md) |
 
 ## Summary
 
