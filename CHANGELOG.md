@@ -1,6 +1,20 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.5] - 2026-06-28
+
+### Bug Fixes
+
+- 🐛 bug(pages): rewrite relative links to absolute github urls in chart page ([`262cf80`](https://github.com/jyje/hermes-agent-helm/commit/262cf80f9fc6fc61d02cb7b70a84b745c78ae895)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(pages): fix light theme and set background to #f4f4f4 ([`e79a472`](https://github.com/jyje/hermes-agent-helm/commit/e79a472a28fecc6cd4001897be5b5cd38f211f0c)) — @jyje
+- 🎨 style(readme): update banner image to 1000×500 optimized version ([`341885c`](https://github.com/jyje/hermes-agent-helm/commit/341885c9564440779f95596dc76e4a72e2810d35)) — @jyje
+- 🎨 style(pages): switch to github-markdown-light.css to force light theme ([`c0edce8`](https://github.com/jyje/hermes-agent-helm/commit/c0edce8b8bb244762dbf40143d3364f6b8fc5b4a)) — @jyje
+- 🎨 style(pages): override markdown-body background to #f4f4f4 ([`6217e73`](https://github.com/jyje/hermes-agent-helm/commit/6217e7315fe0b30569cd5b36bc999be1d8124a01)) — @jyje
+- 🎨 style(pages): update page title and og:title to include product name ([`1e4b653`](https://github.com/jyje/hermes-agent-helm/commit/1e4b65311228e84a3390ca4130bf1fea6c36fde5)) — @jyje
+
 ## [0.5.4] - 2026-06-28
 
 ### Miscellaneous
