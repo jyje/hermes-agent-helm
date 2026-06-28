@@ -3,7 +3,7 @@
 # hermes-agent-helm/hermes-agent
 
 <p>
-  <img height="96" src="https://helm.sh/img/boat.svg" alt="Helm"/>
+  <img height="96" src="https://raw.githubusercontent.com/cncf/artwork/main/projects/kubernetes/icon/color/kubernetes-icon-color.svg" alt="Kubernetes"/>
   &nbsp;&nbsp;<sup><b> ➕ </b></sup>&nbsp;&nbsp;
   <img height="96" src="https://hermes-agent.nousresearch.com/docs/img/logo.png" alt="Hermes Agent"/>
 </p>
