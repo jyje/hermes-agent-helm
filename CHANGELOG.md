@@ -1,6 +1,23 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.2] - 2026-06-28
+
+### Features
+
+- ✨ feat(examples): add a collaborating-agent pair deployment example ([`1913c80`](https://github.com/jyje/hermes-agent-helm/commit/1913c801d75c8e0fdf095660eb90ec69a0b0c8c6)) — @jyje
+
+### Documentation
+
+- 📄 docs(collaboration): add the multi-agent collaboration guide ([`56b9249`](https://github.com/jyje/hermes-agent-helm/commit/56b92493b24a49b5913b7fe5a82876bffd8c37ba)) — @jyje
+- 📄 docs(collaboration): link the guide from teams docs and READMEs ([`8917671`](https://github.com/jyje/hermes-agent-helm/commit/8917671cd788332f1683abc08a2ade96857cb131)) — @jyje
+- 📄 docs(readme): add TL;DR section and surface collaboration links at the top ([`26bdabc`](https://github.com/jyje/hermes-agent-helm/commit/26bdabc6ca3627501e3d872d6efa5e775e389286)) — @jyje
+- 📄 docs(chart): add agent team entry to TL;DR section ([`e8b6977`](https://github.com/jyje/hermes-agent-helm/commit/e8b6977d5e70e9814d33d321091bf472c79a2144)) — @jyje
+
+### Miscellaneous
+
+- ⬆️ dep(workflow): bump action deps and correct Python init-container to 3.13-slim ([`303d345`](https://github.com/jyje/hermes-agent-helm/commit/303d345b53d1aaa8c453caf84d37414ea5bc43b1)) — @jyje
+
 ## [0.5.1] - 2026-06-27
 
 ### Features
