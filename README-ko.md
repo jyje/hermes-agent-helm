@@ -2,7 +2,7 @@
 
 # jyje/hermes-agent-helm
 
-<img width="480" src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
+<img height="240" src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
 
 👩🏻‍💻 A Helm chart to run **Hermes Agent** on Kubernetes, community-powered, lightweight
 
