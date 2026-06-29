@@ -248,7 +248,11 @@ spec:
         defaultMode: 0555
     {{- end }}
     {{- if .Values.persistence.enabled }}
-    {{- if eq .Values.controller.type "deployment" }}
+    {{- if .Values.persistence.existingClaim }}
+    - name: data
+      persistentVolumeClaim:
+        claimName: {{ .Values.persistence.existingClaim | quote }}
+    {{- else if eq .Values.controller.type "deployment" }}
     - name: data
       persistentVolumeClaim:
         claimName: {{ include "hermes-agent.fullname" . }}
