@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.7] - 2026-06-29
+
+### Documentation
+
+- 📄 docs(chart): add Agent team section to chart README (EN + KO) ([`314ede4`](https://github.com/jyje/hermes-agent-helm/commit/314ede4d4b9197c3618515a73e4bff2af0720f03)) — @jyje
+
 ## [0.5.6] - 2026-06-29
 
 ### Bug Fixes
