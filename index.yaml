@@ -11,7 +11,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-29T11:27:44.896961401Z"
+    created: "2026-06-29T22:42:23.407733+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -45,7 +45,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-29T11:11:30.373303878Z"
+    created: "2026-06-29T22:42:23.405626+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -81,7 +81,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-28T22:17:27.793789598Z"
+    created: "2026-06-29T22:42:23.402829+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -114,7 +114,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-28T13:23:04.925601825Z"
+    created: "2026-06-29T22:42:23.400981+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -150,7 +150,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-28T08:09:55.692751426Z"
+    created: "2026-06-29T22:42:23.399181+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -186,7 +186,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-28T07:01:24.481842124Z"
+    created: "2026-06-29T22:42:23.397334+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -222,7 +222,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-27T08:03:07.092570381Z"
+    created: "2026-06-29T22:42:23.394439+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -252,6 +252,44 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Sign published charts with cosign (keyless) to ensure supply‑chain security."
+        - kind: "removed"
+          description: "Remove obsolete one‑off cosign backfill workflow no longer needed."
+        - kind: "fixed"
+          description: "Log in to GHCR before signing in backfill workflow to prevent authentication errors."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.19
+    created: "2026-06-29T22:42:23.392502+09:00"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
+      LLM agent framework — on Kubernetes. Configure any provider Hermes supports
+      (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy
+      such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health
+      check. "
+    digest: ee3fbe6947a90512918571c9273a8e0b226722147417b8ec9d3ba5b8ffd575f7
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.4.2.tgz
+    version: 0.4.2
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Add values.schema.json for upfront values validation"
         - kind: "changed"
           description: "Update README with TL;DR install block and quick‑start content"
@@ -260,7 +298,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-21T00:46:26.121941838Z"
+    created: "2026-06-29T22:42:23.391054+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -298,7 +336,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-20T22:59:20.069325675Z"
+    created: "2026-06-29T22:42:23.389587+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -336,7 +374,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-20T11:57:03.23015482Z"
+    created: "2026-06-29T22:42:23.38798+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -374,7 +412,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.19
-    created: "2026-06-20T20:12:30.391388+09:00"
+    created: "2026-06-29T22:42:23.38546+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -408,7 +446,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.5
-    created: "2026-06-15T14:59:58.748968521Z"
+    created: "2026-06-29T22:42:23.383837+09:00"
     description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
       on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
       LLM agent framework — on Kubernetes. Configure any provider Hermes supports
@@ -446,7 +484,7 @@ entries:
       artifacthub.io/license: MIT
     apiVersion: v2
     appVersion: v2026.6.5
-    created: "2026-06-14T23:37:40.898777+09:00"
+    created: "2026-06-29T22:42:23.382086+09:00"
     description: 'Community-powered Hermes Agent on Kubernetes. This chart deploys
       the Hermes Agent, a versatile agent framework that can be configurable for any
       LLM provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, or any
@@ -470,4 +508,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-29T11:27:44.895209574Z"
+generated: "2026-06-29T22:42:23.380441+09:00"
