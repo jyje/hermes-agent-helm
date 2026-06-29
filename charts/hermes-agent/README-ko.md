@@ -418,7 +418,8 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | ingress.tls | list | TLS configuration for the Ingress. | `[]` |
 | nameOverride | string | Override the chart name used in resource names. | `""` |
 | nodeSelector | object | Node selector for Pod scheduling. | `{}` |
-| persistence | object | ------------------------------------------------------------------------- | `{"accessModes":["ReadWriteOnce"],"enabled":true,"mountPath":"/opt/data","size":"5Gi","storageClass":""}` |
+| persistence | object | ------------------------------------------------------------------------- | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","mountPath":"/opt/data","size":"5Gi","storageClass":""}` |
+| persistence.existingClaim | string | Use an existing PVC instead of creating a new one. When specified, the chart will use this PVC and skip creating its own. | `""` |
 | persistence.storageClass | string | StorageClass for the volumeClaimTemplate. Empty = cluster default. | `""` |
 | podAnnotations | object | Annotations to add to the Pod. | `{}` |
 | podLabels | object | Labels to add to the Pod. | `{}` |
