@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.5.6] - 2026-06-29
+
+### Bug Fixes
+
+- 🐛 bug(pages): fix banner image distortion on narrow screens ([`1331318`](https://github.com/jyje/hermes-agent-helm/commit/1331318228f0f37c0968f909c8cebac99e77dbad)) — @jyje
+
 ## [0.5.5] - 2026-06-28
 
 ### Bug Fixes
