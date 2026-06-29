@@ -1,6 +1,7 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+
 ## [0.5.7] - 2026-06-29
 
 ### Documentation
@@ -113,6 +114,14 @@ All notable changes to this chart are documented here.
 ### Removed
 
 - 🗑️ remove(release): drop the one-off cosign backfill workflow ([`a4240f7`](https://github.com/jyje/hermes-agent-helm/commit/a4240f703479e1a0c37f21a95e73568bc5835c95)) — @jyje
+
+### Notes
+
+- **Helm repo backfill (2026-06-29)** — `hermes-agent-0.4.2.tgz` was absent from
+  the GitHub Pages Helm repo (`index.yaml`) due to a partial pipeline failure at
+  original release time (OCI push succeeded; gh-pages deploy did not).
+  The package was manually re-packaged from the `v0.4.2` tag and added to
+  `gh-pages` on 2026-06-29. OCI and GitHub Release were unaffected.
 
 ## [0.4.1] - 2026-06-21
 
