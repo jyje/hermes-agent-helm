@@ -37,7 +37,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   [`examples/argocd/`](../../examples/argocd/).
 - **실제 시크릿을 커밋하지 않는 GitOps** — SealedSecret + `extraEnvFrom` 가이드:
   [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
-- **에이전트 팀** — 여러 인스턴스를 `@mention`으로 대화를 넘기도록 연결:
+- **에이전트 팀** — 여러 인스턴스를 Discord 채널에서 `@mention`으로 대화를 넘기도록 연결:
   [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml),
   [팀 구성](../../docs/teams-ko.md) + [협업 가이드](../../docs/collaboration-ko.md) 참고.
 
@@ -206,9 +206,49 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml`을
 참고하세요.
 
-> **하나의 공유 채널에 여러 에이전트**를 두고 싶으신가요? 각 인스턴스를 같은
-> `DISCORD_HOME_CHANNEL`을 가리키게 하고(각각 다른 `DISCORD_BOT_TOKEN`) Hermes
-> 팀을 구성하세요 — [Hermes 팀](../../docs/teams-ko.md)을 참고하세요.
+## 에이전트 팀
+
+Hermes는 **단일 인스턴스 개인용 에이전트**입니다 — 수평 확장(스케일 아웃)이 아닙니다.
+대신 잘 관리된 인스턴스를 여러 개 띄우고, **하나의 Discord 채널**을 컨텍스트 버스로
+공유해 팀을 구성하세요. 각 에이전트는 고유한 봇 토큰, 파드, PVC, 아이덴티티를 가지며,
+공유 채널만 공통으로 사용합니다.
+
+### `@mention`으로 대화 넘기기
+
+모든 인스턴스가 같은 `DISCORD_HOME_CHANNEL`을 가리키도록 설정하고(각각 다른
+`DISCORD_BOT_TOKEN`), Discord 메시지 **본문**에 `<@BOT_USER_ID>`를 직접 삽입해
+대화를 넘깁니다 — 답장 참조(reply reference)가 아닌 본문 mention이어야 합니다.
+무한 핑퐁을 막기 위해 아래 네 가지 환경변수를 설정하세요:
+
+| 환경변수 | 권장값 | 이유 |
+| --- | --- | --- |
+| `DISCORD_ALLOW_BOTS` | `mentions` | 다른 봇이 `@mention`할 때만 반응합니다. |
+| `DISCORD_THREAD_REQUIRE_MENTION` | `true` | 공유 스레드에서도 명시적 mention이 있어야만 반응합니다. |
+| `DISCORD_REPLY_TO_MODE` | `off` | 답장 참조를 붙이지 않습니다 — 답장은 자동 ping을 발생시켜 루프를 재시작합니다. |
+| `DISCORD_ALLOW_MENTION_REPLIED_USER` | `false` | 자동 reply-ping을 실제 mention으로 처리하지 않습니다. |
+
+이 환경변수들은 `env` / `extraEnv` 아래에 설정하세요(`config` 블록이 아닙니다
+— Discord 어댑터가 `os.getenv`로 직접 읽습니다).
+
+### 빠른 시작: 에이전트 2개, 채널 1개
+
+```bash
+helm upgrade --install hermes-planner ./charts/hermes-agent \
+  --namespace hermes-team --create-namespace \
+  -f charts/hermes-agent/values-multi-agent-collab.yaml \
+  --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' --wait
+
+helm upgrade --install hermes-builder ./charts/hermes-agent \
+  --namespace hermes-team \
+  -f charts/hermes-agent/values-multi-agent-collab.yaml \
+  --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' --wait
+```
+
+에이전트가 3명 이상이거나 GitOps로 관리하려면 **ArgoCD ApplicationSet**을 사용하세요
+— 팀원 추가가 한 줄 diff로 해결됩니다.
+[`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)과
+[팀 구성](../../docs/teams-ko.md) + [협업 가이드](../../docs/collaboration-ko.md)를
+참고하세요.
 
 ## 고급 테스트
 
