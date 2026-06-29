@@ -4,6 +4,42 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "added"
+          description: "Added Agent team section to chart README with instructions for multi‑agent Discord collaboration."
+        - kind: "changed"
+          description: "Updated README‑ko.md with Korean translation of the Agent team documentation."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.6.19
+    created: "2026-06-29T11:27:44.896961401Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run Hermes Agent — a multi-provider
+      LLM agent framework — on Kubernetes. Configure any provider Hermes supports
+      (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy
+      such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health
+      check. "
+    digest: 074e1a88daaab626eb9285293e31921bcca488e5d9283526495137a4cda5f6ac
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.5.7.tgz
+    version: 0.5.7
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "fixed"
           description: "Fix banner image distortion on narrow screens"
       artifacthub.io/license: MIT
@@ -434,4 +470,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-06-29T11:11:30.371638312Z"
+generated: "2026-06-29T11:27:44.895209574Z"

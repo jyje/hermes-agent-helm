@@ -10,7 +10,7 @@
 
 Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.5.6](https://img.shields.io/badge/Version-0.5.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
+![Version: 0.5.7](https://img.shields.io/badge/Version-0.5.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -19,7 +19,7 @@ Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Con
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.5.6 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.5.7 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -37,7 +37,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   combo: [`examples/argocd/`](../../examples/argocd/).
 - **GitOps without committing real secrets** — SealedSecret + `extraEnvFrom`
   walkthrough: [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
-- **Agent team** — run multiple instances that hand off by `@mention` over a shared channel:
+- **Agent team** — run multiple instances that hand off by `@mention` over a shared Discord channel:
   [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml),
   see [Teams](../../docs/teams.md) + [Collaboration guide](../../docs/collaboration.md).
 
@@ -207,10 +207,6 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ["More examples"](#more-examples) for copy-pasteable messenger blocks.
 
-> Want **several agents in one shared channel**? Point each instance at the same
-> `DISCORD_HOME_CHANNEL` (different `DISCORD_BOT_TOKEN` each) to form a Hermes
-> team — see [Hermes teams](../../docs/teams.md).
-
 ## Login via OAuth device flow (GitHub Copilot)
 
 Some providers issue short-lived OAuth tokens you cannot paste ahead of time —
@@ -246,6 +242,50 @@ Notes:
   selects which one runs. Only `github-copilot` ships today — add a map entry to
   support another device-flow provider. The Copilot `clientId` default is the
   shared client Hermes upstream itself uses.
+
+## Agent team
+
+Hermes is a **single-instance personal agent** — it does not scale out. Instead,
+run several well-managed instances and group them into a team that shares **one
+Discord channel** as the context bus. Each agent gets its own bot token, pod, PVC,
+and identity; the shared channel is the only thing they have in common.
+
+### How agents hand off by `@mention`
+
+Point every instance at the same `DISCORD_HOME_CHANNEL` (with a different
+`DISCORD_BOT_TOKEN` each). Agents hand the conversation to each other by placing
+an explicit `<@BOT_USER_ID>` in the **body** of a Discord message — not as a
+reply reference. Four env vars make the handoff reliable and prevent infinite
+bot-to-bot ping-pong:
+
+| Env var | Recommended value | Why |
+| --- | --- | --- |
+| `DISCORD_ALLOW_BOTS` | `mentions` | Respond to another bot only when it `@mentions` us. |
+| `DISCORD_THREAD_REQUIRE_MENTION` | `true` | In shared threads, fire only on explicit mention. |
+| `DISCORD_REPLY_TO_MODE` | `off` | Don't attach a reply-reference — it auto-pings the partner and restarts the loop. |
+| `DISCORD_ALLOW_MENTION_REPLIED_USER` | `false` | Never treat an auto reply-ping as a real mention. |
+
+Set these under `env` / `extraEnv` (not under `config` — they are read directly
+by the Discord adapter via `os.getenv`).
+
+### Quick start: two agents, one channel
+
+```bash
+helm upgrade --install hermes-planner ./charts/hermes-agent \
+  --namespace hermes-team --create-namespace \
+  -f charts/hermes-agent/values-multi-agent-collab.yaml \
+  --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' --wait
+
+helm upgrade --install hermes-builder ./charts/hermes-agent \
+  --namespace hermes-team \
+  -f charts/hermes-agent/values-multi-agent-collab.yaml \
+  --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' --wait
+```
+
+For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**
+— adding a teammate becomes a one-line diff. See
+[`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
+and the full guide in [Teams](../../docs/teams.md) + [Collaboration](../../docs/collaboration.md).
 
 ## Advanced testing
 
