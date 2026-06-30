@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # existingClaim scenario: install against a pre-created PVC
 # (persistence.existingClaim) and verify it's mounted/writable. Runs against
-# its own ephemeral kind cluster (separate from the default scenario).
+# its own ephemeral kind cluster (separate from the message scenario).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=.github/scripts/lib.sh

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shared helpers for the validate-chart test scenarios. Sourced by
-# scenario-default.sh / scenario-existing-claim.sh — each scenario now runs
+# scenario-message.sh / scenario-existing-claim.sh — each scenario now runs
 # in its OWN ephemeral kind cluster (separate matrix job), so unlike the
 # previous single-cluster setup, these helpers don't need to juggle multiple
 # namespaces or be exported into background subshells.

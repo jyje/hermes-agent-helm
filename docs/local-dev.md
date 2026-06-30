@@ -85,7 +85,7 @@ export NS=test-hermes-chart
 export CI_MODELS="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
 export NVIDIA_API_KEY='nvapi-...'   # omit for a doctor-only run (no live chat)
 
-.github/scripts/scenario-default.sh
+.github/scripts/scenario-message.sh
 # or:
 .github/scripts/scenario-existing-claim.sh
 
@@ -93,10 +93,10 @@ kind delete cluster --name hermes-verify
 ```
 
 Each script is self-contained — install, hook test, and (for
-`scenario-default.sh`, when `NVIDIA_API_KEY` is set) the skill-injection +
+`scenario-message.sh`, when `NVIDIA_API_KEY` is set) the skill-injection +
 chat round-trip, exactly as CI runs it. `DISCORD_BOT_TOKEN` /
 `DISCORD_HOME_CHANNEL` are optional and only consumed by
-`scenario-default.sh`. Run each scenario against its **own** cluster (as
+`scenario-message.sh`. Run each scenario against its **own** cluster (as
 above) — both scripts default `NS` to `test-hermes-chart`, matching CI's
 per-matrix-job isolation; reusing one cluster for both back-to-back will
 collide unless you delete the namespace or override `NS` between runs.
@@ -109,7 +109,7 @@ collide unless you delete the namespace or override `NS` between runs.
 
 ### Using a different provider for the round-trip
 
-`scenario-default.sh` is hardcoded to NVIDIA NIM (the provider CI exercises),
+`scenario-message.sh` is hardcoded to NVIDIA NIM (the provider CI exercises),
 but `lib.sh`'s `install_release` is a thin wrapper around `helm upgrade`, so
 nothing stops you from copying a scenario script and pointing
 `config.model.provider` elsewhere for a quick local check — e.g. a local LM

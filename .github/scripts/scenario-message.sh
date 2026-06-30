@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Default scenario: chart-managed storage, the hook test, and (on trusted
+# message scenario: chart-managed storage, the hook test, and (on trusted
 # runs with an NVIDIA_API_KEY) a skill-injection + chat round-trip through
-# NVIDIA NIM. Runs against its own ephemeral kind cluster.
+# NVIDIA NIM. Also the only scenario that installs Discord, so the
+# live-notify step in the workflow only fires from this scenario. Runs
+# against its own ephemeral kind cluster.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=.github/scripts/lib.sh

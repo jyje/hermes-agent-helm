@@ -25,14 +25,14 @@ result.
 Two scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
 (a separate runner) — fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
-separately: `test (default)` and `test (existing-claim)`. Scenario logic lives
+separately: `test (message)` and `test (existing-claim)`. Scenario logic lives
 in [.github/scripts](../.github/scripts) (`lib.sh` + one script per scenario)
 rather than inline in the workflow.
 
 A `changes` job skips `test` entirely for version-bump-only commits (where the
 chart behavior is unchanged).
 
-#### default scenario — [scenario-default.sh](../.github/scripts/scenario-default.sh)
+#### message scenario — [scenario-message.sh](../.github/scripts/scenario-message.sh)
 
 1. Install with chart-managed storage.
 2. Run the chart's `hermes doctor` test hook (the same Job as `helm test`, but

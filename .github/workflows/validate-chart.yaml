@@ -76,14 +76,14 @@ jobs:
     # runner), so the two scenarios are fully isolated — no shared cluster,
     # no namespace partitioning, no background-process plumbing. Scenario
     # logic lives in .github/scripts/{lib,scenario-*}.sh. If an
-    # NVIDIA_API_KEY secret is present (non-fork runs), the default scenario
+    # NVIDIA_API_KEY secret is present (non-fork runs), the message scenario
     # also does a real model round-trip through NVIDIA NIM; otherwise
     # doctor-only. NIM is used (rather than Gemini) because its free tier has
     # enough headroom for repeated CI runs without hitting per-day quota
     # errors.
     #
     # CI_MODELS is a pool of small/free NIM models (same provider/credentials,
-    # different model ids). The default scenario tries each via
+    # different model ids). The message scenario tries each via
     # `hermes chat -m <model>` and passes as soon as one succeeds, since any
     # single free-tier model can be flaky — this is a FAILOVER pool, not
     # exhaustive per-model testing.
@@ -92,14 +92,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [default, existing-claim]
+        scenario: [message, existing-claim]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
       NS: test-hermes-chart
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
-      # Optional live Discord verification: only scenario-default.sh ever
+      # Optional live Discord verification: only scenario-message.sh ever
       # uses these (it's the only scenario installing Discord), so they're
       # simply unread on the existing-claim job.
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
@@ -115,15 +115,18 @@ jobs:
         timeout-minutes: 12
         run: .github/scripts/scenario-${{ matrix.scenario }}.sh
 
-      - name: Notify Discord and verify delivery (default scenario, trusted runs with a token)
+      - name: Notify Discord and verify delivery (message scenario, trusted runs with a token)
         # Full live round-trip: send the "CI healthy" message via `hermes send`
-        # from the default-scenario workload (no gateway loop needed for
+        # from the message-scenario workload (no gateway loop needed for
         # bot-token platforms), then read the channel back through the Discord
         # API and confirm our unique marker is present. This GATES on trusted
         # runs — if the send fails or the message can't be verified, CI fails.
         # Fork PRs skip it (no secret). The bot needs View Channel + Read Message
-        # History on DISCORD_HOME_CHANNEL for the read-back.
-        if: matrix.scenario == 'default' && success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
+        # History on DISCORD_HOME_CHANNEL for the read-back. Only this scenario
+        # installs Discord, and only this job's own success() is checked — it
+        # does not wait on the existing-claim job (GitHub Actions' own check
+        # status already reports overall pass/fail across the matrix).
+        if: matrix.scenario == 'message' && success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
         run: |
           set -euo pipefail
           pod=$(kubectl get pod -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent \
