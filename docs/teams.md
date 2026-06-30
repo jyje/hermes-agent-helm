@@ -56,6 +56,14 @@ bus:
   **context files** (`SOUL.md`, `AGENTS.md`) that inject into every session's
   system prompt, as described in the
   [Team Telegram Assistant guide](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant).
+- For **shared persistent knowledge** (vector indices, conversation history, or
+  shared config files), you can have all agents mount the **same ReadWriteMany
+  (RWX) PVC** using the `persistence.existingClaim` field. This lets agents
+  read and write to a common knowledge base. See
+  [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)
+  for a complete example. **Note:** The PVC must use a StorageClass that supports
+  `ReadWriteMany` access mode (e.g., NFS, CephFS, Longhorn); most cloud providers'
+  default StorageClass is `ReadWriteOnce` and will not work for multiple writers.
 
 > **Honest status (upstream).** Direct agent-to-agent awareness inside one group
 > is still evolving in Hermes itself (see upstream issues
