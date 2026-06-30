@@ -22,15 +22,17 @@ result.
 
 ### `test`
 
-A single ephemeral **kind** cluster runs two scenarios **in parallel**, each
-isolated in its own namespace and wrapped in its own timeout. If either scenario
-times out or fails, the driver captures that scenario's log and per-namespace
-diagnostics (`kubectl get/describe pods`, workload + test-pod logs).
+Two scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
+(a separate runner) — fully isolated, with native per-job status, timeout, and
+failure diagnostics instead of one bundled log. The PR checks list shows them
+separately: `test (default)` and `test (existing-claim)`. Scenario logic lives
+in [.github/scripts](../.github/scripts) (`lib.sh` + one script per scenario)
+rather than inline in the workflow.
 
 A `changes` job skips `test` entirely for version-bump-only commits (where the
 chart behavior is unchanged).
 
-#### default scenario — namespace `test-hermes-chart`
+#### default scenario — [scenario-default.sh](../.github/scripts/scenario-default.sh)
 
 1. Install with chart-managed storage.
 2. Run the chart's `hermes doctor` test hook (the same Job as `helm test`, but
@@ -42,7 +44,10 @@ The `CI_MODELS` pool is **failover only** — the round-trip passes on the first
 model that answers, not every model. The chat invocation mirrors the chart's own
 test hook: `hermes chat -m <model> --provider nvidia -q <prompt> --max-turns N`.
 
-#### existingClaim scenario — namespace `test-hermes-claim`
+The live Discord notification step (workflow-level, after the scenario script)
+only runs for this scenario, since it's the only one with Discord enabled.
+
+#### existingClaim scenario — [scenario-existing-claim.sh](../.github/scripts/scenario-existing-claim.sh)
 
 Exercises `persistence.existingClaim` (the ability to mount a pre-existing PVC
 instead of one the chart creates — [PR #37](https://github.com/jyje/hermes-agent-helm/pull/37)):

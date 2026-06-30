@@ -69,6 +69,60 @@ make test
 
 ---
 
+## Running the CI test scenarios locally
+
+[validate-chart.yaml](../.github/workflows/validate-chart.yaml)'s `test` job
+runs two scenarios as a **matrix** — each on its own ephemeral kind cluster.
+The scenario logic itself lives in
+[.github/scripts](../.github/scripts) (`lib.sh` + one script per scenario), so
+you can reproduce exactly what CI does, scenario by scenario, against a local
+kind cluster:
+
+```bash
+kind create cluster --name hermes-verify
+
+export NS=test-hermes-chart
+export CI_MODELS="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
+export NVIDIA_API_KEY='nvapi-...'   # omit for a doctor-only run (no live chat)
+
+.github/scripts/scenario-default.sh
+# or:
+.github/scripts/scenario-existing-claim.sh
+
+kind delete cluster --name hermes-verify
+```
+
+Each script is self-contained — install, hook test, and (for
+`scenario-default.sh`, when `NVIDIA_API_KEY` is set) the skill-injection +
+chat round-trip, exactly as CI runs it. `DISCORD_BOT_TOKEN` /
+`DISCORD_HOME_CHANNEL` are optional and only consumed by
+`scenario-default.sh`. Run each scenario against its **own** cluster (as
+above) — both scripts default `NS` to `test-hermes-chart`, matching CI's
+per-matrix-job isolation; reusing one cluster for both back-to-back will
+collide unless you delete the namespace or override `NS` between runs.
+
+> macOS ships bash 3.2 (`/bin/bash --version`), which has a long-fixed-upstream
+> bug where expanding an **empty** array under `set -u` raises "unbound
+> variable" (fixed in bash 4.4+). The scripts already guard for this
+> (`"${arr[@]+"${arr[@]}"}"`), so this should just work — if you hit a similar
+> error while extending these scripts, that's almost certainly the cause.
+
+### Using a different provider for the round-trip
+
+`scenario-default.sh` is hardcoded to NVIDIA NIM (the provider CI exercises),
+but `lib.sh`'s `install_release` is a thin wrapper around `helm upgrade`, so
+nothing stops you from copying a scenario script and pointing
+`config.model.provider` elsewhere for a quick local check — e.g. a local LM
+Studio server as a custom OpenAI-compatible provider (see
+[Configure your provider](../charts/hermes-agent/README.md#configure-your-provider)
+in the chart README). Note this isn't validated end-to-end here: the agent pod
+runs inside the kind node's network namespace, so reaching an LM Studio
+instance on the host requires the pod to resolve the host (e.g.
+`host.docker.internal`, which may or may not resolve from inside a pod
+depending on your container runtime/CNI) — work this out before relying on it.
+
+---
+
 ## Port-forwarding a remote cluster agent
 
 When you want to test against an agent already running in a staging or
