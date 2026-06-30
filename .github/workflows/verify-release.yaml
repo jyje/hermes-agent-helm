@@ -1,0 +1,124 @@
+name: 🔒 verify-release
+
+# Post-release smoke test that proves the full supply-chain trust chain:
+#   1. cosign verify  — signature is in the Sigstore transparency log and matches
+#                       this repo's GitHub Actions OIDC identity
+#   2. helm install   — from the published OCI artifact (not local source files)
+#   3. helm test      — hermes doctor + chat round-trip, same as validate-chart
+#
+# Runs automatically after every successful release-chart run.
+# Failure here means the published artifact is broken or the signature is invalid.
+
+on:
+  workflow_run:
+    workflows: ["🚀 release-chart"]
+    types: [completed]
+
+permissions:
+  packages: read   # pull the signed OCI artifact from ghcr
+
+jobs:
+  verify:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 20
+    env:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Resolve chart version
+        id: ver
+        run: |
+          VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
+          NAME="$(grep -E '^name:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "chart_name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${{ github.repository }}/$NAME:$VER" >> "$GITHUB_OUTPUT"
+          echo "Verifying release: $NAME v$VER"
+
+      # ── Step 1: verify the cosign signature ─────────────────────────────────
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Verify OCI signature (Sigstore)
+        run: |
+          cosign verify \
+            --certificate-identity-regexp \
+              "https://github.com/${{ github.repository }}/.*" \
+            --certificate-oidc-issuer \
+              "https://token.actions.githubusercontent.com" \
+            "${{ steps.ver.outputs.image }}"
+
+      # ── Step 2: install from the verified OCI artifact ──────────────────────
+      - uses: azure/setup-helm@v5
+
+      - uses: helm/kind-action@v1
+
+      - name: Log in to ghcr (helm OCI pull)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Install from OCI
+        run: |
+          if [ -n "$NVIDIA_API_KEY" ]; then
+            helm upgrade --install hermes-agent \
+              "oci://ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}" \
+              --version "${{ steps.ver.outputs.version }}" \
+              --namespace verify-hermes-chart --create-namespace \
+              --set config.model.provider=nvidia \
+              --set-string config.model.default="${CI_MODELS%%,*}" \
+              --set-string env.NVIDIA_API_KEY="$NVIDIA_API_KEY" \
+              --set-string env.OPENAI_API_KEY=unused \
+              --set tests.chat.enabled=true \
+              --set tests.chat.failOnError=true \
+              --set "tests.chat.models={$CI_MODELS}" \
+              --wait --timeout 5m
+          else
+            helm upgrade --install hermes-agent \
+              "oci://ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}" \
+              --version "${{ steps.ver.outputs.version }}" \
+              --namespace verify-hermes-chart --create-namespace \
+              --set-string env.OPENAI_API_KEY=sk-test \
+              --wait --timeout 5m
+          fi
+
+      # ── Step 3: run the chart's own test suite ──────────────────────────────
+      - name: Run install test (hermes doctor + chat round-trip)
+        timeout-minutes: 6
+        run: |
+          ns=verify-hermes-chart
+          job=hermes-agent-test
+
+          helm get hooks hermes-agent -n "$ns" > /tmp/test-hooks.yaml
+          kubectl delete job "$job" -n "$ns" --ignore-not-found
+          kubectl create -n "$ns" -f /tmp/test-hooks.yaml
+
+          result=timeout
+          for _ in $(seq 1 150); do
+            conds=$(kubectl get job "$job" -n "$ns" \
+              -o jsonpath='{.status.conditions[?(@.status=="True")].type}' 2>/dev/null || true)
+            case "$conds" in
+              *Complete*) result=success; break ;;
+              *Failed*)   result=failed;  break ;;
+            esac
+            sleep 2
+          done
+          echo "test job result: $result"
+          [ "$result" = success ]
+
+      - name: Show test logs
+        if: always()
+        run: kubectl logs -n verify-hermes-chart -l app.kubernetes.io/component=test --tail=-1
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl get pods -n verify-hermes-chart -o wide || true
+          kubectl logs -n verify-hermes-chart -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n verify-hermes-chart -l app.kubernetes.io/name=hermes-agent --tail=-1 || true

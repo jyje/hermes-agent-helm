@@ -118,7 +118,7 @@ jobs:
           if [ -n "$NVIDIA_API_KEY" ]; then
             echo "Installing with NVIDIA NIM provider, model pool: $CI_MODELS"
             helm upgrade --install hermes-agent charts/hermes-agent \
-              --namespace hermes-agent --create-namespace \
+              --namespace test-hermes-chart --create-namespace \
               --set config.model.provider=nvidia \
               --set-string config.model.default="${CI_MODELS%%,*}" \
               --set-string env.NVIDIA_API_KEY="$NVIDIA_API_KEY" \
@@ -131,7 +131,7 @@ jobs:
           else
             echo "No NVIDIA_API_KEY secret — installing with placeholder (doctor-only)"
             helm upgrade --install hermes-agent charts/hermes-agent \
-              --namespace hermes-agent --create-namespace \
+              --namespace test-hermes-chart --create-namespace \
               --set-string env.OPENAI_API_KEY=sk-test \
               $DISCORD_ARGS \
               --wait --timeout 5m
@@ -146,7 +146,7 @@ jobs:
           # render the same Job from the installed release (real values) and run
           # it directly, then poll its status — creation is immediate and timing
           # is deterministic.
-          ns=hermes-agent
+          ns=test-hermes-chart
           job=hermes-agent-test
 
           helm get hooks hermes-agent -n "$ns" > /tmp/test-hooks.yaml
@@ -179,12 +179,12 @@ jobs:
         if: success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
         run: |
           set -euo pipefail
-          pod=$(kubectl get pod -n hermes-agent -l app.kubernetes.io/name=hermes-agent \
+          pod=$(kubectl get pod -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent \
             -o jsonpath='{.items[0].metadata.name}')
           nonce="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           msg="✅ hermes-agent chart CI passed — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} [${nonce}]"
           echo "Sending via workload pod: $pod"
-          kubectl exec -n hermes-agent "$pod" -- hermes send --to discord "$msg"
+          kubectl exec -n test-hermes-chart "$pod" -- hermes send --to discord "$msg"
 
           echo "Verifying delivery by reading the channel back…"
           ok=false
@@ -212,11 +212,11 @@ jobs:
 
       - name: Show test logs (incl. chat round-trip transcript)
         if: always()
-        run: kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+        run: kubectl logs -n test-hermes-chart -l app.kubernetes.io/component=test --tail=-1
 
       - name: Diagnostics on failure
         if: failure()
         run: |
-          kubectl get pods -n hermes-agent -o wide || true
-          kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1 || true
-          kubectl logs -n hermes-agent -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
+          kubectl get pods -n test-hermes-chart -o wide || true
+          kubectl logs -n test-hermes-chart -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent --tail=-1 || true

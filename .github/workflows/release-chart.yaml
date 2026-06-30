@@ -105,6 +105,16 @@ jobs:
           cosign sign --yes \
             "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"
 
+      - name: Verify signature (self-check)
+        if: steps.ver.outputs.exists == 'false'
+        run: |
+          cosign verify \
+            --certificate-identity-regexp \
+              "https://github.com/${{ github.repository }}/.*" \
+            --certificate-oidc-issuer \
+              "https://token.actions.githubusercontent.com" \
+            "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"
+
       - name: Checkout existing Helm repo index (gh-pages)
         if: steps.ver.outputs.exists == 'false'
         uses: actions/checkout@v7
