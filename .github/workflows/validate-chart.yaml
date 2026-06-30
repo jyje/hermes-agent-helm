@@ -72,40 +72,36 @@ jobs:
             || { echo "::error::charts/hermes-agent/README.md is stale — run 'make docs' and commit"; exit 1; }
 
   test:
-    # Isolated install + test on an ephemeral kind cluster (no real cluster).
-    # If an NVIDIA_API_KEY secret is present (non-fork runs), also do a real model
-    # round-trip through NVIDIA NIM; otherwise doctor-only. NIM is used (rather
-    # than Gemini) because its free tier has enough headroom for repeated CI runs
-    # without hitting per-day quota errors.
+    # Each matrix entry gets its OWN ephemeral kind cluster (a separate
+    # runner), so the two scenarios are fully isolated — no shared cluster,
+    # no namespace partitioning, no background-process plumbing. Scenario
+    # logic lives in .github/scripts/{lib,scenario-*}.sh. If an
+    # NVIDIA_API_KEY secret is present (non-fork runs), the default scenario
+    # also does a real model round-trip through NVIDIA NIM; otherwise
+    # doctor-only. NIM is used (rather than Gemini) because its free tier has
+    # enough headroom for repeated CI runs without hitting per-day quota
+    # errors.
     #
     # CI_MODELS is a pool of small/free NIM models (same provider/credentials,
-    # different model ids). Scenarios try each via `hermes chat -m <model>` and
-    # pass as soon as one succeeds, since any single free-tier model can be flaky.
-    #
-    # Two scenarios run IN PARALLEL on the SAME kind cluster, isolated by
-    # namespace (one kind cluster = one runner; GitHub Actions cannot share a
-    # kind cluster across jobs, so true job-level fan-out is not possible here):
-    #   • scenario_default       (ns: test-hermes-chart) — default install,
-    #                             skill injection + chat round-trip
-    #   • scenario_existing_claim (ns: test-hermes-claim) — install against a
-    #                             pre-created PVC (persistence.existingClaim)
-    # Each scenario has its OWN `timeout`; if either times out or fails, the
-    # driver collects per-namespace diagnostics and fails the job.
+    # different model ids). The default scenario tries each via
+    # `hermes chat -m <model>` and passes as soon as one succeeds, since any
+    # single free-tier model can be flaky — this is a FAILOVER pool, not
+    # exhaustive per-model testing.
     needs: changes
     if: needs.changes.outputs.functional == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [default, existing-claim]
     runs-on: ubuntu-26.04-arm
-    timeout-minutes: 20
+    timeout-minutes: 15
     env:
+      NS: test-hermes-chart
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
-      # Per-scenario wall-clock budget (seconds). Each parallel scenario is
-      # wrapped in `timeout`; exit 124 from `timeout` is reported as a timeout.
-      SCENARIO_TIMEOUT_SECONDS: "720"
-      # Optional live Discord verification: when the bot token and home channel
-      # id secrets are present on trusted runs, the default-scenario workload is
-      # installed with Discord enabled and, after the scenarios pass, CI sends a
-      # one-shot "CI healthy" message via `hermes send` and reads the channel
-      # back to confirm delivery. Absent on fork PRs (secrets not exposed).
+      # Optional live Discord verification: only scenario-default.sh ever
+      # uses these (it's the only scenario installing Discord), so they're
+      # simply unread on the existing-claim job.
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_HOME_CHANNEL: ${{ secrets.DISCORD_HOME_CHANNEL }}
     steps:
@@ -115,213 +111,11 @@ jobs:
 
       - uses: helm/kind-action@v1
 
-      - name: Run scenarios in parallel (shared kind cluster, per-namespace, per-scenario timeout)
-        timeout-minutes: 16
-        run: |
-          set -uo pipefail
-          LOGDIR=/tmp/ci-scenarios
-          mkdir -p "$LOGDIR"
+      - name: Run ${{ matrix.scenario }} scenario
+        timeout-minutes: 12
+        run: .github/scripts/scenario-${{ matrix.scenario }}.sh
 
-          NS_DEFAULT=test-hermes-chart
-          NS_CLAIM=test-hermes-claim
-
-          # ── Shared helpers (exported into each scenario subshell) ───────────
-
-          # install_release <namespace> [extra helm --set flags...]
-          # Installs with NVIDIA NIM when a key is available, else a doctor-only
-          # placeholder. Discord is only enabled for the default namespace so the
-          # post-test live-send step has a workload to send from.
-          # shellcheck disable=SC2329  # invoked indirectly (export -f + bash -ec)
-          install_release() {
-            ns="$1"; shift
-            discord_args=()
-            if [ "$ns" = "$NS_DEFAULT" ] && [ -n "${DISCORD_BOT_TOKEN:-}" ]; then
-              discord_args+=(--set-string "env.DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN")
-              if [ -n "${DISCORD_HOME_CHANNEL:-}" ]; then
-                discord_args+=(--set "extraEnv[0].name=DISCORD_HOME_CHANNEL" \
-                              --set-string "extraEnv[0].value=$DISCORD_HOME_CHANNEL")
-              fi
-            fi
-            if [ -n "${NVIDIA_API_KEY:-}" ]; then
-              echo "[$ns] installing with NVIDIA NIM (model pool: $CI_MODELS)"
-              helm upgrade --install hermes-agent charts/hermes-agent \
-                --namespace "$ns" --create-namespace \
-                --set config.model.provider=nvidia \
-                --set-string config.model.default="${CI_MODELS%%,*}" \
-                --set-string env.NVIDIA_API_KEY="$NVIDIA_API_KEY" \
-                --set-string env.OPENAI_API_KEY=unused \
-                --set tests.chat.enabled=true \
-                --set tests.chat.failOnError=true \
-                --set "tests.chat.models={$CI_MODELS}" \
-                "${discord_args[@]}" "$@" \
-                --wait --timeout 5m
-            else
-              echo "[$ns] no NVIDIA_API_KEY — installing placeholder (doctor-only)"
-              helm upgrade --install hermes-agent charts/hermes-agent \
-                --namespace "$ns" --create-namespace \
-                --set-string env.OPENAI_API_KEY=sk-test \
-                "${discord_args[@]}" "$@" \
-                --wait --timeout 5m
-            fi
-          }
-
-          # run_hook_test <namespace>
-          # Renders the chart's Helm-hook test Job from the installed release and
-          # runs it directly (NOT `helm test`, whose hook watch can stall many
-          # minutes on a CI runner). Polls until Complete (pass) or Failed.
-          # shellcheck disable=SC2329  # invoked indirectly (export -f + bash -ec)
-          run_hook_test() {
-            ns="$1"; job=hermes-agent-test
-            helm get hooks hermes-agent -n "$ns" > "/tmp/hooks-$ns.yaml"
-            kubectl delete job "$job" -n "$ns" --ignore-not-found
-            kubectl create -n "$ns" -f "/tmp/hooks-$ns.yaml"
-            for _ in $(seq 1 150); do
-              conds=$(kubectl get job "$job" -n "$ns" \
-                -o jsonpath='{.status.conditions[?(@.status=="True")].type}' 2>/dev/null || true)
-              case "$conds" in
-                *Complete*) echo "[$ns] hook test: Complete"; return 0 ;;
-                *Failed*)   echo "[$ns] hook test: Failed";   return 1 ;;
-              esac
-              sleep 2
-            done
-            echo "[$ns] hook test: timed out"; return 1
-          }
-
-          # shellcheck disable=SC2329  # invoked indirectly (export -f + bash -ec)
-          pod_name() {
-            kubectl get pod -n "$1" -l app.kubernetes.io/name=hermes-agent \
-              -o jsonpath='{.items[0].metadata.name}'
-          }
-
-          # chat_round_trip <namespace> <pod> — passes on the first model that
-          # answers; the free-tier pool tolerates per-model flakiness.
-          # shellcheck disable=SC2329  # invoked indirectly (export -f + bash -ec)
-          chat_round_trip() {
-            ns="$1"; pod="$2"; ok=false
-            for model in $(echo "$CI_MODELS" | tr ',' ' '); do
-              echo "[$ns] --- model: $model ---"
-              # Prompt goes via -q (not positional) and --max-turns bounds the
-              # round-trip — same invocation the chart's own test hook uses.
-              if kubectl exec -n "$ns" "$pod" -- \
-                  hermes chat -m "$model" --provider nvidia \
-                    -q "ci-ping" --max-turns 2; then
-                ok=true; break
-              fi
-              echo "[$ns] model $model failed, trying next"
-            done
-            [ "$ok" = true ]
-          }
-
-          # ── Scenario A: default install + skill injection + chat ────────────
-          # shellcheck disable=SC2329  # invoked indirectly (export -f + bash -ec)
-          scenario_default() {
-            ns="$NS_DEFAULT"
-            install_release "$ns"
-            run_hook_test "$ns"
-            if [ -n "${NVIDIA_API_KEY:-}" ]; then
-              pod="$(pod_name "$ns")"; echo "[$ns] pod: $pod"
-              echo "[$ns] === skill injection ==="
-              # shellcheck disable=SC2016  # $HERMES_HOME/$skill_dir expand in the pod's shell, not the runner
-              kubectl exec -n "$ns" "$pod" -- sh -c '
-                skill_dir="${HERMES_HOME:-/opt/data}/skills"
-                mkdir -p "$skill_dir"
-                printf "# CI Ping\n\nWhen the user says \"ci-ping\", reply with exactly: CI_PONG\n" \
-                  > "$skill_dir/ci-test.md"
-                echo "Skill written:"; cat "$skill_dir/ci-test.md"
-              '
-              echo "[$ns] === chat with injected skill ==="
-              chat_round_trip "$ns" "$pod" \
-                || { echo "::error::[$ns] all models failed chat round-trip"; return 1; }
-            else
-              echo "[$ns] doctor-only (hook test already covered the health check)"
-            fi
-          }
-
-          # ── Scenario B: existingClaim install + hermes CLI verification ─────
-          # shellcheck disable=SC2329  # invoked indirectly (export -f + bash -ec)
-          scenario_existing_claim() {
-            ns="$NS_CLAIM"
-            kubectl create namespace "$ns" 2>/dev/null || true
-            echo "[$ns] creating shared PVC ci-shared-pvc"
-            printf '%s\n' \
-              'apiVersion: v1' \
-              'kind: PersistentVolumeClaim' \
-              'metadata:' \
-              '  name: ci-shared-pvc' \
-              'spec:' \
-              '  accessModes: [ReadWriteOnce]' \
-              '  resources:' \
-              '    requests:' \
-              '      storage: 1Gi' \
-              | kubectl apply -n "$ns" -f -
-            # local-path (kind default) is WaitForFirstConsumer, so the PVC binds
-            # only once the pod mounts it — `helm --wait` below covers that.
-            echo "[$ns] installing with persistence.existingClaim=ci-shared-pvc"
-            install_release "$ns" --set persistence.existingClaim=ci-shared-pvc
-            run_hook_test "$ns"
-            pod="$(pod_name "$ns")"; echo "[$ns] pod: $pod"
-            echo "[$ns] verifying the pre-created PVC is mounted and writable"
-            # shellcheck disable=SC2016  # $HERMES_HOME expands in the pod's shell, not the runner
-            kubectl exec -n "$ns" "$pod" -- sh -c '
-              echo "ci-existingClaim-ok" > "${HERMES_HOME:-/opt/data}/ci-claim-probe.txt"
-              cat "${HERMES_HOME:-/opt/data}/ci-claim-probe.txt"
-            '
-            echo "[$ns] hermes doctor on the existingClaim release"
-            kubectl exec -n "$ns" "$pod" -- hermes doctor
-          }
-
-          dump_diag() {
-            ns="$1"
-            echo "::group::diagnostics ($ns)"
-            kubectl get pods -n "$ns" -o wide || true
-            kubectl describe pods -n "$ns" || true
-            kubectl logs -n "$ns" -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
-            kubectl logs -n "$ns" -l app.kubernetes.io/component=test --tail=-1 || true
-            echo "::endgroup::"
-          }
-
-          export -f install_release run_hook_test pod_name chat_round_trip \
-                    scenario_default scenario_existing_claim
-          export NS_DEFAULT NS_CLAIM CI_MODELS NVIDIA_API_KEY \
-                 DISCORD_BOT_TOKEN DISCORD_HOME_CHANNEL
-
-          # ── Launch both scenarios in parallel, each with its own timeout ────
-          secs="${SCENARIO_TIMEOUT_SECONDS:-720}"
-          echo "Launching scenarios in parallel (per-scenario timeout: ${secs}s)…"
-
-          timeout "$secs" bash -ec scenario_default        > "$LOGDIR/default.log" 2>&1 &
-          pid_default=$!
-          timeout "$secs" bash -ec scenario_existing_claim > "$LOGDIR/claim.log"   2>&1 &
-          pid_claim=$!
-
-          rc=0
-          if wait "$pid_default"; then
-            echo "✅ default scenario passed"
-          else
-            code=$?; rc=1
-            if [ "$code" = 124 ]; then echo "⏱️  default scenario TIMED OUT after ${secs}s"
-            else echo "❌ default scenario FAILED (exit $code)"; fi
-          fi
-          if wait "$pid_claim"; then
-            echo "✅ existingClaim scenario passed"
-          else
-            code=$?; rc=1
-            if [ "$code" = 124 ]; then echo "⏱️  existingClaim scenario TIMED OUT after ${secs}s"
-            else echo "❌ existingClaim scenario FAILED (exit $code)"; fi
-          fi
-
-          # Always surface each scenario's captured output…
-          echo "::group::default scenario log";       cat "$LOGDIR/default.log" || true; echo "::endgroup::"
-          echo "::group::existingClaim scenario log";  cat "$LOGDIR/claim.log"  || true; echo "::endgroup::"
-
-          # …and on any failure, the per-namespace cluster diagnostics.
-          if [ "$rc" -ne 0 ]; then
-            dump_diag "$NS_DEFAULT"
-            dump_diag "$NS_CLAIM"
-          fi
-          exit "$rc"
-
-      - name: Notify Discord and verify delivery (trusted runs with a token)
+      - name: Notify Discord and verify delivery (default scenario, trusted runs with a token)
         # Full live round-trip: send the "CI healthy" message via `hermes send`
         # from the default-scenario workload (no gateway loop needed for
         # bot-token platforms), then read the channel back through the Discord
@@ -329,7 +123,7 @@ jobs:
         # runs — if the send fails or the message can't be verified, CI fails.
         # Fork PRs skip it (no secret). The bot needs View Channel + Read Message
         # History on DISCORD_HOME_CHANNEL for the read-back.
-        if: success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
+        if: matrix.scenario == 'default' && success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
         run: |
           set -euo pipefail
           pod=$(kubectl get pod -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent \
@@ -363,24 +157,16 @@ jobs:
           fi
           echo "Verified: the CI notification is present in the Discord channel."
 
-      - name: Show test logs (both scenario namespaces)
+      - name: Show test logs
         if: always()
         run: |
-          for ns in test-hermes-chart test-hermes-claim; do
-            echo "::group::logs ($ns)"
-            kubectl logs -n "$ns" -l app.kubernetes.io/component=test --tail=-1 || true
-            kubectl logs -n "$ns" -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
-            echo "::endgroup::"
-          done
+          kubectl logs -n test-hermes-chart -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
 
-      - name: Diagnostics on failure (both scenario namespaces)
+      - name: Diagnostics on failure
         if: failure()
         run: |
-          for ns in test-hermes-chart test-hermes-claim; do
-            echo "::group::diagnostics ($ns)"
-            kubectl get pods -n "$ns" -o wide || true
-            kubectl describe pods -n "$ns" || true
-            kubectl logs -n "$ns" -l app.kubernetes.io/component=test --tail=-1 || true
-            kubectl logs -n "$ns" -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
-            echo "::endgroup::"
-          done
+          kubectl get pods -n test-hermes-chart -o wide || true
+          kubectl describe pods -n test-hermes-chart || true
+          kubectl logs -n test-hermes-chart -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
