@@ -3,7 +3,7 @@ name: hermes-agent
 description: |
   👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight
   
-  Run Hermes Agent — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
+  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 type: application
 
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
