@@ -36,9 +36,11 @@ jobs:
         run: |
           VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
           NAME="$(grep -E '^name:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
-          echo "version=$VER" >> "$GITHUB_OUTPUT"
-          echo "chart_name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "image=ghcr.io/${{ github.repository }}/$NAME:$VER" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=$VER"
+            echo "chart_name=$NAME"
+            echo "image=ghcr.io/${{ github.repository }}/$NAME:$VER"
+          } >> "$GITHUB_OUTPUT"
           echo "Verifying release: $NAME v$VER"
 
       # ── Step 1: verify the cosign signature ─────────────────────────────────
@@ -112,13 +114,53 @@ jobs:
           echo "test job result: $result"
           [ "$result" = success ]
 
+      - name: CI comprehensive tests (skill injection + chat via kubectl exec)
+        # Conditional extension of the basic helm test — only runs when a model
+        # key is available. Reuses the same kind cluster.
+        if: env.NVIDIA_API_KEY != ''
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          ns=verify-hermes-chart
+          pod=$(kubectl get pod -n "$ns" -l app.kubernetes.io/name=hermes-agent \
+            -o jsonpath='{.items[0].metadata.name}')
+          echo "Pod: $pod"
+
+          # Inject a test skill via the PVC mount
+          echo "=== skill injection ==="
+          # shellcheck disable=SC2016  # $HERMES_HOME/$skill_dir expand in the pod's shell, not the runner
+          kubectl exec -n "$ns" "$pod" -- sh -c '
+            skill_dir="${HERMES_HOME:-/opt/data}/skills"
+            mkdir -p "$skill_dir"
+            printf "# CI Ping\n\nWhen the user says \"ci-ping\", reply with exactly: CI_PONG\n" \
+              > "$skill_dir/ci-test.md"
+            echo "Skill written:"
+            cat "$skill_dir/ci-test.md"
+          '
+
+          # Chat round-trip with injected skill
+          echo "=== chat with injected skill ==="
+          ok=false
+          for model in $(echo "$CI_MODELS" | tr ',' ' '); do
+            echo "--- model: $model ---"
+            if kubectl exec -n "$ns" "$pod" -- \
+                hermes chat -m "$model" "ci-ping" 2>&1 | tee /tmp/chat-out.txt; then
+              ok=true; break
+            fi
+            echo "model $model failed, trying next"
+          done
+          [ "$ok" = "true" ] || { echo "::error::All models failed chat round-trip"; exit 1; }
+
       - name: Show test logs
         if: always()
-        run: kubectl logs -n verify-hermes-chart -l app.kubernetes.io/component=test --tail=-1
+        run: |
+          kubectl logs -n verify-hermes-chart -l app.kubernetes.io/component=test --tail=-1 || true
+          kubectl logs -n verify-hermes-chart -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
 
       - name: Diagnostics on failure
         if: failure()
         run: |
           kubectl get pods -n verify-hermes-chart -o wide || true
+          kubectl describe pods -n verify-hermes-chart || true
           kubectl logs -n verify-hermes-chart -l app.kubernetes.io/component=test --tail=-1 || true
           kubectl logs -n verify-hermes-chart -l app.kubernetes.io/name=hermes-agent --tail=-1 || true
