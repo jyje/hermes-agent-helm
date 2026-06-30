@@ -67,6 +67,14 @@ Run the chart's own test suite after install:
 make test
 ```
 
+If you edited `values.yaml` (new value, changed default, new section),
+regenerate the chart README via helm-docs and commit the result — CI's `lint`
+job fails on any drift between `README.md` and `README.md.gotmpl`:
+
+```bash
+make docs
+```
+
 ---
 
 ## Running the CI test scenarios locally
