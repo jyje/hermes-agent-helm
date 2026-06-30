@@ -143,8 +143,11 @@ jobs:
           ok=false
           for model in $(echo "$CI_MODELS" | tr ',' ' '); do
             echo "--- model: $model ---"
+            # Prompt goes via -q (not positional) and --max-turns bounds the
+            # round-trip — same invocation the chart's own test hook uses.
             if kubectl exec -n "$ns" "$pod" -- \
-                hermes chat -m "$model" "ci-ping" 2>&1 | tee /tmp/chat-out.txt; then
+                hermes chat -m "$model" --provider nvidia \
+                  -q "ci-ping" --max-turns 2; then
               ok=true; break
             fi
             echo "model $model failed, trying next"
