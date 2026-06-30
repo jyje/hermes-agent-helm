@@ -6,6 +6,7 @@ All notable changes to this chart are documented here.
 ### Features
 
 - ✨ feat(ci): add post-release OCI signature verification workflow ([`88b8c09`](https://github.com/jyje/hermes-agent-helm/commit/88b8c09ce07bc0751eb0260a9a298fd0933d0e21)) — @jyje
+- Feat: add support for existingClaim in persistence configuration (#37) ([`e376ae5`](https://github.com/jyje/hermes-agent-helm/commit/e376ae599f17bc5071bc46bdce887555dd98fad8)) — @Djiit
 
 ### Bug Fixes
 
