@@ -1,0 +1,108 @@
+# values-shared-knowledge.yaml
+#
+# Example: multiple Hermes agents sharing a common knowledge base via a single
+# ReadWriteMany (RWX) PVC.
+#
+# Use case: A team of Hermes agents (planner, builder, researcher, etc.) that all
+# read from and write to the same knowledge repository — SOUL.md, AGENTS.md,
+# vector indices, conversation history, or shared context files. Every agent
+# mounts the SAME PVC so changes made by one agent are immediately visible to
+# all others.
+#
+# REQUIREMENT: The PVC must:
+#   - Use a StorageClass that supports ReadWriteMany (RWX) access mode
+#     (e.g., NFS, CephFS, Longhorn, Azure Files, GCE Persistent Disk with
+#     appropriate access modes). Most cloud providers' default StorageClass
+#     is ReadWriteOnce (RWO) and will NOT work for multiple writers.
+#   - Have accessModes: [ReadWriteMany]
+#   - Be created BEFORE deploying the agents (this chart only references it)
+#
+# Example PVC manifest (create this once, then reference it below):
+#
+#   apiVersion: v1
+#   kind: PersistentVolumeClaim
+#   metadata:
+#     name: hermes-shared-knowledge
+#     namespace: hermes-team
+#   spec:
+#     accessModes:
+#       - ReadWriteMany
+#     storageClassName: nfs-client  # or your RWX-capable StorageClass
+#     resources:
+#       requests:
+#         storage: 10Gi
+#
+# All secrets below are DUMMY placeholders. Do NOT commit real keys: override
+# them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom
+# (see examples/argocd/).
+#
+#   # Deploy the planner agent
+#   helm upgrade --install hermes-planner ./charts/hermes-agent \
+#     --namespace hermes-team --create-namespace \
+#     -f charts/hermes-agent/values-shared-knowledge.yaml \
+#     --set-string env.ANTHROPIC_API_KEY='sk-ant-<real>' \
+#     --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' \
+#     --set-string fullnameOverride=hermes-planner --wait
+#
+#   # Deploy the builder agent (same shared PVC, different bot token)
+#   helm upgrade --install hermes-builder ./charts/hermes-agent \
+#     --namespace hermes-team --create-namespace \
+#     -f charts/hermes-agent/values-shared-knowledge.yaml \
+#     --set-string env.ANTHROPIC_API_KEY='sk-ant-<real>' \
+#     --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' \
+#     --set-string fullnameOverride=hermes-builder --wait
+#
+# See docs/teams.md for the full team pattern and collaboration details.
+
+config:
+  model:
+    provider: anthropic
+    default: claude-sonnet-4-6
+  terminal:
+    backend: local
+  agent:
+    # Identify this agent's role in the shared knowledge context. Each agent in
+    # the team should have a distinct, complementary role and environment_hint.
+    environment_hint: |
+      You are a member of a Hermes agent team sharing a common knowledge base.
+      Your role is to handle planning and coordination tasks. Coordinate with
+      other team members by reading and writing to the shared knowledge files
+      in your HERMES_HOME directory.
+
+env:
+  # Real keys come from --set-string or a SealedSecret. Setting
+  # DISCORD_BOT_TOKEN is enough to auto-enable Discord.
+  ANTHROPIC_API_KEY: "sk-ant-DUMMY_replace_me_0000000000000000000000"
+  OPENAI_API_KEY: "unused"
+  DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
+
+# Non-secret Discord knobs. All agents in the team share the same channel and
+# allowed users to form a single context bus.
+extraEnv:
+  - name: DISCORD_HOME_CHANNEL
+    value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+  - name: DISCORD_ALLOWED_USERS
+    value: "111111111111111111"       # DUMMY — comma-separated user ids
+
+# Persistence: use the existing RWX PVC instead of creating a new RWO one.
+# The same PVC name is used by every agent in the team.
+persistence:
+  enabled: true
+  # -- Use an existing PVC that supports ReadWriteMany for shared access
+  existingClaim: "hermes-shared-knowledge"
+  # The chart ignores storageClass, accessModes, and size when existingClaim is set
+  # (those are defined in the PVC itself), but we keep them here for reference.
+  storageClass: ""
+  accessModes:
+    - ReadWriteMany
+  size: 10Gi
+  mountPath: /opt/data
+
+# Defaults are already tuned for small arm64 nodes; shown here for visibility.
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi

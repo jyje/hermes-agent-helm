@@ -420,6 +420,8 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
+| [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair** — two agents handing off by @mention in a shared Discord channel |
+| [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC** — multiple agents reading/writing to the same knowledge base |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See
 [`examples/argocd/`](../../examples/argocd/) — it has one Application manifest
@@ -467,7 +469,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | ingress.tls | list | TLS configuration for the Ingress. | `[]` |
 | nameOverride | string | Override the chart name used in resource names. | `""` |
 | nodeSelector | object | Node selector for Pod scheduling. | `{}` |
-| persistence | object | ------------------------------------------------------------------------- | `{"accessModes":["ReadWriteOnce"],"enabled":true,"mountPath":"/opt/data","size":"5Gi","storageClass":""}` |
+| persistence | object | ------------------------------------------------------------------------- | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","mountPath":"/opt/data","size":"5Gi","storageClass":""}` |
+| persistence.existingClaim | string | Use an existing PVC instead of creating a new one. When specified, the chart will use this PVC and skip creating its own. | `""` |
 | persistence.storageClass | string | StorageClass for the volumeClaimTemplate. Empty = cluster default. | `""` |
 | podAnnotations | object | Annotations to add to the Pod. | `{}` |
 | podLabels | object | Labels to add to the Pod. | `{}` |

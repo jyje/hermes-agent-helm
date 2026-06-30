@@ -222,6 +222,9 @@ persistence:
     - ReadWriteOnce
   size: 5Gi
   mountPath: /opt/data
+  # -- Use an existing PVC instead of creating a new one.
+  # When specified, the chart will use this PVC and skip creating its own.
+  existingClaim: ""
 
 # ---------------------------------------------------------------------------
 # Networking. `hermes gateway run` is primarily OUTBOUND (Telegram/Discord/etc.)
