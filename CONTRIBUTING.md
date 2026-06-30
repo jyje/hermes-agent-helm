@@ -86,6 +86,14 @@ does a real model round-trip via Google AI Studio (Gemini) — see
 [validate-chart.yaml](.github/workflows/validate-chart.yaml). Fork PRs don't receive the secret, so they
 fall back to doctor-only (safe).
 
+## Local development environment
+
+See **[docs/local-dev.md](docs/local-dev.md)** for:
+
+- Setting up a local Kubernetes cluster (kind recommended; minikube and MicroK8s also covered)
+- Port-forwarding a remote cluster agent for dev testing
+- Configuring a Discord bot with the NVIDIA NIM provider and `hermes gateway`
+
 ## Local checks (run before pushing)
 
 ```bash
