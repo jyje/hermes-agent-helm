@@ -1,6 +1,28 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.6.0] - 2026-06-30
+
+### Features
+
+- ✨ feat(ci): add post-release OCI signature verification workflow ([`88b8c09`](https://github.com/jyje/hermes-agent-helm/commit/88b8c09ce07bc0751eb0260a9a298fd0933d0e21)) — @jyje
+
+### Bug Fixes
+
+- 🐛 bug(ci): pass the chat round-trip prompt via -q, not as a positional arg ([`d8e0092`](https://github.com/jyje/hermes-agent-helm/commit/d8e009202c5457cae16e4edc75a60d712247ad3d)) — @jyje
+
+### Documentation
+
+- 📄 docs(changelog): add v0.5.7 entry and backfill note for v0.4.2 ([`62e8809`](https://github.com/jyje/hermes-agent-helm/commit/62e88095a20173a46c38a27b9211f130d6057ae1)) — @jyje
+- 📄 docs(contributing): add local development environment guide ([`9610f55`](https://github.com/jyje/hermes-agent-helm/commit/9610f55768418cad8620adb9a5187433d7155b3b)) — @jyje
+- 📄 docs: add DevOps roadmap ([`94c68b3`](https://github.com/jyje/hermes-agent-helm/commit/94c68b3e45ffe77d3db6b821ba8633bfb8c174a5)) — @jyje
+- 📄 docs(chart): sync README template with the two example value rows ([`ac1216f`](https://github.com/jyje/hermes-agent-helm/commit/ac1216f1d1b4250a881a200b83b8ceaea32bf6f3)) — @jyje
+- 📄 docs(ci): add docs/ci.md and link it from CONTRIBUTING ([`889f7e2`](https://github.com/jyje/hermes-agent-helm/commit/889f7e2f6f8d749baf7cd3ad4a405b52c85ac531)) — @jyje
+
+### Tests
+
+- ✅ test(ci): run validate-chart scenarios in parallel with per-scenario timeouts ([`4145df8`](https://github.com/jyje/hermes-agent-helm/commit/4145df8247a53388e45bf44b0bef852f8c3b79cb)) — @jyje
+- ✅ test(ci): add comprehensive checks to the post-release verify job ([`1d22eb3`](https://github.com/jyje/hermes-agent-helm/commit/1d22eb39e7ac1152a7d2f7bf9b59b3003e592074)) — @jyje
 
 ## [0.5.7] - 2026-06-29
 
@@ -114,14 +136,6 @@ All notable changes to this chart are documented here.
 ### Removed
 
 - 🗑️ remove(release): drop the one-off cosign backfill workflow ([`a4240f7`](https://github.com/jyje/hermes-agent-helm/commit/a4240f703479e1a0c37f21a95e73568bc5835c95)) — @jyje
-
-### Notes
-
-- **Helm repo backfill (2026-06-29)** — `hermes-agent-0.4.2.tgz` was absent from
-  the GitHub Pages Helm repo (`index.yaml`) due to a partial pipeline failure at
-  original release time (OCI push succeeded; gh-pages deploy did not).
-  The package was manually re-packaged from the `v0.4.2` tag and added to
-  `gh-pages` on 2026-06-29. OCI and GitHub Release were unaffected.
 
 ## [0.4.1] - 2026-06-21
 
