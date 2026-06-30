@@ -80,11 +80,12 @@ clean and grouped. `chore(release):` commits are skipped in the changelog.
 
 ## CI validation
 
-PRs and pushes run an isolated **kind** install + `helm test` (the `hermes
-doctor` Job). If a `GOOGLE_API_KEY` repository secret is set, CI additionally
-does a real model round-trip via Google AI Studio (Gemini) — see
-[validate-chart.yaml](.github/workflows/validate-chart.yaml). Fork PRs don't receive the secret, so they
-fall back to doctor-only (safe).
+PRs and pushes run lint + an isolated **kind** install/test, and every release
+is re-verified against the published, cosign-signed artifact.
+
+See **[docs/ci.md](docs/ci.md)** for the full pipeline — the parallel
+default / existingClaim test scenarios, the failover model pool, fork-PR
+behavior, and the post-release verification.
 
 ## Local development environment
 
