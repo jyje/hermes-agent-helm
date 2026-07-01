@@ -235,6 +235,9 @@ spec:
       volumeMounts:
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
+        {{- with .Values.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
   volumes:
     {{- if .Values.bootstrap.enabled }}
     - name: config
@@ -260,6 +263,9 @@ spec:
     {{- else }}
     - name: data
       emptyDir: {}
+    {{- end }}
+    {{- with .Values.extraVolumes }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- with .Values.nodeSelector }}
   nodeSelector:

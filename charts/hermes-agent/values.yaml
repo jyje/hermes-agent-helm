@@ -136,6 +136,20 @@ extraEnvFrom: []
 #  - secretRef:
 #      name: some-existing-secret
 
+# -- Extra volumes on the pod, for anything the agent needs as a FILE rather
+#    than an env var — e.g. a Secret holding a service-account JSON
+#    (see values-google-vertex.yaml).
+extraVolumes: []
+#  - name: vertex-sa
+#    secret:
+#      secretName: vertex-sa
+
+# -- Extra volume mounts on the hermes-agent container (pairs with extraVolumes).
+extraVolumeMounts: []
+#  - name: vertex-sa
+#    mountPath: /var/run/secrets/vertex
+#    readOnly: true
+
 # -- Extra raw manifests rendered as-is alongside this chart's resources.
 #    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
 #    may be either an object or a multiline string (see examples/argocd/).

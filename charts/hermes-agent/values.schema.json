@@ -122,6 +122,27 @@
       "type": "array",
       "items": { "type": "object", "additionalProperties": true }
     },
+    "extraVolumes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": true,
+        "properties": { "name": { "type": "string" } }
+      }
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "mountPath"],
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "mountPath": { "type": "string" }
+        }
+      }
+    },
     "extraResources": {
       "type": "array",
       "items": {
