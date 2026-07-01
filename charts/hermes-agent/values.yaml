@@ -318,6 +318,16 @@ probes:
   # -- Readiness probe spec. Empty = no readiness probe.
   readiness: {}
 
+# -- Pod termination grace period in seconds. Empty = Kubernetes default (30s).
+# The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0:
+# on stop it interrupts in-flight runs immediately, persists the transcript,
+# and exits fast — the default grace period is plenty. If you opt into a drain
+# window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL
+# ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock +
+# crash loop — the same race upstream warns about with systemd's
+# TimeoutStopSec). See "Gateway lifecycle" in the README.
+terminationGracePeriodSeconds: ""
+
 # ---------------------------------------------------------------------------
 # Helm test (chart test). `helm test <release>` runs a doctor-style Job
 # (helm.sh/hook: test) AFTER install to verify the deployment. Rendered by

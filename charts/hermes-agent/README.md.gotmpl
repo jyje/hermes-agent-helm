@@ -368,6 +368,40 @@ the full upstream config (which would drift across Hermes versions).
   oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
+## Gateway lifecycle: rollouts, shutdown, and drain
+
+As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to
+**0**: on pod stop (rollout, node drain, `kubectl delete pod`) it interrupts
+any in-flight agent run immediately, persists the conversation transcript, and
+exits fast. Rollouts are quick by default, and the Kubernetes default
+30-second termination grace period is plenty.
+
+To opt into a graceful drain window instead (wait for running agent turns
+before interrupting), set both halves — the drain in Hermes config and the
+grace period on the pod:
+
+```yaml
+config:
+  agent:
+    restart_drain_timeout: 60    # seconds to wait for in-flight runs
+terminationGracePeriodSeconds: 90 # keep WELL ABOVE the drain timeout
+```
+
+If the grace period is not comfortably above the drain timeout, the kubelet
+SIGKILLs the gateway mid-drain — upstream documents this exact race (against
+systemd's `TimeoutStopSec`) as leaving a stale lock that crash-loops the
+gateway, which is why its default moved to 0. A drain window also cannot
+"save" an unbounded agent turn; treat it as a courtesy, not a guarantee.
+
+> **Scale-to-zero is not applicable in-cluster.** Upstream `v2026.7.1` also
+> added scale-to-zero idle detection (dormant-quiesce), but it is exclusive to
+> Nous' managed relay deployment: it is enabled by a platform-stamped
+> `HERMES_SCALE_TO_ZERO` env (not a user config key), arms only when messaging
+> is relay-only with a registered wake URL, and relies on the hosting platform
+> suspending the VM. With this chart's direct Discord/Telegram/Slack
+> connections it never arms, and Kubernetes would keep the pod Running
+> regardless — so the chart deliberately does not expose it.
+
 ## Environment variables
 
 This chart only walks through the [provider](#install-options-llm-provider)
@@ -388,11 +422,13 @@ A few more commonly-used ones, current as of image `{{ template "chart.appVersio
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
+| `NOUS_INFERENCE_BASE_URL` | Override the Nous OAuth inference endpoint |
+| `HERMES_WRITE_SAFE_ROOT` | Restrict `write_file`/`patch` to these root dirs (OS path separator for multiple) |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack bot (Socket Mode) |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_MAX_ITERATIONS` | Tool-calling loop limit (default: 90) |
-| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 900s) |
+| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
 | `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
 | `HERMES_TIMEZONE` | IANA timezone override |
 

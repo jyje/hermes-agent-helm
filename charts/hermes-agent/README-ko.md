@@ -344,18 +344,20 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 전체 레퍼런스(각 Hermes 릴리즈에 맞춰 최신 상태 유지):
 **[Environment Variables — Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
-이미지 `v2026.6.19` 기준으로 자주 쓰이는 몇 가지를 더 소개합니다:
+이미지 `v2026.7.1` 기준으로 자주 쓰이는 몇 가지를 더 소개합니다:
 
 | 변수 | 용도 |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek 제공자 |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock 제공자 |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI 제공자 |
+| `NOUS_INFERENCE_BASE_URL` | Nous OAuth 추론 엔드포인트 오버라이드 |
+| `HERMES_WRITE_SAFE_ROOT` | `write_file`/`patch`를 이 루트 디렉터리들로 제한 (여러 개는 OS 경로 구분자로) |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack 봇 (Socket Mode) |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_MAX_ITERATIONS` | 도구 호출 루프 제한 (기본값: 90) |
-| `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 900초) |
+| `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `SESSION_IDLE_MINUTES` | 유휴 세션 초기화 주기 (기본값: 1440) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
 
