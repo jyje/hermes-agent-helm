@@ -1,6 +1,28 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.6.1] - 2026-07-01
+
+### Bug Fixes
+
+- 🐛 bug(changelog): credit plain Conventional Commits (no gitmoji) too ([`9c9d9aa`](https://github.com/jyje/hermes-agent-helm/commit/9c9d9aaf98f8c92d78adee5ca641557df0559dbb)) — @jyje
+- 🐛 bug(ci): stop implying full CI passed in the Discord notice ([`6f37a2c`](https://github.com/jyje/hermes-agent-helm/commit/6f37a2c999d938d6c8c5e4eeb4f6d064be1db4ae)) — @jyje
+- 🐛 bug(workflow/propose-release): drop redundant unreleased heading and stop false-crediting past PRs ([`ccb67a3`](https://github.com/jyje/hermes-agent-helm/commit/ccb67a3724dba1a2056cc927843416fd578c3f02)) — @jyje
+
+### Documentation
+
+- 📄 docs(ci): document the matrix test job and local script reuse ([`1127b60`](https://github.com/jyje/hermes-agent-helm/commit/1127b607dd7ba1fb7361698a6a8321c6c94b0751)) — @jyje
+- 📄 docs(chart): link "Hermes Agent" to its upstream repo ([`672436d`](https://github.com/jyje/hermes-agent-helm/commit/672436da8b93dfb8cff912d2a24285a55c2c7697)) — @jyje
+- 📄 docs(local-dev): note helm-docs verification after editing values.yaml ([`f9912c1`](https://github.com/jyje/hermes-agent-helm/commit/f9912c105ef89405ddb8a22df4530ca33db18cdc)) — @jyje
+
+### Build
+
+- 🔨 build(ci): rename the default scenario to message ([`ce41b5e`](https://github.com/jyje/hermes-agent-helm/commit/ce41b5ebe3dca648163eb304ee87e0b9d38695a9)) — @jyje
+
+### Tests
+
+- ✅ test(ci): run each validate-chart scenario on its own kind cluster ([`0db971a`](https://github.com/jyje/hermes-agent-helm/commit/0db971a041794c5584390a52d49db983e9f2dd41)) — @jyje
+
 ## [0.6.0] - 2026-06-30
 
 ### Features
@@ -168,6 +190,10 @@ All notable changes to this chart are documented here.
 - 📄 docs(chart): add Environment variables section to README ([`afa9d7a`](https://github.com/jyje/hermes-agent-helm/commit/afa9d7a7f4b2dd617216bd3f0876942de4b0aab5)) — @jyje
 - 📄 docs(chart): add Korean translation of the chart README ([`830ab12`](https://github.com/jyje/hermes-agent-helm/commit/830ab128a184b6590273ad044fb2b3b3438e35d3)) — @jyje
 
+### Miscellaneous
+
+- Chore(deps): bump actions/checkout from 6 to 7 ([`de41fd0`](https://github.com/jyje/hermes-agent-helm/commit/de41fd0f5a19334833a84bfeeeda5280ac98dc67)) — @dependabot[bot]
+
 ## [0.3.1] - 2026-06-20
 
 ### Features
@@ -176,6 +202,8 @@ All notable changes to this chart are documented here.
 
 ### Bug Fixes
 
+- Fix(ci): skip non-chart placeholder dirs in release-chart docs build ([`9c1af95`](https://github.com/jyje/hermes-agent-helm/commit/9c1af95b030517b1d6c7de66890db92c7ae8b6b5)) — @jyje
+- Fix(ci): always run release/next branch cleanup even if a prior step fails ([`bafee9f`](https://github.com/jyje/hermes-agent-helm/commit/bafee9f4f018c90757f78c7d1c2c0b0dd0a5bad5)) — @jyje
 - 🛠️ fix(pages): correct YAML indentation in release-chart docs build step ([`564680c`](https://github.com/jyje/hermes-agent-helm/commit/564680cd96edaabeea57fdb033437bb1af081dc5)) — @jyje
 
 ### Miscellaneous
@@ -283,6 +311,11 @@ All notable changes to this chart are documented here.
 - 🔧 chore(ci): make changelog entries title + commit link only ([`f656ada`](https://github.com/jyje/hermes-agent-helm/commit/f656ada2cc1b57a2162b3fa546527265a6028b9f)) — @jyje
 - 🔧 chore(ci): move all runners to ubuntu-26.04-arm ([`95e0484`](https://github.com/jyje/hermes-agent-helm/commit/95e04849567832bbd2dcdcaca5df58919b792729)) — @jyje
 - 🔧 chore(ci): add emoji to release proposal, dynamic release name, branch cleanup ([`84ca116`](https://github.com/jyje/hermes-agent-helm/commit/84ca11636f6521d1699aaa6437ece567c5ce2be4)) — @jyje
+- Chore(deps): bump softprops/action-gh-release from 2 to 3 ([`10b27ff`](https://github.com/jyje/hermes-agent-helm/commit/10b27ff5e28aa2ab378345004c7b6eee22fd3443)) — @dependabot[bot]
+- Chore(deps): bump azure/setup-helm from 4 to 5 ([`995a39a`](https://github.com/jyje/hermes-agent-helm/commit/995a39aaf2cba77ec7c5165992ecd88e362cca7d)) — @dependabot[bot]
+- Chore(deps): bump actions/checkout from 4 to 6 ([`8945f28`](https://github.com/jyje/hermes-agent-helm/commit/8945f28104b676ff478ae7830beed4be8ee656a7)) — @dependabot[bot]
+- Chore(deps): bump actions/github-script from 7 to 9 ([`2b6f700`](https://github.com/jyje/hermes-agent-helm/commit/2b6f700f227a5c02c1da4c60b86c4d0908ae88de)) — @dependabot[bot]
+- Chore(deps): bump peter-evans/create-pull-request from 6 to 8 ([`2863bb2`](https://github.com/jyje/hermes-agent-helm/commit/2863bb2fbd39a863242b5ba456c4b7a17b3c4299)) — @dependabot[bot]
 - 🎨 style(ci): add ⚡ emoji to version-comment workflow display name ([`e5573a2`](https://github.com/jyje/hermes-agent-helm/commit/e5573a222a8cdfcfd4de5e7942139ad1a9aa14f0)) — @jyje
 - 🔧 chore(ci): skip the kind round-trip test on version-only changes ([`766f565`](https://github.com/jyje/hermes-agent-helm/commit/766f56519fe5b273b11abd741f04288b4b8821fc)) — @jyje
 - 🎨 style(pages): unify theme between the index and chart docs pages ([`ff2a224`](https://github.com/jyje/hermes-agent-helm/commit/ff2a224c7c282f61a86093803edeb1e1e6718214)) — @jyje
