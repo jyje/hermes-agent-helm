@@ -1,0 +1,117 @@
+name: 🧪 tmp-verify-issue-43
+
+# TEMPORARY workflow — verifies the #43 gateway-lifecycle change on a real
+# kind cluster from the feature branch (validate-chart only runs on dev/main
+# pushes and PRs). Remove this file before the branch merges.
+#
+# What it proves:
+#   1. helm-docs: the hand-synced README.md matches what helm-docs generates
+#      (no local helm-docs available in the dev environment).
+#   2. helm template: terminationGracePeriodSeconds is omitted by default and
+#      rendered when set, for BOTH controller types.
+#   3. kind: with chart defaults (upstream drain timeout 0) a pod delete
+#      completes well under the 30s default grace period — the gateway exits
+#      promptly on SIGTERM instead of hanging into a SIGKILL.
+#   4. kind: the drain opt-in wiring lands — terminationGracePeriodSeconds
+#      reaches the pod spec and config.agent.restart_drain_timeout reaches the
+#      seeded HERMES_HOME/config.yaml.
+
+on:
+  push:
+    branches: [claude/session-review-iup1ir]
+
+env:
+  HELM_DOCS_VERSION: '1.14.2'
+  CHART: 'charts/hermes-agent'
+  NS: test-hermes-lifecycle
+
+jobs:
+  docs-and-template:
+    name: 📄 helm-docs drift + template assertions
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install helm-docs
+        run: |
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; esac
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${arch}.tar.gz" \
+            | tar -xz helm-docs
+          sudo install helm-docs /usr/local/bin/
+
+      - name: helm-docs must produce zero diff
+        run: |
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+          git diff --exit-code -- "${CHART}/README.md" \
+            || { echo "::error::README.md is out of sync with helm-docs output (diff above)"; exit 1; }
+
+      - name: helm lint
+        run: helm lint "$CHART"
+
+      - name: Template assertions (grace period wiring)
+        run: |
+          set -eu
+          # Default: key omitted -> pod spec must NOT carry the field.
+          if helm template t "$CHART" | grep -q terminationGracePeriodSeconds; then
+            echo "::error::terminationGracePeriodSeconds rendered without being set"; exit 1
+          fi
+          # Set: both controller types must carry it in the pod template.
+          for ctrl in deployment statefulset; do
+            out=$(helm template t "$CHART" \
+              --set controller.type="$ctrl" \
+              --set terminationGracePeriodSeconds=90)
+            echo "$out" | grep -q 'terminationGracePeriodSeconds: 90' \
+              || { echo "::error::grace period missing from $ctrl pod template"; exit 1; }
+          done
+          echo "template assertions passed"
+
+  kind-lifecycle:
+    name: 🧪 kind: SIGTERM exit speed + drain opt-in wiring
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7
+      - uses: helm/kind-action@v1
+
+      - name: Install with chart defaults (drain 0)
+        run: |
+          helm upgrade --install hermes-agent "$CHART" \
+            --namespace "$NS" --create-namespace \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --set tests.enabled=false \
+            --wait --timeout 5m
+
+      - name: Pod delete must finish well inside the 30s grace period
+        run: |
+          set -eu
+          pod=$(kubectl get pod -n "$NS" -l app.kubernetes.io/name=hermes-agent \
+            -o jsonpath='{.items[0].metadata.name}')
+          # Let the gateway actually start before we shoot it, so the test
+          # exercises SIGTERM against a RUNNING gateway, not an init phase.
+          sleep 20
+          start=$(date +%s)
+          kubectl delete pod "$pod" -n "$NS" --wait --timeout=60s
+          dur=$(( $(date +%s) - start ))
+          echo "pod deletion took ${dur}s"
+          # 30s grace + SIGKILL would land ≥30s; a clean SIGTERM exit is fast.
+          [ "$dur" -le 25 ] \
+            || { echo "::error::deletion took ${dur}s — gateway likely ignored SIGTERM and was SIGKILLed"; exit 1; }
+
+      - name: Opt-in drain wiring reaches pod spec and seeded config
+        run: |
+          set -eu
+          helm upgrade hermes-agent "$CHART" \
+            --namespace "$NS" \
+            --reuse-values \
+            --set config.agent.restart_drain_timeout=60 \
+            --set terminationGracePeriodSeconds=90 \
+            --wait --timeout 5m
+          pod=$(kubectl get pod -n "$NS" -l app.kubernetes.io/name=hermes-agent \
+            -o jsonpath='{.items[0].metadata.name}')
+          grace=$(kubectl get pod "$pod" -n "$NS" \
+            -o jsonpath='{.spec.terminationGracePeriodSeconds}')
+          [ "$grace" = "90" ] \
+            || { echo "::error::pod grace period is '$grace', expected 90"; exit 1; }
+          kubectl exec -n "$NS" "$pod" -- sh -c \
+            'grep -A5 "^agent:" "${HERMES_HOME:-/opt/data}/config.yaml"; grep -q "restart_drain_timeout: 60" "${HERMES_HOME:-/opt/data}/config.yaml"' \
+            || { echo "::error::restart_drain_timeout missing from seeded config.yaml"; exit 1; }
+          echo "drain opt-in wiring verified (grace=$grace, config seeded)"
