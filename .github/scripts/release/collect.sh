@@ -37,8 +37,15 @@ if [ -n "$last_release_ver" ]; then
 fi
 
 # --- changelog fragment (git-cliff, unreleased range) -----------------------
+# The target version isn't resolved yet at this point in the workflow (that
+# happens later, then CHANGELOG.md itself is regenerated with --tag), so
+# git-cliff has no version to attach here and renders a "## [unreleased]"
+# heading. The PR body already shows the target version in its own table, so
+# that heading is redundant noise there — drop it from the embedded fragment.
 git cliff "${base_ref}..HEAD" --strip all > "$OUT/CHANGELOG_FRAGMENT.md" 2>/dev/null \
   || git cliff --unreleased --strip all > "$OUT/CHANGELOG_FRAGMENT.md"
+grep -v '^## \[' "$OUT/CHANGELOG_FRAGMENT.md" > "$OUT/CHANGELOG_FRAGMENT.md.tmp" \
+  && mv "$OUT/CHANGELOG_FRAGMENT.md.tmp" "$OUT/CHANGELOG_FRAGMENT.md"
 
 # --- chart diff (truncated for the advisor) ---------------------------------
 git diff "${base_ref}..HEAD" -- "$CHART_DIR" > "$OUT/DIFF.full.txt" || true
@@ -64,7 +71,16 @@ commit_count="$(git rev-list --count "${base_ref}..HEAD")"
 
 # --- contributors -----------------------------------------------------------
 git log "${base_ref}..HEAD" --format='%an' | sort -u > "$OUT/commit_authors.txt"
-pr_refs="$(git log "${base_ref}..HEAD" --format='%s %b' | grep -oE '#[0-9]+' | tr -d '#' | sort -un | paste -sd, - || true)"
+
+# PR references: only trust actual GitHub linkage, not any bare "#NN" that
+# happens to appear in explanatory prose (e.g. a commit body narrating a PAST
+# bug by mentioning its PR number — that isn't evidence #NN shipped in THIS
+# range). Two sources:
+#   1. Squash-merge commit subjects, which GitHub auto-suffixes "(#NN)".
+#   2. Explicit closing keywords (Closes/Fixes/Resolves/Refs #NN) anywhere.
+subject_refs="$(git log "${base_ref}..HEAD" --format='%s' | grep -oE '\(#[0-9]+\)$' || true)"
+body_refs="$(git log "${base_ref}..HEAD" --format='%b' | grep -ioE '\b(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?)[: ]*#[0-9]+' || true)"
+pr_refs="$(printf '%s\n%s\n' "$subject_refs" "$body_refs" | grep -oE '#[0-9]+' | tr -d '#' | sort -un | paste -sd, - || true)"
 
 # --- context.json (python for safe escaping; stdlib only) -------------------
 BASE_REF="$base_ref" LAST_RELEASE="$last_release" CURRENT_VERSION="$current_version" \
