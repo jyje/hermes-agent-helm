@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.7.0] - 2026-07-01
+
+### Features
+
+- ✨ feat(chart): add extraVolumes and extraVolumeMounts extension points ([`678c891`](https://github.com/jyje/hermes-agent-helm/commit/678c891ba419f73d5794c0a8eef9312f282562fd)) — @jyje
+- ✨ feat(chart): add Google Vertex AI provider example ([`61d9d14`](https://github.com/jyje/hermes-agent-helm/commit/61d9d145283921ee3750cbaaeeec59ab8f03d460)) — @jyje
+
+### Bug Fixes
+
+- 🛠️ fix(ci): run functional tests when only appVersion changes ([`79bb307`](https://github.com/jyje/hermes-agent-helm/commit/79bb307bb69d6a8bfc4d02f9da34332178f4b9d0)) — @jyje
+
+### Miscellaneous
+
+- ⬆️ dep(image): bump hermes-agent image to v2026.7.1 (#40) ([`df71187`](https://github.com/jyje/hermes-agent-helm/commit/df71187484223a7601500b439d13f0606b206436)) — @jyje-bot[bot]
+
 ## [0.6.1] - 2026-07-01
 
 ### Bug Fixes
