@@ -422,11 +422,13 @@ A few more commonly-used ones, current as of image `{{ template "chart.appVersio
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
+| `NOUS_INFERENCE_BASE_URL` | Override the Nous OAuth inference endpoint |
+| `HERMES_WRITE_SAFE_ROOT` | Restrict `write_file`/`patch` to these root dirs (OS path separator for multiple) |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack bot (Socket Mode) |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_MAX_ITERATIONS` | Tool-calling loop limit (default: 90) |
-| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 900s) |
+| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
 | `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
 | `HERMES_TIMEZONE` | IANA timezone override |
 
