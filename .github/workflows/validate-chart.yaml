@@ -116,7 +116,7 @@ jobs:
         run: .github/scripts/scenario-${{ matrix.scenario }}.sh
 
       - name: Notify Discord and verify delivery (message scenario, trusted runs with a token)
-        # Full live round-trip: send the "CI healthy" message via `hermes send`
+        # Full live round-trip: send a "message scenario verified" notice via `hermes send`
         # from the message-scenario workload (no gateway loop needed for
         # bot-token platforms), then read the channel back through the Discord
         # API and confirm our unique marker is present. This GATES on trusted
@@ -132,7 +132,7 @@ jobs:
           pod=$(kubectl get pod -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent \
             -o jsonpath='{.items[0].metadata.name}')
           nonce="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          msg="✅ hermes-agent chart CI passed — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} [${nonce}]"
+          msg="✅ hermes-agent chart message scenario verified — other checks still in progress — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} [${nonce}]"
           echo "Sending via workload pod: $pod"
           kubectl exec -n test-hermes-chart "$pod" -- hermes send --to discord "$msg"
 
