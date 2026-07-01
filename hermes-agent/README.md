@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.6.19](https://img.shields.io/badge/AppVersion-v2026.6.19-informational?style=flat-square)
+![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.1](https://img.shields.io/badge/AppVersion-v2026.7.1-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -19,7 +19,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-pro
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.6.1 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.7.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -50,6 +50,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | OpenAI | `openai-api` | `OPENAI_API_KEY` | [`values-openai.yaml`](values-openai.yaml) |
 | Anthropic (Claude) | `anthropic` | `ANTHROPIC_API_KEY` | [`values-anthropic.yaml`](values-anthropic.yaml) |
 | Google Gemini | `gemini` | `GOOGLE_API_KEY` | [`values-gemini.yaml`](values-gemini.yaml) |
+| Google Vertex AI | `vertex` | none — OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC) | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
@@ -380,7 +381,7 @@ can be set the same way as the ones above: secrets under `.Values.env`
 Full reference (kept current with each Hermes release):
 **[Environment Variables — Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
-A few more commonly-used ones, current as of image `v2026.6.19`:
+A few more commonly-used ones, current as of image `v2026.7.1`:
 
 | Variable | Purpose |
 | --- | --- |
@@ -416,6 +417,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | — |
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
+| [`values-google-vertex.yaml`](values-google-vertex.yaml) | Google Vertex AI (`vertex`) | **Service-account JSON mounted** via `extraVolumes` (no static API key) |
 | [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
@@ -457,6 +459,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
 | extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
 | extraResources | list | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). | `[]` |
+| extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
+| extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var — e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
