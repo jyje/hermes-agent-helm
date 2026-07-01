@@ -16,7 +16,10 @@ jobs:
     # Detects whether this push/PR only touches Chart.yaml's version (plus the
     # generated docs/changelog that follow it) — a release-bump commit. In that
     # case the chart's behavior is unchanged, so the heavy `test` job below
-    # (ephemeral kind cluster + real round-trip) is skipped.
+    # (ephemeral kind cluster + real round-trip) is skipped. Exception: an
+    # appVersion change swaps the default image, which IS a functional change
+    # even when Chart.yaml is the only file touched — that must still run the
+    # kind scenarios.
     runs-on: ubuntu-26.04-arm
     outputs:
       functional: ${{ steps.filter.outputs.functional }}
@@ -36,6 +39,9 @@ jobs:
           echo "Changed files:"
           echo "$changed"
           if echo "$changed" | grep -vE '^(charts/hermes-agent/(Chart\.yaml|README\.md)|examples/helm/README\.md|CHANGELOG\.md)$' | grep -q .; then
+            echo "functional=true" >> "$GITHUB_OUTPUT"
+          elif git diff "$base" "${{ github.sha }}" -- charts/hermes-agent/Chart.yaml | grep -qE '^\+appVersion:'; then
+            echo "appVersion changed — new default image, running functional tests"
             echo "functional=true" >> "$GITHUB_OUTPUT"
           else
             echo "functional=false" >> "$GITHUB_OUTPUT"
