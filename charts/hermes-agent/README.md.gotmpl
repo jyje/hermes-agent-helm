@@ -50,6 +50,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | OpenAI | `openai-api` | `OPENAI_API_KEY` | [`values-openai.yaml`](values-openai.yaml) |
 | Anthropic (Claude) | `anthropic` | `ANTHROPIC_API_KEY` | [`values-anthropic.yaml`](values-anthropic.yaml) |
 | Google Gemini | `gemini` | `GOOGLE_API_KEY` | [`values-gemini.yaml`](values-gemini.yaml) |
+| Google Vertex AI | `vertex` | none — OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC) | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
@@ -416,6 +417,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | — |
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
+| [`values-google-vertex.yaml`](values-google-vertex.yaml) | Google Vertex AI (`vertex`) | **Service-account JSON mounted** via `extraVolumes` (no static API key) |
 | [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
