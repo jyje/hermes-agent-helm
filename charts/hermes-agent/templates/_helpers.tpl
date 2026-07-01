@@ -102,6 +102,9 @@ metadata:
     {{- end }}
 spec:
   serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
+  {{- with .Values.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ . }}
+  {{- end }}
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
     {{- toYaml . | nindent 4 }}
