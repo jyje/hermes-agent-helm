@@ -284,6 +284,14 @@
       }
     },
 
+    "terminationGracePeriodSeconds": {
+      "description": "Pod termination grace period in seconds. Empty string = Kubernetes default (30s). Keep it WELL ABOVE config.agent.restart_drain_timeout when opting into a drain window.",
+      "oneOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "string", "maxLength": 0 }
+      ]
+    },
+
     "tests": {
       "type": "object",
       "additionalProperties": false,
