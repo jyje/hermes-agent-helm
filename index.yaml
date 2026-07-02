@@ -4,6 +4,42 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "fixed"
+          description: "Corrected git-cliff changelog credit chain bug"
+        - kind: "added"
+          description: "Added SECURITY.md and SECURITY-ko.md documentation files"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.1
+    created: "2026-07-02T12:47:54.699254909Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 31efb304d12e0df2b2243a46f9f88ee00ce0e2cb47b60f61908da088b797e513
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.8.1.tgz
+    version: 0.8.1
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "added"
           description: "Add terminationGracePeriodSeconds field to values.yaml and schema for graceful drain window"
         - kind: "added"
@@ -654,4 +690,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-02T05:55:27.88188124Z"
+generated: "2026-07-02T12:47:54.697269474Z"
