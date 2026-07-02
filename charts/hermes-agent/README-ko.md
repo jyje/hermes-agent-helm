@@ -350,6 +350,7 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | 변수 | 용도 |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek 제공자 |
+| `ZAI_API_KEY` | Z.AI / GLM 제공자 (내장 키 `zai`; `GLM_BASE_URL`로 Global/중국/Coding Plan 엔드포인트 선택) |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock 제공자 |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI 제공자 |
 | `NOUS_INFERENCE_BASE_URL` | Nous OAuth 추론 엔드포인트 오버라이드 |
