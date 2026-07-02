@@ -1,34 +1,26 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.8.1] - 2026-07-02
+
+### Bug Fixes
+
+- Bug(changelog): credit only main's first-parent chain in git-cliff runs (#57) ([`2644f0d`](https://github.com/jyje/hermes-agent-helm/commit/2644f0d7fd0ac5e079edb61f9040a1d8f3b57d25)) — @jyje
+
+### Documentation
+
+- 📄 docs: add SECURITY.md and SECURITY-ko.md (#58) ([`656eb72`](https://github.com/jyje/hermes-agent-helm/commit/656eb728dfa95592750a8807b3a02172eb4985e2)) — @jyje
+
 ## [0.8.0] - 2026-07-02
 
 ### Features
 
-- ✨ feat(chart): expose terminationGracePeriodSeconds for the gateway drain window ([`ad3a827`](https://github.com/jyje/hermes-agent-helm/commit/ad3a82736fbe7999b6a5d3060e7b3015caeb5a37)) — @claude
 - Feat(chart): expose terminationGracePeriodSeconds for the gateway drain window (#52) ([`5385946`](https://github.com/jyje/hermes-agent-helm/commit/5385946cee29e6bcb1434913179f478240752d0f)) — @jyje
-- ✨ feat(chart): add values-moa.yaml example for the Mixture-of-Agents provider ([`6f55abd`](https://github.com/jyje/hermes-agent-helm/commit/6f55abdd4bcfdafd70b35c243fa8d957361ae546)) — @claude
 - Feat(chart): add values-moa.yaml example for the Mixture-of-Agents provider (#53) ([`6065a2e`](https://github.com/jyje/hermes-agent-helm/commit/6065a2ead81ff5a93f5bf67ce1b01fb2a7efe861)) — @jyje
-
-### Bug Fixes
-
-- 🐛 bug(ci): quote the temp workflow's job name so the colon parses ([`e4b7d01`](https://github.com/jyje/hermes-agent-helm/commit/e4b7d012b09105952a30b40aef38f8fe0ee154fc)) — @claude
-- 🐛 bug(chart): allow terminationGracePeriodSeconds in values.schema.json ([`bceec07`](https://github.com/jyje/hermes-agent-helm/commit/bceec07e7b2c65eaf75b4c55733920a0c5dd7969)) — @claude
-- 🐛 bug(ci): drop stray trailing newline reintroduced in README.md ([`69d6d13`](https://github.com/jyje/hermes-agent-helm/commit/69d6d130709ec560dc03a9cf77c72c7a80955d65)) — @claude
-- 🐛 bug(ci): restore blank line before the README version footer ([`f2b8011`](https://github.com/jyje/hermes-agent-helm/commit/f2b8011cbe3a050c375bc514b787a18c11aa071d)) — @claude
 
 ### Documentation
 
-- 📄 docs(chart): add NOUS_INFERENCE_BASE_URL and HERMES_WRITE_SAFE_ROOT, fix stale HERMES_AGENT_TIMEOUT default ([`2412683`](https://github.com/jyje/hermes-agent-helm/commit/2412683f76ed5ac190b0ed1cddfb721f30bb22d5)) — @claude
 - Docs(chart): add ZAI_API_KEY to the curated env var table (#54) ([`7647a96`](https://github.com/jyje/hermes-agent-helm/commit/7647a96d07dd251c2cfd102c1e2f9abe2caf22dd)) — @jyje
-
-### Tests
-
-- ✅ test(ci): add temporary kind verification for the gateway drain change ([`f2d8af8`](https://github.com/jyje/hermes-agent-helm/commit/f2d8af8a467ec2b1384a4ae3c343943531624a02)) — @claude
-
-### Removed
-
-- 🗑️ remove(ci): drop the temporary #43 verification workflow ([`f7f7a95`](https://github.com/jyje/hermes-agent-helm/commit/f7f7a957e81a2a990219f581519c3eaad824a881)) — @claude
 
 ## [0.7.0] - 2026-07-01
 
