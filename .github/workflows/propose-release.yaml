@@ -116,7 +116,18 @@ jobs:
           sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
           python3 .github/scripts/release/update-artifacthub-changes.py \
             charts/hermes-agent/Chart.yaml "$OUT/advice.json"
-          git-cliff --tag "v${new}" -o CHANGELOG.md
+          # Only credit main's first-parent chain (#56): a PR merged with a
+          # merge commit puts BOTH the merge commit (titled after the PR) and
+          # every branch commit inside it onto main, and git-cliff would list
+          # them all — the same change twice, plus its fixup commits. Skipping
+          # everything off the first-parent chain keeps exactly one line per
+          # PR while leaving direct-to-main and squash-merged commits intact.
+          skip_args=()
+          while IFS= read -r sha; do
+            skip_args+=(--skip-commit "$sha")
+          done < <(comm -23 <(git rev-list HEAD | sort) \
+                            <(git rev-list --first-parent HEAD | sort))
+          git-cliff --tag "v${new}" ${skip_args[@]+"${skip_args[@]}"} -o CHANGELOG.md
           # Regenerate the chart README so its version badge matches Chart.yaml —
           # otherwise validate-chart.yaml's docs-drift check fails on the release PR.
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl

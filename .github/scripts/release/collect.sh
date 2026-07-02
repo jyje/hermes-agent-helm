@@ -42,8 +42,17 @@ fi
 # git-cliff has no version to attach here and renders a "## [unreleased]"
 # heading. The PR body already shows the target version in its own table, so
 # that heading is redundant noise there — drop it from the embedded fragment.
-git cliff "${base_ref}..HEAD" --strip all > "$OUT/CHANGELOG_FRAGMENT.md" 2>/dev/null \
-  || git cliff --unreleased --strip all > "$OUT/CHANGELOG_FRAGMENT.md"
+# Only credit first-parent history (#56): with merge-commit merges the PR's
+# merge commit AND its branch commits all land on main, and git-cliff lists
+# them all — skip the non-first-parent ones so each PR appears exactly once.
+# (Mirrors the CHANGELOG.md regeneration in propose-release.yaml.)
+skip_args=()
+while IFS= read -r sha; do
+  skip_args+=(--skip-commit "$sha")
+done < <(comm -23 <(git rev-list "${base_ref}..HEAD" | sort) \
+                  <(git rev-list --first-parent "${base_ref}..HEAD" | sort))
+git cliff "${base_ref}..HEAD" ${skip_args[@]+"${skip_args[@]}"} --strip all > "$OUT/CHANGELOG_FRAGMENT.md" 2>/dev/null \
+  || git cliff --unreleased ${skip_args[@]+"${skip_args[@]}"} --strip all > "$OUT/CHANGELOG_FRAGMENT.md"
 grep -v '^## \[' "$OUT/CHANGELOG_FRAGMENT.md" > "$OUT/CHANGELOG_FRAGMENT.md.tmp" \
   && mv "$OUT/CHANGELOG_FRAGMENT.md.tmp" "$OUT/CHANGELOG_FRAGMENT.md"
 
