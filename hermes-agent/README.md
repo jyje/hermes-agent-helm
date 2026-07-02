@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.1](https://img.shields.io/badge/AppVersion-v2026.7.1-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.1](https://img.shields.io/badge/AppVersion-v2026.7.1-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -19,7 +19,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-pro
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.7.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.8.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -54,6 +54,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
+| Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
 
 > `openai` (no suffix) is **not** a valid provider key — it aliases to
@@ -368,6 +369,40 @@ the full upstream config (which would drift across Hermes versions).
   oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
+## Gateway lifecycle: rollouts, shutdown, and drain
+
+As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to
+**0**: on pod stop (rollout, node drain, `kubectl delete pod`) it interrupts
+any in-flight agent run immediately, persists the conversation transcript, and
+exits fast. Rollouts are quick by default, and the Kubernetes default
+30-second termination grace period is plenty.
+
+To opt into a graceful drain window instead (wait for running agent turns
+before interrupting), set both halves — the drain in Hermes config and the
+grace period on the pod:
+
+```yaml
+config:
+  agent:
+    restart_drain_timeout: 60    # seconds to wait for in-flight runs
+terminationGracePeriodSeconds: 90 # keep WELL ABOVE the drain timeout
+```
+
+If the grace period is not comfortably above the drain timeout, the kubelet
+SIGKILLs the gateway mid-drain — upstream documents this exact race (against
+systemd's `TimeoutStopSec`) as leaving a stale lock that crash-loops the
+gateway, which is why its default moved to 0. A drain window also cannot
+"save" an unbounded agent turn; treat it as a courtesy, not a guarantee.
+
+> **Scale-to-zero is not applicable in-cluster.** Upstream `v2026.7.1` also
+> added scale-to-zero idle detection (dormant-quiesce), but it is exclusive to
+> Nous' managed relay deployment: it is enabled by a platform-stamped
+> `HERMES_SCALE_TO_ZERO` env (not a user config key), arms only when messaging
+> is relay-only with a registered wake URL, and relies on the hosting platform
+> suspending the VM. With this chart's direct Discord/Telegram/Slack
+> connections it never arms, and Kubernetes would keep the pod Running
+> regardless — so the chart deliberately does not expose it.
+
 ## Environment variables
 
 This chart only walks through the [provider](#install-options-llm-provider)
@@ -386,13 +421,16 @@ A few more commonly-used ones, current as of image `v2026.7.1`:
 | Variable | Purpose |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
+| `ZAI_API_KEY` | Z.AI / GLM provider (built-in key `zai`; `GLM_BASE_URL` picks the Global/China/Coding-Plan endpoint) |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
+| `NOUS_INFERENCE_BASE_URL` | Override the Nous OAuth inference endpoint |
+| `HERMES_WRITE_SAFE_ROOT` | Restrict `write_file`/`patch` to these root dirs (OS path separator for multiple) |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack bot (Socket Mode) |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_MAX_ITERATIONS` | Tool-calling loop limit (default: 90) |
-| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 900s) |
+| `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
 | `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
 | `HERMES_TIMEZONE` | IANA timezone override |
 
@@ -493,6 +531,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
+| terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast — the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop — the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
 | tests | object | ------------------------------------------------------------------------- | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
 | tests.chat.enabled | bool | Run a `hermes chat` round-trip and log the conversation. | `false` |

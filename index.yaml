@@ -5,6 +5,44 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Add terminationGracePeriodSeconds field to values.yaml and schema for graceful drain window"
+        - kind: "added"
+          description: "Add values-moa.yaml example for Mixture-of-Agents provider configuration"
+        - kind: "changed"
+          description: "Update README and docs to document new env vars and drain window behavior"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.1
+    created: "2026-07-02T05:55:27.883927191Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: fada1393659d00055934e9fefa314893d74c99b79040a4027f0238bfd4e6389f
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.8.0.tgz
+    version: 0.8.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Add extraVolumes and extraVolumeMounts fields for custom file mounts"
         - kind: "added"
           description: "Add Google Vertex AI provider example using mounted service‑account JSON"
@@ -616,4 +654,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-01T22:15:08.206888848Z"
+generated: "2026-07-02T05:55:27.88188124Z"
