@@ -158,6 +158,18 @@ This chart deploys and manages **one** agent well; teams via an ArgoCD
 ApplicationSet are how you scale today, and a CRD-based operator is a
 long-term, not-started candidate. See [docs/roadmap.md](docs/roadmap.md).
 
+## Contributing
+
+Issues, PRs, and ideas are all welcome — start with
+[CONTRIBUTING.md](CONTRIBUTING.md) (branch model, local checks, release flow).
+Every merged contribution is credited in the changelog and release notes.
+
+Thanks to everyone who has contributed to and starred this project ⭐
+
+<a href="https://github.com/jyje/hermes-agent-helm/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=jyje/hermes-agent-helm" alt="Contributors" />
+</a>
+
 ---
 
 > Banner © [Nous Research](https://github.com/NousResearch/hermes-agent) (MIT).

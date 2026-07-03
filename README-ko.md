@@ -150,6 +150,18 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 기반 팀으로 확장하고, CRD 기반 오퍼레이터는 일정 없는 장기 후보입니다. 자세한
 내용은 [docs/roadmap-ko.md](docs/roadmap-ko.md)를 참고하세요.
 
+## 기여하기
+
+이슈, PR, 아이디어 모두 환영합니다 — [CONTRIBUTING.md](CONTRIBUTING.md)
+(브랜치 모델, 로컬 체크, 릴리즈 플로우)부터 시작하세요. 머지된 모든 기여는
+체인지로그와 릴리즈 노트에 크레딧됩니다.
+
+기여하고 스타를 눌러주신 모든 분들께 감사드립니다 ⭐
+
+<a href="https://github.com/jyje/hermes-agent-helm/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=jyje/hermes-agent-helm" alt="Contributors" />
+</a>
+
 ---
 
 > 배너 © [Nous Research](https://github.com/NousResearch/hermes-agent) (MIT).
