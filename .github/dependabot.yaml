@@ -12,6 +12,7 @@ updates:
       - "github-actions"
     commit-message:
       prefix: "🤖 ci"
+      prefix-development: "🤖 ci"
       include: "scope"
 
   # Helm charts
@@ -24,4 +25,5 @@ updates:
       - "github-actions"
     commit-message:
       prefix: "🤖 ci"
+      prefix-development: "🤖 ci"
       include: "scope"
