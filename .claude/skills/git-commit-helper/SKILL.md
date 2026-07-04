@@ -22,6 +22,9 @@ All commit messages must strictly follow this format:
 - **Title**: A concise summary of the change in imperative mood. Must start with a lowercase letter directly after the colon and space.
 - **Description**: (Optional) Use this to explain "why" the change was made or provide further context.
 
+### Skill-File Changes
+`SKILL.md` files define agent behavior, not just documentation — use `fix` (corrections/refinements to an existing skill) or `feat` (new capability/rule added to a skill), never `docs`, for changes to them. Set the domain to `skills/<skill-name>` (e.g. `(skills/git-commit-helper)`) so it reads distinctly from other domains in a repo where skills live alongside other project code. In a repo dedicated entirely to skills (e.g. this one), the bare skill name (e.g. `(git-commit-helper)`) is sufficient since there's no ambiguity.
+
 ---
 
 ## 2. Gitmoji & Type Mapping
@@ -54,16 +57,24 @@ Commits created entirely by automation (e.g., Dependabot, Renovate) without dire
 | :------ | :--- | :---------- |
 | 🤖      | `ci` | Added automatically by a bot/automation (e.g., Dependabot), not by direct user intervention |
 
-This pairing is configured directly in the automation tool itself (e.g., `commit-message.prefix` in `dependabot.yml`), not generated through this skill's workflow.
+Configure this pairing directly in the automation tool itself, not by hand-editing bot commits after the fact. For Dependabot, set `commit-message` in `dependabot.yml` for every `package-ecosystem` entry:
+```yaml
+commit-message:
+  prefix: "🤖 ci"
+  prefix-development: "🤖 ci"
+  include: "scope"
+```
+This renders as `🤖 ci(deps): bump <package> from X to Y` for production dependencies and `🤖 ci(deps-dev): ...` for development ones (the `(scope)` comes from `include: "scope"`, not from manually typing a domain). Without this config, Dependabot's default has no gitmoji at all, e.g. `build(deps): bump the production-dependencies group with 6 updates` — that default is the bug to fix, not a format to tolerate.
 
 ---
 
 ## 3. Workflow Requirements
 1. **Analyze changes**: Review staged and unstaged changes to understand the scope and purpose of the work.
-2. **Review history**: Search the most recent 10 commits in the `git log` to help determine the appropriate `Type` and `Domain`. After identifying a potential `Domain`, search up to 10 recent commits specifically for that domain to ensure consistency and gain context for writing the commit message.
-3. **Propose message**: Present the drafted commit message to the user in a markdown code block.
-4. **Wait for confirmation**: Ask the user if they want to proceed with the proposed commit message. Do not proceed with committing or pushing until explicit approval is given.
-5. **Commit & Push**:
+2. **Split by concern**: If the changes span multiple semantically distinct concerns (e.g. different `Type`, different `Domain`, or otherwise unrelated purposes), split them into separate commits instead of bundling them into one. Stage and commit each concern individually, each with its own message following this policy. Do not split a single concern across multiple commits just to make diffs smaller.
+3. **Review history**: Search the most recent 10 commits in the `git log` to help determine the appropriate `Type` and `Domain`. After identifying a potential `Domain`, search up to 10 recent commits specifically for that domain to ensure consistency and gain context for writing the commit message.
+4. **Propose message**: Present the drafted commit message to the user in a markdown code block. If split into multiple commits, present all of them together before proceeding.
+5. **Wait for confirmation**: Ask the user if they want to proceed with the proposed commit message(s). Do not proceed with committing or pushing until explicit approval is given.
+6. **Commit & Push**:
    - Only execute `git commit` after explicit user approval. Do NOT auto-commit.
    - After committing, ask the user if they want to push to the remote repository.
    - Only execute `git push` after receiving explicit user approval. Do NOT auto-push.
@@ -74,6 +85,7 @@ This pairing is configured directly in the automation tool itself (e.g., `commit
 - **Agent Autonomy**: You MUST NOT arbitrarily execute commit or push commands before the user approves. All execution must wait for explicit user consent.
 - **Language**: The commit message and any detailed explanations of changes MUST be in English only. Do NOT use Korean.
 - **Privacy & Security**: NEVER include local paths, sensitive environment variables, or other local/sensitive information in the commit messages or detailed descriptions.
+- **No Session Metadata**: NEVER append session infomation or session links. (e.g. `Claude-Session:` lines to commit messages) This is a public repository and session URLs are confidential.
 
 ---
 
@@ -86,11 +98,20 @@ This pairing is configured directly in the automation tool itself (e.g., `commit
 Make a Next.js project for UI/UX and a FastAPI project for the AI backend. 
 ```
 
-### Feature addition
+### Feature addition (AI/agent)
 ```
-✨ feat(n8n): add n8n application
+✨ feat(agent): add Deep Agents example with OpenAI-compatible API
 
-Add n8n workflow automation application to the cluster.
+Wire up a Deep Agents example that talks to any OpenAI-compatible
+endpoint via uv-managed dependencies.
+```
+
+### Feature addition (web frontend)
+```
+✨ feat(vue): initialize Vue frontend and implement 1:1 parity with Next.js chat
+
+Port the existing Next.js chat UI to Vue so both frontends share the
+same feature set and API contract.
 ```
 
 ### Intentional functional configuration change
@@ -125,11 +146,12 @@ Fix three bugs in the git commit policy rule:
 Upgrade open-webui Helm chart to latest version.
 ```
 
-### Refactoring
+### Refactoring (web frontend)
 ```
-♻️ refactor(nfs): rename custom Helm chart with -jyje suffix and add health probes
+♻️ refactor(assets): reorganize logos into subdirectories
 
-Rename Helm chart directory and add health probe configurations.
+Group logo images by source/purpose instead of dumping them all into
+a single flat assets folder.
 ```
 
 ### Security
@@ -151,4 +173,20 @@ Correct "gitmodi" to "gitmoji" in documentation.
 📝 article(blog): add new post about kubernetes best practices
 
 Add a new blog post discussing kubernetes deployment strategies and best practices.
+```
+
+### Documentation
+```
+📄 docs(chart): add Korean translation of the chart README
+
+Add the Korean README as a twin of the English one so non-English
+users get the same install/config guidance.
+```
+
+### Build / CI
+```
+🔨 build(ci): bump ubuntu runner version to 26.04-arm
+
+Move workflows onto the arm runner image to match production hardware
+and pick up its faster cold-start time.
 ```
