@@ -216,6 +216,127 @@ Per-team knowledge that everyone should share goes in context files
 > above is the recommended approach. See the [Roadmap](roadmap.md)
 > and the [`charts/hermes-operator/`](../charts/hermes-operator/) placeholder.
 
+## Leader-orchestrated teams
+
+The channel-sharing team above is *flat*: every agent hears everything and any
+agent may answer. That works for a pair
+([collaboration.md](collaboration.md)), but past two members the mention
+etiquette degrades — everyone pings everyone, and the pair-tested loop brake
+stops being enough. The next maturity step is a **leader-orchestrated team**
+(demo roster: leader `august`, members `may` and `march`), which adds two rules:
+
+- **Star topology (control plane).** The human talks only to the leader.
+  Mentions flow leader ↔ member only, never member ↔ member — so every
+  conversation edge is still a *pair*, and the loop brake from
+  [collaboration.md](collaboration.md) keeps holding with N agents.
+- **Shared workspace, single writer per path (data plane).** Work products
+  never travel through chat. Every agent mounts one shared RWX PVC at
+  `/opt/data/team` via `extraVolumes` while keeping its **own private
+  `HERMES_HOME`** — sharing the whole home would make the per-agent
+  `config.yaml` seeds overwrite each other. `/opt/data/team` sits inside the
+  image's write-safe root (`HERMES_WRITE_SAFE_ROOT=/opt/data`), so no write
+  guard needs loosening. There is no file locking on RWX, so the layout gives
+  every path exactly one writer:
+
+  ```
+  /opt/data/team/
+  ├── tasks/<task-id>.md            # leader writes, members read
+  ├── outputs/<task-id>/<member>/   # ONLY that member writes
+  └── STATUS.md                     # leader is the only writer
+  ```
+
+The run lifecycle, end to end:
+
+```mermaid
+sequenceDiagram
+    participant H as Human
+    participant A as august (leader)
+    participant M as may (member)
+    participant W as /opt/data/team
+
+    H->>A: goal
+    A->>W: tasks/001-….md (goal, output path, done criteria)
+    A->>M: @may — take tasks/001-….md
+    M->>W: outputs/001-…/may/…
+    M->>A: @august — done, outputs/001-…/may/, summary
+    A->>W: review vs done criteria, update STATUS.md
+    A->>H: final deliverable (no member mention → run ends)
+```
+
+Deploy it with the two example values files (leader protocol and member
+protocol live in their `environment_hint`s — the chart itself needs nothing
+new):
+
+```bash
+# 0. create the shared RWX workspace PVC once (manifest in the file header)
+# 1. the leader
+helm upgrade --install hermes-august ./charts/hermes-agent \
+  --namespace hermes-team --create-namespace \
+  -f charts/hermes-agent/values-team-leader.yaml \
+  --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+  --set-string env.DISCORD_BOT_TOKEN='<august-bot-token>' --wait
+
+# 2. each member (repeat for march)
+helm upgrade --install hermes-may ./charts/hermes-agent \
+  -n hermes-team -f charts/hermes-agent/values-team-member.yaml \
+  --set-string fullnameOverride=hermes-may \
+  --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+  --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
+```
+
+Or declaratively:
+[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml) is
+the rendered form — one Application for the leader plus an ApplicationSet whose
+member roster is data (add a teammate = one list entry).
+
+The demos here are **Discord-first** (bot-token platforms need no extra
+infrastructure); the same star topology applies unchanged to Telegram or Slack
+once you swap the platform env vars, since the gateway treats every platform as
+just another credential.
+
+### Team + wiki vault (git-backed)
+
+Raw task outputs pile up; the durable form of a team's knowledge is a curated
+**Obsidian-compatible wiki vault** — and the single-writer rule above already
+tells you who curates: **only the leader**. Members write raw outputs; the
+leader promotes accepted results into the vault (`[[links]]`, tags, an
+`Updated:` date per note), the same raw → wiki split a human knowledge base
+uses.
+
+Keeping the vault **git-backed** (rather than PVC-only) makes the artifacts
+portable and reviewable: the leader clones the vault repo into the workspace,
+commits curated notes, and pushes; humans `git pull` and browse in Obsidian.
+The leader is the **only pusher**, so there are no push races. On Kubernetes
+this needs exactly one credential — a repo-scoped **deploy key** mounted as a
+file, which is what the chart's `extraVolumes`/`extraVolumeMounts` extension
+points are for:
+
+```mermaid
+flowchart LR
+    M1[may raw outputs] --> W[/opt/data/team/]
+    M2[march raw outputs] --> W
+    W -->|leader curates| V[vault clone<br/>wiki/ notes]
+    V -->|git push<br/>deploy key| R[(vault repo)]
+    R -->|git pull| O[Obsidian<br/>human review]
+```
+
+```bash
+# one-time setup
+ssh-keygen -t ed25519 -f vault-key -N '' -C hermes-august-vault
+ssh-keyscan github.com > known_hosts     # pin the host key
+kubectl create secret generic team-vault-deploy-key -n hermes-team \
+  --from-file=id_ed25519=vault-key --from-file=known_hosts=known_hosts
+# register vault-key.pub as a WRITE deploy key on the vault repo
+```
+
+Then uncomment the vault block at the bottom of
+[`values-team-leader.yaml`](../charts/hermes-agent/values-team-leader.yaml):
+it mounts the key read-only at `/var/run/secrets/vault-git` and points
+`GIT_SSH_COMMAND` at it, with the `known_hosts` pinned. Security posture worth
+stating: the deploy key is scoped to the **one** vault repo (write access
+nowhere else), lives in a Secret mounted `0400` — never in an env var — and
+members get no key at all.
+
 ## See also
 
 - [collaboration.md](collaboration.md) — the next step: make the grouped agents
