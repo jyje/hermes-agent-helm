@@ -388,6 +388,7 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어** — 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀** — 리더가 @mention으로 위임하고(스타 토폴로지) 멤버들이 RWX 워크스페이스를 공유; [Teams](../../docs/teams-ko.md) 참고 |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **공유 RWX PVC** — 동일한 지식 베이스에 읽기/쓰기하는 다수의 에이전트 |
 
 순수 `helm`/`-f` 대신 ArgoCD로 배포하시나요? [`examples/argocd/`](../../examples/argocd/)를

@@ -1,0 +1,100 @@
+# values-team-member.yaml
+#
+# One MEMBER of a leader-orchestrated Hermes agent team (star topology). Deploy
+# one release per member (e.g. "may" and "march"), each with its own bot token
+# and its own private HERMES_HOME; the leader comes from values-team-leader.yaml.
+# Override fullnameOverride and replace <MEMBER_NAME> in environment_hint per
+# deploy (the default below is the first demo member, "may").
+# Full walkthrough (planes, workspace layout, PVC manifest): docs/teams.md →
+# "Leader-orchestrated teams" and values-team-leader.yaml's header.
+#
+# All secrets below are DUMMY placeholders. Override at install time or inject
+# via SealedSecret + extraEnvFrom (see examples/argocd/hermes-team.yaml).
+#
+#   # member "may" (repeat with march for the second member)
+#   helm upgrade --install hermes-may ./charts/hermes-agent \
+#     --namespace hermes-team --create-namespace \
+#     -f charts/hermes-agent/values-team-member.yaml \
+#     --set-string fullnameOverride=hermes-may \
+#     --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+#     --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
+
+fullnameOverride: hermes-may   # per member: --set-string fullnameOverride=hermes-march
+
+config:
+  model:
+    # Members may run a DIFFERENT backend than the leader — collaboration does
+    # not require a shared provider (see docs/collaboration.md → mixed backends).
+    provider: nvidia
+    default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+  terminal:
+    backend: local
+  agent:
+    # The member protocol — the mirror of the leader's. A member acts only on
+    # the leader's mention, writes only inside its own output directory, and
+    # reports back only to the leader (never to another member): that keeps the
+    # star topology, so the pair-tested loop brake still holds with N agents.
+    environment_hint: |
+      You are "<MEMBER_NAME>", a MEMBER of a Hermes agent team in this Discord
+      channel. Your leader is "august" (Discord user ID <AUGUST_BOT_USER_ID>).
+      The shared team workspace is /opt/data/team.
+
+      Protocol:
+      1. Act ONLY when august mentions you with a task. Otherwise stay silent —
+         do not react to the human or to other members.
+      2. Read the task file august names (/opt/data/team/tasks/<task-id>.md)
+         and satisfy its done criteria.
+      3. Write your work ONLY under
+         /opt/data/team/outputs/<task-id>/<MEMBER_NAME>/. Never edit tasks/,
+         STATUS.md, or another member's output directory.
+      4. When done, reply with an explicit <@AUGUST_BOT_USER_ID> mention in the
+         BODY of your message, giving the output path and a 2-3 sentence
+         summary. Mention august ONLY to hand results back or to ask ONE
+         blocking question — never to chat. Never mention other members.
+
+env:
+  # Real keys come from --set-string or a SealedSecret. Setting
+  # DISCORD_BOT_TOKEN is enough to auto-enable Discord (one bot per agent).
+  NVIDIA_API_KEY: "nvapi-DUMMY_replace_me_0000000000000000000000"
+  OPENAI_API_KEY: "unused"
+  DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
+
+# SHARED team knobs — must match the leader's values exactly (same channel,
+# same allowed users, same four loop-brake vars). See docs/collaboration.md.
+extraEnv:
+  - name: DISCORD_HOME_CHANNEL
+    value: "000000000000000000"       # DUMMY — same channel id as the leader
+  - name: DISCORD_ALLOWED_USERS
+    value: "111111111111111111"       # DUMMY — same list as the leader
+  - name: DISCORD_ALLOW_BOTS
+    value: "mentions"
+  - name: DISCORD_THREAD_REQUIRE_MENTION
+    value: "true"
+  - name: DISCORD_REPLY_TO_MODE
+    value: "off"
+  - name: DISCORD_ALLOW_MENTION_REPLIED_USER
+    value: "false"
+
+# PRIVATE home (default RWO PVC) + the SAME shared workspace as the leader.
+extraVolumes:
+  - name: team-workspace
+    persistentVolumeClaim:
+      claimName: hermes-team-workspace
+extraVolumeMounts:
+  - name: team-workspace
+    mountPath: /opt/data/team
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi

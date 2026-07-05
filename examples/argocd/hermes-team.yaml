@@ -1,0 +1,186 @@
+# Mirrors charts/hermes-agent/values-team-leader.yaml + values-team-member.yaml:
+# a LEADER-ORCHESTRATED TEAM (star topology). The leader "august" is a plain
+# Application (its protocol/config is one-of-a-kind); the members are an
+# ApplicationSet whose roster is DATA — adding a teammate is one list entry.
+# Full walkthrough: docs/teams.md → "Leader-orchestrated teams".
+#
+# Control plane = one shared Discord channel (mentions flow leader<->member
+# only). Data plane = one shared RWX PVC mounted at /opt/data/team on every
+# agent, while each agent keeps its own private HERMES_HOME.
+#
+# Before applying:
+#   1. Create the shared RWX workspace PVC (see values-team-leader.yaml's
+#      header for the manifest; RWX-capable StorageClass required).
+#   2. Create one Secret per agent (one bot per agent):
+#        kubectl create secret generic hermes-august-discord-secrets -n hermes-team \
+#          --from-literal=NVIDIA_API_KEY='nvapi-<real>' \
+#          --from-literal=DISCORD_BOT_TOKEN='<august-bot-token>'
+#        # repeat for hermes-may-discord-secrets / hermes-march-discord-secrets
+#      (For GitOps, wire these as SealedSecrets via extraResources instead —
+#       see hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml.)
+#   3. Replace the DUMMY channel/user IDs and the <..._BOT_USER_ID>
+#      placeholders in the environment_hints below with your roster's IDs.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-august            # the leader — == releaseName → unique fullname
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    targetRevision: "*"          # pin to an exact version for reproducible upgrades
+    helm:
+      releaseName: hermes-august
+      valuesObject:
+        fullnameOverride: hermes-august
+        config:
+          model:
+            provider: nvidia
+            default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+          terminal:
+            backend: local
+          agent:
+            environment_hint: |
+              You are "august", the LEADER of a Hermes agent team in this
+              Discord channel. Your team members are "may" (Discord user ID
+              <MAY_BOT_USER_ID>) and "march" (Discord user ID
+              <MARCH_BOT_USER_ID>). The shared team workspace is /opt/data/team
+              — all work products live there, never in chat messages.
+
+              Protocol:
+              1. When the human gives you a goal, split it into tasks. Write
+                 each task to /opt/data/team/tasks/<task-id>.md with: goal,
+                 inputs, expected output path, and done criteria.
+              2. Delegate each task to exactly ONE member by putting an
+                 explicit <@id> mention in the BODY of your message, naming the
+                 task file path.
+              3. Members write only under
+                 /opt/data/team/outputs/<task-id>/<member>/ and report back by
+                 mentioning you. Only you mention members; members only mention
+                 you. Never ask members to talk to each other.
+              4. Review each result against the task's done criteria. If it
+                 falls short, re-delegate ONCE with concrete feedback; then
+                 accept what you have and note the gap.
+              5. Track progress in /opt/data/team/STATUS.md — you are its only
+                 writer.
+              6. When every task is accepted, assemble the final deliverable in
+                 the workspace, mark STATUS.md as DONE, and report the result
+                 to the human WITHOUT mentioning any member — that ends the
+                 run. Never send filler messages that mention a member.
+        env:
+          NVIDIA_API_KEY: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-august-discord-secrets
+        # SHARED across the team: same channel, same users, same loop brake.
+        # The member ApplicationSet below repeats this block — YAML anchors do
+        # not cross the `---` document boundary.
+        extraEnv:
+          - { name: DISCORD_HOME_CHANNEL, value: "000000000000000000" }
+          - { name: DISCORD_ALLOWED_USERS, value: "111111111111111111" }
+          - { name: DISCORD_ALLOW_BOTS, value: "mentions" }
+          - { name: DISCORD_THREAD_REQUIRE_MENTION, value: "true" }
+          - { name: DISCORD_REPLY_TO_MODE, value: "off" }
+          - { name: DISCORD_ALLOW_MENTION_REPLIED_USER, value: "false" }
+        # Private home (default PVC) + the shared RWX workspace.
+        extraVolumes:
+          - name: team-workspace
+            persistentVolumeClaim:
+              claimName: hermes-team-workspace
+        extraVolumeMounts:
+          - name: team-workspace
+            mountPath: /opt/data/team
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-team
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: hermes-team-members
+  namespace: argocd
+spec:
+  goTemplate: false
+  generators:
+    - list:
+        elements:
+          # The roster is DATA: add a teammate = add an entry (and create its
+          # Secret + tell august about it in the leader's environment_hint).
+          - name: may
+            botTokenSecret: hermes-may-discord-secrets
+          - name: march
+            botTokenSecret: hermes-march-discord-secrets
+  template:
+    metadata:
+      name: 'hermes-{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: ghcr.io/jyje/hermes-agent-helm
+        chart: hermes-agent
+        targetRevision: '*'      # pin to an exact version for reproducible upgrades
+        helm:
+          releaseName: 'hermes-{{name}}'
+          valuesObject:
+            fullnameOverride: 'hermes-{{name}}'
+            config:
+              model:
+                provider: nvidia
+                default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+              terminal:
+                backend: local
+              agent:
+                environment_hint: |
+                  You are "{{name}}", a MEMBER of a Hermes agent team in this
+                  Discord channel. Your leader is "august" (Discord user ID
+                  <AUGUST_BOT_USER_ID>). The shared team workspace is
+                  /opt/data/team.
+
+                  Protocol:
+                  1. Act ONLY when august mentions you with a task. Otherwise
+                     stay silent — do not react to the human or to other
+                     members.
+                  2. Read the task file august names
+                     (/opt/data/team/tasks/<task-id>.md) and satisfy its done
+                     criteria.
+                  3. Write your work ONLY under
+                     /opt/data/team/outputs/<task-id>/{{name}}/. Never edit
+                     tasks/, STATUS.md, or another member's output directory.
+                  4. When done, reply with an explicit <@AUGUST_BOT_USER_ID>
+                     mention in the BODY of your message, giving the output
+                     path and a 2-3 sentence summary. Mention august ONLY to
+                     hand results back or to ask ONE blocking question — never
+                     to chat. Never mention other members.
+            env:
+              NVIDIA_API_KEY: "set-via-extraEnvFrom"
+            extraEnvFrom:
+              - secretRef:
+                  name: '{{botTokenSecret}}'
+            extraEnv:
+              - { name: DISCORD_HOME_CHANNEL, value: "000000000000000000" }
+              - { name: DISCORD_ALLOWED_USERS, value: "111111111111111111" }
+              - { name: DISCORD_ALLOW_BOTS, value: "mentions" }
+              - { name: DISCORD_THREAD_REQUIRE_MENTION, value: "true" }
+              - { name: DISCORD_REPLY_TO_MODE, value: "off" }
+              - { name: DISCORD_ALLOW_MENTION_REPLIED_USER, value: "false" }
+            extraVolumes:
+              - name: team-workspace
+                persistentVolumeClaim:
+                  claimName: hermes-team-workspace
+            extraVolumeMounts:
+              - name: team-workspace
+                mountPath: /opt/data/team
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: hermes-team
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

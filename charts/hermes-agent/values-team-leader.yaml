@@ -1,0 +1,166 @@
+# values-team-leader.yaml
+#
+# The LEADER of a leader-orchestrated Hermes agent team (star topology). The
+# leader is the only agent the human talks to: it splits a goal into tasks,
+# delegates each to exactly one member by @mention, reviews the results from a
+# shared workspace volume, and declares the run done. Members are deployed from
+# values-team-member.yaml. Full walkthrough: docs/teams.md → "Leader-orchestrated
+# teams".
+#
+# Architecture (the two planes):
+#   - CONTROL plane  = one shared Discord channel; mentions flow leader<->member
+#     only (never member<->member) so the pair-tested loop brake still holds.
+#   - DATA plane     = one shared RWX PVC mounted at /opt/data/team on EVERY
+#     agent via extraVolumes. Each agent keeps its OWN private HERMES_HOME
+#     (config, auth, skills) — sharing the whole home would make the per-agent
+#     config.yaml seeds overwrite each other (see values-shared-knowledge.yaml).
+#     /opt/data/team sits inside the image's HERMES_WRITE_SAFE_ROOT (/opt/data),
+#     so agents can write there without loosening any write guard.
+#
+# Workspace layout (single-writer per path — there is no file locking on RWX):
+#   /opt/data/team/tasks/<task-id>.md            leader writes, members read
+#   /opt/data/team/outputs/<task-id>/<member>/   ONLY that member writes
+#   /opt/data/team/STATUS.md                     leader is the only writer
+#
+# Create the shared workspace PVC once, BEFORE deploying the team (RWX-capable
+# StorageClass required — NFS, CephFS, Longhorn, ...; most defaults are RWO):
+#
+#   apiVersion: v1
+#   kind: PersistentVolumeClaim
+#   metadata:
+#     name: hermes-team-workspace
+#     namespace: hermes-team
+#   spec:
+#     accessModes: [ReadWriteMany]
+#     storageClassName: nfs-client   # your RWX-capable StorageClass
+#     resources: { requests: { storage: 10Gi } }
+#
+# All secrets below are DUMMY placeholders. Override at install time or inject
+# via SealedSecret + extraEnvFrom (see examples/argocd/hermes-team.yaml).
+#
+#   helm upgrade --install hermes-august ./charts/hermes-agent \
+#     --namespace hermes-team --create-namespace \
+#     -f charts/hermes-agent/values-team-leader.yaml \
+#     --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+#     --set-string env.DISCORD_BOT_TOKEN='<august-bot-token>' --wait
+
+fullnameOverride: hermes-august
+
+config:
+  model:
+    # Any provider works, and members may use DIFFERENT backends (see the
+    # provider table in the chart README). NIM keeps the demo friction low.
+    provider: nvidia
+    default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+  terminal:
+    backend: local
+  agent:
+    # The leader protocol. Replace the member names/IDs with your roster —
+    # <@id> mentions in the message BODY are how work moves; the closing rule
+    # ("report to the human WITHOUT mentioning any member") is the loop brake's
+    # prompt half, same as docs/collaboration.md.
+    environment_hint: |
+      You are "august", the LEADER of a Hermes agent team in this Discord
+      channel. Your team members are "may" (Discord user ID <MAY_BOT_USER_ID>)
+      and "march" (Discord user ID <MARCH_BOT_USER_ID>). The shared team
+      workspace is /opt/data/team — all work products live there, never in
+      chat messages.
+
+      Protocol:
+      1. When the human gives you a goal, split it into tasks. Write each task
+         to /opt/data/team/tasks/<task-id>.md (id like 001-short-slug) with:
+         goal, inputs, expected output path, and done criteria.
+      2. Delegate each task to exactly ONE member by putting an explicit <@id>
+         mention in the BODY of your message, naming the task file path.
+      3. Members write only under /opt/data/team/outputs/<task-id>/<member>/
+         and report back by mentioning you. Only you mention members; members
+         only mention you. Never ask members to talk to each other.
+      4. Review each result against the task's done criteria. If it falls
+         short, re-delegate ONCE with concrete feedback; then accept what you
+         have and note the gap.
+      5. Track progress in /opt/data/team/STATUS.md — you are its only writer.
+      6. When every task is accepted, assemble the final deliverable in the
+         workspace, mark STATUS.md as DONE, and report the result to the human
+         WITHOUT mentioning any member — that ends the run. Never send filler
+         messages that mention a member.
+
+env:
+  # Real keys come from --set-string or a SealedSecret. Setting
+  # DISCORD_BOT_TOKEN is enough to auto-enable Discord (one bot per agent).
+  NVIDIA_API_KEY: "nvapi-DUMMY_replace_me_0000000000000000000000"
+  OPENAI_API_KEY: "unused"
+  DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
+
+# Non-secret Discord knobs. The first two are SHARED by the whole team (one
+# channel = the context bus); the four loop-brake knobs MUST be set identically
+# on every agent — see docs/collaboration.md for each one's rationale.
+extraEnv:
+  - name: DISCORD_HOME_CHANNEL
+    value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+  - name: DISCORD_ALLOWED_USERS
+    value: "111111111111111111"       # DUMMY — comma-separated user ids
+  - name: DISCORD_ALLOW_BOTS
+    value: "mentions"
+  - name: DISCORD_THREAD_REQUIRE_MENTION
+    value: "true"
+  - name: DISCORD_REPLY_TO_MODE
+    value: "off"
+  - name: DISCORD_ALLOW_MENTION_REPLIED_USER
+    value: "false"
+
+# PRIVATE home (default RWO PVC) + SHARED workspace, mounted inside the home so
+# it stays within the image's write-safe root. Same two blocks on every member.
+extraVolumes:
+  - name: team-workspace
+    persistentVolumeClaim:
+      claimName: hermes-team-workspace
+extraVolumeMounts:
+  - name: team-workspace
+    mountPath: /opt/data/team
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# ---------------------------------------------------------------------------
+# OPTIONAL: git-backed wiki vault (docs/teams.md → "Team + wiki vault").
+# The leader curates member outputs into an Obsidian-compatible vault cloned
+# inside the workspace and pushes it with a repo-scoped deploy key. Uncomment
+# and create the Secret first:
+#
+#   ssh-keygen -t ed25519 -f vault-key -N '' -C hermes-august-vault
+#   ssh-keyscan github.com > known_hosts    # pin the host key
+#   kubectl create secret generic team-vault-deploy-key -n hermes-team \
+#     --from-file=id_ed25519=vault-key --from-file=known_hosts=known_hosts
+#   # then register vault-key.pub as a WRITE deploy key on the vault repo
+#
+# extraVolumes:
+#   - name: team-workspace
+#     persistentVolumeClaim:
+#       claimName: hermes-team-workspace
+#   - name: vault-deploy-key
+#     secret:
+#       secretName: team-vault-deploy-key
+#       defaultMode: 0400
+# extraVolumeMounts:
+#   - name: team-workspace
+#     mountPath: /opt/data/team
+#   - name: vault-deploy-key
+#     mountPath: /var/run/secrets/vault-git
+#     readOnly: true
+# extraEnv:
+#   # ... keep the Discord knobs above, plus:
+#   - name: GIT_SSH_COMMAND
+#     value: "ssh -i /var/run/secrets/vault-git/id_ed25519 -o UserKnownHostsFile=/var/run/secrets/vault-git/known_hosts"
+# ---------------------------------------------------------------------------
