@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 0.8.1
+version: 0.9.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -34,7 +34,7 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: "fixed"
-      description: "Corrected git-cliff changelog credit chain bug"
     - kind: "added"
-      description: "Added SECURITY.md and SECURITY-ko.md documentation files"
+      description: "Add values-team-leader.yaml and values-team-member.yaml enabling leader‑orchestrated team deployments."
+    - kind: "changed"
+      description: "Update AppVersion badge in README to reflect Hermes image v2026.7.7.2."
