@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.1](https://img.shields.io/badge/AppVersion-v2026.7.1-informational?style=flat-square)
+![Version: 0.9.0](https://img.shields.io/badge/Version-0.9.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.7.2](https://img.shields.io/badge/AppVersion-v2026.7.7.2-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -19,7 +19,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-pro
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.8.1 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.9.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -416,7 +416,7 @@ can be set the same way as the ones above: secrets under `.Values.env`
 Full reference (kept current with each Hermes release):
 **[Environment Variables — Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
-A few more commonly-used ones, current as of image `v2026.7.1`:
+A few more commonly-used ones, current as of image `v2026.7.7.2`:
 
 | Variable | Purpose |
 | --- | --- |
@@ -461,6 +461,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair** — two agents handing off by @mention in a shared Discord channel |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team** — a leader delegates by @mention (star topology) and members share an RWX workspace; see [Teams](../../docs/teams.md) |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC** — multiple agents reading/writing to the same knowledge base |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See
