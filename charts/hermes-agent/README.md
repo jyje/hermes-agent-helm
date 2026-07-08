@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.1](https://img.shields.io/badge/AppVersion-v2026.7.1-informational?style=flat-square)
+![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.7.2](https://img.shields.io/badge/AppVersion-v2026.7.7.2-informational?style=flat-square)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -416,7 +416,7 @@ can be set the same way as the ones above: secrets under `.Values.env`
 Full reference (kept current with each Hermes release):
 **[Environment Variables — Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
-A few more commonly-used ones, current as of image `v2026.7.1`:
+A few more commonly-used ones, current as of image `v2026.7.7.2`:
 
 | Variable | Purpose |
 | --- | --- |
