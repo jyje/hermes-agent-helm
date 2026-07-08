@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.9.1] - 2026-07-08
+
+### Features
+
+- ✨ feat(ci): add GHCR download-count badge for repo and chart READMEs ([`b8d54d6`](https://github.com/jyje/hermes-agent-helm/commit/b8d54d62f797935a60a268ec0cf19df151d1fa36)) — @jyje
+
+### Removed
+
+- Chore(ci): remove temporary package-query debug workflow ([`ff1ac05`](https://github.com/jyje/hermes-agent-helm/commit/ff1ac05b6afa507b3732ab7615c6e310f232acdb)) — @jyje
+- 🗑️ remove(ci): revert GHCR download-count badge (GraphQL Packages API is sunset) ([`75759d5`](https://github.com/jyje/hermes-agent-helm/commit/75759d58d7962c67ab98f27d5250e451d8e5bb82)) — @jyje
+
+### Miscellaneous
+
+- 🎨 style(chart): match chart README badges to the root README's flat style ([`f2f8456`](https://github.com/jyje/hermes-agent-helm/commit/f2f845689c1de286aaa54e658b55993aa1f144b9)) — @jyje
+
 ## [0.9.0] - 2026-07-08
 
 ### Features
