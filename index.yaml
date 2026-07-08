@@ -4,6 +4,40 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "changed"
+          description: "Update README badge style to flat design matching root README"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.7.2
+    created: "2026-07-08T14:24:03.605846248Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 5c11e1612487a02dc7215abf30dbc067aafe312fead14293b201762c60f8faac
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.9.1.tgz
+    version: 0.9.1
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "added"
           description: "Add values-team-leader.yaml and values-team-member.yaml enabling leader‑orchestrated team deployments."
         - kind: "changed"
@@ -726,4 +760,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-08T12:58:24.111151938Z"
+generated: "2026-07-08T14:24:03.603344435Z"
