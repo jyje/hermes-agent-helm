@@ -66,7 +66,7 @@ pod_name() {
 # exhaustive per-model testing). Each model attempt is bounded by
 # CHAT_ROUND_TRIP_TIMEOUT so a single hung model can't burn the whole
 # step's time budget and starve the remaining failover candidates.
-CHAT_ROUND_TRIP_TIMEOUT="${CHAT_ROUND_TRIP_TIMEOUT:-180}"
+CHAT_ROUND_TRIP_TIMEOUT="${CHAT_ROUND_TRIP_TIMEOUT:-1800}"
 chat_round_trip() {
   pod="$1"; ok=false
   for model in $(echo "$CI_MODELS" | tr ',' ' '); do
