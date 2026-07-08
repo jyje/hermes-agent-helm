@@ -1,12 +1,15 @@
 name: 🔍 validate-chart
 
 on:
+  # pull_request only: every merge into main/dev goes through a PR, so the
+  # pull_request run already validates the exact tree that lands on the
+  # target branch. A push trigger on top of that would re-run the same
+  # (expensive, kind-cluster) validation a second time right after merge —
+  # e.g. cron-fetch-image's bump-pr gets validated once as a PR (#120) and
+  # then again on push to main seconds after merging (#121). Direct pushes
+  # bypassing a PR aren't a supported workflow in this repo, so there's no
+  # coverage gap in dropping `push`.
   pull_request:
-    paths:
-      - "charts/hermes-agent/**"
-      - ".github/workflows/validate-chart.yaml"
-  push:
-    branches: [dev, main]
     paths:
       - "charts/hermes-agent/**"
       - ".github/workflows/validate-chart.yaml"
