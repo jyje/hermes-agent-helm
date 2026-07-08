@@ -66,16 +66,20 @@ pod_name() {
 # exhaustive per-model testing).
 chat_round_trip() {
   pod="$1"; ok=false
+  chat_timeout_secs="${CHAT_TIMEOUT_SECS:-180}"
   for model in $(echo "$CI_MODELS" | tr ',' ' '); do
     echo "[$NS] --- model: $model ---"
     # Prompt goes via -q (not positional) and --max-turns bounds the
-    # round-trip — same invocation the chart's own test hook uses.
-    if kubectl exec -n "$NS" "$pod" -- \
+    # round-trip — same invocation the chart's own test hook uses. Bound each
+    # model attempt with timeout so one stalled model doesn't consume the
+    # entire workflow step budget.
+    if timeout -k 15 "${chat_timeout_secs}" \
+      kubectl exec -n "$NS" "$pod" -- \
         hermes chat -m "$model" --provider nvidia \
           -q "ci-ping" --max-turns 2; then
       ok=true; break
     fi
-    echo "[$NS] model $model failed, trying next"
+    echo "[$NS] model $model failed or timed out after ${chat_timeout_secs}s, trying next"
   done
   [ "$ok" = true ]
 }
