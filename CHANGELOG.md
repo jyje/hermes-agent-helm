@@ -1,6 +1,27 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.9.0] - 2026-07-08
+
+### Features
+
+- ✨ feat(examples): add a leader-orchestrated team deployment example ([`774e135`](https://github.com/jyje/hermes-agent-helm/commit/774e1357159f16425e4817424de44389246d17ed)) — @jyje
+
+### Bug Fixes
+
+- 🛠️ fix(skills/git-commit-helper): sync with latest canonical policy ([`25eaee0`](https://github.com/jyje/hermes-agent-helm/commit/25eaee0848da0328fe8d80a38004969920ef393b)) — @jyje
+- 🛠️ fix(dependabot): add missing prefix-development for gitmoji convention ([`5e810d3`](https://github.com/jyje/hermes-agent-helm/commit/5e810d328517767f4951bca0a58d33b8ae56724a)) — @jyje
+- 🛠️ fix(ci): drop the push trigger from validate-chart ([`1fd28dc`](https://github.com/jyje/hermes-agent-helm/commit/1fd28dc434140606d5a3ad654a0cc6ea51fc367f)) — @jyje
+
+### Documentation
+
+- 📄 docs(readme): add a contributing section with the contributor grid ([`34b0622`](https://github.com/jyje/hermes-agent-helm/commit/34b06226acbc69c9921cf4c9ac7cf39946347802)) — @jyje
+- 📄 docs(teams): document leader-orchestrated teams and the git-backed wiki vault ([`93b4b97`](https://github.com/jyje/hermes-agent-helm/commit/93b4b972f9743e00b211f45be619369249964343)) — @jyje
+
+### Miscellaneous
+
+- ⬆️ dep(image): bump hermes-agent image to v2026.7.7.2 (#60) ([`a26137f`](https://github.com/jyje/hermes-agent-helm/commit/a26137f00ab320da0f4d70bc36406f5a60cffcfc)) — @jyje-bot[bot]
+
 ## [0.8.1] - 2026-07-02
 
 ### Bug Fixes
