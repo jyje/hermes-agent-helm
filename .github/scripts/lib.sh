@@ -63,12 +63,15 @@ pod_name() {
 
 # chat_round_trip <pod> — passes on the first model that answers; the
 # free-tier pool tolerates per-model flakiness (it's a FAILOVER pool, not
-# exhaustive per-model testing).
+# exhaustive per-model testing). Each model attempt is bounded by
+# CHAT_ROUND_TRIP_TIMEOUT so a single hung model can't burn the whole
+# step's time budget and starve the remaining failover candidates.
+CHAT_ROUND_TRIP_TIMEOUT="${CHAT_ROUND_TRIP_TIMEOUT:-1800}"
 chat_round_trip() {
   pod="$1"; ok=false
   chat_timeout_secs="${CHAT_TIMEOUT_SECS:-180}"
   for model in $(echo "$CI_MODELS" | tr ',' ' '); do
-    echo "[$NS] --- model: $model ---"
+    echo "[$NS] --- model: $model (timeout ${CHAT_ROUND_TRIP_TIMEOUT}s) ---"
     # Prompt goes via -q (not positional) and --max-turns bounds the
     # round-trip — same invocation the chart's own test hook uses. Bound each
     # model attempt with timeout so one stalled model doesn't consume the
