@@ -11,7 +11,6 @@
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
 ![Version: 0.9.0](https://img.shields.io/badge/Version-0.9.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2026.7.7.2](https://img.shields.io/badge/AppVersion-v2026.7.7.2-informational?style=flat-square)
-[![GHCR Downloads](https://img.shields.io/endpoint?url=https://jyje.github.io/hermes-agent-helm/badges/ghcr-downloads.json)](https://github.com/jyje/hermes-agent-helm/pkgs/container/hermes-agent-helm%2Fhermes-agent)
 
 [English](README.md) · [한국어](README-ko.md)
 
