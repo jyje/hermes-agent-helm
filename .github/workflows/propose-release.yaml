@@ -130,7 +130,7 @@ jobs:
           git-cliff --tag "v${new}" ${skip_args[@]+"${skip_args[@]}"} -o CHANGELOG.md
           # Regenerate the chart README so its version badge matches Chart.yaml —
           # otherwise validate-chart.yaml's docs-drift check fails on the release PR.
-          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
           # Keep the OCI install-example versions in examples/helm/README.md in sync.
           sed -i "s/${old}/${new}/g" examples/helm/README.md
           # Same for the chart's Korean README — it has no .gotmpl (hand-translated

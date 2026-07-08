@@ -13,7 +13,7 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 docs: ## Regenerate chart README via helm-docs (from README.md.gotmpl)
-	helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+	helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
 
 lint: ## Lint the chart
 	helm lint $(CHART) --set env.OPENAI_API_KEY=sk-test

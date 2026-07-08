@@ -211,7 +211,7 @@ jobs:
           fi
 
           # Keep the generated README in sync (validate-chart fails on a stale README).
-          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl
+          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
 
           git add "${CHART}/Chart.yaml" "${CHART}/README.md" "${CHART}/values.yaml"
           git commit \
