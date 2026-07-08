@@ -63,19 +63,22 @@ pod_name() {
 
 # chat_round_trip <pod> — passes on the first model that answers; the
 # free-tier pool tolerates per-model flakiness (it's a FAILOVER pool, not
-# exhaustive per-model testing).
+# exhaustive per-model testing). Each model attempt is bounded by
+# CHAT_ROUND_TRIP_TIMEOUT so a single hung model can't burn the whole
+# step's time budget and starve the remaining failover candidates.
+CHAT_ROUND_TRIP_TIMEOUT="${CHAT_ROUND_TRIP_TIMEOUT:-1800}"
 chat_round_trip() {
   pod="$1"; ok=false
   for model in $(echo "$CI_MODELS" | tr ',' ' '); do
-    echo "[$NS] --- model: $model ---"
+    echo "[$NS] --- model: $model (timeout ${CHAT_ROUND_TRIP_TIMEOUT}s) ---"
     # Prompt goes via -q (not positional) and --max-turns bounds the
     # round-trip — same invocation the chart's own test hook uses.
-    if kubectl exec -n "$NS" "$pod" -- \
+    if timeout "${CHAT_ROUND_TRIP_TIMEOUT}s" kubectl exec -n "$NS" "$pod" -- \
         hermes chat -m "$model" --provider nvidia \
           -q "ci-ping" --max-turns 2; then
       ok=true; break
     fi
-    echo "[$NS] model $model failed, trying next"
+    echo "[$NS] model $model failed or timed out, trying next"
   done
   [ "$ok" = true ]
 }
