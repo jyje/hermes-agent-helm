@@ -73,6 +73,13 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
   **live `hermes chat` 라운드트립**을 실행 — 목(mock)이 아님.
   🔜 Telegram/Discord 라운드트립 검증은 아직 준비 중.
 
+<div align="center">
+  <img src="docs/images/demos/team-k9s-pods.png" alt="kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)"/>
+  <p><em>이 차트로 배포한 리더 주도 팀 — 리더 <code>august</code>와
+  멤버 <code>may</code>, <code>march</code> — kind 클러스터에서 실행 중.
+  <a href="docs/teams-ko.md">Hermes 팀</a> 참고.</em></p>
+</div>
+
 자세한 리소스 구조, 설정 모델, 제공자별 설치 예제(메신저 통합 포함)는
 [charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
 

@@ -282,6 +282,17 @@ helm upgrade --install hermes-may ./charts/hermes-agent \
 렌더링된 형태입니다 — 리더용 Application 하나 + 멤버 로스터가 데이터인
 ApplicationSet(팀원 추가 = 리스트 항목 하나 추가).
 
+kind 클러스터에 배포하면 실행 중인 팀은 이렇게 보입니다(리더 `august`,
+멤버 `may`와 `march`, 각자 사설 홈 PVC + 공유 워크스페이스):
+
+![kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)](images/demos/team-k9s-pods.png)
+
+스토리지 분리는 PVC 목록에서 그대로 보입니다 — 에이전트별 사설 RWO 홈 3개와,
+팀의 작업 산출물(그리고 위키 단계에서는 큐레이션된 볼트)이 놓이는 공유 RWX
+워크스페이스 1개:
+
+![팀의 PVC: 사설 RWO 홈 3개와 공유 RWX 워크스페이스 1개](images/demos/team-k9s-pvcs.png)
+
 여기의 데모는 **Discord 우선**입니다(봇 토큰 플랫폼은 추가 인프라가 필요
 없습니다). 게이트웨이는 모든 플랫폼을 그저 또 하나의 자격증명으로 다루므로,
 플랫폼 환경변수만 바꾸면 같은 스타 토폴로지가 Telegram이나 Slack에도 그대로

@@ -289,6 +289,18 @@ Or declaratively:
 the rendered form — one Application for the leader plus an ApplicationSet whose
 member roster is data (add a teammate = one list entry).
 
+Deployed on a kind cluster, the running team looks like this (leader
+`august`, members `may` and `march`, each with its own private home PVC plus
+the shared workspace):
+
+![A leader-orchestrated Hermes team (august, may, march) running on a kind cluster, shown in k9s](images/demos/team-k9s-pods.png)
+
+The storage split is visible in the PVC list — three private RWO homes (one
+per agent) plus the one shared RWX workspace where the team's work products
+(and, in the wiki phase, the curated vault) live:
+
+![The team's PVCs: three private RWO homes and one shared RWX workspace](images/demos/team-k9s-pvcs.png)
+
 The demos here are **Discord-first** (bot-token platforms need no extra
 infrastructure); the same star topology applies unchanged to Telegram or Slack
 once you swap the platform env vars, since the gateway treats every platform as

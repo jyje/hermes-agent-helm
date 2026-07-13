@@ -76,6 +76,13 @@ change), see [Quick start](#quick-start) below.
   `hermes chat` round-trip** against a real NVIDIA NIM account — not a mock.
   🔜 Telegram/Discord round-trip verification is still a placeholder.
 
+<div align="center">
+  <img src="docs/images/demos/team-k9s-pods.png" alt="A leader-orchestrated Hermes team (august, may, march) running on a kind cluster, shown in k9s"/>
+  <p><em>A leader-orchestrated team from this chart — leader <code>august</code> with
+  members <code>may</code> and <code>march</code> — running on a kind cluster.
+  See <a href="docs/teams.md">Hermes teams</a>.</em></p>
+</div>
+
 For the full resource breakdown, configuration model, and provider-by-provider
 install examples (including messenger integrations), see
 [charts/hermes-agent/README.md](charts/hermes-agent/README.md).
