@@ -150,6 +150,19 @@ extraVolumeMounts: []
 #    mountPath: /var/run/secrets/vertex
 #    readOnly: true
 
+# -- Extra init containers, appended after the chart's own (seed-config,
+#    device-flow login). Full container spec; combine with `extraVolumes` for
+#    one-time volume preparation — e.g. fixing the ownership of a shared RWX
+#    workspace so the non-root agent can write to it
+#    (see values-team-leader.yaml).
+extraInitContainers: []
+#  - name: init-workspace
+#    image: busybox:1.37
+#    command: ["sh", "-c", "chown 10000:10000 /work"]
+#    volumeMounts:
+#      - name: team-workspace
+#        mountPath: /work
+
 # -- Extra raw manifests rendered as-is alongside this chart's resources.
 #    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
 #    may be either an object or a multiline string (see examples/argocd/).

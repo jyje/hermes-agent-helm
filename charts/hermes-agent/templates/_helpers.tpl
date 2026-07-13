@@ -111,7 +111,7 @@ spec:
   {{- end }}
   securityContext:
     {{- toYaml .Values.podSecurityContext | nindent 4 }}
-  {{- if or .Values.bootstrap.enabled .Values.auth.deviceFlow.enabled }}
+  {{- if or .Values.bootstrap.enabled .Values.auth.deviceFlow.enabled .Values.extraInitContainers }}
   initContainers:
     {{- if .Values.bootstrap.enabled }}
     # Seed the partial config.yaml into HERMES_HOME (the writable volume) so
@@ -197,6 +197,9 @@ spec:
           readOnly: true
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
+    {{- end }}
+    {{- with .Values.extraInitContainers }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
   containers:
