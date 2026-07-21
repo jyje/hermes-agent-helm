@@ -19,6 +19,23 @@ candidate rather than a near-term plan. The
 [`charts/hermes-operator/`](../charts/hermes-operator/) directory is an
 intentionally empty placeholder for that possible future chart.
 
+## v1.0 readiness
+
+The chart has been pre-1.0 (`0.x`) since its first release; the gate for
+`1.0.0` is that the multi-agent team story — not just the single-agent
+path — is proven, not merely documented.
+
+| Item | Status |
+| --- | --- |
+| Single agent, production-proven | ✅ done — real deployments with 15+ / 26+ day uptime |
+| Pair collaboration (`@mention` handoff) | ✅ recipe shipped and proven live; 🔜 field-demo evidence not yet attached to [collaboration.md](collaboration.md) |
+| Leader-orchestrated team (star topology, shared workspace) | ✅ recipe shipped, field-tested on an ephemeral kind cluster; 🔜 not yet proven on a persistent cluster |
+| Chart extension points for team patterns (`extraVolumes`, `extraVolumeMounts`, `extraInitContainers`) | ✅ done — cover file-based credentials and one-time volume prep |
+| CI coverage (per-scenario kind matrix, functional-change detection incl. appVersion bumps, docs-drift gate, signed releases) | ✅ done |
+| EN/KO documentation parity | ✅ maintained as an ongoing discipline |
+| Messaging platform coverage | Discord and Telegram are the v1.0 baseline; Slack and other platforms are explicitly **post-v1.0** (the same star topology applies once platform env vars are swapped) |
+| Git-backed wiki vault (team knowledge curation) | ⏸️ design only ([teams.md](teams.md) § Team + wiki vault), not required for v1.0 |
+
 ## See also
 
 - [Hermes teams](teams.md) — the ApplicationSet-based team pattern in detail.
