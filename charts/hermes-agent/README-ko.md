@@ -368,6 +368,31 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
   annotation) 뒤에서나 사설 네트워크에서만 설정하세요 — `values.yaml`의
   `ingress.hosts` / `ingress.tls`를 참고하세요.
 
+## 무인(unattended) 승인
+
+Gateway 파드에는 **TTY가 없습니다** — 위험한 `terminal`/`execute_code` 명령에
+대한 Hermes의 인터랙티브 승인 프롬프트에 답할 사람이 없어서, 그 자리에서
+실행이 멈출 수 있습니다. `config.approvals` 아래에서 조정하세요:
+
+```yaml
+config:
+  approvals:
+    mode: manual        # 기본값 "manual"은 프롬프트를 띄움 — gateway엔 답할 사람이 없음
+    deny:                # 이 패턴에 매칭되는 명령은 승인/yolo 로직이 보기도 전에
+      - "rm -rf /"       # 무조건 거부됩니다 — yolo 모드에서도 안전하게 유지
+      - "curl.*\\|.*sh"
+    cron_mode: deny       # 무인 cron 실행: "deny"(기본값) 또는 "approve"
+    discord_prompt_timeout: 120  # Discord 버튼 프롬프트 유지 시간(초)
+                                 # (업스트림에서 clamp됨; 기본값 300초/5분)
+```
+
+`approvals.deny`는 전체 정책이 아니라 "거부 목록"입니다 — 다른 승인 모드가
+무엇이든 상관없이 특정 위험 패턴을 무조건 막기 위해 존재합니다. 이것만으로
+gateway가 비대화형이 되지는 않으니, 감수할 위험 수준에 맞는
+HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은 [설정
+가이드](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+참고 — 승인 정책 전체를 여기서 다시 다루지는 않습니다).
+
 ## 환경변수
 
 이 차트는 시작에 필요한 [제공자](#install-options-llm-provider) 및

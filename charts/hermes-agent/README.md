@@ -438,6 +438,31 @@ gateway, which is why its default moved to 0. A drain window also cannot
 > connections it never arms, and Kubernetes would keep the pod Running
 > regardless — so the chart deliberately does not expose it.
 
+## Unattended approvals
+
+The gateway pod has **no TTY** — Hermes' interactive approval prompt (for
+dangerous `terminal`/`execute_code` commands) has no human to answer it there,
+so a run can stall waiting on one. Tune this under `config.approvals`:
+
+```yaml
+config:
+  approvals:
+    mode: manual        # "manual" (default) prompts; the gateway has nobody to answer
+    deny:                # commands matching these patterns are refused BEFORE
+      - "rm -rf /"       # any approval/yolo logic even sees them — safe to keep
+      - "curl.*\\|.*sh"  # even in yolo mode
+    cron_mode: deny       # unattended cron runs: "deny" (default) or "approve"
+    discord_prompt_timeout: 120  # seconds a Discord button prompt stays live
+                                 # (clamped upstream; default 300s / 5 min)
+```
+
+`approvals.deny` is a allowlist-of-refusals, not a full policy — it exists to
+hard-block specific dangerous patterns regardless of any other approval mode
+you run with. It does not, by itself, make the gateway non-interactive; pair
+it with whatever HERMES_YOLO_MODE / approval-mode setting fits your risk
+tolerance (see the [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+for the full picture — approvals policy is deliberately not duplicated here).
+
 ## Environment variables
 
 This chart only walks through the [provider](#install-options-llm-provider)
