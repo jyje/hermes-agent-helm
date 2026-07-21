@@ -53,6 +53,9 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | Google Vertex AI | `vertex` | none — OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC) | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
+| Fireworks AI | `fireworks` | `FIREWORKS_API_KEY` | [`values-fireworks.yaml`](values-fireworks.yaml) |
+| DeepInfra | `deepinfra` | `DEEPINFRA_API_KEY` | [`values-deepinfra.yaml`](values-deepinfra.yaml) |
+| Upstage Solar | `upstage` | `UPSTAGE_API_KEY` | [`values-upstage.yaml`](values-upstage.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
@@ -421,6 +424,9 @@ A few more commonly-used ones, current as of image `v2026.7.20`:
 | Variable | Purpose |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
+| `FIREWORKS_API_KEY` | Fireworks AI provider |
+| `DEEPINFRA_API_KEY` / `DEEPINFRA_BASE_URL` | DeepInfra provider and optional endpoint override |
+| `UPSTAGE_API_KEY` / `UPSTAGE_BASE_URL` | Upstage Solar provider and optional endpoint override |
 | `ZAI_API_KEY` | Z.AI / GLM provider (built-in key `zai`; `GLM_BASE_URL` picks the Global/China/Coding-Plan endpoint) |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
@@ -457,6 +463,9 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
 | [`values-google-vertex.yaml`](values-google-vertex.yaml) | Google Vertex AI (`vertex`) | **Service-account JSON mounted** via `extraVolumes` (no static API key) |
 | [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
+| [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Native Fireworks model IDs |
+| [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | Endpoint override via `DEEPINFRA_BASE_URL` |
+| [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | Endpoint override via `UPSTAGE_BASE_URL` |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |

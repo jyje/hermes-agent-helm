@@ -53,6 +53,9 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | Google Vertex AI | `vertex` | 없음 — 마운트된 서비스 계정 JSON(또는 ADC)에서 OAuth2 토큰 자동 발급 | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
+| Fireworks AI | `fireworks` | `FIREWORKS_API_KEY` | [`values-fireworks.yaml`](values-fireworks.yaml) |
+| DeepInfra | `deepinfra` | `DEEPINFRA_API_KEY` | [`values-deepinfra.yaml`](values-deepinfra.yaml) |
+| Upstage Solar | `upstage` | `UPSTAGE_API_KEY` | [`values-upstage.yaml`](values-upstage.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth 디바이스 플로우 — API 키 불필요) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 프리셋의 reference/aggregator 모델에 따라 다름 | [`values-moa.yaml`](values-moa.yaml) |
 | 커스텀 (LiteLLM / vLLM / LM Studio) | `config.providers` 아래 직접 정의한 id | 프록시마다 다름 | [`values-litellm.yaml`](values-litellm.yaml) |
@@ -350,6 +353,9 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | 변수 | 용도 |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek 제공자 |
+| `FIREWORKS_API_KEY` | Fireworks AI 제공자 |
+| `DEEPINFRA_API_KEY` / `DEEPINFRA_BASE_URL` | DeepInfra 제공자 및 선택적 엔드포인트 오버라이드 |
+| `UPSTAGE_API_KEY` / `UPSTAGE_BASE_URL` | Upstage Solar 제공자 및 선택적 엔드포인트 오버라이드 |
 | `ZAI_API_KEY` | Z.AI / GLM 제공자 (내장 키 `zai`; `GLM_BASE_URL`로 Global/중국/Coding Plan 엔드포인트 선택) |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock 제공자 |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI 제공자 |
@@ -384,6 +390,9 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
 | [`values-google-vertex.yaml`](values-google-vertex.yaml) | Google Vertex AI (`vertex`) | **서비스 계정 JSON 마운트** (`extraVolumes`, 정적 API 키 없음) |
 | [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
+| [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Fireworks 고유 모델 ID |
+| [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | `DEEPINFRA_BASE_URL`로 엔드포인트 오버라이드 |
+| [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
