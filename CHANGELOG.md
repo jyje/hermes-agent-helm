@@ -1,6 +1,14 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.10.0] - 2026-07-21
+
+### Miscellaneous
+
+- 🎨 style(pages): drop repo-level Releases badge, add shared badges to chart pages ([`137c50f`](https://github.com/jyje/hermes-agent-helm/commit/137c50f96c2b8d9c468a74e1abfd2c4d7278b0c3)) — @jyje
+- 🎨 style(chart): move GitHub/License badges into the README's existing badge line ([`7758af5`](https://github.com/jyje/hermes-agent-helm/commit/7758af51e7ef55ecc9e6ad9ec4c5a716adc0d0b2)) — @jyje
+- ⬆️ dep(image): bump hermes-agent image to v2026.7.20 (#64) ([`8fdaec7`](https://github.com/jyje/hermes-agent-helm/commit/8fdaec76e2c049abd5a30d01348127bc637a04b8)) — @jyje-bot[bot]
+
 ## [0.9.1] - 2026-07-08
 
 ### Features
