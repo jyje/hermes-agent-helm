@@ -255,6 +255,13 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 [팀 구성](../../docs/teams-ko.md) + [협업 가이드](../../docs/collaboration-ko.md)를
 참고하세요.
 
+> **대안: 파드 하나, 프로필 여러 개.** 여러 봇이 채널 하나를 공유하는 게 아니라,
+> **봇 토큰 하나**로 서로 다른 Discord 길드/채널/스레드를 서로 다른 에이전트
+> *프로필*로 라우팅하는 게 실제로 필요한 것이라면, `config.gateway.multiplex_profiles:
+> true`를 설정하세요(환경변수 오버라이드: `GATEWAY_MULTIPLEX_PROFILES=1`). 이러면
+> 팀원마다 파드 하나가 아니라 파드 하나로 끝납니다 — 위의 핸드오프 패턴과는 다른
+> 문제(협업이 아니라 라우팅)를 푸는 것이니, 실제 필요한 형태에 맞춰 고르세요.
+
 ## 고급 테스트
 
 [`helm test`](#테스트) Job(훅 `helm.sh/hook: test`)은 `hermes --version`을

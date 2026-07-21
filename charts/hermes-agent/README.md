@@ -292,6 +292,14 @@ For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**
 [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
 and the full guide in [Teams](../../docs/teams.md) + [Collaboration](../../docs/collaboration.md).
 
+> **Alternative: one pod, many profiles.** If what you actually need is
+> routing different Discord guilds/channels/threads to different agent
+> *profiles* from a **single bot token** — rather than several bots sharing
+> one channel — set `config.gateway.multiplex_profiles: true` (env override:
+> `GATEWAY_MULTIPLEX_PROFILES=1`). That's one pod instead of one-per-teammate;
+> it solves a different problem than the hand-off pattern above (routing, not
+> collaboration), so pick based on which shape your use case actually needs.
+
 ## Advanced testing
 
 The [`helm test`](#test) Job (hook `helm.sh/hook: test`) runs `hermes
