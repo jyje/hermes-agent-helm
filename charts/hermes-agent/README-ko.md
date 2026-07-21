@@ -316,6 +316,17 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 설정하면 되고, 업스트림 전체 설정을 차트에 복제하지 않습니다(그러면 Hermes
 버전이 바뀔 때마다 어긋나게 됩니다).
 
+> **패스스루 원칙.** `.Values.config`는 **그대로** `config.yaml`로
+> 렌더링됩니다 — 모든 레벨에서 임의의 추가 키를 허용합니다(`values.schema.json`
+> 참고). 즉 Hermes 자체의
+> [설정 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)나
+> [환경변수 레퍼런스](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)에
+> 문서화된 **어떤 키든** `config.<경로>` 또는 `env`/`extraEnv`로 **차트 변경
+> 없이** 이미 설정 가능합니다. 이 README는 설치 시점에 대부분의 사람이 건드리는
+> 소수의 설정(제공자, 메신저, 팀 토폴로지)만 엄선해 다루며, 의도적으로
+> 업스트림 문서 전체를 복제하지 않습니다. 조회 방법은 아래 [FAQ](#faq)를
+> 참고하세요.
+
 - **`config.yaml`** — `.Values.config` 아래 오버라이드할 키만 설정하세요.
   ConfigMap으로 렌더링되어 init 컨테이너에 의해 **`HERMES_HOME`에 시드**됩니다
   (영속 볼륨), Hermes가 런타임에도 자신의 home에 쓰기 때문입니다(skills,
@@ -324,17 +335,32 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
   수정 보존).
 - **시크릿 / API 키** — `.Values.env` 아래 설정하세요. Secret으로 렌더링되어
   `envFrom`을 통해 환경변수로 주입됩니다(env가 `config.yaml`보다 우선).
-  GitOps 환경에서는 실제 키를 `env`에 커밋하지 말고 — 대신 `extraResources`를
-  통해 `SealedSecret`(또는 유사한 것)을 배포하고, 거기서 생성된 Secret을
-  `extraEnvFrom`으로 참조하세요(차트 자체 Secret 다음에 적용되므로 우선
-  적용됩니다). 완전한 SealedSecret + `extraEnvFrom` GitOps 예제는
-  [`examples/argocd/`](../../examples/argocd/)를 참고하세요.
-- **Bitwarden Secrets Manager** — Hermes는 `config.secrets.bitwarden`으로
-  시작 시 제공자 키를 가져올 수 있습니다. 부트스트랩 자격증명인
-  `BWS_ACCESS_TOKEN`만 외부에서 관리하는 Kubernetes Secret에 넣고
-  `extraEnvFrom`으로 참조하세요. [`values-bitwarden.yaml`](values-bitwarden.yaml)
-  예제를 참고하세요. 첫 시작 시 checksum 검증된 `bws` CLI를 `HERMES_HOME`에
-  내려받으므로, Pod에는 Bitwarden과 GitHub Releases로의 egress가 필요합니다.
+
+### 시크릿 공급 전략
+
+배포마다 하나를 고르세요 — 조합도 가능합니다(제공자 키는 SealedSecret, 나머지는
+Bitwarden 등):
+
+| 전략 | 언제 쓰나 | 참고 |
+| --- | --- | --- |
+| 평문 `.Values.env` | 로컬/개발용, 또는 실제 값을 절대 커밋하지 않는 values 파일 | 이 README의 제공자 예제 |
+| SealedSecret + `extraEnvFrom` | GitOps — 실제 시크릿을 암호화해서 커밋 가능하게 | [`examples/argocd/`](../../examples/argocd/) |
+| Bitwarden Secrets Manager | N개 제공자 키를 회전 가능한 부트스트랩 토큰 하나로 중앙화 | [`values-bitwarden.yaml`](values-bitwarden.yaml) |
+| 1Password | 이 차트는 아직 다루지 않습니다 — 해당 시크릿 소스는 시작 시 이미지/PATH에 `op` CLI가 있어야 하는데, 이는 values 예제 하나로 해결할 범위를 넘어섭니다. 업스트림 쪽 작업이 먼저 필요합니다. | — |
+
+GitOps 환경에서는 실제 키를 `env`에 커밋하지 말고 — 대신 `extraResources`를
+통해 `SealedSecret`(또는 유사한 것)을 배포하고, 거기서 생성된 Secret을
+`extraEnvFrom`으로 참조하세요(차트 자체 Secret 다음에 적용되므로 우선
+적용됩니다). 완전한 SealedSecret + `extraEnvFrom` GitOps 예제는
+[`examples/argocd/`](../../examples/argocd/)를 참고하세요.
+
+Bitwarden Secrets Manager는 `config.secrets.bitwarden`으로 시작 시 제공자
+키를 가져옵니다. 부트스트랩 자격증명인 `BWS_ACCESS_TOKEN`만 외부에서 관리하는
+Kubernetes Secret에 넣고 `extraEnvFrom`으로 참조하세요.
+[`values-bitwarden.yaml`](values-bitwarden.yaml) 예제를 참고하세요. 첫 시작
+시 checksum 검증된 `bws` CLI를 `HERMES_HOME`에 내려받으므로, Pod에는
+Bitwarden과 GitHub Releases로의 egress가 필요합니다.
+
 - **대시보드 Ingress** — 관리 대시보드(`service.port`, 기본값 9119)는
   `127.0.0.1` 너머로 바인딩하려면 `--insecure`가 필요한데, 업스트림은 이것이
   **네트워크에 API 키를 노출**한다고 경고합니다. `service.enabled: true`와
@@ -379,6 +405,42 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 > `config.yaml`(`.Values.config` 아래)에만 존재하며, 대응하는 환경변수가
 > 없습니다.
 
+## FAQ
+
+**이 README에 없는 Hermes 설정을 하고 싶어요 — 어떻게 하나요?**
+
+이 README는 설치 시점의 기본 사항(제공자, 메신저, 팀 토폴로지)만 다룹니다.
+그 외의 것은:
+
+1. 공식 [설정 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+   (`config.yaml` 키용) 또는
+   [환경변수 레퍼런스](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
+   (환경변수용)에서 바꾸고 싶은 항목을 찾아보세요.
+2. `config.yaml` 키(예: `foo.bar: baz`)를 찾았다면? values 파일의
+   `.Values.config.foo.bar`에 설정하세요(또는
+   `--set-string config.foo.bar=baz`). 환경변수(예: `SOME_TOKEN`)를
+   찾았다면? `.Values.env.SOME_TOKEN`(시크릿) 또는 `.Values.extraEnv`
+   (평문)에 설정하세요.
+3. `helm upgrade` 후 `kubectl exec <pod> -- hermes doctor` 또는 `helm test`로
+   확인하세요.
+
+Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필요 없습니다 — 위의
+[패스스루 원칙](#설정-모델)을 참고하세요. 이 차트의 `values.yaml`/예제
+파일들은 시작 템플릿을 가질 만한 가치가 있는 설정(새 제공자의 전체 블록,
+메신저의 루프 브레이크 env var, 팀 토폴로지)에 대해서만 존재하며, Hermes
+자체 레퍼런스 문서를 다시 복제한 것이 아닙니다.
+
+**업스트림 릴리즈 노트가 왜 새 `values.yaml` 키로 이어지지 않았나요?**
+
+"config X 추가" 형태의 업스트림 요청 대부분은 위 패스스루로 차트 변경 없이
+이미 도달 가능한 것으로 판명됩니다 — 최근 사례:
+[#45](https://github.com/jyje/hermes-agent-helm/issues/45),
+[#46](https://github.com/jyje/hermes-agent-helm/issues/46),
+[#48](https://github.com/jyje/hermes-agent-helm/issues/48). 새
+`values-*.yaml` 예제 파일은 설정이 복사해서 바로 쓸 시작점을 가질 만큼
+복잡할 때만(새 제공자, 새 시크릿 소스) 추가되며, 업스트림이 출시하는
+개별 키마다 추가되지는 않습니다.
+
 ## 더 많은 예제
 
 소규모/홈 클러스터(예: Raspberry Pi / arm64 k3s 클러스터)를 대상으로 한,
@@ -399,6 +461,7 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Fireworks 고유 모델 ID |
 | [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | `DEEPINFRA_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
+| [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | reference 모델들이 병렬로 실행되고, aggregator 모델이 결과를 종합 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager**가 시작 시 제공자 키 제공 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) | — |

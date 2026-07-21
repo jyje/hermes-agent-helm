@@ -353,6 +353,17 @@ Hermes reads `$HERMES_HOME/config.yaml` and secrets from the environment as
 follows that model — you only set what you want to change, and never reproduce
 the full upstream config (which would drift across Hermes versions).
 
+> **The passthrough principle.** `.Values.config` is rendered into
+> `config.yaml` **as-is** — every level allows arbitrary additional keys (see
+> `values.schema.json`). That means **any** key documented in Hermes' own
+> [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+> or [Environment Variables reference](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
+> is already settable today — under `config.<path>` or `env`/`extraEnv` — with
+> **no chart change required**. This README only curates the handful of
+> settings most people touch at install time (provider, messenger, team
+> topology); it is deliberately not a mirror of the upstream docs. See
+> [FAQ](#faq) below for the lookup recipe.
+
 - **`config.yaml`** — set only override keys under `.Values.config`. It is
   rendered into a ConfigMap and **seeded into `HERMES_HOME`** (the persistent
   volume) by an init container, because Hermes also writes to its home at
@@ -360,17 +371,32 @@ the full upstream config (which would drift across Hermes versions).
   (default) re-seeds on every deploy; set `false` to seed only when absent.
 - **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
-  For GitOps, avoid committing real keys in `env` — instead deploy a
-  `SealedSecret` (or similar) via `extraResources` and reference the Secret it
-  produces with `extraEnvFrom` (applied after the chart's own Secret, so it
-  wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
-  SealedSecret + `extraEnvFrom` GitOps example.
-- **Bitwarden Secrets Manager** — Hermes can resolve provider keys at startup
-  from `config.secrets.bitwarden`. Keep only its `BWS_ACCESS_TOKEN` bootstrap
-  credential in an externally managed Kubernetes Secret referenced through
-  `extraEnvFrom`; see [`values-bitwarden.yaml`](values-bitwarden.yaml). The
-  first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
-  so the pod needs egress to Bitwarden and GitHub Releases.
+
+### Secret provisioning strategies
+
+Pick one per deployment — they compose (e.g. SealedSecret for the provider key,
+Bitwarden for everything else):
+
+| Strategy | When to use | Where |
+| --- | --- | --- |
+| Plain `.Values.env` | Local/dev, or a values file you never commit with real values | this README's provider examples |
+| SealedSecret + `extraEnvFrom` | GitOps — encrypt real secrets so they're safe to commit | [`examples/argocd/`](../../examples/argocd/) |
+| Bitwarden Secrets Manager | Centralize N provider keys behind one rotating bootstrap token | [`values-bitwarden.yaml`](values-bitwarden.yaml) |
+| 1Password | Not yet covered by this chart — its secret source needs the `op` CLI present in the image/PATH at startup, which is more than a values example can add on its own. Track or pick up new work upstream-side first. | — |
+
+For GitOps, avoid committing real keys in `env` — instead deploy a
+`SealedSecret` (or similar) via `extraResources` and reference the Secret it
+produces with `extraEnvFrom` (applied after the chart's own Secret, so it
+wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
+SealedSecret + `extraEnvFrom` GitOps example.
+
+Bitwarden Secrets Manager resolves provider keys at startup from
+`config.secrets.bitwarden`. Keep only its `BWS_ACCESS_TOKEN` bootstrap
+credential in an externally managed Kubernetes Secret referenced through
+`extraEnvFrom`; see [`values-bitwarden.yaml`](values-bitwarden.yaml). The
+first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
+so the pod needs egress to Bitwarden and GitHub Releases.
+
 - **Dashboard Ingress** — the management dashboard (`service.port`, default
   9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
   warns **exposes API keys on the network**. Set `service.enabled: true` and
@@ -450,6 +476,42 @@ A few more commonly-used ones, current as of image `v2026.7.20`:
 > provider routing live in `config.yaml` only (under `.Values.config`), with
 > no environment variable equivalent.
 
+## FAQ
+
+**I want to set a Hermes setting this README doesn't mention — how?**
+
+This README only covers install-time basics (provider, messenger, team
+topology). For anything else:
+
+1. Check the official
+   [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+   (for `config.yaml` keys) or
+   [Environment Variables reference](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
+   (for env vars) — search for what you want to change.
+2. Found a `config.yaml` key, e.g. `foo.bar: baz`? Set it under
+   `.Values.config.foo.bar` in your values file (or `--set-string
+   config.foo.bar=baz`). Found an env var, e.g. `SOME_TOKEN`? Set it under
+   `.Values.env.SOME_TOKEN` (secret) or `.Values.extraEnv` (non-secret).
+3. `helm upgrade` and confirm with `kubectl exec <pod> -- hermes doctor` or
+   `helm test`.
+
+No chart change is ever needed for a setting Hermes itself already supports —
+see [The passthrough principle](#configuration-model) above. This chart's own
+`values.yaml`/example files exist only for the settings worth a starter
+template (a new provider's full block, a messenger's loop-brake env vars,
+team topology) — not as a second copy of Hermes' own reference docs.
+
+**Why did an upstream release note not turn into a new `values.yaml` key?**
+
+Most upstream "add config X" requests turn out to already be reachable through
+the passthrough above with zero chart changes — see recent examples:
+[#45](https://github.com/jyje/hermes-agent-helm/issues/45),
+[#46](https://github.com/jyje/hermes-agent-helm/issues/46),
+[#48](https://github.com/jyje/hermes-agent-helm/issues/48). A new
+`values-*.yaml` example file only gets added when a setting is complex enough
+to be worth a copy-pasteable starting point (a new provider, a new secret
+source) — not for every individual key upstream ships.
+
 ## More examples
 
 Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
@@ -472,6 +534,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Native Fireworks model IDs |
 | [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | Endpoint override via `DEEPINFRA_BASE_URL` |
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | Endpoint override via `UPSTAGE_BASE_URL` |
+| [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | Reference models run in parallel, an aggregator model synthesizes the result |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager** supplies provider keys at startup |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
