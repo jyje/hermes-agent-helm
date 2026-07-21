@@ -62,3 +62,14 @@ extraVolumeMounts:
   - name: vertex-sa
     mountPath: /var/run/secrets/vertex
     readOnly: true
+
+# NOTE: as of a recent Hermes security hardening, VERTEX_CREDENTIALS_PATH and
+# GOOGLE_APPLICATION_CREDENTIALS are stripped from the environment of
+# subprocesses the agent spawns (terminal, execute_code, browser,
+# computer_use) — they still work for the model's own API calls above. If a
+# tool call in your session needs Vertex credentials too (e.g. shelling out to
+# `gcloud`), re-allow it explicitly:
+#
+# config:
+#   tools:
+#     env_passthrough: ["VERTEX_CREDENTIALS_PATH"]
