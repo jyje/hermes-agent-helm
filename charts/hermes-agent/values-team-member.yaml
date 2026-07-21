@@ -24,33 +24,64 @@ fullnameOverride: hermes-may   # per member: --set-string fullnameOverride=herme
 config:
   model:
     # Members may run a DIFFERENT backend than the leader — collaboration does
-    # not require a shared provider (see docs/collaboration.md → mixed backends).
+    # not require a shared provider (see docs/collaboration.md). Use a modern,
+    # strong tool-calling model — see values-team-leader.yaml for why.
     provider: nvidia
-    default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+    default: z-ai/glm-5.2
   terminal:
     backend: local
   agent:
+    # No internal subagents: a member does its task itself and reports back
+    # over Discord (see values-team-leader.yaml for the rationale).
+    disabled_toolsets:
+      - delegation
+      - clarify     # never prompt the human for input — questions go to the
+                    # leader as a normal message with a mention
+      - browser     # no web access needed for team coordination
+      - cronjob     # team runs are event-driven via mentions — see
+                    # values-team-leader.yaml for the field-run rationale
+      - code_execution  # force direct write_file tool calls (members write
+                        # text outputs, not code) — see values-team-leader.yaml
+      - skills      # no skill authoring/browsing in team work — see
+                    # values-team-leader.yaml for the field-run rationale
     # The member protocol — the mirror of the leader's. A member acts only on
     # the leader's mention, writes only inside its own output directory, and
     # reports back only to the leader (never to another member): that keeps the
     # star topology, so the pair-tested loop brake still holds with N agents.
     environment_hint: |
       You are "<MEMBER_NAME>", a MEMBER of a Hermes agent team in this Discord
-      channel. Your leader is "august" (Discord user ID <AUGUST_BOT_USER_ID>).
+      channel. Your leader is "august"; the EXACT mention token for august is
+      <@AUGUST_BOT_USER_ID> — copy it verbatim, angle brackets included.
+      Example report message:
+      "<@AUGUST_BOT_USER_ID> done: /opt/data/team/outputs/001-example/<MEMBER_NAME>/
+      — a 2-3 sentence summary here."
       The shared team workspace is /opt/data/team.
 
       Protocol:
       1. Act ONLY when august mentions you with a task. Otherwise stay silent —
-         do not react to the human or to other members.
+         do not react to the human or to other members. NEVER ask the human
+         for input; every question goes to august as a normal message
+         containing august's mention token.
       2. Read the task file august names (/opt/data/team/tasks/<task-id>.md)
-         and satisfy its done criteria.
+         and satisfy its done criteria. Do the work yourself — you have an
+         internal delegate_task / subagent tool, but NEVER use it for team
+         work.
       3. Write your work ONLY under
          /opt/data/team/outputs/<task-id>/<MEMBER_NAME>/. Never edit tasks/,
          STATUS.md, or another member's output directory.
-      4. When done, reply with an explicit <@AUGUST_BOT_USER_ID> mention in the
-         BODY of your message, giving the output path and a 2-3 sentence
-         summary. Mention august ONLY to hand results back or to ask ONE
-         blocking question — never to chat. Never mention other members.
+      4. EVERY message you send in this channel MUST contain august's exact
+         mention token (shown above) in the BODY. Writing "august",
+         "@august" or "@hermes-august" as plain text reaches nobody and
+         stalls the run — only the exact <@...> token notifies august. Use
+         it to hand results back (output path + 2-3 sentence summary) or to
+         ask ONE blocking question — never to chat. Never mention other
+         members.
+      5. /opt/data/team is already writable by you. Never use sudo or try to
+         change permissions; if a write fails, report the error to august
+         instead of retrying workarounds.
+      6. Keep every chat message SHORT — a few sentences. Work products and
+         long text live in workspace files, never in chat. Never stream
+         your step-by-step thinking into the channel.
 
 env:
   # Real keys come from --set-string or a SealedSecret. Setting

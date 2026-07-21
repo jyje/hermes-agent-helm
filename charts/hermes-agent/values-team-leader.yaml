@@ -2,14 +2,15 @@
 #
 # The LEADER of a leader-orchestrated Hermes agent team (star topology). The
 # leader is the only agent the human talks to: it splits a goal into tasks,
-# delegates each to exactly one member by @mention, reviews the results from a
-# shared workspace volume, and declares the run done. Members are deployed from
-# values-team-member.yaml. Full walkthrough: docs/teams.md → "Leader-orchestrated
-# teams".
+# writes one workspace file per task (see delegation mechanism below), reviews
+# the results from a shared workspace volume, and declares the run done.
+# Members are deployed from values-team-member.yaml. Full walkthrough:
+# docs/teams.md → "Leader-orchestrated teams".
 #
 # Architecture (the two planes):
-#   - CONTROL plane  = one shared Discord channel; mentions flow leader<->member
-#     only (never member<->member) so the pair-tested loop brake still holds.
+#   - CONTROL plane  = one shared Discord channel; REPLY mentions flow
+#     leader<->member only (never member<->member) so the pair-tested loop
+#     brake still holds.
 #   - DATA plane     = one shared RWX PVC mounted at /opt/data/team on EVERY
 #     agent via extraVolumes. Each agent keeps its OWN private HERMES_HOME
 #     (config, auth, skills) — sharing the whole home would make the per-agent
@@ -17,8 +18,27 @@
 #     /opt/data/team sits inside the image's HERMES_WRITE_SAFE_ROOT (/opt/data),
 #     so agents can write there without loosening any write guard.
 #
+# Delegation mechanism (field-tested twice before landing on this design):
+#   Attempt 1 — the model @mentions the member after writing the task file.
+#     Observed failure: it wrote the file, then just narrated "I delegated
+#     to X" to the HUMAN instead of actually posting the mention.
+#   Attempt 2 — a post_tool_call hook (see config.hooks below) parses the
+#     ASSIGNEE out of the task file's NAME (NNN-<member>-slug.md) and sends
+#     the mention itself, deterministically. Observed failure: the model
+#     doesn't reliably use that filename shape (e.g. it split one goal into
+#     six files all named NNN-portfolio-*, with no member in the name), so
+#     the hook silently found no match.
+#   Current — the hook parses the ASSIGNEE out of the task file's CONTENT
+#     (a mandatory first line "Assignee: may"/"Assignee: march" — see the
+#     environment_hint's protocol step 1), independent of what the leader
+#     names the file. Writing the task file IS the delegation act; the model
+#     is explicitly told not to also @mention the member (see step 2) so
+#     there's exactly one deterministic notification path, not a redundant
+#     model-driven one that can silently fail to fire.
+#
 # Workspace layout (single-writer per path — there is no file locking on RWX):
 #   /opt/data/team/tasks/<task-id>.md            leader writes, members read
+#     (first line: "Assignee: <member>" — read by the delegation hook)
 #   /opt/data/team/outputs/<task-id>/<member>/   ONLY that member writes
 #   /opt/data/team/STATUS.md                     leader is the only writer
 #
@@ -49,40 +69,136 @@ fullnameOverride: hermes-august
 config:
   model:
     # Any provider works, and members may use DIFFERENT backends (see the
-    # provider table in the chart README). NIM keeps the demo friction low.
+    # provider table in the chart README). Use a MODERN, strong tool-calling
+    # model: multi-agent coordination is an agentic task, and older/smaller
+    # models field-tested here (llama-3.1-70b) failed to emit proper tool
+    # calls — they narrated delegations instead of doing them, wrapped
+    # write_file in an execute_code script, or dumped raw tool-call JSON into
+    # chat. GLM 5.2 follows the task-file protocol reliably.
     provider: nvidia
-    default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
+    default: z-ai/glm-5.2
   terminal:
     backend: local
+  # Writing a task file IS the delegation act: this post_tool_call hook fires
+  # after every write_file/patch call, reads the mandatory "Assignee: may"/
+  # "Assignee: march" line from the file's CONTENT, and posts the Discord
+  # mention itself via the Discord REST API — no model cooperation needed for
+  # the actual notification (see the file header above for why content,
+  # not the filename, and why a hook at all). `hooks` is a top-level
+  # config.yaml key (sibling of `agent`/`model`), not nested under `agent`.
+  # Script content lives in the ConfigMap under `extraResources` below;
+  # mounted via extraVolumes at /var/run/hooks. See docs/teams.md §
+  # "Leader-orchestrated teams".
+  hooks:
+    post_tool_call:
+      - matcher: "write_file|patch"
+        command: "sh /var/run/hooks/notify-delegation.sh"
+        timeout: 10
   agent:
+    # Team work moves through Discord mentions + the shared workspace, never
+    # through internal subagents: with the delegation toolset ON, small models
+    # reliably "delegate" to an internal delegate_task subagent instead of
+    # messaging the team, then declare success (observed in field runs).
+    # Removing the toolset makes Discord the only delegation path.
+    disabled_toolsets:
+      - delegation
+      - clarify     # interactive input prompts stall the run for minutes;
+                    # leader<->human dialogue happens via normal messages
+      - browser     # no web access needed for team coordination; a model
+                    # can misread "team" in the goal as a cue to browse
+      - cronjob     # a field run turned a one-shot goal into a DAILY cron
+                    # job (with an unrelated local-delegation skill attached)
+                    # instead of delegating; team runs are event-driven via
+                    # mentions, so scheduling has no place in the protocol
+      - code_execution  # a field run wrapped its write_file calls inside an
+                        # execute_code python script instead of calling the
+                        # write_file tool directly — which (a) tripped the
+                        # execute_code approval gate and (b) bypassed the
+                        # post_tool_call hook below (it matches tool name
+                        # write_file, not execute_code). Removing execute_code
+                        # forces direct write_file calls, which the hook sees.
+                        # The team's work is writing text files; no code-exec
+                        # is needed.
+      - skills      # covers skill_manage/list/view. Two field runs abused it:
+                    # one browsed the "autonomous-ai-agents" skills chasing a
+                    # "delegate coding" match; another tried skill_manage to
+                    # CREATE a "portfolio-landing-page-copy" skill instead of
+                    # delegating. Team coordination is the task-file protocol,
+                    # not skill authoring — the leader needs no skills tools.
     # The leader protocol. Replace the member names/IDs with your roster —
     # <@id> mentions in the message BODY are how work moves; the closing rule
     # ("report to the human WITHOUT mentioning any member") is the loop brake's
     # prompt half, same as docs/collaboration.md.
     environment_hint: |
       You are "august", the LEADER of a Hermes agent team in this Discord
-      channel. Your team members are "may" (Discord user ID <MAY_BOT_USER_ID>)
-      and "march" (Discord user ID <MARCH_BOT_USER_ID>). The shared team
-      workspace is /opt/data/team — all work products live there, never in
-      chat messages.
+      channel. Your team members, with the EXACT mention token to use when
+      you reply to one of them (copy it verbatim, angle brackets included):
+      - may   → <@MAY_BOT_USER_ID>
+      - march → <@MARCH_BOT_USER_ID>
+      The shared team workspace is /opt/data/team — all work products live
+      there, never in chat messages.
+
+      Two DIFFERENT things can look similar — do not confuse them:
+      - TEAM COOPERATION (this): may and march are SEPARATE Hermes agent
+        instances, each its own pod, own Discord bot, own identity, running
+        independently of you right now. You reach them ONLY by writing a
+        task file per the protocol below — never through a skill, never
+        through a tool, because no tool or skill on this pod can reach
+        another pod.
+      - LOCAL DELEGATION (not this): your bundled skills "claude-code" /
+        "codex" / "opencode" spawn an external CODING CLI as a SUBPROCESS
+        INSIDE YOUR OWN POD to write code. They are unrelated to your team
+        and cannot reach may or march. When the goal is to coordinate with
+        your team, those skills are never the right tool — use the task-file
+        protocol below instead.
 
       Protocol:
-      1. When the human gives you a goal, split it into tasks. Write each task
-         to /opt/data/team/tasks/<task-id>.md (id like 001-short-slug) with:
-         goal, inputs, expected output path, and done criteria.
-      2. Delegate each task to exactly ONE member by putting an explicit <@id>
-         mention in the BODY of your message, naming the task file path.
-      3. Members write only under /opt/data/team/outputs/<task-id>/<member>/
-         and report back by mentioning you. Only you mention members; members
-         only mention you. Never ask members to talk to each other.
-      4. Review each result against the task's done criteria. If it falls
-         short, re-delegate ONCE with concrete feedback; then accept what you
-         have and note the gap.
-      5. Track progress in /opt/data/team/STATUS.md — you are its only writer.
-      6. When every task is accepted, assemble the final deliverable in the
+      1. When the human gives you a goal, FIRST reply with a short
+         acknowledgment stating your plan before doing anything else — e.g.
+         "알겠습니다. may에게 헤드라인 3개, march에게 CTA 3개를 맡기겠습니다."
+         One or two sentences, naming the goal breakdown and who gets what.
+         Send this as its own message BEFORE writing any task file, so the
+         human sees you've understood before work starts.
+      2. Then split the goal into tasks (any number, any file naming you
+         like). Write each task to /opt/data/team/tasks/<task-id>.md. The
+         task-id/filename can be anything descriptive — but the FILE'S FIRST
+         LINE MUST BE EXACTLY "Assignee: may" or "Assignee: march" (lowercase
+         name, no angle brackets, nothing else on that line). After the
+         Assignee line, include: goal, inputs, expected output path
+         (/opt/data/team/outputs/<task-id>/<member>/...), and done criteria.
+      3. Writing that task file is THE ENTIRE delegation act — a system hook
+         reads the Assignee line and notifies that member automatically the
+         instant the file is written. Do NOT also @mention the member
+         yourself for this: it doesn't add anything (they're already
+         notified) and a duplicate ping just adds noise.
+      4. After writing a task file, move on to the next task, or if there are
+         no more tasks, STOP and end your turn. Do NOT try to read a
+         member's output in the same turn you just delegated it — no time
+         has passed for them to work yet. Only check outputs on a LATER turn
+         (the human follows up, or a member replies mentioning you).
+      5. Members write only under /opt/data/team/outputs/<task-id>/<member>/
+         and report back by mentioning you — reply using their exact token
+         from the roster above. Never ask members to talk to each other.
+      6. Keep the run moving: if a member asks a question or reports a
+         blocker, answer promptly in a message that mentions that member. If
+         a member stays silent on a delegated task for a while, write ONE
+         reminder task file (same Assignee-line convention — this also
+         re-notifies them); if still silent, note the gap in STATUS.md and
+         move on.
+      7. Review each result against the task's done criteria. If it falls
+         short, write a follow-up task file (same Assignee-line convention)
+         with concrete feedback; then accept what you have and note the gap.
+      8. Track progress in /opt/data/team/STATUS.md — you are its only writer.
+      9. When every task is accepted, assemble the final deliverable in the
          workspace, mark STATUS.md as DONE, and report the result to the human
          WITHOUT mentioning any member — that ends the run. Never send filler
          messages that mention a member.
+      10. /opt/data/team is already writable by you. Never use sudo or try to
+          change permissions; if a write fails, report the error to the human
+          instead of retrying workarounds.
+      11. Keep every chat message SHORT — a few sentences. Work products and
+          long text live in workspace files, never in chat. Never stream
+          your step-by-step thinking into the channel.
 
 env:
   # Real keys come from --set-string or a SealedSecret. Setting
@@ -107,16 +223,63 @@ extraEnv:
     value: "off"
   - name: DISCORD_ALLOW_MENTION_REPLIED_USER
     value: "false"
+  # Read by the notify-delegation.sh hook (extraResources below) to resolve a
+  # member name parsed out of the task filename to a mention token.
+  - name: MAY_BOT_USER_ID
+    value: "000000000000000000"       # DUMMY — may's Discord user ID
+  - name: MARCH_BOT_USER_ID
+    value: "000000000000000000"       # DUMMY — march's Discord user ID
 
 # PRIVATE home (default RWO PVC) + SHARED workspace, mounted inside the home so
 # it stays within the image's write-safe root. Same two blocks on every member.
+# The third pair (delegation-hook) mounts the hook script from extraResources
+# below — leader only, members don't delegate so they don't need it.
 extraVolumes:
   - name: team-workspace
     persistentVolumeClaim:
       claimName: hermes-team-workspace
+  - name: delegation-hook
+    configMap:
+      name: hermes-august-delegation-hook
 extraVolumeMounts:
   - name: team-workspace
     mountPath: /opt/data/team
+  - name: delegation-hook
+    mountPath: /var/run/hooks
+    readOnly: true
+
+# One-time workspace preparation: RWX volumes often arrive root-owned (NFS
+# root_squash exports, hostPath, ...), while the agent runs as the non-root
+# `hermes` user (uid/gid 10000). The LEADER fixes ownership and seeds the
+# layout once — members don't need this block (single writer, even for the fix).
+extraInitContainers:
+  - name: init-workspace
+    image: busybox:1.37
+    command:
+      - sh
+      - -c
+      - |
+        set -eu
+        mkdir -p /work/tasks /work/outputs
+        chown -R 10000:10000 /work
+
+        # Shell hooks need a one-time consent approval per (event, command)
+        # pair — normally a TTY prompt, but the gateway has none. Rather than
+        # `hooks_auto_accept: true` (which blankly approves ANY future hook,
+        # not just this one — flagged as too broad in review), pre-seed the
+        # allowlist with EXACTLY the one hook this chart registers. `data` is
+        # the chart's own private-home PVC (mounted below at the same path as
+        # persistence.mountPath), so this re-runs on every restart the same
+        # way config.yaml reseeding does.
+        cat > /home/shell-hooks-allowlist.json <<'JSON'
+        {"approvals":[{"event":"post_tool_call","command":"sh /var/run/hooks/notify-delegation.sh","approved_at":"1970-01-01T00:00:00Z"}]}
+        JSON
+        chown 10000:10000 /home/shell-hooks-allowlist.json
+    volumeMounts:
+      - name: team-workspace
+        mountPath: /work
+      - name: data
+        mountPath: /home
 
 persistence:
   enabled: true
@@ -132,6 +295,86 @@ resources:
   limits:
     cpu: "1"
     memory: 1Gi
+
+# Delegation hook script (see config.hooks.post_tool_call above and
+# extraVolumes/extraVolumeMounts). POSIX sh only — the image has no bash/jq,
+# but does have curl and python3 (used here for JSON, not jq).
+extraResources:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: hermes-august-delegation-hook
+    data:
+      notify-delegation.sh: |
+        #!/bin/sh
+        # post_tool_call hook: when the leader writes a task file under
+        # /opt/data/team/tasks/*.md, deterministically post the Discord
+        # delegation mention ourselves instead of relying on the model to
+        # remember a second step. The assignee is parsed from the file's
+        # CONTENT (a mandatory "Assignee: may"/"Assignee: march" line — see
+        # the leader's environment_hint protocol step 1), NOT the filename:
+        # an earlier filename-based version silently found no match the one
+        # time the model split a goal into several files that didn't encode
+        # the member in the name.
+        set -eu
+
+        payload="$(cat -)"
+        path=$(printf '%s' "$payload" | python3 -c '
+        import json, sys
+        d = json.load(sys.stdin)
+        print((d.get("tool_input") or {}).get("path", ""))
+        ')
+
+        case "$path" in
+          /opt/data/team/tasks/*.md) ;;
+          *) printf '{}\n'; exit 0 ;;
+        esac
+
+        [ -f "$path" ] || { printf '{}\n'; exit 0; }
+
+        member=$(python3 -c '
+        import re, sys
+        try:
+            text = open(sys.argv[1], errors="ignore").read()
+        except OSError:
+            sys.exit(0)
+        # No trailing end-of-line anchor: field testing showed the model
+        # sometimes writes a literal backslash-n ("\n" as two characters)
+        # instead of a real newline after the value, which a $ anchor
+        # would fail to match. A word boundary is enough and matches both.
+        m = re.search(r"(?im)^\s*Assignee:\s*(may|march)\b", text)
+        if m:
+            print(m.group(1).lower())
+        ' "$path")
+
+        member_id=""
+        case "$member" in
+          may)   member_id="${MAY_BOT_USER_ID:-}" ;;
+          march) member_id="${MARCH_BOT_USER_ID:-}" ;;
+        esac
+
+        if [ -z "$member_id" ] || [ -z "${DISCORD_BOT_TOKEN:-}" ] || [ -z "${DISCORD_HOME_CHANNEL:-}" ]; then
+          printf '{}\n'; exit 0
+        fi
+
+        msg="<@${member_id}> New task assigned: ${path} - see the file for goal, expected output path, and done criteria."
+
+        # No intermediate /tmp file: Hermes spawns this hook with a more
+        # restrictive execution context than an interactive `kubectl exec`
+        # test session — a manual test writing to /tmp succeeded, but the
+        # real hook invocation failed with "Permission denied" creating a
+        # /tmp file (confirmed via the gateway's own log). Piping the JSON
+        # straight into curl's stdin sidesteps needing /tmp entirely.
+        python3 -c '
+        import json, sys
+        print(json.dumps({"content": sys.argv[1]}))
+        ' "$msg" | curl -sS -o /dev/null -X POST \
+          "https://discord.com/api/v10/channels/${DISCORD_HOME_CHANNEL}/messages" \
+          -H "Authorization: Bot ${DISCORD_BOT_TOKEN}" \
+          -H "Content-Type: application/json" \
+          --data-binary @- || true
+
+        printf '{}\n'
 
 # ---------------------------------------------------------------------------
 # OPTIONAL: git-backed wiki vault (docs/teams.md → "Team + wiki vault").
