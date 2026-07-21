@@ -48,13 +48,13 @@ form Artifact Hub lists.
 ```bash
 # public chart: no login needed to pull
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.9.1 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.10.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 
 # with an env-specific values file (download or keep your own)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.9.1 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.10.0 \
   --namespace hermes-agent --create-namespace \
   -f my-values.yaml --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -62,8 +62,8 @@ helm upgrade --install hermes-agent \
 Inspect before installing:
 
 ```bash
-helm show values oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.9.1
-helm show readme oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.9.1
+helm show values oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.10.0
+helm show readme oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.10.0
 ```
 
 If the package is private, log in first:
@@ -130,7 +130,7 @@ kubectl create secret generic hermes-agent-provider-key -n hermes-agent \
   --from-literal=OPENAI_API_KEY='sk-<your-key>'
 
 helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
-  --version 0.9.1 -n hermes-agent --create-namespace \
+  --version 0.10.0 -n hermes-agent --create-namespace \
   --set 'extraEnvFrom[0].secretRef.name=hermes-agent-provider-key'
 ```
 
@@ -145,14 +145,14 @@ helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-
 
 ```bash
 # 1) package (also runs docs + lint via the Makefile target)
-make package                      # -> dist/hermes-agent-0.9.1.tgz
+make package                      # -> dist/hermes-agent-0.10.0.tgz
 
 # 2) login to ghcr (PAT needs write:packages)
 echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u jyje --password-stdin
 
 # 3) push as an OCI artifact
-helm push dist/hermes-agent-0.9.1.tgz oci://ghcr.io/jyje/hermes-agent-helm
-#   -> ghcr.io/jyje/hermes-agent-helm/hermes-agent:0.9.1
+helm push dist/hermes-agent-0.10.0.tgz oci://ghcr.io/jyje/hermes-agent-helm
+#   -> ghcr.io/jyje/hermes-agent-helm/hermes-agent:0.10.0
 
 # (Makefile shortcut)
 make push
