@@ -369,6 +369,24 @@ the full upstream config (which would drift across Hermes versions).
   oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
+### Per-model reasoning effort overrides
+
+Upstream `v2026.7.20` added adaptive-thinking controls for Kimi-family and
+GLM-5.2 models. Use `config.model.reasoning_effort_overrides` to tune
+`reasoning_effort` per model id while keeping a global default:
+
+```yaml
+config:
+  model:
+    reasoning_effort: medium
+    reasoning_effort_overrides:
+      kimi-k2.7-code: high
+      glm-5.2: low
+```
+
+When an active model id is not listed in `reasoning_effort_overrides`, Hermes
+falls back to `config.model.reasoning_effort`.
+
 ## Gateway lifecycle: rollouts, shutdown, and drain
 
 As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to

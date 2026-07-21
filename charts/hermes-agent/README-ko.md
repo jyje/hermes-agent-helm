@@ -333,6 +333,24 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
   annotation) 뒤에서나 사설 네트워크에서만 설정하세요 — `values.yaml`의
   `ingress.hosts` / `ingress.tls`를 참고하세요.
 
+### 모델별 reasoning_effort 오버라이드
+
+업스트림 `v2026.7.20`에서 Kimi 계열 및 GLM-5.2 모델의 adaptive thinking
+제어가 추가되었습니다. `config.model.reasoning_effort_overrides`를 사용하면
+전역 기본값을 유지한 채 모델 id별 `reasoning_effort`를 조정할 수 있습니다:
+
+```yaml
+config:
+  model:
+    reasoning_effort: medium
+    reasoning_effort_overrides:
+      kimi-k2.7-code: high
+      glm-5.2: low
+```
+
+활성 모델 id가 `reasoning_effort_overrides`에 없으면 Hermes는
+`config.model.reasoning_effort` 값을 사용합니다.
+
 ## 환경변수
 
 이 차트는 시작에 필요한 [제공자](#install-options-llm-provider) 및
