@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.7.20](https://img.shields.io/badge/AppVersion-v2026.7.20-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.7.20](https://img.shields.io/badge/AppVersion-v2026.7.20-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -19,7 +19,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-pro
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.10.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.11.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -53,6 +53,9 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | Google Vertex AI | `vertex` | none — OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC) | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
+| Fireworks AI | `fireworks` | `FIREWORKS_API_KEY` | [`values-fireworks.yaml`](values-fireworks.yaml) |
+| DeepInfra | `deepinfra` | `DEEPINFRA_API_KEY` | [`values-deepinfra.yaml`](values-deepinfra.yaml) |
+| Upstage Solar | `upstage` | `UPSTAGE_API_KEY` | [`values-upstage.yaml`](values-upstage.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
@@ -289,6 +292,14 @@ For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**
 [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
 and the full guide in [Teams](../../docs/teams.md) + [Collaboration](../../docs/collaboration.md).
 
+> **Alternative: one pod, many profiles.** If what you actually need is
+> routing different Discord guilds/channels/threads to different agent
+> *profiles* from a **single bot token** — rather than several bots sharing
+> one channel — set `config.gateway.multiplex_profiles: true` (env override:
+> `GATEWAY_MULTIPLEX_PROFILES=1`). That's one pod instead of one-per-teammate;
+> it solves a different problem than the hand-off pattern above (routing, not
+> collaboration), so pick based on which shape your use case actually needs.
+
 ## Advanced testing
 
 The [`helm test`](#test) Job (hook `helm.sh/hook: test`) runs `hermes
@@ -350,6 +361,17 @@ Hermes reads `$HERMES_HOME/config.yaml` and secrets from the environment as
 follows that model — you only set what you want to change, and never reproduce
 the full upstream config (which would drift across Hermes versions).
 
+> **The passthrough principle.** `.Values.config` is rendered into
+> `config.yaml` **as-is** — every level allows arbitrary additional keys (see
+> `values.schema.json`). That means **any** key documented in Hermes' own
+> [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+> or [Environment Variables reference](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
+> is already settable today — under `config.<path>` or `env`/`extraEnv` — with
+> **no chart change required**. This README only curates the handful of
+> settings most people touch at install time (provider, messenger, team
+> topology); it is deliberately not a mirror of the upstream docs. See
+> [FAQ](#faq) below for the lookup recipe.
+
 - **`config.yaml`** — set only override keys under `.Values.config`. It is
   rendered into a ConfigMap and **seeded into `HERMES_HOME`** (the persistent
   volume) by an init container, because Hermes also writes to its home at
@@ -357,11 +379,32 @@ the full upstream config (which would drift across Hermes versions).
   (default) re-seeds on every deploy; set `false` to seed only when absent.
 - **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
-  For GitOps, avoid committing real keys in `env` — instead deploy a
-  `SealedSecret` (or similar) via `extraResources` and reference the Secret it
-  produces with `extraEnvFrom` (applied after the chart's own Secret, so it
-  wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
-  SealedSecret + `extraEnvFrom` GitOps example.
+
+### Secret provisioning strategies
+
+Pick one per deployment — they compose (e.g. SealedSecret for the provider key,
+Bitwarden for everything else):
+
+| Strategy | When to use | Where |
+| --- | --- | --- |
+| Plain `.Values.env` | Local/dev, or a values file you never commit with real values | this README's provider examples |
+| SealedSecret + `extraEnvFrom` | GitOps — encrypt real secrets so they're safe to commit | [`examples/argocd/`](../../examples/argocd/) |
+| Bitwarden Secrets Manager | Centralize N provider keys behind one rotating bootstrap token | [`values-bitwarden.yaml`](values-bitwarden.yaml) |
+| 1Password | Not yet covered by this chart — its secret source needs the `op` CLI present in the image/PATH at startup, which is more than a values example can add on its own. Track or pick up new work upstream-side first. | — |
+
+For GitOps, avoid committing real keys in `env` — instead deploy a
+`SealedSecret` (or similar) via `extraResources` and reference the Secret it
+produces with `extraEnvFrom` (applied after the chart's own Secret, so it
+wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
+SealedSecret + `extraEnvFrom` GitOps example.
+
+Bitwarden Secrets Manager resolves provider keys at startup from
+`config.secrets.bitwarden`. Keep only its `BWS_ACCESS_TOKEN` bootstrap
+credential in an externally managed Kubernetes Secret referenced through
+`extraEnvFrom`; see [`values-bitwarden.yaml`](values-bitwarden.yaml). The
+first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
+so the pod needs egress to Bitwarden and GitHub Releases.
+
 - **Dashboard Ingress** — the management dashboard (`service.port`, default
   9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
   warns **exposes API keys on the network**. Set `service.enabled: true` and
@@ -403,6 +446,31 @@ gateway, which is why its default moved to 0. A drain window also cannot
 > connections it never arms, and Kubernetes would keep the pod Running
 > regardless — so the chart deliberately does not expose it.
 
+## Unattended approvals
+
+The gateway pod has **no TTY** — Hermes' interactive approval prompt (for
+dangerous `terminal`/`execute_code` commands) has no human to answer it there,
+so a run can stall waiting on one. Tune this under `config.approvals`:
+
+```yaml
+config:
+  approvals:
+    mode: manual        # "manual" (default) prompts; the gateway has nobody to answer
+    deny:                # commands matching these patterns are refused BEFORE
+      - "rm -rf /"       # any approval/yolo logic even sees them — safe to keep
+      - "curl.*\\|.*sh"  # even in yolo mode
+    cron_mode: deny       # unattended cron runs: "deny" (default) or "approve"
+    discord_prompt_timeout: 120  # seconds a Discord button prompt stays live
+                                 # (clamped upstream; default 300s / 5 min)
+```
+
+`approvals.deny` is a allowlist-of-refusals, not a full policy — it exists to
+hard-block specific dangerous patterns regardless of any other approval mode
+you run with. It does not, by itself, make the gateway non-interactive; pair
+it with whatever HERMES_YOLO_MODE / approval-mode setting fits your risk
+tolerance (see the [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+for the full picture — approvals policy is deliberately not duplicated here).
+
 ## Environment variables
 
 This chart only walks through the [provider](#install-options-llm-provider)
@@ -421,6 +489,9 @@ A few more commonly-used ones, current as of image `v2026.7.20`:
 | Variable | Purpose |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
+| `FIREWORKS_API_KEY` | Fireworks AI provider |
+| `DEEPINFRA_API_KEY` / `DEEPINFRA_BASE_URL` | DeepInfra provider and optional endpoint override |
+| `UPSTAGE_API_KEY` / `UPSTAGE_BASE_URL` | Upstage Solar provider and optional endpoint override |
 | `ZAI_API_KEY` | Z.AI / GLM provider (built-in key `zai`; `GLM_BASE_URL` picks the Global/China/Coding-Plan endpoint) |
 | `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
@@ -437,6 +508,42 @@ A few more commonly-used ones, current as of image `v2026.7.20`:
 > **Not env-configurable:** context compression, fallback providers, and
 > provider routing live in `config.yaml` only (under `.Values.config`), with
 > no environment variable equivalent.
+
+## FAQ
+
+**I want to set a Hermes setting this README doesn't mention — how?**
+
+This README only covers install-time basics (provider, messenger, team
+topology). For anything else:
+
+1. Check the official
+   [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+   (for `config.yaml` keys) or
+   [Environment Variables reference](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
+   (for env vars) — search for what you want to change.
+2. Found a `config.yaml` key, e.g. `foo.bar: baz`? Set it under
+   `.Values.config.foo.bar` in your values file (or `--set-string
+   config.foo.bar=baz`). Found an env var, e.g. `SOME_TOKEN`? Set it under
+   `.Values.env.SOME_TOKEN` (secret) or `.Values.extraEnv` (non-secret).
+3. `helm upgrade` and confirm with `kubectl exec <pod> -- hermes doctor` or
+   `helm test`.
+
+No chart change is ever needed for a setting Hermes itself already supports —
+see [The passthrough principle](#configuration-model) above. This chart's own
+`values.yaml`/example files exist only for the settings worth a starter
+template (a new provider's full block, a messenger's loop-brake env vars,
+team topology) — not as a second copy of Hermes' own reference docs.
+
+**Why did an upstream release note not turn into a new `values.yaml` key?**
+
+Most upstream "add config X" requests turn out to already be reachable through
+the passthrough above with zero chart changes — see recent examples:
+[#45](https://github.com/jyje/hermes-agent-helm/issues/45),
+[#46](https://github.com/jyje/hermes-agent-helm/issues/46),
+[#48](https://github.com/jyje/hermes-agent-helm/issues/48). A new
+`values-*.yaml` example file only gets added when a setting is complex enough
+to be worth a copy-pasteable starting point (a new provider, a new secret
+source) — not for every individual key upstream ships.
 
 ## More examples
 
@@ -457,6 +564,11 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
 | [`values-google-vertex.yaml`](values-google-vertex.yaml) | Google Vertex AI (`vertex`) | **Service-account JSON mounted** via `extraVolumes` (no static API key) |
 | [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
+| [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Native Fireworks model IDs |
+| [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | Endpoint override via `DEEPINFRA_BASE_URL` |
+| [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | Endpoint override via `UPSTAGE_BASE_URL` |
+| [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | Reference models run in parallel, an aggregator model synthesizes the result |
+| [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager** supplies provider keys at startup |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
@@ -497,6 +609,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
 | extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
 | extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
+| extraInitContainers | list | Extra init containers, appended after the chart's own (seed-config,    device-flow login). Full container spec; combine with `extraVolumes` for    one-time volume preparation — e.g. fixing the ownership of a shared RWX    workspace so the non-root agent can write to it    (see values-team-leader.yaml). | `[]` |
 | extraResources | list | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). | `[]` |
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var — e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |

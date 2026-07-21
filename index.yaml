@@ -3,6 +3,44 @@ entries:
   hermes-agent:
   - annotations:
       artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
+          description: "Add Fireworks, DeepInfra, Upstage and Bitwarden values files for new LLM providers"
+        - kind: "changed"
+          description: "Update template to always render extraInitContainers when defined, fixing missing init containers"
+        - kind: "added"
+          description: "Document passthrough principle and unattended approvals configuration in README"
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.20
+    created: "2026-07-21T21:12:19.877672023Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 14a9928c0d1f5c9b5d48d4250c2183d951a32badf9dd54443d12fcac85f2ab28
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.11.0.tgz
+    version: 0.11.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: "- kind: \"fixed\"\n  description: \"\U0001F3A8 style(pages):
         drop repo-level Releases badge, add shared badges to chart pages\"\n"
       artifacthub.io/license: MIT
@@ -793,4 +831,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-21T01:36:25.776170224Z"
+generated: "2026-07-21T21:12:19.875424604Z"
