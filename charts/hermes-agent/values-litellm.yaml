@@ -19,6 +19,14 @@ config:
       base_url: https://litellm.example.com/v1
       key_env: OPENAI_API_KEY      # env var that holds the proxy key
       discover_models: true        # populate the model picker from /v1/models
+      # Optional: extra HTTP headers on every request to this provider — for
+      # a WAF/Cloudflare Access-gated proxy, a corporate gateway needing a
+      # second auth header, or request tracing. Values may hold secrets
+      # (e.g. CF-Access-Client-Secret); prefer ${ENV_VAR} substitution over
+      # a literal here so nothing sensitive lands in the ConfigMap.
+      # extra_headers:
+      #   CF-Access-Client-Id: "xxxx.access"
+      #   CF-Access-Client-Secret: "${CF_ACCESS_SECRET}"
   model:
     provider: litellm
     # Must match a model name exposed by the proxy (see /v1/models).
