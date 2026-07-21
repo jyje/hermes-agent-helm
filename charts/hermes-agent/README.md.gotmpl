@@ -365,6 +365,12 @@ the full upstream config (which would drift across Hermes versions).
   produces with `extraEnvFrom` (applied after the chart's own Secret, so it
   wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
   SealedSecret + `extraEnvFrom` GitOps example.
+- **Bitwarden Secrets Manager** — Hermes can resolve provider keys at startup
+  from `config.secrets.bitwarden`. Keep only its `BWS_ACCESS_TOKEN` bootstrap
+  credential in an externally managed Kubernetes Secret referenced through
+  `extraEnvFrom`; see [`values-bitwarden.yaml`](values-bitwarden.yaml). The
+  first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
+  so the pod needs egress to Bitwarden and GitHub Releases.
 - **Dashboard Ingress** — the management dashboard (`service.port`, default
   9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
   warns **exposes API keys on the network**. Set `service.enabled: true` and
@@ -466,6 +472,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Native Fireworks model IDs |
 | [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | Endpoint override via `DEEPINFRA_BASE_URL` |
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | Endpoint override via `UPSTAGE_BASE_URL` |
+| [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager** supplies provider keys at startup |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |

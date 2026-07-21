@@ -329,6 +329,12 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
   `extraEnvFrom`으로 참조하세요(차트 자체 Secret 다음에 적용되므로 우선
   적용됩니다). 완전한 SealedSecret + `extraEnvFrom` GitOps 예제는
   [`examples/argocd/`](../../examples/argocd/)를 참고하세요.
+- **Bitwarden Secrets Manager** — Hermes는 `config.secrets.bitwarden`으로
+  시작 시 제공자 키를 가져올 수 있습니다. 부트스트랩 자격증명인
+  `BWS_ACCESS_TOKEN`만 외부에서 관리하는 Kubernetes Secret에 넣고
+  `extraEnvFrom`으로 참조하세요. [`values-bitwarden.yaml`](values-bitwarden.yaml)
+  예제를 참고하세요. 첫 시작 시 checksum 검증된 `bws` CLI를 `HERMES_HOME`에
+  내려받으므로, Pod에는 Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 - **대시보드 Ingress** — 관리 대시보드(`service.port`, 기본값 9119)는
   `127.0.0.1` 너머로 바인딩하려면 `--insecure`가 필요한데, 업스트림은 이것이
   **네트워크에 API 키를 노출**한다고 경고합니다. `service.enabled: true`와
@@ -393,6 +399,7 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 | [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Fireworks 고유 모델 ID |
 | [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | `DEEPINFRA_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
+| [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager**가 시작 시 제공자 키 제공 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) | — |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
