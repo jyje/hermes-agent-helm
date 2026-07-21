@@ -1,6 +1,25 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.11.0] - 2026-07-21
+
+### Features
+
+- ✨ feat(chart): add extraInitContainers extension point ([`278ef0f`](https://github.com/jyje/hermes-agent-helm/commit/278ef0feacfd4f439e9c40e8e4522c3cf4a0b655)) — @jyje
+- ✨ feat(teams): automate leader task notifications ([`f3e2380`](https://github.com/jyje/hermes-agent-helm/commit/f3e23802def1ee7bec9939413e7cd1cb849c0c2e)) — @jyje
+- ✨ feat(providers): add Fireworks, DeepInfra, and Upstage examples ([`b21fbd9`](https://github.com/jyje/hermes-agent-helm/commit/b21fbd98c9a79608dbe6879c9e25911f740eb3cd)) — @jyje
+- ✨ feat(secrets): add Bitwarden Secrets Manager values example ([`80b6f09`](https://github.com/jyje/hermes-agent-helm/commit/80b6f09bbf5f4e84a5cfe6a968df892b0f33d71f)) — @jyje
+
+### Documentation
+
+- 📄 docs(teams): add field demo screenshots from a kind cluster ([`1c77fc2`](https://github.com/jyje/hermes-agent-helm/commit/1c77fc2eea9685d597c33c9958466b94524f5a27)) — @jyje
+- 📄 docs(roadmap): define v1 messaging baseline ([`1a71d1b`](https://github.com/jyje/hermes-agent-helm/commit/1a71d1ba3a71b714ddda009ffc069d2e0902836e)) — @jyje
+- 📄 docs(chart): document the config passthrough principle and add an FAQ ([`51056f3`](https://github.com/jyje/hermes-agent-helm/commit/51056f3a1e35e735a9b5bd8abe154f8035ee37a8)) — @jyje
+- 📄 docs(chart): document unattended approvals config ([`3e37f0c`](https://github.com/jyje/hermes-agent-helm/commit/3e37f0c3fc23dba96325a27a1f04079690fb311a)) — @jyje
+- 📄 docs(chart): note the multiplex-profiles alternative to multi-pod teams ([`42f8125`](https://github.com/jyje/hermes-agent-helm/commit/42f81254aa9c8239a8efabf1d6850e31f3bf93a7)) — @jyje
+- 📄 docs(providers): add extra_headers example to the LiteLLM values file ([`504ff1d`](https://github.com/jyje/hermes-agent-helm/commit/504ff1de3bf274a1a4f3b6a3ea1def1f3bb7abca)) — @jyje
+- 📄 docs(providers): note Vertex credential subprocess-stripping in the values example ([`000276f`](https://github.com/jyje/hermes-agent-helm/commit/000276f614a5ce5b98dad526a89a089beea4a52d)) — @jyje
+
 ## [0.10.0] - 2026-07-21
 
 ### Miscellaneous
