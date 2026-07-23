@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.7.20](https://img.shields.io/badge/AppVersion-v2026.7.20-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 0.12.0](https://img.shields.io/badge/Version-0.12.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.7.20](https://img.shields.io/badge/AppVersion-v2026.7.20-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md)
 
@@ -19,7 +19,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-pro
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.11.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 0.12.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```

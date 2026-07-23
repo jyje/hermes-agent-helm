@@ -5,6 +5,40 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Added ArgoCD example for Upstage Solar Open 2 model in upstage values."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.20
+    created: "2026-07-23T14:27:07.518026113Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: ad5db9a3e757c37cd99f0c4284b286f41f0a687d82942d04405bba3eee596ba2
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.12.0.tgz
+    version: 0.12.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Add Fireworks, DeepInfra, Upstage and Bitwarden values files for new LLM providers"
         - kind: "changed"
           description: "Update template to always render extraInitContainers when defined, fixing missing init containers"
@@ -831,4 +865,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-21T21:12:19.875424604Z"
+generated: "2026-07-23T14:27:07.515005493Z"
