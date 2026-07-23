@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 0.11.0
+version: 0.12.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -35,8 +35,4 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: "added"
-      description: "Add Fireworks, DeepInfra, Upstage and Bitwarden values files for new LLM providers"
-    - kind: "changed"
-      description: "Update template to always render extraInitContainers when defined, fixing missing init containers"
-    - kind: "added"
-      description: "Document passthrough principle and unattended approvals configuration in README"
+      description: "Added ArgoCD example for Upstage Solar Open 2 model in upstage values."

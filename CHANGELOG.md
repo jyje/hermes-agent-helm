@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [0.12.0] - 2026-07-23
+
+### Features
+
+- ✨ feat(providers): add an ArgoCD example for Upstage Solar Open 2 ([`43890ea`](https://github.com/jyje/hermes-agent-helm/commit/43890eab8cb6f2e3c89210a4797985cc516c8999)) — @jyje
+
 ## [0.11.0] - 2026-07-21
 
 ### Features
