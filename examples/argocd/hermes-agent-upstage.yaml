@@ -1,0 +1,53 @@
+# Mirrors charts/hermes-agent/values-upstage.yaml: Upstage Solar's built-in,
+# OpenAI-compatible provider — pointed at Solar Open 2 (Upstage's open-weight
+# 250B-A15B MoE model, https://huggingface.co/upstage/Solar-Open2-250B)
+# instead of the hosted solar-pro3 default. Verified working end-to-end
+# (official Hermes Agent image, live API round trip) in
+# https://github.com/jyje/pilot-upstage-solar-open2/tree/main/02-hermes-agent-solar-open2 —
+# no bridge, proxy, or custom provider needed; `upstage` already recognizes
+# the `solar-open*` model family.
+#
+# Before applying, create the Secret this Application references:
+#   kubectl create secret generic hermes-agent-upstage-secrets -n hermes-agent \
+#     --from-literal=UPSTAGE_API_KEY='<real>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-agent-upstage
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
+    helm:
+      releaseName: hermes-agent-upstage
+      valuesObject:
+        config:
+          model:
+            provider: upstage
+            # Upstage's open-weight flagship — see the file header for the
+            # verified-working evidence. For the hosted/business-tier model
+            # instead, use "solar-pro3" (values-upstage.yaml's default).
+            default: solar-open2
+          terminal:
+            backend: local
+        env:
+          # Real key comes from the Secret via extraEnvFrom below.
+          UPSTAGE_API_KEY: "set-via-extraEnvFrom"
+          # Unused by the upstage provider; overrides the chart's OpenAI placeholder.
+          OPENAI_API_KEY: "unused"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-upstage-secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

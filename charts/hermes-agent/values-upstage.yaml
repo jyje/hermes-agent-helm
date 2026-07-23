@@ -11,6 +11,10 @@
 config:
   model:
     provider: upstage
+    # Hosted/business-tier model. For Upstage's open-weight flagship instead
+    # (250B-A15B MoE, https://huggingface.co/upstage/Solar-Open2-250B),
+    # use "solar-open2" — same provider, no other change needed. Verified
+    # working end-to-end: https://github.com/jyje/pilot-upstage-solar-open2/tree/main/02-hermes-agent-solar-open2
     default: solar-pro3
   terminal:
     backend: local

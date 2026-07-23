@@ -14,6 +14,7 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-openai-sealedsecret.yaml`](hermes-agent-openai-sealedsecret.yaml) | `values-openai.yaml` + GitOps | `hermes-agent-openai-sealedsecret-secrets` via **SealedSecret** (`extraResources`) |
 | [`hermes-agent-anthropic.yaml`](hermes-agent-anthropic.yaml) | `values-anthropic.yaml` | `hermes-agent-anthropic-secrets` (`ANTHROPIC_API_KEY`) |
 | [`hermes-agent-gemini.yaml`](hermes-agent-gemini.yaml) | `values-gemini.yaml` | `hermes-agent-gemini-secrets` (`GOOGLE_API_KEY`) |
+| [`hermes-agent-upstage.yaml`](hermes-agent-upstage.yaml) | `values-upstage.yaml` (model overridden to **Solar Open 2**) | `hermes-agent-upstage-secrets` (`UPSTAGE_API_KEY`) |
 | [`hermes-agent-openrouter.yaml`](hermes-agent-openrouter.yaml) | `values-openrouter.yaml` | `hermes-agent-openrouter-secrets` (`OPENROUTER_API_KEY`) |
 | [`hermes-agent-litellm.yaml`](hermes-agent-litellm.yaml) | `values-litellm.yaml` | `hermes-agent-litellm-secrets` (`OPENAI_API_KEY`, proxy key) |
 | [`hermes-agent-litellm-k8s.yaml`](hermes-agent-litellm-k8s.yaml) | `values-litellm-k8s.yaml` | `hermes-agent-litellm-k8s-secrets` via **SealedSecret** (`extraResources`) |
