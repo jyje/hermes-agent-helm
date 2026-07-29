@@ -12,6 +12,7 @@ on:
   pull_request:
     paths:
       - "charts/hermes-agent/**"
+      - ".github/scripts/**"
       - ".github/workflows/validate-chart.yaml"
 
 jobs:
@@ -82,7 +83,7 @@ jobs:
 
   test:
     # Each matrix entry gets its OWN ephemeral kind cluster (a separate
-    # runner), so the two scenarios are fully isolated — no shared cluster,
+    # runner), so the scenarios are fully isolated — no shared cluster,
     # no namespace partitioning, no background-process plumbing. Scenario
     # logic lives in .github/scripts/{lib,scenario-*}.sh. If an
     # NVIDIA_API_KEY secret is present (non-fork runs), the message scenario
@@ -101,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim]
+        scenario: [message, existing-claim, team]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
