@@ -29,11 +29,11 @@ path — is proven, not merely documented.
 | --- | --- |
 | Single agent, production-proven | ✅ done — real deployments with 15+ / 26+ day uptime |
 | Pair collaboration (`@mention` handoff) | ✅ recipe shipped and proven live; 🔜 field-demo evidence not yet attached to [collaboration.md](collaboration.md) |
-| Leader-orchestrated team (star topology, shared workspace) | ✅ recipe shipped, field-tested on an ephemeral kind cluster; 🔜 not yet proven on a persistent cluster |
+| Leader-orchestrated team (Discord thread, explicit bot mentions) | ✅ two live kind runs with `v2026.7.20`: human→leader→may→leader→march→leader→human completed, final turns had no member mention, no shared team path existed, and the second run proved final-line TEAM metadata; see [teams.md](teams.md) |
 | Chart extension points for team patterns (`extraVolumes`, `extraVolumeMounts`, `extraInitContainers`) | ✅ done — cover file-based credentials and one-time volume prep |
-| CI coverage (per-scenario kind matrix, functional-change detection incl. appVersion bumps, docs-drift gate, signed releases) | ✅ done |
+| CI coverage (per-scenario kind matrix, functional-change detection incl. appVersion bumps, docs-drift gate, signed releases) | ✅ single-instance scenarios plus a structural team scenario; CI validates session/mention settings and absence of shared-file coordination, while the live Discord proof covers bot-to-bot completion |
 | EN/KO documentation parity | ✅ maintained as an ongoing discipline |
-| Messaging platform coverage | Discord and Telegram are the v1.0 baseline; Slack and other platforms are explicitly **post-v1.0** (the same star topology applies once platform env vars are swapped) |
+| Messaging platform coverage | Discord and Telegram are the v1.0 human-to-agent baseline; the leader-team proof is Discord-specific. Telegram bot-to-bot orchestration needs a separate platform proof. Slack and other platforms are **post-v1.0** |
 | Git-backed wiki vault (team knowledge curation) | ⏸️ design only ([teams.md](teams.md) § Team + wiki vault), not required for v1.0 |
 
 ## See also

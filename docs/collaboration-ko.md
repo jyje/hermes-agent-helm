@@ -10,9 +10,11 @@
 
 이 문서는 [teams-ko.md](teams-ko.md#팀이-맥락을-공유하는-방법)의 "솔직한 현황"
 노트 — 에이전트 간 직접 인식은 업스트림에서 아직 진화 중 — 뒤에 있는 구체적
-레시피입니다. 하지만 **공유 채널의 역할별 에이전트 둘 사이의 `@mention` 핸드오프**는
-오늘 이미 안정적으로 동작합니다. 아래는 그대로 복사할 수 있는 2-에이전트 쌍
-(`planner`와 `builder`)입니다.
+레시피입니다. **공유 채널의 역할별 에이전트 둘 사이의 `@mention` 핸드오프**는 아래
+안전장치로 동작하는 것이 관찰됐습니다. 하지만 upstream은 봇 대 봇 대화를 내장
+circuit breaker가 없는 미지원 토폴로지로 문서화합니다. 실험적 레시피로 취급하고
+수동 중지 경로를 준비한 뒤 정확한 이미지/플랫폼 조합으로 검증하세요. 아래는 그
+시험에 사용한 2-에이전트 쌍(`planner`와 `builder`)입니다.
 
 ---
 
@@ -76,6 +78,22 @@ config:
 
 마지막 세 문장이 **루프 브레이크의 프롬프트 절반**입니다. 단순한 예의가 아니라,
 유한한 대화를 유한하게 만드는 장치입니다.
+
+보이는 스레드가 실제 컨텍스트 버스가 되려면 모든 에이전트가 사람과 봇 발신자를
+아우르는 하나의 대화 기록을 써야 합니다. Hermes 기본값은 발신자별 세션이므로,
+다음을 명시하고 Discord history backfill을 유지합니다:
+
+```yaml
+config:
+  group_sessions_per_user: false
+  discord:
+    history_backfill: true
+    history_backfill_limit: 50
+```
+
+`group_sessions_per_user: false`가 없으면 파트너 멘션은 받더라도 사람의 앞선 턴이
+없는 별도 세션에서 처리할 수 있습니다. Backfill은 봇이 멘션되지 않았던 동안의
+보이는 스레드 메시지를 복구할 뿐, 숨은 파일 기반 조정 채널을 만들지 않습니다.
 
 > 봇의 사용자 ID는 Discord에서 개발자 모드를 켜고 봇을 우클릭 → *사용자 ID 복사*로
 > 얻습니다. 각 에이전트의 hint는 **상대** 에이전트의 ID를 참조합니다.
@@ -232,6 +250,8 @@ sequenceDiagram
 - `DISCORD_HOME_CHANNEL` — 하나의 공유 채널 id (맥락 버스)
 - `DISCORD_ALLOWED_USERS` — 팀에게 말할 수 있는 사람
 - 위의 4개 루프 브레이크 노브
+- `config.group_sessions_per_user: false`와 Discord history backfill — 사람과
+  봇 발신자를 아우르는 하나의 보이는 스레드 대화 기록
 
 **에이전트별**(고유):
 - `releaseName` / `metadata.name` — 고유해야 함
@@ -298,6 +318,10 @@ spec:
           valuesObject:
             fullnameOverride: 'hermes-{{name}}'
             config:
+              group_sessions_per_user: false
+              discord:
+                history_backfill: true
+                history_backfill_limit: 50
               agent:
                 environment_hint: |
                   You are "{{name}}". Your job is to {{role}}. Your partner is
@@ -333,6 +357,8 @@ ApplicationSet 없이 두 릴리스를 손으로 펼친 버전은
 - [ ] 에이전트당 봇 하나, **모두 같은 채널에 초대**, Message Content Intent 켜기.
 - [ ] 모든 에이전트가 `DISCORD_HOME_CHANNEL`과 `DISCORD_ALLOWED_USERS` 공유.
 - [ ] 4개 루프 브레이크 노브를 **모든** 에이전트에 설정(`config`가 아니라 `env`/`extraEnv`).
+- [ ] 모든 에이전트에 `group_sessions_per_user: false`와 Discord history
+      backfill을 설정해 발신자별 분리 세션이 아니라 스레드가 문맥을 운반하도록 함.
 - [ ] 각 `environment_hint`가 **파트너의** 사용자 ID와 "끝나면 멈춤" 지시 포함.
 - [ ] 에이전트당 고유한 `releaseName` == `metadata.name`.
 - [ ] 백엔드 혼합 가능 — 채널만 일치하면 됨.

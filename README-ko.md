@@ -71,12 +71,14 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
 - **엔드-투-엔드 검증.** CI가 임시 **kind** 클러스터에 차트를 설치하고
   번들된 테스트 Job(`hermes doctor`)과 실제 NVIDIA NIM 계정에 대한
   **live `hermes chat` 라운드트립**을 실행 — 목(mock)이 아님.
-  🔜 Telegram/Discord 라운드트립 검증은 아직 준비 중.
+  Discord 스레드 리더 팀도 사람 → 리더 → 멤버 둘 → 리더 라이브 라운드트립을
+  완주했습니다. Telegram 팀 오케스트레이션은 별도 실증 대상입니다.
 
 <div align="center">
   <img src="docs/images/demos/team-k9s-pods.png" alt="kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)"/>
-  <p><em>이 차트로 배포한 리더 주도 팀 — 리더 <code>august</code>와
-  멤버 <code>may</code>, <code>march</code> — kind 클러스터에서 실행 중.
+  <p><em>배포 증거: 리더 <code>august</code>와 멤버
+  <code>may</code>/<code>march</code>가 kind에서 독립 릴리스로 실행 중.
+  이 스크린샷만으로 멀티턴 멘션 루프가 증명되지는 않습니다. 현재 상태는
   <a href="docs/teams-ko.md">Hermes 팀</a> 참고.</em></p>
 </div>
 

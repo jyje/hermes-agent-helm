@@ -25,7 +25,7 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-github-copilot.yaml`](hermes-agent-github-copilot.yaml) | `values-github-copilot.yaml` + GitOps | `hermes-agent-copilot-secrets` via **SealedSecret** (`DISCORD_BOT_TOKEN` only — Copilot token minted at runtime via **OAuth device flow**) |
 | [`hermes-agent-ingress.yaml`](hermes-agent-ingress.yaml) | `values-ingress.yaml` | `hermes-agent-ingress-secrets` (`OPENAI_API_KEY`) + `hermes-agent-dashboard-auth` (nginx basic-auth) |
 | [`hermes-collab-pair.yaml`](hermes-collab-pair.yaml) | `values-multi-agent-collab.yaml` (×2: planner+builder) | `hermes-planner-discord-secrets` + `hermes-builder-discord-secrets` — a **collaborating pair** that hands off by `@mention`; see [docs/collaboration.md](../../docs/collaboration.md) |
-| [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-august-discord-secrets` + `hermes-may-discord-secrets` + `hermes-march-discord-secrets` — a **leader-orchestrated team** (leader Application + member ApplicationSet, star topology, shared RWX workspace); see [docs/teams.md](../../docs/teams.md) |
+| [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-august-discord-secrets` + `hermes-may-discord-secrets` + `hermes-march-discord-secrets` — a **leader-orchestrated team** (leader Application + member ApplicationSet, serialized explicit mentions in one Discord thread, no shared-file handoff); see [docs/teams.md](../../docs/teams.md) |
 
 `hermes-agent.yaml` is the bare-minimum starting point — pure chart defaults
 plus the secret wiring; copy it and add a `valuesObject` to customize.
@@ -40,7 +40,8 @@ the four loop-brake env vars.
 **leader** (`august`) plus an **ApplicationSet** whose member roster (`may`,
 `march`) is a list-generator entry — adding a teammate is a one-line diff. The
 agents share a Discord channel (star topology: mentions flow leader ↔ member
-only) and an RWX workspace PVC created out-of-band. See
+only). The thread is the context bus and audit log; no RWX workspace carries
+tasks or results. See
 [docs/teams.md](../../docs/teams.md) → "Leader-orchestrated teams".
 
 All examples use the **OCI registry** source form (`repoURL`/`chart`/
