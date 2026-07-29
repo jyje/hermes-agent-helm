@@ -39,6 +39,15 @@ config:
     default: openai/gpt-oss-120b    # must match a model the proxy exposes
   terminal:
     backend: local
+  # A collaboration thread contains messages from the human and both bots.
+  # Use one transcript for all senders and backfill visible thread messages
+  # that arrived while this bot was not mentioned.
+  group_sessions_per_user: false
+  discord:
+    require_mention: true
+    thread_require_mention: true
+    history_backfill: true
+    history_backfill_limit: 50
   agent:
     # The handoff protocol. Names the PARTNER's Discord user ID and tells this
     # agent how to hand over (explicit <@id> in the BODY) and — critically — how

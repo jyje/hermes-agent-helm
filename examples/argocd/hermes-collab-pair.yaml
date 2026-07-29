@@ -46,6 +46,12 @@ spec:
             default: openai/gpt-oss-120b
           terminal:
             backend: local
+          group_sessions_per_user: false
+          discord:
+            require_mention: true
+            thread_require_mention: true
+            history_backfill: true
+            history_backfill_limit: 50
           agent:
             # Names the PARTNER (builder) and how to hand over / stop.
             environment_hint: |
@@ -103,6 +109,12 @@ spec:
             default: claude-sonnet-4.5
           terminal:
             backend: local
+          group_sessions_per_user: false
+          discord:
+            require_mention: true
+            thread_require_mention: true
+            history_backfill: true
+            history_backfill_limit: 50
           agent:
             environment_hint: |
               You are "builder", one of two collaborating Hermes agents in this
