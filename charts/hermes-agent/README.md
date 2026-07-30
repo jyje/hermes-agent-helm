@@ -252,8 +252,9 @@ Notes:
 
 Hermes is a **single-instance personal agent** — it does not scale out. Instead,
 run several well-managed instances and group them into a team that shares **one
-Discord channel** as the context bus. Each agent gets its own bot token, pod, PVC,
-and identity; the shared channel is the only thing they have in common.
+Discord channel** as the context bus. Each agent gets its own bot token, pod,
+private `HERMES_HOME` PVC, and identity. Task coordination is shared only through
+the Discord channel; team-specific knowledge volumes are mounted separately.
 
 ### How agents hand off by `@mention`
 
@@ -273,6 +274,11 @@ bot-to-bot ping-pong:
 Set these under `env` / `extraEnv` (not under `config` — they are read directly
 by the Discord adapter via `os.getenv`).
 
+Also set `config.group_sessions_per_user: false` and keep
+`config.discord.history_backfill: true`. Hermes otherwise isolates the human
+and each bot sender into different sessions inside the same visible thread.
+Backfill supplies visible messages that arrived while a bot was not mentioned.
+
 ### Quick start: two agents, one channel
 
 ```bash
@@ -291,6 +297,25 @@ For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**
 — adding a teammate becomes a one-line diff. See
 [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
 and the full guide in [Teams](../../docs/teams.md) + [Collaboration](../../docs/collaboration.md).
+
+For a leader plus several members, use
+[`values-team-leader.yaml`](values-team-leader.yaml) and
+[`values-team-member.yaml`](values-team-member.yaml). That reference protocol
+serializes one explicit bot mention at a time and keeps every task, result, and
+review in the Discord thread. A separate pre-provisioned RWX PVC carries
+durable shared knowledge, but never tasks, status, or result handoffs. The team
+recipe requires that claim: leader read-write, members read-only.
+The `file` and `memory` toolsets remain available for each agent's own work;
+only cross-agent handoffs through files, memory, hooks, or background work are
+prohibited.
+
+> Upstream currently documents Hermes bot-to-bot Discord conversation as an
+> unsupported topology with no built-in circuit breaker. The example is
+> experimental: use a dedicated trusted channel, keep a manual stop path, and
+> require a live proof with your pinned image before relying on it.
+
+The reference sequence completed live on kind with `v2026.7.20`; see the
+timestamped [team evidence](../../docs/teams.md#leader-orchestrated-teams).
 
 > **Alternative: one pod, many profiles.** If what you actually need is
 > routing different Discord guilds/channels/threads to different agent
@@ -573,7 +598,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair** — two agents handing off by @mention in a shared Discord channel |
-| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team** — a leader delegates by @mention (star topology) and members share an RWX workspace; see [Teams](../../docs/teams.md) |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team** — serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/teams.md) |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC** — multiple agents reading/writing to the same knowledge base |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See
@@ -609,7 +634,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
 | extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
 | extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
-| extraInitContainers | list | Extra init containers, appended after the chart's own (seed-config,    device-flow login). Full container spec; combine with `extraVolumes` for    one-time volume preparation — e.g. fixing the ownership of a shared RWX    workspace so the non-root agent can write to it    (see values-team-leader.yaml). | `[]` |
+| extraInitContainers | list | Extra init containers, appended after the chart's own (seed-config,    device-flow login). Full container spec; combine with `extraVolumes` for    one-time preparation of a user-provided volume (for example, a shared    knowledge volume used independently of the Discord team handoff). | `[]` |
 | extraResources | list | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). | `[]` |
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var — e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |

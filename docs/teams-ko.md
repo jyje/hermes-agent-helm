@@ -56,10 +56,11 @@ Hermes Agent는 **개인용 에이전트**입니다: 하나의 `HERMES_HOME`, �
   (`SOUL.md`, `AGENTS.md`)로 고정합니다 — 매 세션의 시스템 프롬프트에 주입되며,
   [Team Telegram Assistant 가이드](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant)에
   나옵니다.
-- **공유 영속적 지식** (벡터 인덱스, 대화 내역, 또는 공유 config 파일)을 위해, 모든
-  에이전트가 `persistence.existingClaim` 필드를 사용하여 **같은 ReadWriteMany (RWX)
-  PVC**를 마운트할 수 있습니다. 이렇게 하면 에이전트들이 공통 지식 베이스에 읽기/쓰기를
-  할 수 있습니다. 완전한 예는
+- **공유 영속적 지식**(벡터 인덱스나 공유 참고 파일)을 위해 각자의 사설
+  `HERMES_HOME`은 유지하고, `extraVolumes`와 `extraVolumeMounts`로 별도 경로에
+  **같은 ReadWriteMany(RWX) PVC**를 마운트할 수 있습니다. 이렇게 하면 config,
+  메모리, 정체성, gateway 세션을 공유하지 않고 공통 지식 베이스를 읽고 쓸 수
+  있습니다. 완전한 예는
   [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)을
   참조하세요. **주의:** PVC는 `ReadWriteMany` 액세스 모드를 지원하는 StorageClass를
   사용해야 합니다(예: NFS, CephFS, Longhorn); 대부분의 클라우드 제공자의 기본
@@ -212,132 +213,171 @@ spec:
 
 ## 리더 주도 팀 (Leader-orchestrated teams)
 
-위의 채널 공유 팀은 *플랫(flat)*합니다: 모든 에이전트가 모든 것을 듣고, 누구든
-답할 수 있습니다. 페어([collaboration-ko.md](collaboration-ko.md))에서는 잘
-동작하지만, 멤버가 둘을 넘으면 멘션 에티켓이 무너지기 시작합니다 — 모두가 모두를
-핑하고, 페어에서 검증한 루프 브레이크만으로는 부족해집니다. 다음 성숙 단계는
-**리더 주도 팀**(데모 로스터: 리더 `august`, 멤버 `may`와 `march`)이며, 두 가지
-규칙이 추가됩니다:
+위의 채널 공유 팀은 *플랫(flat)*하여 모든 에이전트가 답할 수 있습니다.
+**리더 주도 팀**은 하나의 보이는 Discord 스레드를 유지하되 대화 그래프를
+스타 형태로 제한합니다(데모 명부: 리더 `august`, 멤버 `may`, `march`):
 
-- **스타 토폴로지 (컨트롤 플레인).** 사람은 리더에게만 말합니다. 멘션은
-  리더 ↔ 멤버 사이로만 흐르고, 멤버 ↔ 멤버는 절대 없습니다 — 그래서 모든 대화
-  간선(edge)이 여전히 *페어*이고, [collaboration-ko.md](collaboration-ko.md)의
-  루프 브레이크가 에이전트 N명에서도 계속 유효합니다.
-- **공유 워크스페이스, 경로당 단일 writer (데이터 플레인).** 작업 산출물은
-  절대 채팅으로 옮기지 않습니다. 모든 에이전트가 하나의 공유 RWX PVC를
-  `extraVolumes`로 `/opt/data/team`에 마운트하되, **각자의 사설 `HERMES_HOME`은
-  유지합니다** — 홈 전체를 공유하면 에이전트별 `config.yaml` 시드가 서로를
-  덮어쓰기 때문입니다. `/opt/data/team`은 이미지의 쓰기 안전 루트
-  (`HERMES_WRITE_SAFE_ROOT=/opt/data`) 안에 있으므로 쓰기 가드를 느슨하게
-  할 필요가 없습니다. RWX에는 파일 잠금이 없으므로, 레이아웃이 모든 경로에
-  정확히 한 명의 writer만 두도록 합니다:
+- **사람과는 리더만 대화합니다.** 멤버는 `august`가 메시지 본문에서 명시적으로
+  멘션했을 때만 동작하고, 완전한 결과를 본문에 담아 `august`를 명시적으로
+  멘션해 돌려줍니다.
+- **Discord 스레드가 컨텍스트 버스이자 감사 로그입니다.** 위임, 중간 결과,
+  리뷰 피드백, 수정, 최종 종합이 모두 스레드 메시지로 남습니다. 파일 경로는
+  핸드오프가 될 수 없습니다.
+- **모든 발신자가 하나의 대화 기록을 씁니다.** 모든 팀 values 파일은
+  `group_sessions_per_user: false`를 설정합니다. 그렇지 않으면 Hermes 기본값이
+  같은 스레드의 사람, `may`, `march`를 서로 다른 세션으로 분리합니다.
+  `discord.history_backfill: true`는 봇이 호출되지 않았던 동안의 보이는 스레드
+  메시지를 문맥으로 보충합니다.
+- **mention-only 루프 브레이크를 그대로 적용합니다.**
+  `DISCORD_ALLOW_BOTS=mentions`, `DISCORD_THREAD_REQUIRE_MENTION=true`,
+  reply-reference 끄기, replied-user 멘션 끄기를 함께 써서 메시지 본문의 실제
+  `<@BOT_ID>`만 다음 봇 턴을 시작하게 합니다.
 
-  ```
-  /opt/data/team/
-  ├── tasks/<task-id>.md            # 리더가 쓰고, 멤버는 읽기만
-  ├── outputs/<task-id>/<member>/   # 해당 멤버만 씀
-  └── STATUS.md                     # 리더가 유일한 writer
-  ```
+> **실험적 / upstream 미지원:** Hermes 공식 Discord 가이드는 봇 대 봇 대화에
+> 내장 circuit breaker가 없으며 지원 토폴로지가 아니라고 명시합니다. 이 레시피는
+> 한 번에 하나의 본문 멘션, reply-reference ping 차단, 프롬프트 수준의 최대 6회
+> 핸드오프, 마지막 멤버 멘션 제거로 위험을 좁힙니다. 이는 완화책이지 upstream
+> 지원 보장이 아닙니다. 전용 신뢰 채널에서 시험하고 필요하면 즉시 봇을 중지하거나
+> scale down할 준비를 하세요.
 
-실행 라이프사이클 전체:
+각 인스턴스에는 설정과 자체 gateway 세션 캐시를 위한 일반 사설
+`HERMES_HOME` PVC가 남습니다. 이 PVC들은 공유되지 않으며 에이전트 사이에서
+과제나 결과를 운반하지 않습니다. 일부 local-path provisioner가 PVC 루트를
+`root:root 0700`으로 만들기 때문에, 예시는 작은 init container로 이 사설 홈의
+소유권을 uid/gid 10000에 줍니다. 진실의 원천은 Discord입니다.
+
+로컬 기능과 팀 조정은 별개입니다. 에이전트가 자체 작업에 사설 임시 파일과 영속
+메모리를 사용할 수 있도록 `file`과 `memory` toolset은 활성 상태로 둡니다. 다른
+에이전트에게 그 사설 상태를 읽으라고 지시해서는 안 되며, hook, watcher, scheduler,
+백그라운드 프로세스, 파일 쓰기, 메모리 업데이트, tool/API 호출로 팀 과제를
+전달하거나 트리거해서도 안 됩니다. 정확한 봇 멘션과 완전한 과제 또는 결과 계약을
+포함한 공개 Discord 메시지만 핸드오프입니다.
+
+별도로 미리 준비한 `hermes-team-knowledge` RWX PVC를
+`/opt/data/team-knowledge`에 마운트합니다. 리더는 읽기/쓰기로 마운트하며 유일한
+큐레이터이고, 멤버는 읽기 전용으로 마운트합니다. 여기에는 영속적이고 재사용 가능한
+지식만 두며 실시간 조정 상태는 두지 않습니다. 권한 경계가 프롬프트 계약을 보강하고
+다중 writer 경합을 피합니다.
+
+기준 프로토콜은 의도적으로 직렬입니다. 리더가 멤버 한 명을 멘션하고, 그 멤버가
+리더를 다시 멘션할 때까지 기다린 뒤 결과를 검토하고 다음 멤버를 멘션합니다.
+방 전체가 하나의 세션을 쓰는 상태에서 여러 멤버가 동시에 답하면 하나의 실행 슬롯을
+두고 경합할 수 있으므로, 직렬화가 첫 실증을 결정적으로 만듭니다.
 
 ```mermaid
 sequenceDiagram
     participant H as 사람
     participant A as august (리더)
-    participant M as may (멤버)
-    participant W as /opt/data/team
+    participant M as may
+    participant R as march
 
-    H->>A: 목표
-    A->>W: tasks/001-….md (목표, 출력 경로, 완료 기준)
-    A->>M: @may — tasks/001-….md 맡아줘
-    M->>W: outputs/001-…/may/…
-    M->>A: @august — 완료, outputs/001-…/may/, 요약
-    A->>W: 완료 기준 대비 리뷰, STATUS.md 갱신
-    A->>H: 최종 산출물 (멤버 멘션 없음 → 실행 종료)
+    H->>A: @august 목표 (스레드 하나 시작)
+    A->>M: <@may> [TEAM ... TASK] + 전체 문맥과 완료 기준
+    M->>A: <@august> [TEAM ... RESULT] + 완전한 결과
+    A->>R: <@march> [TEAM ... TASK] + 목표 + 승인된 may 결과
+    R->>A: <@august> [TEAM ... RESULT] + 리뷰/종합
+    A-->>H: 최종 종합, 멤버 멘션 없음
+    Note over A,R: 멤버 멘션이 없으면 다음 봇 턴도 없습니다.
 ```
 
-두 개의 예제 values 파일로 배포합니다(리더/멤버 프로토콜은 각자의
-`environment_hint`에 있습니다 — 차트 자체에는 새로운 게 필요 없습니다):
+모든 위임에는 작은 공개 계약을 넣습니다:
+
+```text
+<@MEMBER_ID>
+
+Context: <승인된 이전 결과를 포함해 필요한 모든 문맥>
+Task: <구체적인 과제 하나>
+Done when: <관찰 가능한 완료 기준>
+Reply contract: <@LEADER_ID>를 멘션하고 완전한 결과를 여기에 포함.
+
+[TEAM run=<short-id> step=<n> TASK]
+```
+
+의도한 봇이 분명히 호출되도록 멘션은 첫 줄에 두고, TEAM 메타데이터는 과제 본문을
+방해하지 않도록 마지막 독립 줄에 둡니다.
+
+먼저 RWX를 지원하는 StorageClass로 공유 지식 claim을 만듭니다. 루트는 uid/gid
+10000이 읽을 수 있어야 하고 리더의 uid/gid 10000이 쓸 수 있어야 합니다:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-team-knowledge
+  namespace: hermes-team
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: nfs-client # 사용하는 RWX 지원 클래스로 교체
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+그다음 리더와 멤버별 릴리스를 배포합니다. values 파일은 각 에이전트의 사설 홈과
+별개로 동일한 claim을 마운트합니다:
 
 ```bash
-# 0. 공유 RWX 워크스페이스 PVC를 먼저 한 번 생성 (매니페스트는 파일 헤더에)
-# 1. 리더
 helm upgrade --install hermes-august ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-team-leader.yaml \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<august-bot-token>' --wait
 
-# 2. 각 멤버 (march도 동일하게 반복)
 helm upgrade --install hermes-may ./charts/hermes-agent \
-  -n hermes-team -f charts/hermes-agent/values-team-member.yaml \
-  --set-string fullnameOverride=hermes-may \
+  --namespace hermes-team \
+  -f charts/hermes-agent/values-team-member.yaml \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
+
+# march도 반복합니다. 이 인덱스는 멤버 예시의 TEAM_MEMBER_NAME입니다.
+helm upgrade --install hermes-march ./charts/hermes-agent \
+  --namespace hermes-team \
+  -f charts/hermes-agent/values-team-member.yaml \
+  --set-string fullnameOverride=hermes-march \
+  --set-string 'extraEnv[6].value=march' \
+  --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+  --set-string env.DISCORD_BOT_TOKEN='<march-bot-token>' --wait
 ```
 
-또는 선언적으로:
-[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml)이
-렌더링된 형태입니다 — 리더용 Application 하나 + 멤버 로스터가 데이터인
-ApplicationSet(팀원 추가 = 리스트 항목 하나 추가).
+values 파일의 채널 ID, 허용할 사람 ID, 봇 ID도 교체해야 합니다. 선언형 사용자는
+[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml)을
+사용할 수 있습니다. 리더 Application 하나와 멤버 ApplicationSet으로 구성됩니다.
+이 Application들이 sync되기 전에 대상 네임스페이스에 공유 claim을 준비하세요.
 
-kind 클러스터에 배포하면 실행 중인 팀은 이렇게 보입니다(리더 `august`,
-멤버 `may`와 `march`, 각자 사설 홈 PVC + 공유 워크스페이스):
+### 라이브 증거
 
-![kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)](images/demos/team-k9s-pods.png)
+2026-07-30(KST), kind의 고정 이미지 `v2026.7.20`에서 스레드 기반 실행 두 건을
+실제로 검증했습니다. 두 실행 모두 사람 → `august` → `may` → `august` → `march`
+→ `august` → 사람 순서로 진행됐습니다:
 
-스토리지 분리는 PVC 목록에서 그대로 보입니다 — 에이전트별 사설 RWO 홈 3개와,
-팀의 작업 산출물(그리고 위키 단계에서는 큐레이션된 볼트)이 놓이는 공유 RWX
-워크스페이스 1개:
+| 실행 | 목표와 결과 | 소요 시간 | 증거 |
+| --- | --- | ---: | --- |
+| `verify-sum` | `7 + 11 = 18`; `may`가 계산하고 `march`가 독립 검증한 뒤 `august`가 종합 | 약 105초 | [Discord 스레드](https://discord.com/channels/1515526710353858631/1532150987123458088) |
+| `verify-sum-01` | `111237 + 7256311 = 7,367,548`; 계산과 자리별 덧셈 검증이 일치 | 약 96초 | [Discord 스레드](https://discord.com/channels/1515526710353858631/1532155035495043172) |
 
-![팀의 PVC: 사설 RWO 홈 3개와 공유 RWX 워크스페이스 1개](images/demos/team-k9s-pvcs.png)
+두 번째 실행은 개선된 표시 계약도 증명합니다. 봇 멘션은 첫 줄에 있고
+`[TEAM run=… step=… TASK|RESULT]`는 마지막 독립 줄에 표시됐습니다. ID를 가린
+Discord API read-back으로 작성자/타임스탬프 순서를 확인했고, 완전한 결과가
+스레드에 남았으며 두 최종 리더 메시지 모두 멤버 멘션이 없었습니다. 세 파드에는
+`/opt/data/team` 경로가 없어서 공유 파일 핸드오프 자체가 불가능했습니다. 기존
+두 대화 실행은 전용 지식 마운트를 추가하기 전에 수행했으므로 메시지 프로토콜을
+증명하지만 공유 스토리지를 증명하지는 않습니다. 현재 kind 구조 시나리오는 별도로
+리더가 지식 PVC에 쓰고 멤버가 같은 내용을 읽으며 멤버의 쓰기는 거부되는 것을
+검증합니다. 기존 kind 스크린샷은 독립 릴리스 세 개와 사설 홈을 따로 증명합니다.
 
-여기의 데모는 **Discord 우선**입니다(봇 토큰 플랫폼은 추가 인프라가 필요
-없습니다). 게이트웨이는 모든 플랫폼을 그저 또 하나의 자격증명으로 다루므로,
-플랫폼 환경변수만 바꾸면 같은 스타 토폴로지가 Telegram이나 Slack에도 그대로
-적용됩니다.
+이 레시피는 Discord 스레드, 멘션, reply-reference, 세션 의미론에 안전성이
+의존하므로 **Discord 전용**입니다. Telegram은 사람-에이전트 용도의 v1 메신저로
+계속 지원하지만, Telegram 봇 대 봇 리더 팀은 플랫폼 차원의 별도 실증이 필요합니다.
+자격증명 환경변수만 바꾸면 충분하다고 설명하지 않습니다.
 
-### 팀 + 위키 볼트 (git 기반)
+### 공유 지식과 조정은 분리합니다
 
-원시 작업 산출물은 쌓이기만 합니다; 팀 지식의 지속 가능한 형태는 큐레이션된
-**Obsidian 호환 위키 볼트**입니다 — 그리고 위의 단일 writer 규칙이 이미 누가
-큐레이션하는지 말해줍니다: **오직 리더만**. 멤버는 원시 산출물을 쓰고, 리더가
-승인된 결과를 볼트로 승격합니다(`[[링크]]`, 태그, 노트별 `Updated:` 날짜) —
-사람의 지식 베이스가 쓰는 raw → wiki 분리와 동일합니다.
-
-볼트를 (PVC 전용이 아니라) **git 기반**으로 유지하면 산출물이 이식 가능하고
-리뷰 가능해집니다: 리더가 볼트 레포를 워크스페이스에 클론하고, 큐레이션한
-노트를 커밋하고, 푸시합니다; 사람은 `git pull`해서 Obsidian으로 봅니다.
-리더가 **유일한 pusher**이므로 푸시 경합이 없습니다. Kubernetes에서 이것에
-필요한 자격증명은 정확히 하나 — 파일로 마운트되는 레포 범위의 **deploy key** —
-이며, 차트의 `extraVolumes`/`extraVolumeMounts` 확장 지점이 바로 그 용도입니다:
-
-```mermaid
-flowchart LR
-    M1[may 원시 산출물] --> W[/opt/data/team/]
-    M2[march 원시 산출물] --> W
-    W -->|리더가 큐레이션| V[볼트 클론<br/>wiki/ 노트]
-    V -->|git push<br/>deploy key| R[(볼트 레포)]
-    R -->|git pull| O[Obsidian<br/>사람이 리뷰]
-```
-
-```bash
-# 일회성 설정
-ssh-keygen -t ed25519 -f vault-key -N '' -C hermes-august-vault
-ssh-keyscan github.com > known_hosts     # 호스트 키 고정
-kubectl create secret generic team-vault-deploy-key -n hermes-team \
-  --from-file=id_ed25519=vault-key --from-file=known_hosts=known_hosts
-# vault-key.pub을 볼트 레포에 WRITE deploy key로 등록
-```
-
-그다음 [`values-team-leader.yaml`](../charts/hermes-agent/values-team-leader.yaml)
-하단의 볼트 블록 주석을 해제하세요: 키를 `/var/run/secrets/vault-git`에
-읽기 전용으로 마운트하고 `GIT_SSH_COMMAND`가 그 키를 쓰도록 하며,
-`known_hosts`를 고정합니다. 언급할 가치가 있는 보안 태세: deploy key는 볼트
-레포 **하나**로 범위가 제한되고(다른 곳에는 쓰기 권한 없음), `0400`으로
-마운트된 Secret에 있으며 — 절대 환경변수가 아님 — 멤버는 키를 전혀 받지
-않습니다.
+리더는 승인된 재사용 지식을 `/opt/data/team-knowledge` 아래에 큐레이션할 수 있고,
+멤버는 이를 배경 지식으로 참고할 수 있습니다. 공유 PVC에는 실행별 과제, 담당자,
+queue, 상태, 중간 결과, 완료 마커, 다음 단계 지시를 두면 안 됩니다. 멤버는 파일
+변경을 polling해서는 안 되며 모든 위임은 Discord 메시지만으로 완전히 이해할 수
+있어야 합니다. 결과도 경로만 가리키지 말고 관련 근거 전체를 스레드에 다시 담아야
+합니다. 이렇게 해야 영속 지식을 활용하면서 숨은 조정 플레인으로 변질되지 않습니다.
 
 ## 함께 보기
 

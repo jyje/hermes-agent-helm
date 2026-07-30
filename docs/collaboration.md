@@ -10,9 +10,12 @@
 
 This page is the concrete recipe behind the "honest status" note in
 [teams.md](teams.md#how-a-team-shares-context): direct agent-to-agent awareness
-is still evolving upstream, but a **`@mention` handoff between two role-scoped
-agents in a shared channel** works reliably today. Below is a working two-agent
-pair (a `planner` and a `builder`) you can copy.
+is still evolving upstream. A **`@mention` handoff between two role-scoped
+agents in a shared channel** has been observed working with the safeguards
+below, but upstream documents bot-to-bot conversation as an unsupported
+topology with no built-in circuit breaker. Treat this as an experimental
+recipe, keep a manual stop path, and validate your exact image/platform
+configuration. Below is the two-agent pair used for that test.
 
 ---
 
@@ -76,6 +79,23 @@ config:
 
 The last three sentences are the **prompt half of the loop brake**. They are not
 optional politeness — they are what makes a finite conversation finite.
+
+For the visible thread to be a real context bus, every agent also needs one
+transcript across human and bot senders. Hermes defaults to a separate session
+per sender, so set this explicitly and retain Discord history backfill:
+
+```yaml
+config:
+  group_sessions_per_user: false
+  discord:
+    history_backfill: true
+    history_backfill_limit: 50
+```
+
+Without `group_sessions_per_user: false`, a bot may receive the partner's
+mention in a session that does not contain the human's earlier turn. Backfill
+recovers visible thread messages missed while the bot was not mentioned; it
+does not introduce a hidden file-based coordination channel.
 
 > Find a bot's user ID by enabling Developer Mode in Discord and right-clicking
 > the bot → *Copy User ID*. Each agent's hint references the **other** agent's ID.
@@ -238,6 +258,8 @@ the roster stays easy to edit.
 - `DISCORD_HOME_CHANNEL` — the one shared channel id (the context bus)
 - `DISCORD_ALLOWED_USERS` — who may talk to the team
 - the four loop-brake knobs above
+- `config.group_sessions_per_user: false` and Discord history backfill — one
+  visible thread transcript across human and bot senders
 
 **Per agent** (unique):
 - `releaseName` / `metadata.name` — must be unique (the
@@ -305,6 +327,10 @@ spec:
           valuesObject:
             fullnameOverride: 'hermes-{{name}}'
             config:
+              group_sessions_per_user: false
+              discord:
+                history_backfill: true
+                history_backfill_limit: 50
               agent:
                 environment_hint: |
                   You are "{{name}}". Your job is to {{role}}. Your partner is
@@ -340,6 +366,8 @@ if you'd rather see both releases spelled out.
 - [ ] One bot per agent, **all invited to the same channel**, Message Content Intent on.
 - [ ] Every agent shares `DISCORD_HOME_CHANNEL` and `DISCORD_ALLOWED_USERS`.
 - [ ] All four loop-brake knobs set on **every** agent (`env`/`extraEnv`, not `config`).
+- [ ] `group_sessions_per_user: false` and Discord history backfill set on every
+      agent so the thread, rather than sender-isolated sessions, carries context.
 - [ ] Each `environment_hint` names the **partner's** user ID and includes the "stop when done" instruction.
 - [ ] Unique `releaseName` == `metadata.name` per agent.
 - [ ] Mixed backends are fine — only the channel must match.

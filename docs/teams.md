@@ -56,10 +56,11 @@ bus:
   **context files** (`SOUL.md`, `AGENTS.md`) that inject into every session's
   system prompt, as described in the
   [Team Telegram Assistant guide](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant).
-- For **shared persistent knowledge** (vector indices, conversation history, or
-  shared config files), you can have all agents mount the **same ReadWriteMany
-  (RWX) PVC** using the `persistence.existingClaim` field. This lets agents
-  read and write to a common knowledge base. See
+- For **shared persistent knowledge** (vector indices or shared reference
+  files), keep each private `HERMES_HOME` and mount the **same
+  ReadWriteMany (RWX) PVC** at a separate path using `extraVolumes` and
+  `extraVolumeMounts`. This lets agents read and write a common knowledge base
+  without sharing config, memory, identity, or gateway sessions. See
   [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)
   for a complete example. **Note:** The PVC must use a StorageClass that supports
   `ReadWriteMany` access mode (e.g., NFS, CephFS, Longhorn); most cloud providers'
@@ -218,136 +219,183 @@ Per-team knowledge that everyone should share goes in context files
 
 ## Leader-orchestrated teams
 
-The channel-sharing team above is *flat*: every agent hears everything and any
-agent may answer. That works for a pair
-([collaboration.md](collaboration.md)), but past two members the mention
-etiquette degrades — everyone pings everyone, and the pair-tested loop brake
-stops being enough. The next maturity step is a **leader-orchestrated team**
-(demo roster: leader `august`, members `may` and `march`), which adds two rules:
+The channel-sharing team above is *flat*: every agent may answer. A
+**leader-orchestrated team** keeps one visible Discord thread but limits the
+conversation graph to a star (demo roster: leader `august`, members `may`
+and `march`):
 
-- **Star topology (control plane).** The human talks only to the leader.
-  Mentions flow leader ↔ member only, never member ↔ member — so every
-  conversation edge is still a *pair*, and the loop brake from
-  [collaboration.md](collaboration.md) keeps holding with N agents.
-- **Shared workspace, single writer per path (data plane).** Work products
-  never travel through chat. Every agent mounts one shared RWX PVC at
-  `/opt/data/team` via `extraVolumes` while keeping its **own private
-  `HERMES_HOME`** — sharing the whole home would make the per-agent
-  `config.yaml` seeds overwrite each other. `/opt/data/team` sits inside the
-  image's write-safe root (`HERMES_WRITE_SAFE_ROOT=/opt/data`), so no write
-  guard needs loosening. There is no file locking on RWX, so the layout gives
-  every path exactly one writer:
+- **Only the leader talks to the human.** Members act only on an explicit body
+  mention from `august` and hand their complete result back by explicitly
+  mentioning `august`.
+- **The Discord thread is the context bus and audit log.** Delegations,
+  intermediate results, review feedback, revisions, and the final synthesis are
+  messages in the thread. A filesystem path is never a handoff.
+- **One transcript spans all senders.** Every team values file sets
+  `group_sessions_per_user: false`; otherwise Hermes' default would isolate
+  the human, `may`, and `march` into separate sessions inside the same
+  thread. `discord.history_backfill: true` supplies visible thread messages
+  that arrived while a bot was not addressed.
+- **The mention-only loop brake still applies.** `DISCORD_ALLOW_BOTS=mentions`,
+  `DISCORD_THREAD_REQUIRE_MENTION=true`, reply references off, and replied-user
+  mentions off make a literal `<@BOT_ID>` in the message body the only next-turn
+  trigger.
 
-  ```
-  /opt/data/team/
-  ├── tasks/<task-id>.md            # leader writes, members read
-  ├── outputs/<task-id>/<member>/   # ONLY that member writes
-  └── STATUS.md                     # leader is the only writer
-  ```
+> **Experimental / upstream-unsupported:** Hermes' official Discord guide says
+> bot-to-bot conversation has no built-in circuit breaker and is not a
+> supported topology. This recipe narrows the risk with one-at-a-time body
+> mentions, no reply-reference ping, a prompt-level six-handoff ceiling, and a
+> final response with no member mention. Those are mitigations, not an upstream
+> support guarantee; keep the bots in a dedicated trusted channel and be ready
+> to stop or scale them down during testing.
 
-The run lifecycle, end to end:
+Each instance still has its normal private `HERMES_HOME` PVC for configuration
+and its own gateway session cache. Those PVCs are not shared and do not carry
+tasks or results between agents. The examples include a small init container
+that gives uid/gid 10000 ownership of this private home because some local-path
+provisioners create its root as `root:root 0700`. Discord remains the source of
+truth.
+
+Local capability is separate from team coordination. The `file` and `memory`
+toolsets remain enabled because an agent may need private scratch files and
+durable memory for its own work. Another agent must never be told to read that
+private state, and no hook, watcher, scheduler, background process, file write,
+memory update, or tool/API call may deliver or trigger a team assignment. Only
+the visible Discord message containing the exact bot mention and complete task
+or result contract is a handoff.
+
+A second, pre-provisioned `hermes-team-knowledge` RWX PVC is mounted at
+`/opt/data/team-knowledge`. The leader mounts it read-write and is the sole
+curator; members mount it read-only. It contains durable reusable knowledge,
+not live coordination state. The permission boundary reinforces the prompt
+contract and avoids multi-writer races.
+
+The reference protocol is deliberately serial. The leader mentions one member,
+waits for that member to mention it back, reviews the result, and only then
+mentions the next member. With a room-wide session, simultaneous member replies
+can contend for one running-agent slot; serialization makes the first live proof
+deterministic.
 
 ```mermaid
 sequenceDiagram
     participant H as Human
     participant A as august (leader)
-    participant M as may (member)
-    participant W as /opt/data/team
+    participant M as may
+    participant R as march
 
-    H->>A: goal
-    A->>W: tasks/001-….md (goal, output path, done criteria)
-    A->>M: @may — take tasks/001-….md
-    M->>W: outputs/001-…/may/…
-    M->>A: @august — done, outputs/001-…/may/, summary
-    A->>W: review vs done criteria, update STATUS.md
-    A->>H: final deliverable (no member mention → run ends)
+    H->>A: @august goal (starts one thread)
+    A->>M: <@may> [TEAM ... TASK] + full context and criteria
+    M->>A: <@august> [TEAM ... RESULT] + complete result
+    A->>R: <@march> [TEAM ... TASK] + goal + accepted may result
+    R->>A: <@august> [TEAM ... RESULT] + review/synthesis
+    A-->>H: final synthesis, no member mention
+    Note over A,R: No member mention means no next bot turn.
 ```
 
-Deploy it with the two example values files (leader protocol and member
-protocol live in their `environment_hint`s — the chart itself needs nothing
-new):
+Every delegation carries a small visible contract:
+
+```text
+<@MEMBER_ID>
+
+Context: <everything needed, including accepted earlier results>
+Task: <one concrete task>
+Done when: <observable acceptance criteria>
+Reply contract: mention <@LEADER_ID> and include the complete result here.
+
+[TEAM run=<short-id> step=<n> TASK]
+```
+
+The mention stays first so the intended bot is obvious and triggered; the TEAM
+metadata stays on the final independent line so it does not interrupt the task.
+
+First create the shared knowledge claim with an RWX-capable StorageClass. Its
+root must be readable by uid/gid 10000 and writable by uid/gid 10000 for the
+leader:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-team-knowledge
+  namespace: hermes-team
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: nfs-client # replace with your RWX-capable class
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+Then deploy the leader and one release per member. The values files mount the
+same claim separately from every agent's private home:
 
 ```bash
-# 0. create the shared RWX workspace PVC once (manifest in the file header)
-# 1. the leader
 helm upgrade --install hermes-august ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-team-leader.yaml \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<august-bot-token>' --wait
 
-# 2. each member (repeat for march)
 helm upgrade --install hermes-may ./charts/hermes-agent \
-  -n hermes-team -f charts/hermes-agent/values-team-member.yaml \
-  --set-string fullnameOverride=hermes-may \
+  --namespace hermes-team \
+  -f charts/hermes-agent/values-team-member.yaml \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
+
+# Repeat for march; this index is TEAM_MEMBER_NAME in the member example.
+helm upgrade --install hermes-march ./charts/hermes-agent \
+  --namespace hermes-team \
+  -f charts/hermes-agent/values-team-member.yaml \
+  --set-string fullnameOverride=hermes-march \
+  --set-string 'extraEnv[6].value=march' \
+  --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+  --set-string env.DISCORD_BOT_TOKEN='<march-bot-token>' --wait
 ```
 
-Or declaratively:
-[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml) is
-the rendered form — one Application for the leader plus an ApplicationSet whose
-member roster is data (add a teammate = one list entry).
+Replace the channel, allowed-human, and bot IDs in the values files as well.
+Declarative users can use
+[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml): one
+leader Application plus a member ApplicationSet. Provision the shared claim in
+the destination namespace before those Applications sync.
 
-Deployed on a kind cluster, the running team looks like this (leader
-`august`, members `may` and `march`, each with its own private home PVC plus
-the shared workspace):
+### Live evidence
 
-![A leader-orchestrated Hermes team (august, may, march) running on a kind cluster, shown in k9s](images/demos/team-k9s-pods.png)
+Two thread-native runs were proven live on 2026-07-30 (KST) with the pinned
+`v2026.7.20` image on kind. In both runs the visible route was human → `august`
+→ `may` → `august` → `march` → `august` → human:
 
-The storage split is visible in the PVC list — three private RWO homes (one
-per agent) plus the one shared RWX workspace where the team's work products
-(and, in the wiki phase, the curated vault) live:
+| Run | Goal and result | Elapsed | Evidence |
+| --- | --- | ---: | --- |
+| `verify-sum` | `7 + 11 = 18`; `may` calculated, `march` independently verified, `august` synthesized | ~105 s | [Discord thread](https://discord.com/channels/1515526710353858631/1532150987123458088) |
+| `verify-sum-01` | `111237 + 7256311 = 7,367,548`; calculation and positional-addition verification agreed | ~96 s | [Discord thread](https://discord.com/channels/1515526710353858631/1532155035495043172) |
 
-![The team's PVCs: three private RWO homes and one shared RWX workspace](images/demos/team-k9s-pvcs.png)
+The second run also proves the improved presentation contract: the bot mention
+is on the first line and `[TEAM run=… step=… TASK|RESULT]` is on its own final
+line. Sanitized Discord API read-back confirmed the author/timestamp sequence,
+complete results stayed in the thread, and both final leader messages contained
+no member mention. All three pods had no `/opt/data/team` path, so no shared-file
+handoff was available. Those two conversational runs predated the dedicated
+knowledge mount and prove the message protocol, not shared storage. The current
+kind structural scenario separately verifies that the leader can write the
+knowledge PVC, a member can read the same content, and the member mount rejects
+writes. The existing kind screenshot separately proves the independent releases
+and private homes.
 
-The demos here are **Discord-first** (bot-token platforms need no extra
-infrastructure); the same star topology applies unchanged to Telegram or Slack
-once you swap the platform env vars, since the gateway treats every platform as
-just another credential.
+This recipe is **Discord-specific** because its safety depends on Discord thread,
+mention, reply-reference, and session semantics. Telegram remains a supported
+v1 messenger for human-to-agent use, but a Telegram bot-to-bot leader team needs
+a separate platform-level proof; changing only credential environment variables
+is not presented as sufficient.
 
-### Team + wiki vault (git-backed)
+### Shared knowledge is separate from coordination
 
-Raw task outputs pile up; the durable form of a team's knowledge is a curated
-**Obsidian-compatible wiki vault** — and the single-writer rule above already
-tells you who curates: **only the leader**. Members write raw outputs; the
-leader promotes accepted results into the vault (`[[links]]`, tags, an
-`Updated:` date per note), the same raw → wiki split a human knowledge base
-uses.
-
-Keeping the vault **git-backed** (rather than PVC-only) makes the artifacts
-portable and reviewable: the leader clones the vault repo into the workspace,
-commits curated notes, and pushes; humans `git pull` and browse in Obsidian.
-The leader is the **only pusher**, so there are no push races. On Kubernetes
-this needs exactly one credential — a repo-scoped **deploy key** mounted as a
-file, which is what the chart's `extraVolumes`/`extraVolumeMounts` extension
-points are for:
-
-```mermaid
-flowchart LR
-    M1[may raw outputs] --> W[/opt/data/team/]
-    M2[march raw outputs] --> W
-    W -->|leader curates| V[vault clone<br/>wiki/ notes]
-    V -->|git push<br/>deploy key| R[(vault repo)]
-    R -->|git pull| O[Obsidian<br/>human review]
-```
-
-```bash
-# one-time setup
-ssh-keygen -t ed25519 -f vault-key -N '' -C hermes-august-vault
-ssh-keyscan github.com > known_hosts     # pin the host key
-kubectl create secret generic team-vault-deploy-key -n hermes-team \
-  --from-file=id_ed25519=vault-key --from-file=known_hosts=known_hosts
-# register vault-key.pub as a WRITE deploy key on the vault repo
-```
-
-Then uncomment the vault block at the bottom of
-[`values-team-leader.yaml`](../charts/hermes-agent/values-team-leader.yaml):
-it mounts the key read-only at `/var/run/secrets/vault-git` and points
-`GIT_SSH_COMMAND` at it, with the `known_hosts` pinned. Security posture worth
-stating: the deploy key is scoped to the **one** vault repo (write access
-nowhere else), lives in a Secret mounted `0400` — never in an env var — and
-members get no key at all.
+The leader may curate accepted, reusable knowledge under
+`/opt/data/team-knowledge`; members may consult it as background. The shared PVC
+must never contain run-specific tasks, assignees, queues, status, intermediate
+results, completion markers, or next-step instructions. Members must not poll it
+for changes, and every delegation must remain fully understandable from the
+Discord message alone. A result must reproduce all relevant evidence in the
+thread instead of pointing at a path. This keeps durable knowledge useful
+without turning it into a hidden coordination plane.
 
 ## See also
 

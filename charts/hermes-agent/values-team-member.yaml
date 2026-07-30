@@ -1,102 +1,116 @@
 # values-team-member.yaml
 #
-# One MEMBER of a leader-orchestrated Hermes agent team (star topology). Deploy
-# one release per member (e.g. "may" and "march"), each with its own bot token
-# and its own private HERMES_HOME; the leader comes from values-team-leader.yaml.
-# Override fullnameOverride and replace <MEMBER_NAME> in environment_hint per
-# deploy (the default below is the first demo member, "may").
-# Full walkthrough (planes, workspace layout, PVC manifest): docs/teams.md →
-# "Leader-orchestrated teams" and values-team-leader.yaml's header.
+# One MEMBER of the Discord-thread-native leader team. Deploy one release per
+# member with a unique bot token and private HERMES_HOME. Override
+# fullnameOverride and TEAM_MEMBER_NAME per release. The member receives its
+# entire task in a visible leader @mention and returns its entire result in a
+# visible @mention to august. A separately provisioned hermes-team-knowledge RWX
+# claim is mounted read-only for durable background knowledge; see the leader
+# values header for the PVC manifest and permission requirements.
 #
-# All secrets below are DUMMY placeholders. Override at install time or inject
-# via SealedSecret + extraEnvFrom (see examples/argocd/hermes-team.yaml).
-#
-#   # member "may" (repeat with march for the second member)
 #   helm upgrade --install hermes-may ./charts/hermes-agent \
 #     --namespace hermes-team --create-namespace \
 #     -f charts/hermes-agent/values-team-member.yaml \
 #     --set-string fullnameOverride=hermes-may \
+#     --set-string 'extraEnv[6].value=may' \
 #     --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
 #     --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
 
-fullnameOverride: hermes-may   # per member: --set-string fullnameOverride=hermes-march
+fullnameOverride: hermes-may
 
 config:
   model:
-    # Members may run a DIFFERENT backend than the leader — collaboration does
-    # not require a shared provider (see docs/collaboration.md). Use a modern,
-    # strong tool-calling model — see values-team-leader.yaml for why.
+    # Members may use a different provider/model from the leader. The Discord
+    # thread protocol, not a shared model backend, is the collaboration layer.
     provider: nvidia
     default: z-ai/glm-5.2
   terminal:
     backend: local
+  group_sessions_per_user: false
+  discord:
+    require_mention: true
+    thread_require_mention: true
+    auto_thread: true
+    history_backfill: true
+    history_backfill_limit: 50
+    allow_mentions:
+      everyone: false
+      roles: false
+      users: true
+      replied_user: false
+  display:
+    tool_progress: "off"
   agent:
-    # No internal subagents: a member does its task itself and reports back
-    # over Discord (see values-team-leader.yaml for the rationale).
+    # Files and memory remain available for the member's own work and durable
+    # state. Alternate delegation/outbound paths stay disabled; task and result
+    # transfer between agents must remain in Discord.
     disabled_toolsets:
+      - browser
+      - clarify
+      - code_execution
+      - cronjob
       - delegation
-      - clarify     # never prompt the human for input — questions go to the
-                    # leader as a normal message with a mention
-      - browser     # no web access needed for team coordination
-      - cronjob     # team runs are event-driven via mentions — see
-                    # values-team-leader.yaml for the field-run rationale
-      - code_execution  # force direct write_file tool calls (members write
-                        # text outputs, not code) — see values-team-leader.yaml
-      - skills      # no skill authoring/browsing in team work — see
-                    # values-team-leader.yaml for the field-run rationale
-    # The member protocol — the mirror of the leader's. A member acts only on
-    # the leader's mention, writes only inside its own output directory, and
-    # reports back only to the leader (never to another member): that keeps the
-    # star topology, so the pair-tested loop brake still holds with N agents.
+      - discord
+      - discord_admin
+      - messaging
+      - session_search
+      - skills
+      - terminal
+      - todo
+      - web
     environment_hint: |
-      You are "<MEMBER_NAME>", a MEMBER of a Hermes agent team in this Discord
-      channel. Your leader is "august"; the EXACT mention token for august is
-      <@AUGUST_BOT_USER_ID> — copy it verbatim, angle brackets included.
-      Example report message:
-      "<@AUGUST_BOT_USER_ID> done: /opt/data/team/outputs/001-example/<MEMBER_NAME>/
-      — a 2-3 sentence summary here."
-      The shared team workspace is /opt/data/team.
+      You are "${TEAM_MEMBER_NAME}", a MEMBER of a Hermes agent team in one
+      Discord thread. Your leader is "august". The leader's EXACT mention
+      token is <@${AUGUST_BOT_USER_ID}>.
+
+      The Discord thread is the team's ONLY shared task state and audit trail.
+      You MAY use private files and memory for your own scratch work or durable
+      state, but the leader must never need a path, file, memory entry, or hidden
+      state to understand your result. NEVER use a hook, watcher, scheduler,
+      background process, file write, memory update, API/tool call, or another
+      bot to deliver, trigger, relay, or queue a result. The ONLY handoff is your
+      same visible Discord response containing august's exact mention and the
+      complete result.
+
+      Durable shared knowledge is mounted read-only at ${TEAM_KNOWLEDGE_ROOT}.
+      You MAY consult it as background, but never treat a new or changed file as
+      a task signal and never wait or poll for file changes. The visible Discord
+      task must contain all required context. Include any knowledge you relied on
+      in your complete visible result; never answer with only a file path.
 
       Protocol:
-      1. Act ONLY when august mentions you with a task. Otherwise stay silent —
-         do not react to the human or to other members. NEVER ask the human
-         for input; every question goes to august as a normal message
-         containing august's mention token.
-      2. Read the task file august names (/opt/data/team/tasks/<task-id>.md)
-         and satisfy its done criteria. Do the work yourself — you have an
-         internal delegate_task / subagent tool, but NEVER use it for team
-         work.
-      3. Write your work ONLY under
-         /opt/data/team/outputs/<task-id>/<MEMBER_NAME>/. Never edit tasks/,
-         STATUS.md, or another member's output directory.
-      4. EVERY message you send in this channel MUST contain august's exact
-         mention token (shown above) in the BODY. Writing "august",
-         "@august" or "@hermes-august" as plain text reaches nobody and
-         stalls the run — only the exact <@...> token notifies august. Use
-         it to hand results back (output path + 2-3 sentence summary) or to
-         ask ONE blocking question — never to chat. Never mention other
-         members.
-      5. /opt/data/team is already writable by you. Never use sudo or try to
-         change permissions; if a write fails, report the error to august
-         instead of retrying workarounds.
-      6. Keep every chat message SHORT — a few sentences. Work products and
-         long text live in workspace files, never in chat. Never stream
-         your step-by-step thinking into the channel.
+      1. Act only when a message from august contains your exact bot mention and
+         a [TEAM ... TASK] block. Ignore human requests, messages for another
+         member, and unmentioned thread traffic.
+      2. Read the visible Context, Task, Done when, and Reply contract fields.
+         Perform only that task. Do not delegate it and do not ask the human.
+      3. Return exactly one visible response. Put august's mention on the first
+         line, then the COMPLETE result, evidence, assumptions, and any caveat.
+         Put the TEAM metadata on its own FINAL line, like this:
+           <@${AUGUST_BOT_USER_ID}>
+
+           <complete result>
+
+           [TEAM run=<same-id> step=<same-n> RESULT]
+         Do not point to a local file or private state.
+      4. If blocked, use the same leader mention and label the response BLOCKED;
+         state one precise question plus the context needed to answer it.
+      5. Mention august exactly once. Never mention another member or the human.
+         Plain text such as "august", "@august", or "@hermes-august" reaches
+         nobody and stalls the run; only the literal <@${AUGUST_BOT_USER_ID}>
+         token triggers the leader. Never send filler. Your leader mention is
+         the deterministic handoff that starts august's next turn.
 
 env:
-  # Real keys come from --set-string or a SealedSecret. Setting
-  # DISCORD_BOT_TOKEN is enough to auto-enable Discord (one bot per agent).
   NVIDIA_API_KEY: "nvapi-DUMMY_replace_me_0000000000000000000000"
   OPENAI_API_KEY: "unused"
   DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
 
-# SHARED team knobs — must match the leader's values exactly (same channel,
-# same allowed users, same four loop-brake vars). See docs/collaboration.md.
 extraEnv:
   - name: DISCORD_HOME_CHANNEL
-    value: "000000000000000000"       # DUMMY — same channel id as the leader
+    value: "000000000000000000"       # DUMMY — same parent channel as leader
   - name: DISCORD_ALLOWED_USERS
-    value: "111111111111111111"       # DUMMY — same list as the leader
+    value: "111111111111111111"       # DUMMY — same trusted human IDs
   - name: DISCORD_ALLOW_BOTS
     value: "mentions"
   - name: DISCORD_THREAD_REQUIRE_MENTION
@@ -105,15 +119,32 @@ extraEnv:
     value: "off"
   - name: DISCORD_ALLOW_MENTION_REPLIED_USER
     value: "false"
+  - name: TEAM_MEMBER_NAME
+    value: "may"                      # per release: may or march
+  - name: AUGUST_BOT_USER_ID
+    value: "000000000000000000"       # DUMMY — leader's Discord user ID
+  - name: TEAM_KNOWLEDGE_ROOT
+    value: "/opt/data/team-knowledge"
 
-# PRIVATE home (default RWO PVC) + the SAME shared workspace as the leader.
+# Private home plus the shared knowledge claim. The read-only member mount makes
+# the leader the sole curator and prevents multi-writer races.
 extraVolumes:
-  - name: team-workspace
+  - name: team-knowledge
     persistentVolumeClaim:
-      claimName: hermes-team-workspace
+      claimName: hermes-team-knowledge
+
 extraVolumeMounts:
-  - name: team-workspace
-    mountPath: /opt/data/team
+  - name: team-knowledge
+    mountPath: /opt/data/team-knowledge
+    readOnly: true
+
+extraInitContainers:
+  - name: init-private-home
+    image: busybox:1.37
+    command: ["sh", "-c", "chown -R 10000:10000 /home"]
+    volumeMounts:
+      - name: data
+        mountPath: /home
 
 persistence:
   enabled: true

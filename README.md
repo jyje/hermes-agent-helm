@@ -72,15 +72,18 @@ change), see [Quick start](#quick-start) below.
   that shares context over a common gateway channel. See
   [Hermes teams](docs/teams.md).
 - **Verified end-to-end.** CI installs the chart on an ephemeral **kind**
-  cluster and runs the bundled test Job (`hermes doctor`), plus a **live
-  `hermes chat` round-trip** against a real NVIDIA NIM account — not a mock.
-  🔜 Telegram/Discord round-trip verification is still a placeholder.
+  cluster and runs the bundled test Job (`hermes doctor`). When the
+  `NVIDIA_API_KEY` repository secret is available, it also runs a **live
+  `hermes chat` round-trip** against NVIDIA NIM — not a mock.
+  The Discord-thread leader team has also completed a live human → leader →
+  two members → leader round-trip; Telegram team orchestration remains separate.
 
 <div align="center">
   <img src="docs/images/demos/team-k9s-pods.png" alt="A leader-orchestrated Hermes team (august, may, march) running on a kind cluster, shown in k9s"/>
-  <p><em>A leader-orchestrated team from this chart — leader <code>august</code> with
-  members <code>may</code> and <code>march</code> — running on a kind cluster.
-  See <a href="docs/teams.md">Hermes teams</a>.</em></p>
+  <p><em>Deployment evidence: leader <code>august</code> and members
+  <code>may</code>/<code>march</code> running as independent releases on kind.
+  This screenshot does not by itself prove the multi-turn mention loop; see
+  <a href="docs/teams.md">Hermes teams</a> for the current status.</em></p>
 </div>
 
 For the full resource breakdown, configuration model, and provider-by-provider

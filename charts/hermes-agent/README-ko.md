@@ -215,8 +215,9 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 Hermes는 **단일 인스턴스 개인용 에이전트**입니다 — 수평 확장(스케일 아웃)이 아닙니다.
 대신 잘 관리된 인스턴스를 여러 개 띄우고, **하나의 Discord 채널**을 컨텍스트 버스로
-공유해 팀을 구성하세요. 각 에이전트는 고유한 봇 토큰, 파드, PVC, 아이덴티티를 가지며,
-공유 채널만 공통으로 사용합니다.
+공유해 팀을 구성하세요. 각 에이전트는 고유한 봇 토큰, 파드, 사설 `HERMES_HOME`
+PVC, 아이덴티티를 가집니다. 과제 조정은 Discord 채널에서만 공유하며, 팀 전용 지식
+볼륨은 별도로 마운트합니다.
 
 ### `@mention`으로 대화 넘기기
 
@@ -234,6 +235,11 @@ Hermes는 **단일 인스턴스 개인용 에이전트**입니다 — 수평 확
 
 이 환경변수들은 `env` / `extraEnv` 아래에 설정하세요(`config` 블록이 아닙니다
 — Discord 어댑터가 `os.getenv`로 직접 읽습니다).
+
+또한 `config.group_sessions_per_user: false`를 설정하고
+`config.discord.history_backfill: true`를 유지하세요. 그렇지 않으면 Hermes가 같은
+스레드의 사람과 각 봇 발신자를 서로 다른 세션으로 분리합니다. Backfill은 봇이
+멘션되지 않았던 동안 도착한 보이는 메시지를 문맥으로 보충합니다.
 
 ### 빠른 시작: 에이전트 2개, 채널 1개
 
@@ -254,6 +260,23 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)과
 [팀 구성](../../docs/teams-ko.md) + [협업 가이드](../../docs/collaboration-ko.md)를
 참고하세요.
+
+리더와 여러 멤버로 구성하려면
+[`values-team-leader.yaml`](values-team-leader.yaml)과
+[`values-team-member.yaml`](values-team-member.yaml)을 사용하세요. 이 기준
+프로토콜은 한 번에 하나의 명시적 봇 멘션만 직렬로 처리하고 모든 과제·결과·리뷰를
+Discord 스레드에 남깁니다. 별도로 미리 준비한 RWX PVC에는 영속 공유 지식만 두며,
+과제·상태·결과 핸드오프에는 사용하지 않습니다. 팀 레시피는 이 claim을 필수로 하며
+리더는 읽기/쓰기, 멤버는 읽기 전용으로 마운트합니다.
+`file`과 `memory` toolset은 각 에이전트의 자체 작업에 계속 사용할 수 있으며,
+파일·메모리·hook·백그라운드 작업을 통한 에이전트 간 핸드오프만 금지합니다.
+
+> Upstream은 현재 Hermes 봇 대 봇 Discord 대화를 내장 circuit breaker가 없는
+> 미지원 토폴로지로 문서화합니다. 이 예시는 실험적입니다. 전용 신뢰 채널과 수동
+> 중지 경로를 준비하고, 고정한 이미지 조합으로 실제 실증한 뒤 사용하세요.
+
+기준 시퀀스는 kind의 `v2026.7.20`에서 실제로 완주했습니다. 타임스탬프가 있는
+[팀 증거](../../docs/teams-ko.md#리더-주도-팀-leader-orchestrated-teams)를 참고하세요.
 
 > **대안: 파드 하나, 프로필 여러 개.** 여러 봇이 채널 하나를 공유하는 게 아니라,
 > **봇 토큰 하나**로 서로 다른 Discord 길드/채널/스레드를 서로 다른 에이전트
@@ -499,7 +522,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어** — 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |
-| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀** — 리더가 @mention으로 위임하고(스타 토폴로지) 멤버들이 RWX 워크스페이스를 공유; [Teams](../../docs/teams-ko.md) 참고 |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀** — 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; [Teams](../../docs/teams-ko.md) 참고 |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **공유 RWX PVC** — 동일한 지식 베이스에 읽기/쓰기하는 다수의 에이전트 |
 
 순수 `helm`/`-f` 대신 ArgoCD로 배포하시나요? [`examples/argocd/`](../../examples/argocd/)를

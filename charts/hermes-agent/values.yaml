@@ -152,9 +152,8 @@ extraVolumeMounts: []
 
 # -- Extra init containers, appended after the chart's own (seed-config,
 #    device-flow login). Full container spec; combine with `extraVolumes` for
-#    one-time volume preparation — e.g. fixing the ownership of a shared RWX
-#    workspace so the non-root agent can write to it
-#    (see values-team-leader.yaml).
+#    one-time preparation of a user-provided volume (for example, a shared
+#    knowledge volume used independently of the Discord team handoff).
 extraInitContainers: []
 #  - name: init-workspace
 #    image: busybox:1.37
