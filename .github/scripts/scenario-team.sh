@@ -122,7 +122,7 @@ grep -Fq '[TEAM run=<same-id> step=<same-n> RESULT]' <<<"$member_config"
 
 echo "[$NS] verifying local file and memory tools remain enabled"
 for config in "$leader_config" "$member_config"; do
-  if grep -Eq '^      - (file|memory)$' <<<"$config"; then
+  if grep -Eq '^[[:space:]]+- (file|memory)$' <<<"$config"; then
     echo "file or memory unexpectedly disabled" >&2
     exit 1
   fi
