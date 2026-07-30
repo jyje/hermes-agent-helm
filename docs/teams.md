@@ -56,10 +56,11 @@ bus:
   **context files** (`SOUL.md`, `AGENTS.md`) that inject into every session's
   system prompt, as described in the
   [Team Telegram Assistant guide](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant).
-- For **shared persistent knowledge** (vector indices, conversation history, or
-  shared config files), you can have all agents mount the **same ReadWriteMany
-  (RWX) PVC** using the `persistence.existingClaim` field. This lets agents
-  read and write to a common knowledge base. See
+- For **shared persistent knowledge** (vector indices or shared reference
+  files), keep each private `HERMES_HOME` and mount the **same
+  ReadWriteMany (RWX) PVC** at a separate path using `extraVolumes` and
+  `extraVolumeMounts`. This lets agents read and write a common knowledge base
+  without sharing config, memory, identity, or gateway sessions. See
   [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)
   for a complete example. **Note:** The PVC must use a StorageClass that supports
   `ReadWriteMany` access mode (e.g., NFS, CephFS, Longhorn); most cloud providers'
@@ -254,6 +255,20 @@ that gives uid/gid 10000 ownership of this private home because some local-path
 provisioners create its root as `root:root 0700`. Discord remains the source of
 truth.
 
+Local capability is separate from team coordination. The `file` and `memory`
+toolsets remain enabled because an agent may need private scratch files and
+durable memory for its own work. Another agent must never be told to read that
+private state, and no hook, watcher, scheduler, background process, file write,
+memory update, or tool/API call may deliver or trigger a team assignment. Only
+the visible Discord message containing the exact bot mention and complete task
+or result contract is a handoff.
+
+A second, pre-provisioned `hermes-team-knowledge` RWX PVC is mounted at
+`/opt/data/team-knowledge`. The leader mounts it read-write and is the sole
+curator; members mount it read-only. It contains durable reusable knowledge,
+not live coordination state. The permission boundary reinforces the prompt
+contract and avoids multi-writer races.
+
 The reference protocol is deliberately serial. The leader mentions one member,
 waits for that member to mention it back, reviews the result, and only then
 mentions the next member. With a room-wide session, simultaneous member replies
@@ -292,8 +307,26 @@ Reply contract: mention <@LEADER_ID> and include the complete result here.
 The mention stays first so the intended bot is obvious and triggered; the TEAM
 metadata stays on the final independent line so it does not interrupt the task.
 
-Deploy the leader and one release per member. No RWX workspace or preliminary
-PVC manifest is required:
+First create the shared knowledge claim with an RWX-capable StorageClass. Its
+root must be readable by uid/gid 10000 and writable by uid/gid 10000 for the
+leader:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-team-knowledge
+  namespace: hermes-team
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: nfs-client # replace with your RWX-capable class
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+Then deploy the leader and one release per member. The values files mount the
+same claim separately from every agent's private home:
 
 ```bash
 helm upgrade --install hermes-august ./charts/hermes-agent \
@@ -321,7 +354,8 @@ helm upgrade --install hermes-march ./charts/hermes-agent \
 Replace the channel, allowed-human, and bot IDs in the values files as well.
 Declarative users can use
 [`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml): one
-leader Application plus a member ApplicationSet, with no shared storage object.
+leader Application plus a member ApplicationSet. Provision the shared claim in
+the destination namespace before those Applications sync.
 
 ### Live evidence
 
@@ -339,8 +373,12 @@ is on the first line and `[TEAM run=… step=… TASK|RESULT]` is on its own fin
 line. Sanitized Discord API read-back confirmed the author/timestamp sequence,
 complete results stayed in the thread, and both final leader messages contained
 no member mention. All three pods had no `/opt/data/team` path, so no shared-file
-handoff was available. The existing kind screenshots separately prove the three
-independent releases and private homes.
+handoff was available. Those two conversational runs predated the dedicated
+knowledge mount and prove the message protocol, not shared storage. The current
+kind structural scenario separately verifies that the leader can write the
+knowledge PVC, a member can read the same content, and the member mount rejects
+writes. The existing kind screenshot separately proves the independent releases
+and private homes.
 
 This recipe is **Discord-specific** because its safety depends on Discord thread,
 mention, reply-reference, and session semantics. Telegram remains a supported
@@ -348,14 +386,16 @@ v1 messenger for human-to-agent use, but a Telegram bot-to-bot leader team needs
 a separate platform-level proof; changing only credential environment variables
 is not presented as sufficient.
 
-### Durable knowledge is separate
+### Shared knowledge is separate from coordination
 
-This protocol deliberately does not exchange intermediate context through a
-shared workspace. If a durable wiki or repository is wanted, the leader or a
-human may archive the **accepted final conversation** after the run. That is a
-downstream publishing step, not a hidden coordination plane, and a member must
-never be told to read or write a path instead of posting its result in the
-thread.
+The leader may curate accepted, reusable knowledge under
+`/opt/data/team-knowledge`; members may consult it as background. The shared PVC
+must never contain run-specific tasks, assignees, queues, status, intermediate
+results, completion markers, or next-step instructions. Members must not poll it
+for changes, and every delegation must remain fully understandable from the
+Discord message alone. A result must reproduce all relevant evidence in the
+thread instead of pointing at a path. This keeps durable knowledge useful
+without turning it into a hidden coordination plane.
 
 ## See also
 

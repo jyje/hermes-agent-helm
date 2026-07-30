@@ -264,7 +264,9 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 [`values-team-leader.yaml`](values-team-leader.yaml)과
 [`values-team-member.yaml`](values-team-member.yaml)을 사용하세요. 이 기준
 프로토콜은 한 번에 하나의 명시적 봇 멘션만 직렬로 처리하고 모든 과제·결과·리뷰를
-Discord 스레드에 남깁니다. 공유 팀 워크스페이스는 의도적으로 사용하지 않습니다.
+Discord 스레드에 남깁니다. 별도로 미리 준비한 RWX PVC에는 영속 공유 지식만 두며,
+과제·상태·결과 핸드오프에는 사용하지 않습니다. 팀 레시피는 이 claim을 필수로 하며
+리더는 읽기/쓰기, 멤버는 읽기 전용으로 마운트합니다.
 
 > Upstream은 현재 Hermes 봇 대 봇 Discord 대화를 내장 circuit breaker가 없는
 > 미지원 토폴로지로 문서화합니다. 이 예시는 실험적입니다. 전용 신뢰 채널과 수동
@@ -517,7 +519,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어** — 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |
-| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀** — Discord 스레드에서 명시적 봇 @mention을 직렬 처리하고 공유 파일 핸드오프는 사용하지 않음; [Teams](../../docs/teams-ko.md) 참고 |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀** — 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; [Teams](../../docs/teams-ko.md) 참고 |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **공유 RWX PVC** — 동일한 지식 베이스에 읽기/쓰기하는 다수의 에이전트 |
 
 순수 `helm`/`-f` 대신 ArgoCD로 배포하시나요? [`examples/argocd/`](../../examples/argocd/)를

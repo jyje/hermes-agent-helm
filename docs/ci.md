@@ -59,10 +59,13 @@ instead of one the chart creates — [PR #37](https://github.com/jyje/hermes-age
 5. Re-run `hermes doctor`.
 
 This is a **smoke test**: it proves the chart binds to a pre-created PVC and
-starts cleanly. It does **not** yet verify multi-instance sharing (RWX) or data
-persistence across restarts/upgrades — the original motivation for the feature
-(a shared knowledge base across several agents). Widening it to a cross-read /
-restart-persistence check is a known follow-up.
+starts cleanly. Persistence across restarts/upgrades remains a follow-up.
+
+The separate `team` scenario provisions `hermes-team-knowledge` as RWX, mounts
+it read-write on the leader and read-only on a member, writes a probe from the
+leader, cross-reads it from the member, and confirms that a member write is
+rejected. It therefore covers the multi-instance shared-knowledge boundary
+without treating the volume as a task handoff path.
 
 ### Fork PRs
 

@@ -301,7 +301,9 @@ For a leader plus several members, use
 [`values-team-leader.yaml`](values-team-leader.yaml) and
 [`values-team-member.yaml`](values-team-member.yaml). That reference protocol
 serializes one explicit bot mention at a time and keeps every task, result, and
-review in the Discord thread. It deliberately has no shared team workspace.
+review in the Discord thread. A separate pre-provisioned RWX PVC carries
+durable shared knowledge, but never tasks, status, or result handoffs. The team
+recipe requires that claim: leader read-write, members read-only.
 
 > Upstream currently documents Hermes bot-to-bot Discord conversation as an
 > unsupported topology with no built-in circuit breaker. The example is
@@ -592,7 +594,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair** — two agents handing off by @mention in a shared Discord channel |
-| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team** — serialized explicit bot @mentions in one Discord thread; no shared-file handoff; see [Teams](../../docs/teams.md) |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team** — serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/teams.md) |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC** — multiple agents reading/writing to the same knowledge base |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See

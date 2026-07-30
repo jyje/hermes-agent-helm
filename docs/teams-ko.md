@@ -56,10 +56,11 @@ Hermes Agent는 **개인용 에이전트**입니다: 하나의 `HERMES_HOME`, �
   (`SOUL.md`, `AGENTS.md`)로 고정합니다 — 매 세션의 시스템 프롬프트에 주입되며,
   [Team Telegram Assistant 가이드](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant)에
   나옵니다.
-- **공유 영속적 지식** (벡터 인덱스, 대화 내역, 또는 공유 config 파일)을 위해, 모든
-  에이전트가 `persistence.existingClaim` 필드를 사용하여 **같은 ReadWriteMany (RWX)
-  PVC**를 마운트할 수 있습니다. 이렇게 하면 에이전트들이 공통 지식 베이스에 읽기/쓰기를
-  할 수 있습니다. 완전한 예는
+- **공유 영속적 지식**(벡터 인덱스나 공유 참고 파일)을 위해 각자의 사설
+  `HERMES_HOME`은 유지하고, `extraVolumes`와 `extraVolumeMounts`로 별도 경로에
+  **같은 ReadWriteMany(RWX) PVC**를 마운트할 수 있습니다. 이렇게 하면 config,
+  메모리, 정체성, gateway 세션을 공유하지 않고 공통 지식 베이스를 읽고 쓸 수
+  있습니다. 완전한 예는
   [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)을
   참조하세요. **주의:** PVC는 `ReadWriteMany` 액세스 모드를 지원하는 StorageClass를
   사용해야 합니다(예: NFS, CephFS, Longhorn); 대부분의 클라우드 제공자의 기본
@@ -245,6 +246,19 @@ spec:
 `root:root 0700`으로 만들기 때문에, 예시는 작은 init container로 이 사설 홈의
 소유권을 uid/gid 10000에 줍니다. 진실의 원천은 Discord입니다.
 
+로컬 기능과 팀 조정은 별개입니다. 에이전트가 자체 작업에 사설 임시 파일과 영속
+메모리를 사용할 수 있도록 `file`과 `memory` toolset은 활성 상태로 둡니다. 다른
+에이전트에게 그 사설 상태를 읽으라고 지시해서는 안 되며, hook, watcher, scheduler,
+백그라운드 프로세스, 파일 쓰기, 메모리 업데이트, tool/API 호출로 팀 과제를
+전달하거나 트리거해서도 안 됩니다. 정확한 봇 멘션과 완전한 과제 또는 결과 계약을
+포함한 공개 Discord 메시지만 핸드오프입니다.
+
+별도로 미리 준비한 `hermes-team-knowledge` RWX PVC를
+`/opt/data/team-knowledge`에 마운트합니다. 리더는 읽기/쓰기로 마운트하며 유일한
+큐레이터이고, 멤버는 읽기 전용으로 마운트합니다. 여기에는 영속적이고 재사용 가능한
+지식만 두며 실시간 조정 상태는 두지 않습니다. 권한 경계가 프롬프트 계약을 보강하고
+다중 writer 경합을 피합니다.
+
 기준 프로토콜은 의도적으로 직렬입니다. 리더가 멤버 한 명을 멘션하고, 그 멤버가
 리더를 다시 멘션할 때까지 기다린 뒤 결과를 검토하고 다음 멤버를 멘션합니다.
 방 전체가 하나의 세션을 쓰는 상태에서 여러 멤버가 동시에 답하면 하나의 실행 슬롯을
@@ -282,8 +296,25 @@ Reply contract: <@LEADER_ID>를 멘션하고 완전한 결과를 여기에 포�
 의도한 봇이 분명히 호출되도록 멘션은 첫 줄에 두고, TEAM 메타데이터는 과제 본문을
 방해하지 않도록 마지막 독립 줄에 둡니다.
 
-리더와 멤버별 릴리스를 배포합니다. RWX 워크스페이스나 선행 PVC 매니페스트는
-필요하지 않습니다:
+먼저 RWX를 지원하는 StorageClass로 공유 지식 claim을 만듭니다. 루트는 uid/gid
+10000이 읽을 수 있어야 하고 리더의 uid/gid 10000이 쓸 수 있어야 합니다:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-team-knowledge
+  namespace: hermes-team
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: nfs-client # 사용하는 RWX 지원 클래스로 교체
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+그다음 리더와 멤버별 릴리스를 배포합니다. values 파일은 각 에이전트의 사설 홈과
+별개로 동일한 claim을 마운트합니다:
 
 ```bash
 helm upgrade --install hermes-august ./charts/hermes-agent \
@@ -310,8 +341,8 @@ helm upgrade --install hermes-march ./charts/hermes-agent \
 
 values 파일의 채널 ID, 허용할 사람 ID, 봇 ID도 교체해야 합니다. 선언형 사용자는
 [`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml)을
-사용할 수 있습니다. 리더 Application 하나와 멤버 ApplicationSet으로 구성되며
-공유 스토리지 오브젝트는 없습니다.
+사용할 수 있습니다. 리더 Application 하나와 멤버 ApplicationSet으로 구성됩니다.
+이 Application들이 sync되기 전에 대상 네임스페이스에 공유 claim을 준비하세요.
 
 ### 라이브 증거
 
@@ -329,19 +360,24 @@ values 파일의 채널 ID, 허용할 사람 ID, 봇 ID도 교체해야 합니�
 Discord API read-back으로 작성자/타임스탬프 순서를 확인했고, 완전한 결과가
 스레드에 남았으며 두 최종 리더 메시지 모두 멤버 멘션이 없었습니다. 세 파드에는
 `/opt/data/team` 경로가 없어서 공유 파일 핸드오프 자체가 불가능했습니다. 기존
-kind 스크린샷은 별도로 독립 릴리스 세 개와 사설 홈을 증명합니다.
+두 대화 실행은 전용 지식 마운트를 추가하기 전에 수행했으므로 메시지 프로토콜을
+증명하지만 공유 스토리지를 증명하지는 않습니다. 현재 kind 구조 시나리오는 별도로
+리더가 지식 PVC에 쓰고 멤버가 같은 내용을 읽으며 멤버의 쓰기는 거부되는 것을
+검증합니다. 기존 kind 스크린샷은 독립 릴리스 세 개와 사설 홈을 따로 증명합니다.
 
 이 레시피는 Discord 스레드, 멘션, reply-reference, 세션 의미론에 안전성이
 의존하므로 **Discord 전용**입니다. Telegram은 사람-에이전트 용도의 v1 메신저로
 계속 지원하지만, Telegram 봇 대 봇 리더 팀은 플랫폼 차원의 별도 실증이 필요합니다.
 자격증명 환경변수만 바꾸면 충분하다고 설명하지 않습니다.
 
-### 영속 지식은 별도입니다
+### 공유 지식과 조정은 분리합니다
 
-이 프로토콜은 공유 워크스페이스로 중간 문맥을 교환하지 않습니다. 영속 위키나
-저장소가 필요하다면 실행이 끝난 뒤 리더 또는 사람이 **승인된 최종 대화**를
-보관할 수 있습니다. 이는 숨은 조정 플레인이 아니라 후속 게시 단계이며, 멤버에게
-스레드에 결과를 쓰는 대신 경로를 읽거나 쓰라고 지시해서는 안 됩니다.
+리더는 승인된 재사용 지식을 `/opt/data/team-knowledge` 아래에 큐레이션할 수 있고,
+멤버는 이를 배경 지식으로 참고할 수 있습니다. 공유 PVC에는 실행별 과제, 담당자,
+queue, 상태, 중간 결과, 완료 마커, 다음 단계 지시를 두면 안 됩니다. 멤버는 파일
+변경을 polling해서는 안 되며 모든 위임은 Discord 메시지만으로 완전히 이해할 수
+있어야 합니다. 결과도 경로만 가리키지 말고 관련 근거 전체를 스레드에 다시 담아야
+합니다. 이렇게 해야 영속 지식을 활용하면서 숨은 조정 플레인으로 변질되지 않습니다.
 
 ## 함께 보기
 
