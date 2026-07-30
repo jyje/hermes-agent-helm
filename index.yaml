@@ -5,6 +5,44 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Added group_sessions_per_user, discord mention and thread settings to leader and member values for thread‑native team coordination."
+        - kind: "changed"
+          description: "Changed default shared knowledge PVC access mode from ReadWriteMany to ReadWriteOnce, requiring existing PVCs to meet new access mode."
+        - kind: "added"
+          description: "Added AUGUST_BOT_USER_ID and TEAM_KNOWLEDGE_ROOT values to support leader‑orchestrated team workflows."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.20
+    created: "2026-07-30T03:57:24.444868498Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: fb86756ef8535f0350ec3a5013d77ca9fd889a6113f34bea24b5abc73f43401f
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.0.0.tgz
+    version: 1.0.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Added ArgoCD example for Upstage Solar Open 2 model in upstage values."
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -865,4 +903,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-23T14:27:07.515005493Z"
+generated: "2026-07-30T03:57:24.442551464Z"
