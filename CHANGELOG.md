@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this chart are documented here.
+## [1.0.0] - 2026-07-30
+
+### Features
+
+- ✨ feat(teams): orchestrate agents through Discord threads (#89) ([`9ab31f7`](https://github.com/jyje/hermes-agent-helm/commit/9ab31f7258446bb98216612343cff00722ce6802)) — @jyje
+
 ## [0.12.0] - 2026-07-23
 
 ### Features
