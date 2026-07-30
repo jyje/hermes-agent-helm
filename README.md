@@ -72,8 +72,9 @@ change), see [Quick start](#quick-start) below.
   that shares context over a common gateway channel. See
   [Hermes teams](docs/teams.md).
 - **Verified end-to-end.** CI installs the chart on an ephemeral **kind**
-  cluster and runs the bundled test Job (`hermes doctor`), plus a **live
-  `hermes chat` round-trip** against a real NVIDIA NIM account — not a mock.
+  cluster and runs the bundled test Job (`hermes doctor`). When the
+  `NVIDIA_API_KEY` repository secret is available, it also runs a **live
+  `hermes chat` round-trip** against NVIDIA NIM — not a mock.
   The Discord-thread leader team has also completed a live human → leader →
   two members → leader round-trip; Telegram team orchestration remains separate.
 

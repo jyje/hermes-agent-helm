@@ -69,8 +69,9 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
   복제하지 않고, 잘 관리된 인스턴스를 여러 개 띄워 공통 gateway 채널로 컨텍스트를
   공유하는 **팀**으로 묶습니다. [Hermes 팀](docs/teams-ko.md)을 참고하세요.
 - **엔드-투-엔드 검증.** CI가 임시 **kind** 클러스터에 차트를 설치하고
-  번들된 테스트 Job(`hermes doctor`)과 실제 NVIDIA NIM 계정에 대한
-  **live `hermes chat` 라운드트립**을 실행 — 목(mock)이 아님.
+  번들된 테스트 Job(`hermes doctor`)을 실행합니다. `NVIDIA_API_KEY` 리포지토리
+  시크릿이 있으면 NVIDIA NIM에 대한 **live `hermes chat` 라운드트립**도 실행합니다
+  — 목(mock)이 아닙니다.
   Discord 스레드 리더 팀도 사람 → 리더 → 멤버 둘 → 리더 라이브 라운드트립을
   완주했습니다. Telegram 팀 오케스트레이션은 별도 실증 대상입니다.
 

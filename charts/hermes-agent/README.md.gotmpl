@@ -252,8 +252,9 @@ Notes:
 
 Hermes is a **single-instance personal agent** — it does not scale out. Instead,
 run several well-managed instances and group them into a team that shares **one
-Discord channel** as the context bus. Each agent gets its own bot token, pod, PVC,
-and identity; the shared channel is the only thing they have in common.
+Discord channel** as the context bus. Each agent gets its own bot token, pod,
+private `HERMES_HOME` PVC, and identity. Task coordination is shared only through
+the Discord channel; team-specific knowledge volumes are mounted separately.
 
 ### How agents hand off by `@mention`
 
@@ -304,6 +305,9 @@ serializes one explicit bot mention at a time and keeps every task, result, and
 review in the Discord thread. A separate pre-provisioned RWX PVC carries
 durable shared knowledge, but never tasks, status, or result handoffs. The team
 recipe requires that claim: leader read-write, members read-only.
+The `file` and `memory` toolsets remain available for each agent's own work;
+only cross-agent handoffs through files, memory, hooks, or background work are
+prohibited.
 
 > Upstream currently documents Hermes bot-to-bot Discord conversation as an
 > unsupported topology with no built-in circuit breaker. The example is

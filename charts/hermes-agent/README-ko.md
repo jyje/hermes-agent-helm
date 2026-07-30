@@ -215,8 +215,9 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 Hermes는 **단일 인스턴스 개인용 에이전트**입니다 — 수평 확장(스케일 아웃)이 아닙니다.
 대신 잘 관리된 인스턴스를 여러 개 띄우고, **하나의 Discord 채널**을 컨텍스트 버스로
-공유해 팀을 구성하세요. 각 에이전트는 고유한 봇 토큰, 파드, PVC, 아이덴티티를 가지며,
-공유 채널만 공통으로 사용합니다.
+공유해 팀을 구성하세요. 각 에이전트는 고유한 봇 토큰, 파드, 사설 `HERMES_HOME`
+PVC, 아이덴티티를 가집니다. 과제 조정은 Discord 채널에서만 공유하며, 팀 전용 지식
+볼륨은 별도로 마운트합니다.
 
 ### `@mention`으로 대화 넘기기
 
@@ -267,6 +268,8 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 Discord 스레드에 남깁니다. 별도로 미리 준비한 RWX PVC에는 영속 공유 지식만 두며,
 과제·상태·결과 핸드오프에는 사용하지 않습니다. 팀 레시피는 이 claim을 필수로 하며
 리더는 읽기/쓰기, 멤버는 읽기 전용으로 마운트합니다.
+`file`과 `memory` toolset은 각 에이전트의 자체 작업에 계속 사용할 수 있으며,
+파일·메모리·hook·백그라운드 작업을 통한 에이전트 간 핸드오프만 금지합니다.
 
 > Upstream은 현재 Hermes 봇 대 봇 Discord 대화를 내장 circuit breaker가 없는
 > 미지원 토폴로지로 문서화합니다. 이 예시는 실험적입니다. 전용 신뢰 채널과 수동
