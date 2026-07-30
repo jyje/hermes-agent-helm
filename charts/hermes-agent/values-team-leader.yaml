@@ -3,13 +3,29 @@
 # The LEADER of a Discord-thread-native Hermes agent team (star topology).
 # The human talks only to the leader; the leader and members hand work back and
 # forth with explicit bot @mentions in ONE Discord thread. The visible thread is
-# the context bus and audit log. No shared PVC, task file, completion marker, or
-# backend callback participates in the handoff.
+# the coordination bus and audit log. A separate RWX PVC provides durable shared
+# knowledge, but no task file, completion marker, hook, or backend callback on
+# that PVC participates in a handoff.
 #
 # The reference protocol intentionally serializes the team: august mentions one
 # member, that member mentions august back, and august either requests a revision
 # or mentions the next member. This avoids concurrent messages interrupting the
 # one shared thread session. See docs/teams.md and docs/collaboration.md.
+#
+# Before installing any team release, create one RWX claim named
+# hermes-team-knowledge in the target namespace. The leader mounts it read-write
+# and members mount it read-only. Its root must be readable by uid/gid 10000 and
+# writable by uid/gid 10000 for the leader. Example:
+#
+#   apiVersion: v1
+#   kind: PersistentVolumeClaim
+#   metadata:
+#     name: hermes-team-knowledge
+#     namespace: hermes-team
+#   spec:
+#     accessModes: [ReadWriteMany]
+#     storageClassName: nfs-client  # replace with an RWX-capable class
+#     resources: { requests: { storage: 10Gi } }
 #
 # All secrets and Discord IDs below are DUMMY placeholders. Override them at
 # install time or inject secrets through extraEnvFrom (see
@@ -52,10 +68,9 @@ config:
     tool_progress: "off"
 
   agent:
-    # This reference team proves pure conversational orchestration. Disabling
-    # stateful/outbound tools prevents a model from replacing a visible handoff
-    # with a local file, internal subagent, or second messaging path. Re-enable
-    # role-specific research/action tools only after the mention loop is proven.
+    # Files and memory remain available for each agent's own work and durable
+    # state. Alternate delegation/outbound paths stay disabled so only a visible
+    # Discord mention can assign work to another team member.
     disabled_toolsets:
       - browser
       - clarify
@@ -64,8 +79,6 @@ config:
       - delegation
       - discord
       - discord_admin
-      - file
-      - memory
       - messaging
       - session_search
       - skills
@@ -81,10 +94,21 @@ config:
 
       The Discord thread is the team's ONLY shared task state and audit trail.
       Every instruction, intermediate result, review, correction, and final
-      result must be visible in the thread. NEVER use a file, filesystem path,
-      shared volume, hidden local note, internal subagent, or tool call as a
-      handoff between team members. Do not say that you delegated work unless
-      your same response contains the assignee's exact <@...> token.
+      result must be visible in the thread. You MAY use private files and memory
+      for your own scratch work or durable state, but they are never a handoff:
+      no teammate may need a path, file, memory entry, or hidden state to act.
+      NEVER use a hook, watcher, scheduler, background process, file write,
+      memory update, API/tool call, or another bot to deliver, trigger, relay,
+      or queue work for a teammate. The ONLY delegation act is your same visible
+      Discord response containing the assignee's exact <@...> token and complete
+      task contract. Do not claim that you delegated work without that message.
+
+      Durable shared knowledge is mounted at ${TEAM_KNOWLEDGE_ROOT}. You are its
+      only writer; members mount it read-only. Store only reusable, accepted
+      knowledge there and state in your visible final response what you updated.
+      NEVER store or poll for run-specific tasks, assignees, queues, status,
+      intermediate results, completion markers, or next-step instructions there.
+      A delegation must remain fully understandable without reading this path.
 
       Protocol:
       1. Work serially: mention EXACTLY ONE member in each response. Wait for
@@ -149,9 +173,20 @@ extraEnv:
     value: "000000000000000000"       # DUMMY — march's Discord user ID
   - name: AUGUST_BOT_USER_ID
     value: "000000000000000000"       # DUMMY — leader's Discord user ID
+  - name: TEAM_KNOWLEDGE_ROOT
+    value: "/opt/data/team-knowledge"
 
-# Each agent keeps only its normal private HERMES_HOME PVC for config and its
-# own Discord session cache. There is deliberately no shared team workspace.
+# Every agent keeps its private HERMES_HOME. The separate shared volume is only
+# a durable knowledge base; it is never a task queue or coordination workspace.
+extraVolumes:
+  - name: team-knowledge
+    persistentVolumeClaim:
+      claimName: hermes-team-knowledge
+
+extraVolumeMounts:
+  - name: team-knowledge
+    mountPath: /opt/data/team-knowledge
+
 extraInitContainers:
   # Some local-path provisioners create a new PVC root as root:root 0700. The
   # gateway drops to uid/gid 10000, so make this agent's PRIVATE home traversable

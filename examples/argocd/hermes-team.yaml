@@ -3,17 +3,23 @@
 # The chart-packaged values-team-leader.yaml and values-team-member.yaml hold
 # the complete protocol. This Argo CD example supplies the roster, non-secret
 # Discord IDs, and per-agent Secret references. All work handoffs are explicit
-# bot @mentions in one visible Discord thread; there is no shared workspace.
+# bot @mentions in one visible Discord thread. A separately provisioned RWX PVC
+# named hermes-team-knowledge carries durable knowledge only: leader read-write,
+# members read-only. It is not a task queue or hidden handoff path.
 #
 # Before applying:
-#   1. Create one Secret per agent. Each must contain NVIDIA_API_KEY (or the
+#   1. Provision the hermes-team namespace and an RWX PVC named
+#      hermes-team-knowledge. Use an RWX-capable StorageClass and make its root
+#      readable by uid/gid 10000 and writable by uid/gid 10000 for the leader.
+#      The example manifest is in values-team-leader.yaml's header.
+#   2. Create one Secret per agent. Each must contain NVIDIA_API_KEY (or the
 #      credential for your chosen provider) and its own DISCORD_BOT_TOKEN:
 #        kubectl create secret generic hermes-august-discord-secrets -n hermes-team \
 #          --from-literal=NVIDIA_API_KEY='nvapi-<real>' \
 #          --from-literal=DISCORD_BOT_TOKEN='<august-bot-token>'
 #      Repeat for hermes-may-discord-secrets and hermes-march-discord-secrets.
-#   2. Replace every DUMMY channel/user/bot ID below.
-#   3. Invite all three bots to the same Discord channel and enable Message
+#   3. Replace every DUMMY channel/user/bot ID below.
+#   4. Invite all three bots to the same Discord channel and enable Message
 #      Content Intent for every bot.
 #
 # The values files set group_sessions_per_user=false so human and bot senders in
@@ -37,7 +43,10 @@ spec:
       valueFiles:
         - values-team-leader.yaml
       parameters:
-        # extraEnv indices are defined by values-team-leader.yaml.
+        # Helm list overrides are positional. Keep these indices synchronized
+        # with values-team-leader.yaml; scenario-team.sh renders and verifies
+        # this exact mapping so index drift fails CI instead of silently
+        # overriding another variable.
         - name: extraEnv[0].value     # DISCORD_HOME_CHANNEL
           value: "000000000000000000"
           forceString: true
@@ -99,7 +108,10 @@ spec:
             - name: fullnameOverride
               value: 'hermes-{{name}}'
               forceString: true
-            # extraEnv indices are defined by values-team-member.yaml.
+            # Helm list overrides are positional. Keep these indices synchronized
+            # with values-team-member.yaml; scenario-team.sh renders and verifies
+            # this exact mapping so index drift fails CI instead of silently
+            # overriding another variable.
             - name: extraEnv[0].value # DISCORD_HOME_CHANNEL
               value: "000000000000000000"
               forceString: true
