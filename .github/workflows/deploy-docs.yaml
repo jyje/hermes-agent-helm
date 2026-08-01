@@ -27,15 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pages/pnpm-lock.yaml
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - name: Install site dependencies
         run: pnpm -C pages install --frozen-lockfile
