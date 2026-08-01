@@ -1,0 +1,32 @@
+---
+interface Props { rawPath: string; label?: string; }
+const { rawPath, label = 'Markdown source' } = Astro.props;
+---
+
+<div class="raw-document-actions" data-raw-path={rawPath}>
+  <a href={rawPath}>{label}</a>
+  <button type="button">Copy source</button>
+</div>
+
+<script>
+  document.querySelectorAll('.raw-document-actions').forEach((actions) => {
+    const button = actions.querySelector('button');
+    const rawPath = actions.dataset.rawPath;
+    if (!(button instanceof HTMLButtonElement) || !rawPath) return;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(await (await fetch(rawPath)).text());
+        button.textContent = 'Copied';
+        window.setTimeout(() => { button.textContent = 'Copy source'; }, 1600);
+      } catch {
+        button.textContent = 'Copy failed';
+      }
+    });
+  });
+</script>
+
+<style>
+  .raw-document-actions { display:flex; gap:.7rem; align-items:center; margin: 1.25rem 0; font-size:.86rem; }
+  a, button { border:1px solid var(--sl-color-gray-5); background:var(--sl-color-bg); color:var(--sl-color-text); padding:.45rem .65rem; text-decoration:none; font:inherit; cursor:pointer; }
+  a:hover, button:hover { border-color:var(--sl-color-accent); color:var(--sl-color-text-accent); }
+</style>

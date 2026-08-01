@@ -6,3 +6,6 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Starlight local dependency store
+.pnpm-store/

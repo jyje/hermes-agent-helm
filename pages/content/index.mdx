@@ -1,0 +1,50 @@
+---
+title: Hermes Agent Helm
+description: Community-powered, lightweight Helm charts for running Hermes Agent on Kubernetes.
+sidebar:
+  label: Home
+  order: 0
+  attrs:
+    data-sidebar-order: '0'
+---
+
+This is the Helm chart repository for [jyje/hermes-agent-helm](https://github.com/jyje/hermes-agent-helm), a community-powered, lightweight Helm chart to run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes.
+
+<div className="overview-image">
+  <img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent" />
+</div>
+
+<p className="badges">
+  <a href="https://github.com/jyje/hermes-agent-helm"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github" /></a>
+  <a href="https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
+</p>
+
+## Install
+
+```bash
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+helm install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' \
+  --wait
+```
+
+The chart is also published as an OCI artifact at `oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent` — see the [main README](https://github.com/jyje/hermes-agent-helm#getting-started) for both options and the full configuration reference.
+
+## Charts
+
+<ul className="chart-list">
+  <li className="chart-card">
+    <a href="/hermes-agent-helm/reference/chart-readme/"><span>hermes-agent</span><span className="chart-version">v1.0.0</span></a>
+    <p>👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight</p>
+  </li>
+</ul>
+
+## Index
+
+Raw Helm repository index: [index.yaml](/hermes-agent-helm/index.yaml)
+
+---
+
+<small>Published automatically by [release-chart.yaml](https://github.com/jyje/hermes-agent-helm/blob/main/.github/workflows/release-chart.yaml) on every chart release.</small>

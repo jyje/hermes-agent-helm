@@ -1,0 +1,24 @@
+---
+const { head } = Astro.locals.starlightRoute;
+---
+
+{head.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-copy-source]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.addEventListener('click', async () => {
+        const rawPath = button.closest('[data-raw-path]')?.dataset.rawPath;
+        if (!rawPath) return;
+        try {
+          await navigator.clipboard.writeText(await (await fetch(rawPath)).text());
+          button.textContent = 'Copied';
+          window.setTimeout(() => { button.textContent = 'Copy source'; }, 1600);
+        } catch {
+          button.textContent = 'Copy failed';
+        }
+      });
+    });
+  });
+</script>
