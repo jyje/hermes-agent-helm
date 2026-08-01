@@ -1,0 +1,39 @@
+---
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+
+const finalPathSegment = (href) => href.split('?')[0].replace(/\/+$/, '').split('/').at(-1);
+
+const sidebarOrder = (entry) => Number(entry.attrs['data-sidebar-order'] ?? Number.MAX_SAFE_INTEGER);
+
+const applyDirectoryMetadata = (entries) => entries
+  .map((entry) => {
+    if (entry.type !== 'group') return { entry, order: sidebarOrder(entry) };
+    const directoryIndex = entry.entries.find((child) =>
+      child.type === 'link' && finalPathSegment(child.href) === entry.label,
+    );
+    return {
+      order: directoryIndex ? sidebarOrder(directoryIndex) : Number.MAX_SAFE_INTEGER,
+      entry: {
+        ...entry,
+        // An index.md frontmatter `sidebar.label` names its enclosing directory.
+        // Keep that index as a route, but avoid duplicating it below the group title.
+        label: directoryIndex?.label ?? entry.label,
+        entries: applyDirectoryMetadata(entry.entries.filter((child) => child !== directoryIndex)),
+      },
+    };
+  })
+  .toSorted((a, b) => a.order - b.order)
+  .map(({ entry }) => entry);
+
+const sidebar = applyDirectoryMetadata(Astro.locals.starlightRoute.sidebar);
+---
+
+<SidebarPersister>
+  <SidebarSublist sublist={sidebar} />
+</SidebarPersister>
+
+<div class="md:sl-hidden">
+  <MobileMenuFooter />
+</div>
