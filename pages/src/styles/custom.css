@@ -17,12 +17,10 @@ body { background-image:none; }
 .sidebar-pane :is(a, summary) { color: #3e454d; }
 .sidebar-pane a:hover, .sidebar-pane a:focus { color: #075f5b; background-color: #e0f1ef; }
 .sidebar-pane [aria-current='page'], .sidebar-pane [aria-current='page']:hover, .sidebar-pane [aria-current='page']:focus { color: #fff; background-color: #087f7a; }
-.github-stars { align-items:center; gap:.35rem; color:var(--sl-color-text-accent); font-size:.8rem; font-weight:650; text-decoration:none; white-space:nowrap; }
+.github-stars { align-items:center; flex:0 0 auto; gap:.35rem; color:var(--sl-color-text-accent); font-size:.8rem; font-weight:650; text-decoration:none; white-space:nowrap; }
 .github-stars:hover { color:var(--sl-color-accent-high); }
-.github-stars svg { width:1.1rem; height:1.1rem; }
+.github-stars svg { display:block; flex:0 0 1.1rem; width:1.1rem; min-width:1.1rem; height:1.1rem; aspect-ratio:1; }
 .github-stars__count { font-variant-numeric:tabular-nums; }
-.site-title { letter-spacing: -.035em; }
-.site-title img { width: 208px; height: 35px; }
 .hero { border: 1px solid var(--sl-color-gray-5); border-left: 5px solid var(--sl-color-accent); padding: clamp(1.5rem, 4vw, 3rem); margin: 1rem 0 2.5rem; background: color-mix(in srgb, var(--sl-color-bg-nav), transparent 25%); }
 .hero h1 { max-width: 17ch; font-family: var(--sl-font-mono); letter-spacing: -.075em; font-size: clamp(2.25rem, 5vw, 4.5rem); line-height: .95; }
 .hero p { max-width: 60ch; font-size: 1.15rem; }
