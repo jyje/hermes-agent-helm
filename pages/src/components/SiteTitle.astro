@@ -1,0 +1,97 @@
+---
+import headerArtwork from '../../../docs/images/hermes-agent-helm.png';
+
+const { siteTitleHref, lang } = Astro.locals.starlightRoute;
+const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered Helm chart';
+---
+
+<a href={siteTitleHref} class="site-title">
+  <span class="site-title__mark" aria-hidden="true">
+    <img src={headerArtwork.src} alt="" width={headerArtwork.width} height={headerArtwork.height} />
+  </span>
+  <span class="site-title__copy">
+    <strong translate="no">jyje/hermes-agent-helm</strong>
+    <small>{subtitle}</small>
+  </span>
+</a>
+
+<style>
+  @layer starlight.core {
+    .site-title {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0.65rem;
+      color: var(--sl-color-text);
+      text-decoration: none;
+    }
+
+    .site-title__mark {
+      position: relative;
+      display: block;
+      flex: 0 0 4.75rem;
+      width: 4.75rem;
+      height: 2rem;
+      overflow: hidden;
+    }
+
+    .site-title__mark img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6.8rem;
+      height: auto;
+      max-width: none;
+      transform: translate(-50%, -50%);
+    }
+
+    .site-title__copy {
+      display: grid;
+      min-width: 0;
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+
+    .site-title__copy strong {
+      overflow: hidden;
+      font-family: var(--sl-font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      text-overflow: ellipsis;
+    }
+
+    .site-title__copy small {
+      margin-top: 0.25rem;
+      color: var(--sl-color-gray-3);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.015em;
+    }
+
+    @media (max-width: 30rem) {
+      .site-title {
+        gap: 0.45rem;
+      }
+
+      .site-title__mark {
+        flex-basis: 3.75rem;
+        width: 3.75rem;
+        height: 1.65rem;
+      }
+
+      .site-title__mark img {
+        width: 5.4rem;
+      }
+
+      .site-title__copy strong {
+        font-size: 0.68rem;
+      }
+
+      .site-title__copy small {
+        margin-top: 0.18rem;
+        font-size: 0.52rem;
+      }
+    }
+  }
+</style>
