@@ -9,8 +9,7 @@ on:
       - "README-ko.md"
       - "docs/**"
       - "examples/**"
-      - "charts/hermes-agent/README*"
-      - "charts/hermes-agent/values*.yaml"
+      - "charts/**"
       - ".github/workflows/deploy-docs.yaml"
   pull_request:
     paths:
@@ -19,8 +18,7 @@ on:
       - "README-ko.md"
       - "docs/**"
       - "examples/**"
-      - "charts/hermes-agent/README*"
-      - "charts/hermes-agent/values*.yaml"
+      - "charts/**"
       - ".github/workflows/deploy-docs.yaml"
   workflow_dispatch:
 

@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,6 +9,7 @@ const rawRoot = join(site, 'public/source');
 // Example pages always live two folders below `docs`, hence this stable import.
 const componentImport = "import RawDocumentActions from '../../../../components/RawDocumentActions.astro';";
 const quote = (source) => source;
+const sitePath = (path = '') => `/hermes-agent-helm${path}`;
 
 const examples = [
   ['providers', 'openai', 'OpenAI', 'OpenAI API로 가장 빠르게 시작하는 기본 provider 구성', 'OPENAI_API_KEY', 'OpenAI 계정과 API key가 필요합니다. 처음 설치하거나 범용 기준 구성이 필요할 때 선택합니다.', 'OpenAI 모델 ID와 key만 실제 값으로 바꾸면 됩니다.'],
@@ -34,6 +35,53 @@ const examples = [
   ['advanced', 'team-member', 'Team member', 'leader 팀에 참여하는 개별 member release 구성', 'NVIDIA_API_KEY, DISCORD_BOT_TOKEN', '고유한 bot token, fullnameOverride, TEAM_MEMBER_NAME이 필요합니다.', 'member마다 이 파일로 별도 Helm release를 만들고 identity 값을 다르게 설정합니다.'],
 ];
 
+const englishExampleCopy = new Map([
+  ['openai', ['A minimal provider configuration for getting started quickly with the OpenAI API.', 'An OpenAI account and API key are required. Choose this for a first installation or a broadly compatible baseline.', 'Replace the model ID and API key with the values for your environment.']],
+  ['anthropic', ['Configure Claude as Hermes Agent’s default model provider.', 'An Anthropic API key and access to a Claude model are required.', 'Keep the provider set to `anthropic` and inject the Anthropic key through a Secret.']],
+  ['gemini', ['Use the Google AI Studio Gemini API as the model provider.', 'A Google AI Studio API key is required.', 'Adjust the Gemini model ID and API key for your environment.']],
+  ['google-vertex', ['Connect to Vertex AI Gemini using a GCP service account.', 'A GCP service-account JSON Secret with Vertex AI User permissions and a project ID are required.', 'Create the credential Secret before installation because the chart mounts it instead of using a static API key.']],
+  ['github-copilot', ['Complete GitHub Copilot device login through Discord.', 'A Discord bot, GitHub Copilot access, and persistent storage are required so login tokens can be reused.', 'Approve the device code from the initial pod logs or Discord prompt in GitHub.']],
+  ['nvidia-nim-and-discord', ['Connect NVIDIA NIM and a Discord bot in one release.', 'NVIDIA API credentials, a Discord bot token, a channel, and allowed user IDs are required.', 'This provider-and-messenger combination can also run on ARM64 clusters.']],
+  ['openrouter', ['Select models from multiple upstream providers with one OpenRouter key.', 'An OpenRouter API key and a target model are required.', 'Use a provider/model name from the OpenRouter catalog.']],
+  ['fireworks', ['Use Fireworks AI through its OpenAI-compatible provider endpoint.', 'A Fireworks API key and a supported model are required.', 'Check the available model catalog before changing `config.model.default`.']],
+  ['deepinfra', ['Connect to the DeepInfra OpenAI-compatible endpoint.', 'A DeepInfra API key and a model available from the endpoint are required.', 'Choose a model from the DeepInfra `/v1/openai/models` list.']],
+  ['upstage', ['Use Upstage Solar as the model provider.', 'An Upstage API key and a Solar model are required.', 'Set the Solar model ID and API key for your environment.']],
+  ['litellm', ['Connect to a LiteLLM proxy reachable over the network.', 'The LiteLLM HTTPS endpoint and a proxy virtual key are required.', 'Use this for a proxy outside the cluster or exposed through an Ingress or LoadBalancer.']],
+  ['litellm-k8s', ['Connect to LiteLLM through a Service in the same Kubernetes cluster.', 'The LiteLLM Service name, namespace, port, and proxy key are required.', 'Set the base URL to the Service FQDN to avoid an Ingress and TLS hop.']],
+  ['anthropic-and-discord', ['Combine the Claude provider and a Discord bot in one release.', 'An Anthropic API key, Discord bot token, channel ID, and allowed user IDs are required.', 'Use this to validate model and messenger settings together.']],
+  ['openai-and-telegram', ['Combine the OpenAI provider and a Telegram bot in one release.', 'An OpenAI API key, Telegram bot token, and chat scope are required.', 'Set the Telegram target scope before talking to the bot.']],
+  ['ingress', ['Expose the sensitive management dashboard behind an authenticated Ingress.', 'An OpenAI API key, a basic-auth Secret, and an Ingress controller are required.', 'The dashboard can expose API keys, so enforce authentication and a private network boundary.']],
+  ['bitwarden', ['Fetch provider credentials from Bitwarden Secrets Manager at startup.', 'A Bitwarden machine account with read access and a bootstrap Kubernetes Secret are required.', 'Keep provider credentials in the Bitwarden project rather than Git or a Kubernetes Secret.']],
+  ['moa', ['Combine multiple reference models with an aggregator model.', 'Hermes image v2026.7.1 or later and credentials for each referenced provider are required.', 'Replace the preset reference and aggregator models for your workload.']],
+  ['multi-agent-collab', ['Run the planner half of a collaborating pair in the same Discord channel.', 'Two bot identities, a shared channel, each bot’s Discord user ID, and provider credentials are required.', 'Deploy the separate builder release and loop-brake settings together with this planner.']],
+  ['shared-knowledge', ['Mount an RWX PVC as shared knowledge for multiple agents.', 'An existing RWX PVC writable by uid/gid 10000 and provider credentials are required.', 'Keep each agent’s HERMES_HOME on a private PVC and share only the knowledge claim.']],
+  ['team-leader', ['Run the leader of a Discord thread-based agent team.', 'An RWX knowledge claim, a leader bot, member bot IDs, and provider credentials are required.', 'Mount shared knowledge read-write for the leader and hand off work explicitly to members.']],
+  ['team-member', ['Run an individual member release in a leader-led team.', 'A unique bot token, fullnameOverride, TEAM_MEMBER_NAME, and provider credentials are required.', 'Deploy a separate Helm release for each member using this values file.']],
+]);
+
+const examplePageCopy = {
+  en: {
+    requiredSecret: 'Required secret',
+    overlay: 'Overlay',
+    whenToUse: 'When to use it',
+    install: 'Install',
+    multipleCredentials: 'When an example requires more than one credential, pass every listed value with `--set-string` or use `extraEnvFrom` to reference an existing Secret.',
+    adapt: 'Adapt before deploying',
+    complete: 'Complete overlay',
+    raw: 'Open raw values YAML',
+  },
+  ko: {
+    requiredSecret: '필수 Secret',
+    overlay: '오버레이',
+    whenToUse: '언제 사용하나요?',
+    install: '설치',
+    multipleCredentials: '둘 이상의 자격 증명이 필요한 예제에서는 모든 값을 `--set-string`으로 전달하거나 `extraEnvFrom`으로 기존 Secret을 참조하세요.',
+    adapt: '배포 전 조정',
+    complete: '전체 오버레이',
+    raw: '원본 values YAML 열기',
+  },
+};
+
 async function output(path, content) { await mkdir(dirname(path), { recursive: true }); await writeFile(path, content); }
 async function sourceCopy(source, destination) { await mkdir(dirname(destination), { recursive: true }); await cp(source, destination); }
 
@@ -44,6 +92,95 @@ async function sourcePage({ source, outputPath, title, description }) {
   await output(join(generated, outputPath), `---\ntitle: ${title}\ndescription: ${description}\n---\n\n<div class="raw-document-actions" data-raw-path="${rawPath}">\n  <a href="${rawPath}">Open raw Markdown</a>\n  <button type="button" data-copy-source>Copy source</button>\n</div>\n\n${content}`);
 }
 
+const chartField = (source, field) => {
+  const lines = source.split('\n');
+  const fieldIndex = lines.findIndex((line) => new RegExp(`^${field}:\\s*`).test(line));
+  if (fieldIndex < 0) return '';
+  const value = lines[fieldIndex].replace(new RegExp(`^${field}:\\s*`), '').trim();
+  if (value !== '|' && value !== '>') return value.replace(/^(?:"|')|(?:"|')$/g, '');
+  const block = [];
+  for (const line of lines.slice(fieldIndex + 1)) {
+    if (line.length > 0 && !/^\s/.test(line)) break;
+    if (line.trim()) block.push(line.trim());
+  }
+  return block[0] ?? '';
+};
+
+async function discoverCharts() {
+  const chartsDirectory = join(root, 'charts');
+  const entries = await readdir(chartsDirectory, { withFileTypes: true });
+  const charts = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const directory = entry.name;
+    const chartDirectory = join(chartsDirectory, directory);
+    const files = await readdir(chartDirectory);
+    if (!files.includes('Chart.yaml')) continue;
+    const chart = await readFile(join(chartDirectory, 'Chart.yaml'), 'utf8');
+    charts.push({
+      directory,
+      files,
+      name: chartField(chart, 'name') || directory,
+      version: chartField(chart, 'version') || 'unversioned',
+      description: chartField(chart, 'description') || 'A Helm chart published by this repository.',
+    });
+  }
+  return charts.toSorted((left, right) => left.name.localeCompare(right.name));
+}
+
+async function generateChartCatalog(charts) {
+  const cards = charts.map((chart) => `  <li className="chart-card">\n    <a href="${sitePath(`/charts/${chart.directory}/`)}"><span>${chart.name}</span><span className="chart-version">v${chart.version}</span></a>\n    <p>${chart.description}</p>\n  </li>`).join('\n');
+  await output(join(generated, 'index.mdx'), `---\ntitle: Helm chart repository\ndescription: Community-maintained Helm charts for Kubernetes workloads.\nsidebar:\n  label: Home\n  order: 0\n  attrs:\n    data-sidebar-order: '0'\n---\n\n# Helm charts\n\nEach chart has its own installation, values, overlays, and source reference. Add a chart under \`charts/<chart-name>/\` and it will be discovered during the documentation build.\n\n<ul className="chart-list">\n${cards}\n</ul>\n\n## Repository index\n\nRaw Helm repository index: [index.yaml](${sitePath('/index.yaml')})\n\n---\n\n<small>Published automatically on every chart release.</small>`);
+  await output(join(generated, 'charts/index.md'), `---\ntitle: Charts\ndescription: Independently documented Helm charts published by this repository.\nsidebar:\n  label: Charts\n  order: 10\n  attrs:\n    data-sidebar-order: '10'\n---\n\nChoose a chart to view its install instructions, values files, and source documentation.`);
+
+  for (const [position, chart] of charts.entries()) {
+    const chartPath = join(root, 'charts', chart.directory);
+    const route = sitePath(`/charts/${chart.directory}`);
+    const valueFiles = chart.files.filter((file) => /^values(?:-[a-z0-9-]+)?\.ya?ml$/i.test(file)).toSorted();
+    const overlays = valueFiles.filter((file) => file !== 'values.yaml');
+    const chartOrder = (position + 1) * 10;
+    await output(join(generated, 'charts', chart.directory, 'index.md'), `---\ntitle: ${chart.name}\ndescription: ${chart.description}\nsidebar:\n  label: ${chart.name}\n  order: ${chartOrder}\n  attrs:\n    data-sidebar-order: '${chartOrder}'\n---\n\n# ${chart.name}\n\n${chart.description}\n\n- [Install](${route}/install/)\n- [Values and overlays](${route}/reference/values/)\n- [Chart README](${route}/reference/readme/)`);
+    await output(join(generated, 'charts', chart.directory, 'install.md'), `---\ntitle: Install\ndescription: Install ${chart.name} from this Helm repository.\nsidebar:\n  order: 10\n---\n\n## Install from the Helm repository\n\n\`\`\`bash\nhelm repo add <repository-name> https://jyje.github.io/hermes-agent-helm\nhelm repo update\nhelm upgrade --install <release-name> <repository-name>/${chart.name} \\\n+  --namespace <namespace> --create-namespace\n\`\`\`\n\nUse the chart’s [values reference](${route}/reference/values/) or an overlay before deploying.`);
+    const installPath = join(generated, 'charts', chart.directory, 'install.md');
+    await writeFile(installPath, (await readFile(installPath, 'utf8')).replace('\n+  --namespace', '\n  --namespace'));
+    await output(join(generated, 'charts', chart.directory, 'reference/index.md'), `---\ntitle: Reference\ndescription: Source documentation and values files for ${chart.name}.\nsidebar:\n  label: Reference\n  order: 20\n---\n\nUse the chart README for complete configuration details, or inspect a source values file directly.`);
+    const readme = chart.files.find((file) => /^README\.md$/i.test(file));
+    if (readme) await sourcePage({
+      source: join(chartPath, readme),
+      outputPath: `charts/${chart.directory}/reference/readme.md`,
+      title: 'Chart README',
+      description: `The maintained README for ${chart.name}.`,
+    });
+    const valuesSections = [];
+    for (const valueFile of valueFiles) {
+      const source = join(chartPath, valueFile);
+      const rawPath = sitePath(`/source/charts/${chart.directory}/${valueFile}`);
+      const values = await readFile(source, 'utf8');
+      await sourceCopy(source, join(rawRoot, 'charts', chart.directory, valueFile));
+      valuesSections.push(`## ${valueFile}\n\n<div class="raw-document-actions" data-raw-path="${rawPath}">\n  <a href="${rawPath}">Open raw YAML</a>\n  <button type="button" data-copy-source>Copy source</button>\n</div>\n\n\`\`\`yaml title="charts/${chart.directory}/${valueFile}"\n${values}\n\`\`\``);
+    }
+    await output(join(generated, 'charts', chart.directory, 'reference/values.md'), `---\ntitle: Values and overlays\ndescription: Values files maintained with ${chart.name}.\nsidebar:\n  order: 10\n---\n\n${valuesSections.join('\n\n')}`);
+    if (overlays.length > 0) {
+      await output(join(generated, 'charts', chart.directory, 'overlays/index.md'), `---\ntitle: Values overlays\ndescription: Ready-to-adapt values overlays for ${chart.name}.\nsidebar:\n  label: Values overlays\n  order: 30\n---\n\nEach overlay is partial and is applied with the chart’s base \`values.yaml\`.`);
+      for (const [overlayIndex, overlay] of overlays.entries()) {
+        const values = await readFile(join(chartPath, overlay), 'utf8');
+        const rawPath = sitePath(`/source/charts/${chart.directory}/${overlay}`);
+        const slug = overlay.replace(/^values-/, '').replace(/\.ya?ml$/i, '');
+        const label = slug.replaceAll('-', ' ');
+        const order = (overlayIndex + 1) * 10;
+        await output(join(generated, 'charts', chart.directory, 'overlays', `${slug}.md`), `---\ntitle: ${label}\ndescription: ${overlay} for ${chart.name}.\nsidebar:\n  order: ${order}\n---\n\n<div class="raw-document-actions" data-raw-path="${rawPath}">\n  <a href="${rawPath}">Open raw YAML</a>\n  <button type="button" data-copy-source>Copy source</button>\n</div>\n\n\`\`\`yaml title="charts/${chart.directory}/${overlay}"\n${values}\n\`\`\``);
+      }
+    }
+  }
+}
+
+function exampleDocument({ title, description, secret, slug, requirements, customize, rawPath, yaml, copy, importPath }) {
+  const componentImport = importPath;
+  return `---\ntitle: ${title}\ndescription: ${description}\n---\n\n${componentImport}\n\n<div className="example-meta">\n  <div><strong>${copy.requiredSecret}</strong>${secret}</div>\n  <div><strong>${copy.overlay}</strong>values-${slug}.yaml</div>\n</div>\n\n## ${copy.whenToUse}\n\n${requirements}\n\n## ${copy.install}\n\n\`\`\`bash\nhelm upgrade --install hermes-agent ./charts/hermes-agent \\\n+  --namespace hermes-agent --create-namespace \\
+  -f charts/hermes-agent/values-${slug}.yaml \\
+  --set-string env.${secret.split(',')[0].replaceAll(' ', '_')}='<real-value>' --wait\n\`\`\`\n\n${copy.multipleCredentials}\n\n## ${copy.adapt}\n\n${customize}\n\n<RawDocumentActions rawPath="${rawPath}" label="${copy.raw}" />\n\n## ${copy.complete}\n\n\`\`\`yaml title="charts/hermes-agent/values-${slug}.yaml"\n${quote(yaml)}\n\`\`\``;
+}
+
 async function main() {
   // The generated source set can add or remove pages between runs. Clear
   // Astro's ignored content caches so deleted generated files never linger.
@@ -51,8 +188,10 @@ async function main() {
   await rm(join(site, 'node_modules/.astro'), { recursive: true, force: true });
   await rm(generated, { recursive: true, force: true });
   await rm(rawRoot, { recursive: true, force: true });
+  const charts = await discoverCharts();
   await output(join(generated, 'index.mdx'), `---\ntitle: Hermes Agent on Kubernetes\ndescription: Deploy a persistent, provider-agnostic Hermes Agent with Helm.\ntemplate: splash\n---\n\n<div className="hero">\n\n# Your agent runs where your workloads run.\n\nDeploy Hermes Agent as a lightweight Deployment or StatefulSet. Pick an example, add your secret, and keep the agent’s working state on a PVC.\n\n[Install Hermes Agent](/hermes-agent-helm/getting-started/install/) [Choose an example](/hermes-agent-helm/examples/)\n\n</div>\n\n## Start with a known shape\n\n- **One model, no messenger** — begin with [OpenAI](/hermes-agent-helm/examples/providers/openai/), Anthropic, Gemini, or another provider overlay.\n- **One bot, one channel** — use a Discord or Telegram example when the agent should receive messages.\n- **Several agents** — use the collaboration and team overlays only after the individual bot flow works.\n\n## What this chart owns\n\nThe chart creates the Kubernetes workload, its configuration ConfigMap, its Secret, optional persistent storage, and opt-in dashboard Service/Ingress. Hermes runs commands in its pod; no Docker socket or inbound API is required.\n\n## Read the source in the form you need\n\nEvery guide links to its original Markdown or YAML and offers a copy action. The full machine-readable map is available at [llms.txt](/hermes-agent-helm/llms.txt).`);
   await sourceCopy(join(site, 'content/index.mdx'), join(generated, 'index.mdx'));
+  await generateChartCatalog(charts);
   await output(join(generated, 'getting-started/index.md'), `---\ntitle: Getting Started\ndescription: Install Hermes Agent, then choose a values overlay for your provider and integration.\nsidebar:\n  label: Getting Started\n  order: 0\n---\n\nStart with the [installation guide](/hermes-agent-helm/getting-started/install/), then choose the values overlay that matches your provider and integration.`);
   await output(join(generated, 'getting-started/install.md'), `---\ntitle: Install Hermes Agent\ndescription: Install the chart with a provider key, then verify the rendered workload.\n---\n\n## Install from the Helm repository\n\n\`\`\`bash\nhelm repo add hermes-agent https://jyje.github.io/hermes-agent-helm\nhelm repo update\nhelm upgrade --install hermes-agent hermes-agent/hermes-agent \\\n  --namespace hermes-agent --create-namespace \\\n  --set-string env.OPENAI_API_KEY='sk-...' --wait\n\`\`\`\n\n## Or install the OCI artifact\n\n\`\`\`bash\nhelm upgrade --install hermes-agent \\\n  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \\\n  --version <chart-version> --namespace hermes-agent --create-namespace \\\n  --set-string env.OPENAI_API_KEY='sk-...' --wait\n\`\`\`\n\n## Verify\n\n\`\`\`bash\nhelm test hermes-agent --namespace hermes-agent\nkubectl get pods --namespace hermes-agent\n\`\`\`\n\nThe Helm test performs the chart's doctor-style check. Pick a provider overlay next when the generic OpenAI default is not your target.`);
   await output(join(generated, 'examples/index.md'), `---\ntitle: Choose a values example\ndescription: Start from a runnable overlay, then replace only its dummy credentials and environment-specific identifiers.\n---\n\nEvery example is an overlay for \`charts/hermes-agent/values.yaml\`. It is deliberately partial: Hermes adds its version-specific defaults and your environment injects secrets separately.\n\n## Pick by outcome\n\n- **Connect a model:** provider pages cover public APIs and the GitHub device-login flow.\n- **Connect a proxy or bot:** integration pages cover LiteLLM, Discord, Telegram, and the protected dashboard.\n- **Coordinate agents:** advanced pages cover secrets managers, shared storage, collaboration, and teams.\n\nNever commit real keys into an overlay. Each example documents the required Secret and an install command with placeholder values.`);
@@ -99,6 +238,37 @@ async function main() {
     const yaml = await readFile(source, 'utf8');
     await sourceCopy(source, join(rawRoot, 'charts/hermes-agent', `values-${slug}.yaml`));
     await output(join(generated, 'examples', group, `${slug}.mdx`), `---\ntitle: ${title}\ndescription: ${description}\n---\n\n${componentImport}\n\n<div className="example-meta">\n  <div><strong>Required secret</strong>${secret}</div>\n  <div><strong>Overlay</strong>values-${slug}.yaml</div>\n</div>\n\n## When to use it\n\n${requirements}\n\n## Install\n\n\`\`\`bash\nhelm upgrade --install hermes-agent ./charts/hermes-agent \\\n  --namespace hermes-agent --create-namespace \\\n  -f charts/hermes-agent/values-${slug}.yaml \\\n  --set-string env.${secret.split(',')[0].replaceAll(' ', '_')}='<real-value>' --wait\n\`\`\`\n\nWhen the example requires more than one credential, pass every listed value with \`--set-string\` or use \`extraEnvFrom\` to reference an existing Secret.\n\n## Adapt before deploying\n\n${customize}\n\n<RawDocumentActions rawPath="${rawPath}" label="Open raw values YAML" />\n\n## Complete overlay\n\n\`\`\`yaml title="charts/hermes-agent/values-${slug}.yaml"\n${quote(yaml)}\n\`\`\``);
+  }
+
+  // Generate locale-specific example pages after copying their source overlays.
+  // The legacy generator above is retained temporarily for the existing route
+  // structure; these writes replace its English pages and add Korean variants.
+  for (const [group, slug, title, descriptionKo, secret, requirementsKo, customizeKo] of examples) {
+    const source = join(root, 'charts/hermes-agent', `values-${slug}.yaml`);
+    const rawPath = `/hermes-agent-helm/source/charts/hermes-agent/values-${slug}.yaml`;
+    const yaml = await readFile(source, 'utf8');
+    const [descriptionEn, requirementsEn, customizeEn] = englishExampleCopy.get(slug);
+    for (const [locale, description, requirements, customize] of [
+      ['en', descriptionEn, requirementsEn, customizeEn],
+      ['ko', descriptionKo, requirementsKo, customizeKo],
+    ]) {
+      const localePath = locale === 'en' ? [] : [locale];
+      const document = exampleDocument({
+        title,
+        description,
+        secret,
+        slug,
+        requirements,
+        customize,
+        rawPath,
+        yaml,
+        copy: examplePageCopy[locale],
+        importPath: locale === 'en'
+          ? componentImport
+          : "import RawDocumentActions from '../../../../../components/RawDocumentActions.astro';",
+      }).replace('\n+  --namespace', '\n  --namespace');
+      await output(join(generated, ...localePath, 'examples', group, `${slug}.mdx`), document);
+    }
   }
 
   const documents = [
