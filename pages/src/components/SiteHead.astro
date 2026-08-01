@@ -3,6 +3,8 @@ const { head } = Astro.locals.starlightRoute;
 ---
 
 {head.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
 
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {

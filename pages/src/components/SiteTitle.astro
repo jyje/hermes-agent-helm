@@ -2,7 +2,7 @@
 import headerArtwork from '../../../docs/images/hermes-agent-helm.png';
 
 const { siteTitleHref, lang } = Astro.locals.starlightRoute;
-const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered Helm chart';
+const subtitle = 'Hermes Agent Helm chart';
 ---
 
 <a href={siteTitleHref} class="site-title">
@@ -56,10 +56,10 @@ const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered
     .site-title__copy strong {
       display: block;
       padding-block: 0.08em;
-      font-family: var(--sl-font-mono);
+      font-family: var(--sl-font);
       font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: -0.035em;
+      font-weight: 650;
+      letter-spacing: 0;
       line-height: 1.2;
     }
 
@@ -68,7 +68,7 @@ const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered
       color: var(--sl-color-gray-3);
       font-size: 0.62rem;
       font-weight: 600;
-      letter-spacing: 0.015em;
+      letter-spacing: 0;
       line-height: 1.2;
     }
 

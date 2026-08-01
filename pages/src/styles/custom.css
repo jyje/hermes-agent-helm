@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'MesloLGS Nerd Font';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/Meslo/S/Regular/MesloLGSNerdFont-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'MesloLGS Nerd Font';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/Meslo/S/Bold/MesloLGSNerdFont-Bold.ttf') format('truetype');
+}
+
 :root {
   color-scheme: light;
   /* Match the header artwork's #f4f4f4 canvas exactly. */
@@ -9,8 +25,8 @@
   --sl-color-bg-sidebar: #ececec;
   --sl-color-hairline-light: #d5d5d5;
   --sl-color-hairline-shade: #c8c8c8;
-  --sl-font: Inter, ui-sans-serif, system-ui, sans-serif;
-  --sl-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --sl-font: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: "MesloLGS Nerd Font", "MesloLGS NF", "JetBrainsMono Nerd Font", ui-monospace, monospace;
 }
 
 html, body { background-color:#f4f4f4; }
@@ -21,10 +37,12 @@ body { background-image:none; }
 .sidebar-pane [aria-current='page'], .sidebar-pane [aria-current='page']:hover, .sidebar-pane [aria-current='page']:focus { color: #fff; background-color: #087f7a; }
 .github-stars { align-items:center; flex:0 0 auto; gap:.35rem; color:var(--sl-color-text-accent); font-size:.8rem; font-weight:650; text-decoration:none; white-space:nowrap; }
 .github-stars:hover { color:var(--sl-color-accent-high); }
-.github-stars svg { display:block; flex:0 0 1.1rem; width:1.1rem; min-width:1.1rem; height:1.1rem; aspect-ratio:1; }
+.github-stars > svg { display:block; flex:0 0 1.25rem; width:1.25rem; min-width:1.25rem; height:1.25rem; overflow:visible; }
+.github-stars__metric { align-items:center; display:inline-flex; gap:.2rem; }
+.github-stars__metric svg { display:block; flex:0 0 1rem; width:1rem; height:1rem; overflow:visible; }
 .github-stars__count { font-variant-numeric:tabular-nums; }
 .hero { border: 1px solid var(--sl-color-gray-5); border-left: 5px solid var(--sl-color-accent); padding: clamp(1.5rem, 4vw, 3rem); margin: 1rem 0 2.5rem; background: color-mix(in srgb, var(--sl-color-bg-nav), transparent 25%); }
-.hero h1 { max-width: 17ch; font-family: var(--sl-font-mono); letter-spacing: -.075em; font-size: clamp(2.25rem, 5vw, 4.5rem); line-height: .95; }
+.hero h1 { max-width: 17ch; font-family: var(--sl-font); letter-spacing: -.04em; font-size: clamp(2.25rem, 5vw, 4.5rem); line-height: .95; }
 .hero p { max-width: 60ch; font-size: 1.15rem; }
 .hero code { color: var(--sl-color-text); }
 .sl-markdown-content :is(h2, h3) { letter-spacing: -.03em; }
