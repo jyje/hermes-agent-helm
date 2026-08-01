@@ -1,0 +1,70 @@
+# Mirrors charts/hermes-agent/values-ingress.yaml: OpenAI (api.openai.com)
+# with the management dashboard exposed via Ingress, behind nginx basic-auth.
+#
+# Before applying, create:
+#   1. The Secret this Application references for the API key:
+#        kubectl create secret generic hermes-agent-ingress-secrets -n hermes-agent \
+#          --from-literal=OPENAI_API_KEY='sk-<real>'
+#   2. The basic-auth Secret used by the ingress.annotations below:
+#        htpasswd -cb /tmp/auth admin '<your-password>'
+#        kubectl create secret generic hermes-agent-dashboard-auth -n hermes-agent \
+#          --from-file=auth=/tmp/auth
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # KEEP IT EQUAL TO spec.source.helm.releaseName below.
+  name: hermes-agent-ingress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
+    helm:
+      # MUST equal metadata.name (see examples/argocd/README.md).
+      releaseName: hermes-agent-ingress
+      valuesObject:
+        config:
+          model:
+            provider: openai-api
+            default: gpt-4o-mini
+          terminal:
+            backend: local
+        # Real key comes from the Secret via extraEnvFrom below; this
+        # placeholder is never used.
+        env:
+          OPENAI_API_KEY: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-ingress-secrets
+        service:
+          enabled: true
+          type: ClusterIP
+          port: 9119
+        ingress:
+          enabled: true
+          className: nginx
+          annotations:
+            nginx.ingress.kubernetes.io/auth-type: basic
+            nginx.ingress.kubernetes.io/auth-secret: hermes-agent-dashboard-auth
+            nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Hermes Agent Dashboard"
+          hosts:
+            - host: hermes-agent.example.com
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls: []
+          #  - secretName: hermes-agent-tls
+          #    hosts:
+          #      - hermes-agent.example.com
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

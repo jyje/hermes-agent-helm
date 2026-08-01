@@ -1,0 +1,73 @@
+---
+title: LiteLLM (in cluster)
+description: Connect to LiteLLM through a Service in the same Kubernetes cluster.
+---
+
+import RawDocumentActions from '@components/RawDocumentActions.astro';
+
+<div className="example-meta">
+  <div><strong>Required secret</strong>OPENAI_API_KEY</div>
+  <div><strong>Overlay</strong>values-litellm-k8s.yaml</div>
+</div>
+
+## When to use it
+
+The LiteLLM Service name, namespace, port, and proxy key are required.
+
+## Install
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-litellm-k8s.yaml \
+  --set-string env.OPENAI_API_KEY='<real-value>' --wait
+```
+
+When an example requires more than one credential, pass every listed value with `--set-string` or use `extraEnvFrom` to reference an existing Secret.
+
+## Adapt before deploying
+
+Set the base URL to the Service FQDN to avoid an Ingress and TLS hop.
+
+<RawDocumentActions rawPath="/hermes-agent-helm/source/charts/hermes-agent/values-litellm-k8s.yaml" label="Open Raw YAML" />
+
+## Complete overlay
+
+```yaml title="charts/hermes-agent/values-litellm-k8s.yaml"
+# values-litellm-k8s.yaml
+#
+# Hermes Agent talking to a LiteLLM proxy deployed in the SAME Kubernetes
+# cluster (e.g. via the upstream berriai/litellm-helm chart), reached over
+# in-cluster Service DNS — no Ingress/TLS needed. For a proxy reachable over
+# the network instead, see values-litellm.yaml.
+#
+# Adjust `base_url` to match your LiteLLM Service name/namespace:
+#   http://<service>.<namespace>.svc.cluster.local:<port>/v1
+#
+# Dummy key — override at install time.
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-litellm-k8s.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-<your-litellm-proxy-key>' --wait
+
+config:
+  # Register the in-cluster proxy as a custom OpenAI-compatible provider. The
+  # key ("litellm") is the provider id referenced by model.provider below.
+  providers:
+    litellm:
+      # DUMMY — service "litellm" in namespace "litellm", default chart port.
+      base_url: http://litellm.litellm.svc.cluster.local:4000/v1
+      key_env: OPENAI_API_KEY      # env var that holds the proxy key
+      discover_models: true        # populate the model picker from /v1/models
+  model:
+    provider: litellm
+    # Must match a model name exposed by the proxy (see /v1/models).
+    default: openai/gpt-oss-120b
+  terminal:
+    backend: local
+
+env:
+  OPENAI_API_KEY: "sk-DUMMY_replace_me_000000000000000000000000"
+
+```

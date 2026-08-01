@@ -1,0 +1,59 @@
+# Mirrors charts/hermes-agent/values-anthropic-and-discord.yaml: Anthropic
+# (Claude) for the model AND a Discord bot — both wired in one Application.
+#
+# Before applying, create the Secret this Application references:
+#   kubectl create secret generic hermes-agent-anthropic-discord-secrets -n hermes-agent \
+#     --from-literal=ANTHROPIC_API_KEY='sk-ant-<real>' \
+#     --from-literal=DISCORD_BOT_TOKEN='<real-bot-token>'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-agent-anthropic-and-discord
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
+    helm:
+      releaseName: hermes-agent-anthropic-and-discord
+      valuesObject:
+        config:
+          model:
+            provider: anthropic
+            # A current Claude model id — see https://docs.anthropic.com for
+            # the list (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).
+            default: claude-sonnet-4-6
+          terminal:
+            backend: local
+        env:
+          # Real values come from the Secret via extraEnvFrom below.
+          ANTHROPIC_API_KEY: "set-via-extraEnvFrom"
+          # Unused by the anthropic provider; overrides the chart's OpenAI placeholder.
+          OPENAI_API_KEY: "unused"
+          # Setting the token is enough to auto-enable Discord — no config.yaml
+          # change. Create the bot at https://discord.com/developers/applications,
+          # enable the "Message Content Intent", and invite it to your server.
+          DISCORD_BOT_TOKEN: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-anthropic-discord-secrets
+        # Non-secret Discord knobs — plain env, not the Secret.
+        extraEnv:
+          - name: DISCORD_HOME_CHANNEL        # channel id for cron / notification delivery
+            value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+          - name: DISCORD_ALLOWED_USERS       # comma-separated user ids allowed to talk
+            value: "111111111111111111"       # DUMMY — your Discord user id
+          - name: DISCORD_ALLOW_ALL_USERS     # true only for throwaway/dev bots
+            value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

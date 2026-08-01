@@ -1,0 +1,140 @@
+# Discord-thread-native leader team.
+#
+# The chart-packaged values-team-leader.yaml and values-team-member.yaml hold
+# the complete protocol. This Argo CD example supplies the roster, non-secret
+# Discord IDs, and per-agent Secret references. All work handoffs are explicit
+# bot @mentions in one visible Discord thread. A separately provisioned RWX PVC
+# named hermes-team-knowledge carries durable knowledge only: leader read-write,
+# members read-only. It is not a task queue or hidden handoff path.
+#
+# Before applying:
+#   1. Provision the hermes-team namespace and an RWX PVC named
+#      hermes-team-knowledge. Use an RWX-capable StorageClass and make its root
+#      readable by uid/gid 10000 and writable by uid/gid 10000 for the leader.
+#      The example manifest is in values-team-leader.yaml's header.
+#   2. Create one Secret per agent. Each must contain NVIDIA_API_KEY (or the
+#      credential for your chosen provider) and its own DISCORD_BOT_TOKEN:
+#        kubectl create secret generic hermes-august-discord-secrets -n hermes-team \
+#          --from-literal=NVIDIA_API_KEY='nvapi-<real>' \
+#          --from-literal=DISCORD_BOT_TOKEN='<august-bot-token>'
+#      Repeat for hermes-may-discord-secrets and hermes-march-discord-secrets.
+#   3. Replace every DUMMY channel/user/bot ID below.
+#   4. Invite all three bots to the same Discord channel and enable Message
+#      Content Intent for every bot.
+#
+# The values files set group_sessions_per_user=false so human and bot senders in
+# one thread share one transcript, history_backfill=true so mentioned bots see
+# the visible thread context, and mention-only loop brakes so no body mention
+# means no next bot turn.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-august
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    targetRevision: "*"              # pin an exact chart version in production
+    helm:
+      releaseName: hermes-august
+      valueFiles:
+        - values-team-leader.yaml
+      parameters:
+        # Helm list overrides are positional. Keep these indices synchronized
+        # with values-team-leader.yaml; scenario-team.sh renders and verifies
+        # this exact mapping so index drift fails CI instead of silently
+        # overriding another variable.
+        - name: extraEnv[0].value     # DISCORD_HOME_CHANNEL
+          value: "000000000000000000"
+          forceString: true
+        - name: extraEnv[1].value     # DISCORD_ALLOWED_USERS
+          value: "111111111111111111"
+          forceString: true
+        - name: extraEnv[6].value     # MAY_BOT_USER_ID
+          value: "000000000000000000"
+          forceString: true
+        - name: extraEnv[7].value     # MARCH_BOT_USER_ID
+          value: "000000000000000000"
+          forceString: true
+        - name: extraEnv[8].value     # AUGUST_BOT_USER_ID
+          value: "000000000000000000"
+          forceString: true
+      valuesObject:
+        env:
+          NVIDIA_API_KEY: set-via-extraEnvFrom
+          DISCORD_BOT_TOKEN: set-via-extraEnvFrom
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-august-discord-secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-team
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: hermes-team-members
+  namespace: argocd
+spec:
+  goTemplate: false
+  generators:
+    - list:
+        elements:
+          - name: may
+            botSecret: hermes-may-discord-secrets
+          - name: march
+            botSecret: hermes-march-discord-secrets
+  template:
+    metadata:
+      name: 'hermes-{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: ghcr.io/jyje/hermes-agent-helm
+        chart: hermes-agent
+        targetRevision: "*"          # pin an exact chart version in production
+        helm:
+          releaseName: 'hermes-{{name}}'
+          valueFiles:
+            - values-team-member.yaml
+          parameters:
+            - name: fullnameOverride
+              value: 'hermes-{{name}}'
+              forceString: true
+            # Helm list overrides are positional. Keep these indices synchronized
+            # with values-team-member.yaml; scenario-team.sh renders and verifies
+            # this exact mapping so index drift fails CI instead of silently
+            # overriding another variable.
+            - name: extraEnv[0].value # DISCORD_HOME_CHANNEL
+              value: "000000000000000000"
+              forceString: true
+            - name: extraEnv[1].value # DISCORD_ALLOWED_USERS
+              value: "111111111111111111"
+              forceString: true
+            - name: extraEnv[6].value # TEAM_MEMBER_NAME
+              value: '{{name}}'
+              forceString: true
+            - name: extraEnv[7].value # AUGUST_BOT_USER_ID
+              value: "000000000000000000"
+              forceString: true
+          valuesObject:
+            env:
+              NVIDIA_API_KEY: set-via-extraEnvFrom
+              DISCORD_BOT_TOKEN: set-via-extraEnvFrom
+            extraEnvFrom:
+              - secretRef:
+                  name: '{{botSecret}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: hermes-team
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

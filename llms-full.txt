@@ -11,24 +11,24 @@
 
 ## Values examples
 
-- [OpenAI](https://jyje.github.io/hermes-agent-helm/examples/providers/openai/): OpenAI API로 가장 빠르게 시작하는 기본 provider 구성
-- [Anthropic](https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/): Claude를 Hermes Agent의 기본 모델로 사용하는 구성
-- [Google Gemini](https://jyje.github.io/hermes-agent-helm/examples/providers/gemini/): Google AI Studio Gemini API를 사용하는 구성
-- [Google Vertex AI](https://jyje.github.io/hermes-agent-helm/examples/providers/google-vertex/): GCP 서비스 계정으로 Vertex AI Gemini에 연결하는 구성
-- [GitHub Copilot](https://jyje.github.io/hermes-agent-helm/examples/providers/github-copilot/): Discord를 통해 GitHub OAuth device login을 완료하는 구성
-- [NVIDIA NIM + Discord](https://jyje.github.io/hermes-agent-helm/examples/providers/nvidia-nim-and-discord/): NVIDIA NIM 모델과 Discord bot을 함께 연결하는 구성
-- [OpenRouter](https://jyje.github.io/hermes-agent-helm/examples/providers/openrouter/): 하나의 OpenRouter key로 다양한 upstream 모델을 선택하는 구성
-- [Fireworks AI](https://jyje.github.io/hermes-agent-helm/examples/providers/fireworks/): Fireworks의 OpenAI-compatible provider를 사용하는 구성
-- [DeepInfra](https://jyje.github.io/hermes-agent-helm/examples/providers/deepinfra/): DeepInfra OpenAI-compatible endpoint에 연결하는 구성
-- [Upstage Solar](https://jyje.github.io/hermes-agent-helm/examples/providers/upstage/): Upstage Solar provider를 사용하는 구성
-- [LiteLLM (external)](https://jyje.github.io/hermes-agent-helm/examples/integrations/litellm/): 네트워크로 도달 가능한 LiteLLM proxy에 연결하는 구성
-- [LiteLLM (in cluster)](https://jyje.github.io/hermes-agent-helm/examples/integrations/litellm-k8s/): 같은 Kubernetes 클러스터 안의 LiteLLM Service DNS를 사용하는 구성
-- [Anthropic + Discord](https://jyje.github.io/hermes-agent-helm/examples/integrations/anthropic-and-discord/): Claude provider와 Discord bot을 한 릴리스에 결합한 구성
-- [OpenAI + Telegram](https://jyje.github.io/hermes-agent-helm/examples/integrations/openai-and-telegram/): OpenAI provider와 Telegram bot을 결합한 구성
-- [Dashboard Ingress](https://jyje.github.io/hermes-agent-helm/examples/integrations/ingress/): 민감한 management dashboard를 인증된 Ingress 뒤에 노출하는 구성
-- [Bitwarden Secrets Manager](https://jyje.github.io/hermes-agent-helm/examples/advanced/bitwarden/): Bitwarden에서 provider key를 시작 시 가져오는 구성
-- [Mixture of Agents](https://jyje.github.io/hermes-agent-helm/examples/advanced/moa/): 여러 reference model과 aggregator model을 결합하는 구성
-- [Collaborating pair](https://jyje.github.io/hermes-agent-helm/examples/advanced/multi-agent-collab/): 같은 Discord channel에서 @mention으로 협업하는 planner 구성
-- [Shared knowledge PVC](https://jyje.github.io/hermes-agent-helm/examples/advanced/shared-knowledge/): 여러 agent가 RWX PVC를 공용 지식 저장소로 mount하는 구성
-- [Team leader](https://jyje.github.io/hermes-agent-helm/examples/advanced/team-leader/): Discord thread 기반 leader-orchestrated team의 leader 구성
-- [Team member](https://jyje.github.io/hermes-agent-helm/examples/advanced/team-member/): leader 팀에 참여하는 개별 member release 구성
+- [OpenAI](https://jyje.github.io/hermes-agent-helm/examples/providers/openai/): A minimal configuration for getting started with the OpenAI API.
+- [Anthropic](https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/): Configure Claude as the default model provider.
+- [Google Gemini](https://jyje.github.io/hermes-agent-helm/examples/providers/gemini/): Use the Google AI Studio Gemini API.
+- [Google Vertex AI](https://jyje.github.io/hermes-agent-helm/examples/providers/google-vertex/): Connect to Vertex AI Gemini with a GCP service account.
+- [GitHub Copilot](https://jyje.github.io/hermes-agent-helm/examples/providers/github-copilot/): Complete GitHub Copilot device login through Discord.
+- [NVIDIA NIM + Discord](https://jyje.github.io/hermes-agent-helm/examples/providers/nvidia-nim-and-discord/): Connect NVIDIA NIM and a Discord bot in one release.
+- [OpenRouter](https://jyje.github.io/hermes-agent-helm/examples/providers/openrouter/): Select upstream models with one OpenRouter key.
+- [Fireworks AI](https://jyje.github.io/hermes-agent-helm/examples/providers/fireworks/): Use the Fireworks OpenAI-compatible endpoint.
+- [DeepInfra](https://jyje.github.io/hermes-agent-helm/examples/providers/deepinfra/): Connect to the DeepInfra OpenAI-compatible endpoint.
+- [Upstage Solar](https://jyje.github.io/hermes-agent-helm/examples/providers/upstage/): Use Upstage Solar as the model provider.
+- [LiteLLM (external)](https://jyje.github.io/hermes-agent-helm/examples/integrations/litellm/): Connect to a network-reachable LiteLLM proxy.
+- [LiteLLM (in cluster)](https://jyje.github.io/hermes-agent-helm/examples/integrations/litellm-k8s/): Connect to LiteLLM through an in-cluster Service.
+- [Anthropic + Discord](https://jyje.github.io/hermes-agent-helm/examples/integrations/anthropic-and-discord/): Combine Claude and a Discord bot in one release.
+- [OpenAI + Telegram](https://jyje.github.io/hermes-agent-helm/examples/integrations/openai-and-telegram/): Combine OpenAI and a Telegram bot in one release.
+- [Dashboard Ingress](https://jyje.github.io/hermes-agent-helm/examples/integrations/ingress/): Expose the management dashboard behind an authenticated Ingress.
+- [Bitwarden Secrets Manager](https://jyje.github.io/hermes-agent-helm/examples/advanced/bitwarden/): Fetch provider credentials from Bitwarden at startup.
+- [Mixture of Agents](https://jyje.github.io/hermes-agent-helm/examples/advanced/moa/): Combine reference models with an aggregator model.
+- [Collaborating pair](https://jyje.github.io/hermes-agent-helm/examples/advanced/multi-agent-collab/): Run a collaborating pair in the same Discord channel.
+- [Shared knowledge PVC](https://jyje.github.io/hermes-agent-helm/examples/advanced/shared-knowledge/): Mount an RWX PVC as shared knowledge for multiple agents.
+- [Team leader](https://jyje.github.io/hermes-agent-helm/examples/advanced/team-leader/): Run the leader of a Discord thread-based team.
+- [Team member](https://jyje.github.io/hermes-agent-helm/examples/advanced/team-member/): Run an individual release in a leader-led team.

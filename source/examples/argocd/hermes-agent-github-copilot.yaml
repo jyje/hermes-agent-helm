@@ -1,0 +1,124 @@
+# Mirrors charts/hermes-agent/values-github-copilot.yaml, PLUS the GitOps
+# secret-delivery pattern: a SealedSecret (rendered via extraResources) that the
+# sealed-secrets controller decrypts into a Secret, referenced via extraEnvFrom.
+#
+# GitHub Copilot is authenticated at startup via the OAuth device flow, so there
+# is NO Copilot key to seal — the only secret here is the Discord bot token
+# (which the login init container also reuses to post the verification link).
+# Nothing here is a real secret — `encryptedData` below is a placeholder;
+# replace it with your own `kubeseal` output.
+#
+# Full step-by-step (creating the Secret, sealing it, and pasting the result
+# here) is in examples/argocd/README.md — "SealedSecret walkthrough".
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # KEEP IT EQUAL TO spec.source.helm.releaseName below.
+  name: hermes-agent-github-copilot
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/jyje/hermes-agent-helm
+    chart: hermes-agent
+    # "*" tracks the latest published chart version (semver range supported
+    # for Helm/OCI sources). Pin to an exact version (e.g. "0.1.1") for
+    # reproducible/controlled upgrades.
+    targetRevision: "*"
+    helm:
+      # MUST equal metadata.name (see examples/argocd/README.md).
+      releaseName: hermes-agent-github-copilot
+      valuesObject:
+        # Keep the rendered resource names short and readable
+        # (hermes-agent, hermes-agent-env, hermes-agent-0, ...) instead of
+        # repeating the long Application/release name on every resource. Only
+        # run ONE Application with fullnameOverride: hermes-agent per
+        # namespace — see "The one rule" in examples/argocd/README.md.
+        fullnameOverride: hermes-agent
+        config:
+          model:
+            # Hermes' built-in GitHub Copilot provider (calls the Copilot token API).
+            provider: copilot
+            # Any model your Copilot subscription can reach. Examples: gpt-4o,
+            # gpt-4.1, claude-sonnet-4.5, gemini-2.5-pro, gpt-5.
+            default: gpt-4o
+          terminal:
+            backend: local
+        # Authenticate the Copilot credential via the OAuth device flow at
+        # startup. The login init container posts a verification link + code to
+        # the Discord home channel; approve it on github.com to mint the token.
+        auth:
+          deviceFlow:
+            enabled: true
+            provider: github-copilot
+            notify: discord
+        # Keep the chart's own Secret a harmless placeholder; the SealedSecret
+        # below decrypts into hermes-agent-copilot-secrets, and extraEnvFrom
+        # (applied AFTER the chart's own envFrom) overrides it.
+        env:
+          # The Copilot token is fetched at runtime via device flow, so the
+          # chart's OpenAI placeholder is unused here.
+          OPENAI_API_KEY: "unused"
+          # Setting the token is enough to auto-enable Discord — no config.yaml
+          # change. The login init container reuses this same bot to post the
+          # verification link. Create the bot at
+          # https://discord.com/developers/applications, enable the
+          # "Message Content Intent", and invite it to your server.
+          DISCORD_BOT_TOKEN: "set-via-extraEnvFrom"
+        extraEnvFrom:
+          - secretRef:
+              name: hermes-agent-copilot-secrets
+        # Non-secret Discord knobs — plain env, not the Secret. The login init
+        # container also reads DISCORD_HOME_CHANNEL from here.
+        extraEnv:
+          - name: DISCORD_HOME_CHANNEL        # channel id for cron / notification / login delivery
+            value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+          - name: DISCORD_ALLOWED_USERS       # comma-separated user ids allowed to talk
+            value: "111111111111111111"       # DUMMY — your Discord user id
+          - name: DISCORD_ALLOW_ALL_USERS     # true only for throwaway/dev bots
+            value: "false"
+        # Persistence is required for device-flow login: the token is written
+        # here so it survives restarts (otherwise you would re-approve on every
+        # restart). Empty storageClass = cluster default. On a Raspberry Pi
+        # cluster that is typically local-path (k3s) or microk8s-hostpath —
+        # both ReadWriteOnce, which is exactly what this single-writer
+        # workload wants.
+        persistence:
+          enabled: true
+          storageClass: ""
+          accessModes:
+            - ReadWriteOnce
+          size: 5Gi
+        # Defaults are already tuned for small arm64 nodes; shown here for visibility.
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
+        extraResources:
+          - apiVersion: bitnami.com/v1alpha1
+            kind: SealedSecret
+            metadata:
+              name: hermes-agent-copilot-secrets
+              # namespace: defaults to the Application's destination namespace
+              # (hermes-agent) when omitted.
+            spec:
+              encryptedData:
+                # Replace with `kubeseal` output for YOUR cluster — see
+                # "SealedSecret walkthrough" in examples/argocd/README.md.
+                DISCORD_BOT_TOKEN: AgDUMMY_replace_with_kubeseal_output==
+              template:
+                metadata:
+                  name: hermes-agent-copilot-secrets
+                  # namespace: defaults to the Application's destination namespace
+                  # (hermes-agent) when omitted.
+                type: Opaque
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-agent
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true

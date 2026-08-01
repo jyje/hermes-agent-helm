@@ -1,0 +1,89 @@
+---
+title: Dashboard Ingress
+description: 민감한 management dashboard를 인증된 Ingress 뒤에 노출하는 구성
+---
+
+import RawDocumentActions from '@components/RawDocumentActions.astro';
+
+<div className="example-meta">
+  <div><strong>필수 Secret</strong>OPENAI_API_KEY, basic-auth Secret</div>
+  <div><strong>오버레이</strong>values-ingress.yaml</div>
+</div>
+
+## 언제 사용하나요?
+
+Ingress controller와 사전에 생성한 basic-auth Secret이 필요합니다.
+
+## 설치
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-ingress.yaml \
+  --set-string env.OPENAI_API_KEY='<real-value>' --wait
+```
+
+둘 이상의 자격 증명이 필요한 예제에서는 모든 값을 `--set-string`으로 전달하거나 `extraEnvFrom`으로 기존 Secret을 참조하세요.
+
+## 배포 전 조정
+
+dashboard는 API key를 노출할 수 있으므로 authentication과 private network 경계를 반드시 적용합니다.
+
+<RawDocumentActions rawPath="/hermes-agent-helm/source/charts/hermes-agent/values-ingress.yaml" label="원본 YAML 열기" />
+
+## 전체 오버레이
+
+```yaml title="charts/hermes-agent/values-ingress.yaml"
+# values-ingress.yaml
+#
+# Exposes the Hermes management dashboard (service.port, default 9119) via an
+# Ingress. The upstream warns this dashboard EXPOSES API KEYS on the network,
+# so it MUST sit behind authentication — this example uses nginx's basic-auth
+# annotations. Adjust `ingressClassName` / annotations for your controller
+# (Traefik, HAProxy, ...).
+#
+# Dummy key — override at install time. The basic-auth Secret referenced by
+# the annotation below must be created separately:
+#
+#   htpasswd -cb /tmp/auth admin '<your-password>'
+#   kubectl create secret generic hermes-agent-dashboard-auth -n hermes-agent \
+#     --from-file=auth=/tmp/auth
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-ingress.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-<real>' --wait
+
+config:
+  model:
+    provider: openai-api
+    default: gpt-4o-mini
+  terminal:
+    backend: local
+
+env:
+  OPENAI_API_KEY: "sk-DUMMY_replace_me_000000000000000000000000"
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9119
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: hermes-agent-dashboard-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Hermes Agent Dashboard"
+  hosts:
+    - host: hermes-agent.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: hermes-agent-tls
+  #    hosts:
+  #      - hermes-agent.example.com
+
+```

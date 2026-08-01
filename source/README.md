@@ -70,7 +70,7 @@ change), see [Quick start](#quick-start) below.
   agent (one `HERMES_HOME`, one gateway, one memory), so you don't replicate a
   pod; you run several well-managed instances and group them into a **team**
   that shares context over a common gateway channel. See
-  [Hermes teams](docs/teams.md).
+  [Hermes teams](docs/reference/teams.md).
 - **Verified end-to-end.** CI installs the chart on an ephemeral **kind**
   cluster and runs the bundled test Job (`hermes doctor`). When the
   `NVIDIA_API_KEY` repository secret is available, it also runs a **live
@@ -83,7 +83,7 @@ change), see [Quick start](#quick-start) below.
   <p><em>Deployment evidence: leader <code>august</code> and members
   <code>may</code>/<code>march</code> running as independent releases on kind.
   This screenshot does not by itself prove the multi-turn mention loop; see
-  <a href="docs/teams.md">Hermes teams</a> for the current status.</em></p>
+  <a href="docs/reference/teams.md">Hermes teams</a> for the current status.</em></p>
 </div>
 
 For the full resource breakdown, configuration model, and provider-by-provider
@@ -166,7 +166,7 @@ reviewed PR (the version bump) — the AI only advises, merging is what ships. S
 
 This chart deploys and manages **one** agent well; teams via an ArgoCD
 ApplicationSet are how you scale today, and a CRD-based operator is a
-long-term, not-started candidate. See [docs/roadmap.md](docs/roadmap.md).
+long-term, not-started candidate. See [docs/reference/roadmap.md](docs/reference/roadmap.md).
 
 ## Contributing
 

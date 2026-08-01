@@ -1,0 +1,42 @@
+apiVersion: v2
+name: hermes-agent
+description: |
+  👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight
+  
+  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
+type: application
+
+icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+
+# Chart version (bump on chart changes).
+version: 1.0.0
+
+# Upstream Hermes Agent image version this chart targets by default.
+# Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
+appVersion: "v2026.7.20"
+
+keywords:
+  - hermes
+  - agent
+  - llm
+  - openai-compatible
+
+home: https://github.com/jyje/hermes-agent-helm
+sources:
+  - https://github.com/jyje/hermes-agent-helm
+  - https://github.com/NousResearch/hermes-agent
+maintainers:
+  - name: jyje
+    email: jyjeon@outlook.com
+
+# Artifact Hub metadata (for future publishing to artifacthub.io).
+annotations:
+  artifacthub.io/category: ai-machine-learning
+  artifacthub.io/license: MIT
+  artifacthub.io/changes: |
+    - kind: "added"
+      description: "Added group_sessions_per_user, discord mention and thread settings to leader and member values for thread‑native team coordination."
+    - kind: "changed"
+      description: "Changed default shared knowledge PVC access mode from ReadWriteMany to ReadWriteOnce, requiring existing PVCs to meet new access mode."
+    - kind: "added"
+      description: "Added AUGUST_BOT_USER_ID and TEAM_KNOWLEDGE_ROOT values to support leader‑orchestrated team workflows."

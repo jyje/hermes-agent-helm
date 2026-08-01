@@ -1,0 +1,14 @@
+{{- if .Values.auth.deviceFlow.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hermes-agent.fullname" . }}-login
+  labels:
+    {{- include "hermes-agent.labels" . | nindent 4 }}
+data:
+  # Provider-generic device-flow login script, mounted into the
+  # `auth-device-login` init container. Sourced verbatim from
+  # files/device_login.py (stdlib-only).
+  device_login.py: |
+    {{- .Files.Get "files/device_login.py" | nindent 4 }}
+{{- end }}

@@ -1,0 +1,65 @@
+---
+title: Upstage Solar
+description: Use Upstage Solar as the model provider.
+---
+
+import RawDocumentActions from '@components/RawDocumentActions.astro';
+
+<div className="example-meta">
+  <div><strong>Required secret</strong>UPSTAGE_API_KEY</div>
+  <div><strong>Overlay</strong>values-upstage.yaml</div>
+</div>
+
+## When to use it
+
+An Upstage API key and a Solar model are required.
+
+## Install
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-upstage.yaml \
+  --set-string env.UPSTAGE_API_KEY='<real-value>' --wait
+```
+
+When an example requires more than one credential, pass every listed value with `--set-string` or use `extraEnvFrom` to reference an existing Secret.
+
+## Adapt before deploying
+
+Set the Solar model ID and API key for your environment.
+
+<RawDocumentActions rawPath="/hermes-agent-helm/source/charts/hermes-agent/values-upstage.yaml" label="Open Raw YAML" />
+
+## Complete overlay
+
+```yaml title="charts/hermes-agent/values-upstage.yaml"
+# values-upstage.yaml
+#
+# Hermes Agent using Upstage Solar's built-in OpenAI-compatible provider.
+# Dummy key — override at install time.
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-upstage.yaml \
+#     --set-string env.UPSTAGE_API_KEY='<real>' --wait
+
+config:
+  model:
+    provider: upstage
+    # Hosted/business-tier model. For Upstage's open-weight flagship instead
+    # (250B-A15B MoE, https://huggingface.co/upstage/Solar-Open2-250B),
+    # use "solar-open2" — same provider, no other change needed. Verified
+    # working end-to-end: https://github.com/jyje/pilot-upstage-solar-open2/tree/main/02-hermes-agent-solar-open2
+    default: solar-pro3
+  terminal:
+    backend: local
+
+env:
+  UPSTAGE_API_KEY: "DUMMY_replace_me_0000000000000000000000"
+  # Optional endpoint override (upstream default: https://api.upstage.ai/v1).
+  # UPSTAGE_BASE_URL: "https://api.upstage.ai/v1"
+  # Unused by the upstage provider; overrides the chart's OpenAI placeholder.
+  OPENAI_API_KEY: "unused"
+
+```

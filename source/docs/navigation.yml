@@ -1,0 +1,134 @@
+version: 1
+
+# Page labels come from each Markdown file's frontmatter. This manifest owns
+# only the hierarchy and ordering shown by the documentation renderer.
+locales:
+  root:
+    - index
+    - page: charts/index
+      children:
+        - page: charts/hermes-agent/index
+          children:
+            - charts/hermes-agent/install
+            - page: charts/hermes-agent/overlays/index
+              collapsed: false
+              children:
+                - charts/hermes-agent/overlays/anthropic-and-discord
+                - charts/hermes-agent/overlays/anthropic
+                - charts/hermes-agent/overlays/bitwarden
+                - charts/hermes-agent/overlays/deepinfra
+                - charts/hermes-agent/overlays/fireworks
+                - charts/hermes-agent/overlays/gemini
+                - charts/hermes-agent/overlays/github-copilot
+                - charts/hermes-agent/overlays/google-vertex
+                - charts/hermes-agent/overlays/ingress
+                - charts/hermes-agent/overlays/litellm-k8s
+                - charts/hermes-agent/overlays/litellm
+                - charts/hermes-agent/overlays/moa
+                - charts/hermes-agent/overlays/multi-agent-collab
+                - charts/hermes-agent/overlays/nvidia-nim-and-discord
+                - charts/hermes-agent/overlays/openai-and-telegram
+                - charts/hermes-agent/overlays/openai
+                - charts/hermes-agent/overlays/openrouter
+                - charts/hermes-agent/overlays/shared-knowledge
+                - charts/hermes-agent/overlays/team-leader
+                - charts/hermes-agent/overlays/team-member
+                - charts/hermes-agent/overlays/upstage
+            - page: charts/hermes-agent/reference/index
+              children:
+                - charts/hermes-agent/reference/values
+                - charts/hermes-agent/reference/readme
+    - page: getting-started/index
+      children:
+        - getting-started/install
+    - page: examples/index
+      children:
+        - page: examples/providers/index
+          children:
+            - examples/providers/anthropic
+            - examples/providers/deepinfra
+            - examples/providers/fireworks
+            - examples/providers/gemini
+            - examples/providers/github-copilot
+            - examples/providers/google-vertex
+            - examples/providers/nvidia-nim-and-discord
+            - examples/providers/openai
+            - examples/providers/openrouter
+            - examples/providers/upstage
+        - page: examples/integrations/index
+          children:
+            - examples/integrations/anthropic-and-discord
+            - examples/integrations/ingress
+            - examples/integrations/litellm
+            - examples/integrations/litellm-k8s
+            - examples/integrations/openai-and-telegram
+        - page: examples/advanced/index
+          children:
+            - examples/advanced/bitwarden
+            - examples/advanced/moa
+            - examples/advanced/multi-agent-collab
+            - examples/advanced/shared-knowledge
+            - examples/advanced/team-leader
+            - examples/advanced/team-member
+    - page: guides/index
+      children:
+        - guides/configuration
+        - guides/secrets-and-storage
+        - guides/operations
+    - page: reference/index
+      children:
+        - reference/argocd
+        - reference/chart-readme
+        - reference/ci
+        - reference/collaboration
+        - reference/contributing
+        - reference/devops-roadmap
+        - reference/helm-installation
+        - reference/helm-repository
+        - reference/local-development
+        - reference/repository-readme
+        - reference/roadmap
+        - reference/security
+        - reference/source-documents
+        - reference/teams
+        - reference/values
+
+  ko:
+    - index
+    - label: 예제
+      children:
+        - label: 공급자
+          children:
+            - examples/providers/anthropic
+            - examples/providers/deepinfra
+            - examples/providers/fireworks
+            - examples/providers/gemini
+            - examples/providers/github-copilot
+            - examples/providers/google-vertex
+            - examples/providers/nvidia-nim-and-discord
+            - examples/providers/openai
+            - examples/providers/openrouter
+            - examples/providers/upstage
+        - label: 통합
+          children:
+            - examples/integrations/anthropic-and-discord
+            - examples/integrations/ingress
+            - examples/integrations/litellm
+            - examples/integrations/litellm-k8s
+            - examples/integrations/openai-and-telegram
+        - label: 고급
+          children:
+            - examples/advanced/bitwarden
+            - examples/advanced/moa
+            - examples/advanced/multi-agent-collab
+            - examples/advanced/shared-knowledge
+            - examples/advanced/team-leader
+            - examples/advanced/team-member
+    - label: 참고 자료
+      children:
+        - reference/chart-readme
+        - reference/collaboration
+        - reference/repository-readme
+        - reference/roadmap
+        - reference/security
+        - reference/teams
