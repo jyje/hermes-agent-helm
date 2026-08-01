@@ -1,0 +1,214 @@
+# values-team-leader.yaml
+#
+# The LEADER of a Discord-thread-native Hermes agent team (star topology).
+# The human talks only to the leader; the leader and members hand work back and
+# forth with explicit bot @mentions in ONE Discord thread. The visible thread is
+# the coordination bus and audit log. A separate RWX PVC provides durable shared
+# knowledge, but no task file, completion marker, hook, or backend callback on
+# that PVC participates in a handoff.
+#
+# The reference protocol intentionally serializes the team: august mentions one
+# member, that member mentions august back, and august either requests a revision
+# or mentions the next member. This avoids concurrent messages interrupting the
+# one shared thread session. See docs/teams.md and docs/collaboration.md.
+#
+# Before installing any team release, create one RWX claim named
+# hermes-team-knowledge in the target namespace. The leader mounts it read-write
+# and members mount it read-only. Its root must be readable by uid/gid 10000 and
+# writable by uid/gid 10000 for the leader. Example:
+#
+#   apiVersion: v1
+#   kind: PersistentVolumeClaim
+#   metadata:
+#     name: hermes-team-knowledge
+#     namespace: hermes-team
+#   spec:
+#     accessModes: [ReadWriteMany]
+#     storageClassName: nfs-client  # replace with an RWX-capable class
+#     resources: { requests: { storage: 10Gi } }
+#
+# All secrets and Discord IDs below are DUMMY placeholders. Override them at
+# install time or inject secrets through extraEnvFrom (see
+# examples/argocd/hermes-team.yaml).
+#
+#   helm upgrade --install hermes-august ./charts/hermes-agent \
+#     --namespace hermes-team --create-namespace \
+#     -f charts/hermes-agent/values-team-leader.yaml \
+#     --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
+#     --set-string env.DISCORD_BOT_TOKEN='<august-bot-token>' --wait
+
+fullnameOverride: hermes-august
+
+config:
+  model:
+    # The team protocol is provider-independent. Use a model that reliably
+    # follows exact mention and response-format instructions; override both
+    # fields to use another supported provider/model.
+    provider: nvidia
+    default: z-ai/glm-5.2
+  terminal:
+    backend: local
+
+  # One transcript per Discord channel/thread, shared across human and bot
+  # senders. The upstream default is true (one session per sender), which would
+  # split the human→leader and member→leader turns into different contexts.
+  group_sessions_per_user: false
+  discord:
+    require_mention: true
+    thread_require_mention: true
+    auto_thread: true
+    history_backfill: true
+    history_backfill_limit: 50
+    allow_mentions:
+      everyone: false
+      roles: false
+      users: true
+      replied_user: false
+  display:
+    tool_progress: "off"
+
+  agent:
+    # Files and memory remain available for each agent's own work and durable
+    # state. Alternate delegation/outbound paths stay disabled so only a visible
+    # Discord mention can assign work to another team member.
+    disabled_toolsets:
+      - browser
+      - clarify
+      - code_execution
+      - cronjob
+      - delegation
+      - discord
+      - discord_admin
+      - messaging
+      - session_search
+      - skills
+      - terminal
+      - todo
+      - web
+    environment_hint: |
+      You are "august", the LEADER of a Hermes agent team in one Discord
+      thread. The human talks only to you. Your members and their EXACT Discord
+      mention tokens are:
+      - may   -> <@${MAY_BOT_USER_ID}>
+      - march -> <@${MARCH_BOT_USER_ID}>
+
+      The Discord thread is the team's ONLY shared task state and audit trail.
+      Every instruction, intermediate result, review, correction, and final
+      result must be visible in the thread. You MAY use private files and memory
+      for your own scratch work or durable state, but they are never a handoff:
+      no teammate may need a path, file, memory entry, or hidden state to act.
+      NEVER use a hook, watcher, scheduler, background process, file write,
+      memory update, API/tool call, or another bot to deliver, trigger, relay,
+      or queue work for a teammate. The ONLY delegation act is your same visible
+      Discord response containing the assignee's exact <@...> token and complete
+      task contract. Do not claim that you delegated work without that message.
+
+      Durable shared knowledge is mounted at ${TEAM_KNOWLEDGE_ROOT}. You are its
+      only writer; members mount it read-only. Store only reusable, accepted
+      knowledge there and state in your visible final response what you updated.
+      NEVER store or poll for run-specific tasks, assignees, queues, status,
+      intermediate results, completion markers, or next-step instructions there.
+      A delegation must remain fully understandable without reading this path.
+
+      Protocol:
+      1. Work serially: mention EXACTLY ONE member in each response. Wait for
+         that member to mention you back before assigning the next member. This
+         avoids concurrent turns interrupting the shared thread session.
+      2. On a new human goal, choose the first member and reply once with a
+         short acknowledgment followed immediately by a complete delegation.
+         The delegation MUST use this visible format. Keep the mention on the
+         first line and the TEAM metadata on its own FINAL line:
+           <@MEMBER_ID>
+
+           Context: <all context the member needs>
+           Task: <one concrete task>
+           Done when: <observable acceptance criteria>
+           Reply contract: mention <@${AUGUST_BOT_USER_ID}> and include the
+           complete result in the Discord message; do not point to a file.
+
+           [TEAM run=<short-id> step=<n> TASK]
+      3. When a member mentions you with a result, review the result against the
+         stated criteria. If it needs revision, mention that SAME member with
+         concrete feedback and the full context needed for the revision.
+      4. If the result is accepted and another member should work next, mention
+         the next member and include the original goal plus every relevant
+         accepted result in the message. The next member must not need a file or
+         private state to understand the task.
+      5. Preserve the run id and increment the step number on every handoff.
+         HARD LIMIT: never emit a member handoff above step 6. If another
+         handoff would be required, stop with a human-facing incomplete status
+         and NO member mention. Keep results concise enough for Discord.
+      6. When all criteria are satisfied, answer the human with the complete
+         synthesis and NO member mention. No member mention is the terminal
+         state: it prevents another bot turn and ends the run.
+      7. Never mention two members at once, never ask members to talk directly
+         to each other, and never emit a filler message containing a member
+         mention. A mention always means real work is ready for that bot.
+
+env:
+  # Real keys come from --set-string or a Secret. Setting DISCORD_BOT_TOKEN is
+  # enough to auto-enable Discord (one distinct bot token per agent).
+  NVIDIA_API_KEY: "nvapi-DUMMY_replace_me_0000000000000000000000"
+  OPENAI_API_KEY: "unused"
+  DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
+
+# The channel/user values and loop brake must match on every agent. The four
+# Discord gates make an explicit body <@id> the only bot-to-bot trigger.
+extraEnv:
+  - name: DISCORD_HOME_CHANNEL
+    value: "000000000000000000"       # DUMMY — shared parent channel ID
+  - name: DISCORD_ALLOWED_USERS
+    value: "111111111111111111"       # DUMMY — trusted human user IDs
+  - name: DISCORD_ALLOW_BOTS
+    value: "mentions"
+  - name: DISCORD_THREAD_REQUIRE_MENTION
+    value: "true"
+  - name: DISCORD_REPLY_TO_MODE
+    value: "off"
+  - name: DISCORD_ALLOW_MENTION_REPLIED_USER
+    value: "false"
+  - name: MAY_BOT_USER_ID
+    value: "000000000000000000"       # DUMMY — may's Discord user ID
+  - name: MARCH_BOT_USER_ID
+    value: "000000000000000000"       # DUMMY — march's Discord user ID
+  - name: AUGUST_BOT_USER_ID
+    value: "000000000000000000"       # DUMMY — leader's Discord user ID
+  - name: TEAM_KNOWLEDGE_ROOT
+    value: "/opt/data/team-knowledge"
+
+# Every agent keeps its private HERMES_HOME. The separate shared volume is only
+# a durable knowledge base; it is never a task queue or coordination workspace.
+extraVolumes:
+  - name: team-knowledge
+    persistentVolumeClaim:
+      claimName: hermes-team-knowledge
+
+extraVolumeMounts:
+  - name: team-knowledge
+    mountPath: /opt/data/team-knowledge
+
+extraInitContainers:
+  # Some local-path provisioners create a new PVC root as root:root 0700. The
+  # gateway drops to uid/gid 10000, so make this agent's PRIVATE home traversable
+  # after the chart has seeded config.yaml. This volume is never shared.
+  - name: init-private-home
+    image: busybox:1.37
+    command: ["sh", "-c", "chown -R 10000:10000 /home"]
+    volumeMounts:
+      - name: data
+        mountPath: /home
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
