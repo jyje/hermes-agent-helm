@@ -11,11 +11,11 @@
     "check": "npm run prepare-content && astro build"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.37.6",
-    "astro": "^5.13.7",
-    "sharp": "^0.34.3"
+    "@astrojs/starlight": "^0.41.5",
+    "astro": "^7.1.6",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "typescript": "^7.0.2"
   }
 }
