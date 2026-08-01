@@ -1,0 +1,406 @@
+# Default values for hermes-agent.
+# StatefulSet + ConfigMap (config.yaml) + Secret (.env) + Helm test.
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Fully override the generated resource name (release-name-chart).
+fullnameOverride: ""
+
+image:
+  # -- Container image repository (multi-arch: amd64 + arm64).
+  repository: nousresearch/hermes-agent
+  # -- Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" ==
+  # Hermes v0.16.0), plus `latest` / `main`. There is no semver tag.
+  # Empty defaults to `.Chart.AppVersion`.
+  tag: ""
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets for private registries.
+imagePullSecrets: []
+
+# -- Container entrypoint. The image's DEFAULT CMD is the interactive `hermes`
+# chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing
+# a restart loop. So run the long-lived gateway explicitly; inside the
+# s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6
+# service (auto-restart on crash). Append `--no-supervise` only if you want to
+# bypass s6.
+command: ["hermes"]
+# -- Arguments appended to `command`.
+args: ["gateway", "run"]
+
+# ---------------------------------------------------------------------------
+# Workload controller.
+# "deployment" (default): no headless Service; when persistence is enabled, a
+#   single standalone PVC (named <fullname>) is created and the rollout
+#   strategy is forced to Recreate (so the new Pod doesn't race the old one
+#   for the ReadWriteOnce volume). More resource-flexible (no StatefulSet
+#   ordering/identity overhead) — the right choice for a single replica.
+# "statefulset": stable identity, a dedicated PVC via volumeClaimTemplates
+#   (data-<fullname>-0), and a headless Service for governance/DNS. Pick this
+#   if you need StatefulSet semantics (ordered rollout, stable network
+#   identity).
+# Both render the same Pod spec (resources, env, probes, ...).
+# ---------------------------------------------------------------------------
+controller:
+  # -- Workload kind: "deployment" or "statefulset".
+  type: deployment
+
+# -- DO NOT change this. Hermes Agent is a single-writer workload bound to one
+# HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out —
+# with controller.type=deployment extra replicas just hang Pending (can't mount
+# the same RWO volume); with statefulset they become separate, disconnected
+# agent instances with their own PVC/identity. There is no supported
+# multi-replica mode for this chart.
+replicaCount: 1
+
+serviceAccount:
+  # -- Create a ServiceAccount for the pod.
+  create: true
+  # -- Name to use; generated from fullname when empty.
+  name: ""
+  # -- Annotations to add to the ServiceAccount.
+  annotations: {}
+
+# ---------------------------------------------------------------------------
+# config.yaml -> Hermes reads $HERMES_HOME/config.yaml as a PARTIAL OVERRIDE on
+# top of its version-specific built-in defaults (precedence: CLI > config.yaml >
+# .env > built-in defaults). Only set the keys you want to change here; never
+# reproduce the full upstream config (it drifts across versions and Hermes fills
+# the rest in). This map is rendered into a ConfigMap and seeded into HERMES_HOME
+# by an init container (see `bootstrap`). Keys below use the real v2026.6.5 schema.
+#
+# Hermes supports many providers (openai, anthropic, google, openrouter, and any
+# OpenAI-compatible endpoint). Defaults use the provider's public endpoint —
+# override to point anywhere (see values-litellm.yaml / values-litellm-k8s.yaml).
+# ---------------------------------------------------------------------------
+config:
+  model:
+    # Model id for the chosen provider (no vendor prefix for built-ins).
+    default: gpt-4o-mini
+    # Hermes provider key. Use a BUILT-IN key — common ones:
+    #   openai-api (api.openai.com) | anthropic | gemini | openrouter |
+    #   nvidia | deepseek | lmstudio | ...
+    # NOTE: `openai` is NOT valid (it aliases to openrouter).
+    # For an OpenAI-compatible proxy (LiteLLM / vLLM / LM Studio / ...), register
+    # a custom provider under `config.providers` below and set this to that key
+    # (see values-litellm.yaml / values-litellm-k8s.yaml).
+    provider: openai-api
+  # Custom OpenAI-compatible providers, keyed by provider id. Empty by default.
+  #   providers:
+  #     litellm:
+  #       base_url: http://litellm.my-ns.svc.cluster.local:4000/v1
+  #       key_env: OPENAI_API_KEY   # env var holding the key
+  #       discover_models: true     # populate model picker from /v1/models
+  providers: {}
+  terminal:
+    # Run the agent's shell/code execution INSIDE this pod. The pod itself
+    # (namespace, securityContext, resource limits, PVC) is the sandbox.
+    # The `docker` backend is intentionally NOT supported in-cluster: it needs
+    # a Docker daemon/socket, which is a security risk and absent on containerd
+    # clusters (e.g. MicroK8s / Raspberry Pi). Keep this `local`.
+    backend: local
+  agent:
+    max_turns: 90
+    gateway_timeout: 1800
+
+# Seeding of config.yaml into HERMES_HOME (the persistent volume). Hermes writes
+# to its home at runtime (skills, auth.json, self-improvement), so config lives
+# in the writable volume rather than a read-only mount.
+bootstrap:
+  # -- Seed the rendered config.yaml into HERMES_HOME via an init container.
+  enabled: true
+  # -- true: overwrite HERMES_HOME/config.yaml with chart content on every
+  #    deploy (declarative). false: seed only if it does not already exist
+  #    (preserve runtime edits).
+  overwrite: true
+
+# ---------------------------------------------------------------------------
+# .env / secrets -> Hermes reads API keys from the environment, which take
+# precedence over config.yaml. Keys are rendered into a Secret and injected via
+# envFrom (not written as a .env file). Override at deploy time, e.g.
+#   --set-string env.OPENAI_API_KEY=sk-...
+# Provider key names: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY,
+# NVIDIA_API_KEY, OPENROUTER_API_KEY, LM_API_KEY (LM Studio), ...
+# ---------------------------------------------------------------------------
+env:
+  OPENAI_API_KEY: "sk-REPLACE_ME"
+
+# -- Plain (non-secret) env vars injected directly on the container.
+extraEnv: []
+#  - name: HERMES_ACCEPT_HOOKS
+#    value: "1"
+
+# -- Extra envFrom sources (reference existing ConfigMaps/Secrets).
+extraEnvFrom: []
+#  - secretRef:
+#      name: some-existing-secret
+
+# -- Extra volumes on the pod, for anything the agent needs as a FILE rather
+#    than an env var — e.g. a Secret holding a service-account JSON
+#    (see values-google-vertex.yaml).
+extraVolumes: []
+#  - name: vertex-sa
+#    secret:
+#      secretName: vertex-sa
+
+# -- Extra volume mounts on the hermes-agent container (pairs with extraVolumes).
+extraVolumeMounts: []
+#  - name: vertex-sa
+#    mountPath: /var/run/secrets/vertex
+#    readOnly: true
+
+# -- Extra init containers, appended after the chart's own (seed-config,
+#    device-flow login). Full container spec; combine with `extraVolumes` for
+#    one-time preparation of a user-provided volume (for example, a shared
+#    knowledge volume used independently of the Discord team handoff).
+extraInitContainers: []
+#  - name: init-workspace
+#    image: busybox:1.37
+#    command: ["sh", "-c", "chown 10000:10000 /work"]
+#    volumeMounts:
+#      - name: team-workspace
+#        mountPath: /work
+
+# -- Extra raw manifests rendered as-is alongside this chart's resources.
+#    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
+#    may be either an object or a multiline string (see examples/argocd/).
+#    Useful for things this chart doesn't model directly, e.g. a SealedSecret
+#    that a sealed-secrets controller decrypts into a Secret referenced via
+#    `extraEnvFrom` (see examples/argocd/).
+extraResources: []
+
+# ---------------------------------------------------------------------------
+# auth -> Interactive credential bootstrap.
+#
+# By default the agent authenticates with the static provider key from `env`
+# (rendered into the `-env` Secret). `auth.deviceFlow` is an alternative for
+# providers that issue short-lived/OAuth tokens you cannot paste ahead of time:
+# it performs the **OAuth 2.0 Device Authorization Grant (RFC 8628)** at pod
+# startup, surfaces the verification URL + user code to a human (e.g. via the
+# agent's Discord bot, mobile-friendly), waits for approval, and persists the
+# resulting token to `HERMES_HOME/.env` — exactly where Hermes natively reads
+# it. The token survives restarts on the persistent volume; re-login only
+# happens when it is missing or revoked.
+#
+# Currently supports **github-copilot** (Hermes provider id `copilot`), whose
+# API rejects PATs and requires a `gho_`/`ghu_` device-flow token.
+# ---------------------------------------------------------------------------
+auth:
+  deviceFlow:
+    # -- Bootstrap a provider credential via the OAuth device flow at startup.
+    #    When false, the agent uses the static key from `env`/`extraEnvFrom`.
+    enabled: false
+    # -- Which provider profile to authenticate. Must be a key under
+    #    `providers` below. Only one device-flow login runs at a time.
+    provider: github-copilot
+    # -- Where to deliver the verification URL + user code for human approval.
+    #    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +
+    #    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`). The code is always
+    #    also printed to the init container logs as a fallback.
+    notify: discord
+    # -- Seconds to wait for the human to authorize before the init container
+    #    fails (and retries). Keep below the provider's device-code validity.
+    timeoutSeconds: 870
+    # -- Force a fresh login even if a token already exists on the volume.
+    forceRelogin: false
+    # -- uid/gid that should own the written token file. The login init
+    #    container runs as root so it can write to any storage class reliably,
+    #    then chowns the token to this owner. Set it to the Hermes runtime uid —
+    #    the upstream image's s6-overlay runs the agent as uid/gid 10000 — so the
+    #    non-root agent can read the credential.
+    tokenOwner:
+      uid: 10000
+      gid: 10000
+    # -- Login image. stdlib-only Python; no extra dependencies are installed.
+    image:
+      repository: python
+      tag: "3.13-slim"
+    # -- Resources for the login init container.
+    resources: {}
+    # Catalog of device-flow-capable providers. The chart ships sane defaults;
+    # the selected one (`provider` above) is what runs. Add an entry to support
+    # another provider (each provider uses its own OAuth authorization server).
+    providers:
+      github-copilot:
+        # -- OAuth client id for the device grant. The shared opencode/Copilot-CLI
+        #    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py).
+        clientId: "Ov23li8tweQw6odWQebz"
+        # -- OAuth scope requested in the device grant.
+        scope: "read:user"
+        # -- Host serving the device-code + token endpoints (GitHub-style paths).
+        authHost: github.com
+        # -- .env key Hermes reads this provider's token from (resolution order
+        #    COPILOT_GITHUB_TOKEN > GH_TOKEN > GITHUB_TOKEN).
+        tokenEnv: COPILOT_GITHUB_TOKEN
+        # -- Optional endpoint to verify an existing token is still live; on
+        #    401/403 the init container re-runs the login. Empty = skip the check.
+        validateUrl: https://api.github.com/copilot_internal/v2/token
+
+# ---------------------------------------------------------------------------
+# Persistence: HERMES_HOME state lives here.
+# ---------------------------------------------------------------------------
+persistence:
+  enabled: true
+  # -- StorageClass for the volumeClaimTemplate. Empty = cluster default.
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  mountPath: /opt/data
+  # -- Use an existing PVC instead of creating a new one.
+  # When specified, the chart will use this PVC and skip creating its own.
+  existingClaim: ""
+
+# ---------------------------------------------------------------------------
+# Networking. `hermes gateway run` is primarily OUTBOUND (Telegram/Discord/etc.)
+# and exposes no inbound API, so no access Service is created by default. A
+# headless Service is always created for StatefulSet DNS/governance.
+#
+# The only inbound HTTP surface is the management `dashboard` (default port
+# 9119, binds to 127.0.0.1). Exposing it cluster-wide requires `--insecure`,
+# which the upstream warns EXPOSES API KEYS on the network — so it is opt-in.
+# ---------------------------------------------------------------------------
+service:
+  # -- Create a ClusterIP Service (only useful if you expose the dashboard).
+  enabled: false
+  # -- Service type.
+  type: ClusterIP
+  # -- Service port (and the dashboard's container port).
+  port: 9119
+  # -- Annotations to add to the Service.
+  annotations: {}
+
+# Ingress for the management dashboard. Requires `service.enabled: true` AND
+# the dashboard running with --insecure (see the `service` comment above for
+# the API-key exposure warning) — only enable this behind authentication
+# (e.g. an ingress-level oauth2-proxy/basic-auth annotation) or on a private
+# network.
+ingress:
+  # -- Create an Ingress resource.
+  enabled: false
+  # -- IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default.
+  className: ""
+  # -- Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules).
+  annotations: {}
+  # -- Host/path rules, all routed to the Service port above.
+  hosts:
+    - host: hermes-agent.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration for the Ingress.
+  tls: []
+  #  - secretName: hermes-agent-tls
+  #    hosts:
+  #      - hermes-agent.example.com
+
+# -- Container resource requests/limits. Lightweight defaults aimed at small
+# clusters (incl. Raspberry Pi / arm64).
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "2"
+    memory: "2Gi"
+
+# -- Pod-level securityContext. Left empty by default to stay compatible with
+# the image's s6-overlay init (which starts as root and drops privileges
+# itself). Add hardening here once verified for your environment.
+podSecurityContext: {}
+#  fsGroup: 1000
+
+# -- Container-level securityContext. Same caveat as `podSecurityContext` above.
+securityContext: {}
+#  allowPrivilegeEscalation: false
+#  capabilities:
+#    drop: [ALL]
+
+# -- Health probes. Empty = none. The image's s6-overlay already supervises and
+# auto-restarts the gateway in-container, so k8s probes are optional. Provide a
+# full probe spec to enable, e.g. an exec check:
+#   liveness:
+#     exec: { command: ["hermes","gateway","status"] }
+#     initialDelaySeconds: 30
+#     periodSeconds: 30
+probes:
+  # -- Liveness probe spec. Empty = no liveness probe.
+  liveness: {}
+  # -- Readiness probe spec. Empty = no readiness probe.
+  readiness: {}
+
+# -- Pod termination grace period in seconds. Empty = Kubernetes default (30s).
+# The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0:
+# on stop it interrupts in-flight runs immediately, persists the transcript,
+# and exits fast — the default grace period is plenty. If you opt into a drain
+# window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL
+# ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock +
+# crash loop — the same race upstream warns about with systemd's
+# TimeoutStopSec). See "Gateway lifecycle" in the README.
+terminationGracePeriodSeconds: ""
+
+# ---------------------------------------------------------------------------
+# Helm test (chart test). `helm test <release>` runs a doctor-style Job
+# (helm.sh/hook: test) AFTER install to verify the deployment. Rendered by
+# default; set tests.enabled=false to skip it entirely.
+# ---------------------------------------------------------------------------
+tests:
+  # -- Render the chart test Job.
+  enabled: true
+  # -- Image used by the test Job. Empty fields fall back to the main
+  # `image.*` (so the hermes CLI + doctor are available and arch matches).
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: ""
+  # -- When true, `hermes doctor` issues fail the test. When false, doctor runs
+  #    for visibility but only hard checks (hermes --version, seeded config) fail.
+  doctorStrict: false
+  # -- Seconds to allow `hermes doctor` to run before timing out.
+  doctorTimeout: 120
+  # ---------------------------------------------------------------------------
+  # Optional real model round-trip: `hermes chat -q "<prompt>"` against the
+  # configured provider. The full conversation (prompt + response) is printed
+  # to the test Job's logs. Requires a working provider key in `env`/`config`
+  # (e.g. config.model.provider=gemini + env.GOOGLE_API_KEY, or a LiteLLM-style
+  # custom provider — see values-litellm.yaml). Off by default since the
+  # placeholder key cannot reach a real provider.
+  # ---------------------------------------------------------------------------
+  chat:
+    # -- Run a `hermes chat` round-trip and log the conversation.
+    enabled: false
+    # -- Prompt sent to the agent.
+    prompt: "Just say hi."
+    # -- Max agent turns for the round-trip.
+    maxTurns: 1
+    # -- Seconds to allow each round-trip attempt to run before timing out.
+    timeout: 180
+    # -- When true, a failed/empty round-trip fails the test job.
+    failOnError: false
+    # -- Optional pool of `provider/model` ids to try in order (via `hermes chat
+    #    -m <id> --provider config.model.provider`), each with its own `timeout`.
+    #    Passes as soon as one succeeds — useful for free-tier models that are
+    #    sometimes overloaded. Leave empty to use `config.model.default` as-is
+    #    (single attempt, no `-m`/`--provider` override).
+    models: []
+  # -- Resource requests/limits for the test Job's container.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+# -- Annotations to add to the Pod.
+podAnnotations: {}
+# -- Labels to add to the Pod.
+podLabels: {}
+
+# -- Node selector for Pod scheduling.
+nodeSelector: {}
+# -- Tolerations for Pod scheduling.
+tolerations: []
+# -- Affinity rules for Pod scheduling.
+affinity: {}

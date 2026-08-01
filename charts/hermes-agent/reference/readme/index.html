@@ -1,0 +1,1295 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-zar2v3cf"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Chart README | jyje/hermes-agent-helm</title><link rel="canonical" href="https://jyje.github.io/hermes-agent-helm/charts/hermes-agent/reference/readme/"/><link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/charts/hermes-agent/reference/readme/"/><link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/charts/hermes-agent/reference/readme/"/><link rel="alternate" hreflang="x-default" href="https://jyje.github.io/hermes-agent-helm/charts/hermes-agent/reference/readme/"/><link rel="sitemap" href="/hermes-agent-helm/sitemap-index.xml"/><link rel="shortcut icon" href="/hermes-agent-helm/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.6"/><meta name="generator" content="Starlight v0.41.5"/><meta property="og:title" content="Chart README"/><meta property="og:type" content="article"/><meta property="og:url" content="https://jyje.github.io/hermes-agent-helm/charts/hermes-agent/reference/readme/"/><meta property="og:locale" content="en"/><meta property="og:description" content="The maintained README for hermes-agent."/><meta property="og:site_name" content="jyje/hermes-agent-helm"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="The maintained README for hermes-agent."/><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"><script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-copy-source]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.addEventListener('click', async () => {
+        const rawPath = button.closest('[data-raw-path]')?.dataset.rawPath;
+        if (!rawPath) return;
+        try {
+          await navigator.clipboard.writeText(await (await fetch(rawPath)).text());
+          button.textContent = 'Copied';
+          window.setTimeout(() => { button.textContent = 'Copy source'; }, 1600);
+        } catch {
+          button.textContent = 'Copy failed';
+        }
+      });
+    });
+  });
+</script><script>
+  document.documentElement.dataset.theme = 'light';
+</script><link rel="stylesheet" href="/hermes-agent-helm/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/hermes-agent-helm/_astro/common.B-tEf9Kg.css"><script type="module" src="/hermes-agent-helm/_astro/page.LAbJoB63.js"></script></head><body class="astro-zar2v3cf"><a class="sl-skip-link astro-bkt3z3w3" href="#_top">Skip to content</a><div class="page sl-flex astro-u3bpnxmj"><header class="header astro-u3bpnxmj"><div class="header astro-hbouc7pm"><div class="title-wrapper sl-flex astro-hbouc7pm"><a href="/hermes-agent-helm/" class="site-title astro-hen6hmfb"><span class="site-title__mark astro-hen6hmfb" aria-hidden="true"><img src="/hermes-agent-helm/_astro/hermes-agent-helm.DE9qkHMB.png" alt="" width="1000" height="500" class="astro-hen6hmfb"></span><span class="site-title__copy astro-hen6hmfb"><strong translate="no" class="astro-hen6hmfb">jyje/hermes-agent-helm</strong><small class="astro-hen6hmfb">Hermes Agent Helm chart</small></span></a></div><div class="sl-flex print:hidden astro-hbouc7pm"><site-search class="astro-hbouc7pm astro-glthw752" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-glthw752"><svg aria-hidden="true" class="astro-glthw752 astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-glthw752" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-glthw752" style="display: none;"><kbd class="astro-glthw752">Ctrl</kbd><kbd class="astro-glthw752">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-glthw752"><div class="dialog-frame sl-flex astro-glthw752"><button data-close-modal class="sl-flex md:sl-hidden astro-glthw752">Cancel</button><div class="search-container astro-glthw752"><div id="starlight__search" class="astro-glthw752"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/hermes-agent-helm/_astro/Search.astro_astro_type_script_index_0_lang.Bl6m8HSo.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-hbouc7pm"><div class="sl-flex social-icons astro-hbouc7pm"><a class="github-stars sl-flex" href="https://github.com/jyje/hermes-agent-helm" rel="me" aria-label="GitHub repository"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg><span class="sr-only">GitHub repository</span><span class="github-stars__metric" aria-label="GitHub stars"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M22 9.67a1 1 0 0 0-.86-.67l-5.69-.83L12.9 3a1 1 0 0 0-1.8 0L8.55 8.16 2.86 9a1 1 0 0 0-.81.68 1 1 0 0 0 .25 1l4.13 4-1 5.68a1 1 0 0 0 1.45 1.07L12 18.76l5.1 2.68c.14.08.3.12.46.12a1 1 0 0 0 .99-1.19l-1-5.68 4.13-4A1 1 0 0 0 22 9.67Zm-6.15 4a1 1 0 0 0-.29.89l.72 4.19-3.76-2a1 1 0 0 0-.94 0l-3.76 2 .72-4.19a1 1 0 0 0-.29-.89l-3-3 4.21-.61a1 1 0 0 0 .76-.55L12 5.7l1.88 3.82a1 1 0 0 0 .76.55l4.21.61-3 2.99Z"/></svg><span class="github-stars__count" data-github-stars aria-live="polite">Stars</span></span></a><script>(function(){const repository = "jyje/hermes-agent-helm";
+
+  const counts = document.querySelectorAll('[data-github-stars]');
+  const updateCounts = (value) => counts.forEach((count) => { count.textContent = value; });
+
+  fetch(`https://api.github.com/repos/${repository}`, { headers: { Accept: 'application/vnd.github+json' } })
+    .then((response) => response.ok ? response.json() : Promise.reject(response))
+    .then(({ stargazers_count }) => {
+      if (typeof stargazers_count === 'number') {
+        updateCounts(new Intl.NumberFormat().format(stargazers_count));
+      }
+    })
+    .catch(() => updateCounts('GitHub'));
+})();</script></div><!-- This documentation site intentionally uses a fixed light theme. --><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-mp62kjdu"><span class="sr-only astro-mp62kjdu">Select language</span><svg aria-hidden="true" class="icon label-icon astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg><select autocomplete="off" class="astro-mp62kjdu"><option value="/hermes-agent-helm/charts/hermes-agent/reference/readme/" class="astro-mp62kjdu">English</option><option value="/hermes-agent-helm/ko/charts/hermes-agent/reference/readme/" class="astro-mp62kjdu">한국어</option></select><svg aria-hidden="true" class="icon caret astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-lang-select><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-u3bpnxmj" aria-label="Main"><starlight-menu-button class="print:hidden astro-qo2k72wy"><button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-qo2k72wy"><svg aria-hidden="true" class="open-menu astro-qo2k72wy astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-qo2k72wy astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg></button></starlight-menu-button><script type="module">var e=class extends HTMLElement{btn=this.querySelector(`button`);constructor(){super(),this.btn.addEventListener(`click`,()=>this.toggleExpanded());let e=this.closest(`nav`);e&&e.addEventListener(`keyup`,e=>this.closeOnEscape(e)),matchMedia(`(min-width: 50em)`).addEventListener(`change`,()=>this.setExpanded(!1))}setExpanded(e){this.setAttribute(`aria-expanded`,String(e)),document.body.toggleAttribute(`data-mobile-menu-expanded`,e),document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}toggleExpanded(){this.setExpanded(this.getAttribute(`aria-expanded`)!==`true`)}closeOnEscape(e){e.code===`Escape`&&(this.setExpanded(!1),this.btn.focus())}};customElements.define(`starlight-menu-button`,e);</script><div id="starlight__sidebar" class="sidebar-pane astro-u3bpnxmj"><div class="sidebar-content sl-flex astro-u3bpnxmj"><sl-sidebar-state-persist data-hash="0qvz7tk" class="astro-rljcf4bx"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/" class="large astro-bksbaatw" data-sidebar-order="0"><span class="astro-bksbaatw">Home</span></a></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Charts</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">hermes-agent</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/install/" class="astro-bksbaatw"><span class="astro-bksbaatw">Install</span></a></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Values overlays</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/anthropic-and-discord/" class="astro-bksbaatw"><span class="astro-bksbaatw">anthropic and discord</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/anthropic/" class="astro-bksbaatw"><span class="astro-bksbaatw">anthropic</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/bitwarden/" class="astro-bksbaatw"><span class="astro-bksbaatw">bitwarden</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/deepinfra/" class="astro-bksbaatw"><span class="astro-bksbaatw">deepinfra</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/fireworks/" class="astro-bksbaatw"><span class="astro-bksbaatw">fireworks</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/gemini/" class="astro-bksbaatw"><span class="astro-bksbaatw">gemini</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/github-copilot/" class="astro-bksbaatw"><span class="astro-bksbaatw">github copilot</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/google-vertex/" class="astro-bksbaatw"><span class="astro-bksbaatw">google vertex</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/ingress/" class="astro-bksbaatw"><span class="astro-bksbaatw">ingress</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/litellm-k8s/" class="astro-bksbaatw"><span class="astro-bksbaatw">litellm k8s</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/litellm/" class="astro-bksbaatw"><span class="astro-bksbaatw">litellm</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/moa/" class="astro-bksbaatw"><span class="astro-bksbaatw">moa</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/multi-agent-collab/" class="astro-bksbaatw"><span class="astro-bksbaatw">multi agent collab</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/nvidia-nim-and-discord/" class="astro-bksbaatw"><span class="astro-bksbaatw">nvidia nim and discord</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/openai-and-telegram/" class="astro-bksbaatw"><span class="astro-bksbaatw">openai and telegram</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/openai/" class="astro-bksbaatw"><span class="astro-bksbaatw">openai</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/openrouter/" class="astro-bksbaatw"><span class="astro-bksbaatw">openrouter</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/shared-knowledge/" class="astro-bksbaatw"><span class="astro-bksbaatw">shared knowledge</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/team-leader/" class="astro-bksbaatw"><span class="astro-bksbaatw">team leader</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/team-member/" class="astro-bksbaatw"><span class="astro-bksbaatw">team member</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/upstage/" class="astro-bksbaatw"><span class="astro-bksbaatw">upstage</span></a></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Reference</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/reference/values/" class="astro-bksbaatw"><span class="astro-bksbaatw">Values and overlays</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/charts/hermes-agent/reference/readme/" aria-current="page" class="astro-bksbaatw"><span class="astro-bksbaatw">Chart README</span></a></li></ul></details></li></ul></details></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Getting Started</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/getting-started/install/" class="astro-bksbaatw"><span class="astro-bksbaatw">Install Hermes Agent</span></a></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Examples</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Providers</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/anthropic/" class="astro-bksbaatw"><span class="astro-bksbaatw">Anthropic</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/deepinfra/" class="astro-bksbaatw"><span class="astro-bksbaatw">DeepInfra</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/fireworks/" class="astro-bksbaatw"><span class="astro-bksbaatw">Fireworks AI</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/gemini/" class="astro-bksbaatw"><span class="astro-bksbaatw">Google Gemini</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/github-copilot/" class="astro-bksbaatw"><span class="astro-bksbaatw">GitHub Copilot</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/google-vertex/" class="astro-bksbaatw"><span class="astro-bksbaatw">Google Vertex AI</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/nvidia-nim-and-discord/" class="astro-bksbaatw"><span class="astro-bksbaatw">NVIDIA NIM + Discord</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/openai/" class="astro-bksbaatw"><span class="astro-bksbaatw">OpenAI</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/openrouter/" class="astro-bksbaatw"><span class="astro-bksbaatw">OpenRouter</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/providers/upstage/" class="astro-bksbaatw"><span class="astro-bksbaatw">Upstage Solar</span></a></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Integrations</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/integrations/anthropic-and-discord/" class="astro-bksbaatw"><span class="astro-bksbaatw">Anthropic + Discord</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/integrations/ingress/" class="astro-bksbaatw"><span class="astro-bksbaatw">Dashboard Ingress</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/integrations/litellm/" class="astro-bksbaatw"><span class="astro-bksbaatw">LiteLLM (external)</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/integrations/litellm-k8s/" class="astro-bksbaatw"><span class="astro-bksbaatw">LiteLLM (in cluster)</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/integrations/openai-and-telegram/" class="astro-bksbaatw"><span class="astro-bksbaatw">OpenAI + Telegram</span></a></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Advanced</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/advanced/bitwarden/" class="astro-bksbaatw"><span class="astro-bksbaatw">Bitwarden Secrets Manager</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/advanced/moa/" class="astro-bksbaatw"><span class="astro-bksbaatw">Mixture of Agents</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/advanced/multi-agent-collab/" class="astro-bksbaatw"><span class="astro-bksbaatw">Collaborating pair</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/advanced/shared-knowledge/" class="astro-bksbaatw"><span class="astro-bksbaatw">Shared knowledge PVC</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/advanced/team-leader/" class="astro-bksbaatw"><span class="astro-bksbaatw">Team leader</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/examples/advanced/team-member/" class="astro-bksbaatw"><span class="astro-bksbaatw">Team member</span></a></li></ul></details></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Guides</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/guides/configuration/" class="astro-bksbaatw"><span class="astro-bksbaatw">Configuration model</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/guides/operations/" class="astro-bksbaatw"><span class="astro-bksbaatw">Operations and testing</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/guides/secrets-and-storage/" class="astro-bksbaatw"><span class="astro-bksbaatw">Secrets and persistence</span></a></li></ul></details></li><li class="astro-bksbaatw"><details open class="astro-bksbaatw"><summary class="astro-bksbaatw"><span class="group-label astro-bksbaatw"><span class="large astro-bksbaatw">Reference</span></span><svg aria-hidden="true" class="caret astro-bksbaatw astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="10"></sl-sidebar-restore><ul class="astro-bksbaatw"><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/argocd/" class="astro-bksbaatw"><span class="astro-bksbaatw">ArgoCD guide</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/chart-readme/" class="astro-bksbaatw"><span class="astro-bksbaatw">Chart README</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/ci/" class="astro-bksbaatw"><span class="astro-bksbaatw">CI guide</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/collaboration/" class="astro-bksbaatw"><span class="astro-bksbaatw">Hermes collaboration</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/contributing/" class="astro-bksbaatw"><span class="astro-bksbaatw">Contributing</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/devops-roadmap/" class="astro-bksbaatw"><span class="astro-bksbaatw">DevOps roadmap</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/helm-installation/" class="astro-bksbaatw"><span class="astro-bksbaatw">Helm installation guide</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/helm-repository/" class="astro-bksbaatw"><span class="astro-bksbaatw">Helm repository index</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/local-development/" class="astro-bksbaatw"><span class="astro-bksbaatw">Local development guide</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/repository-readme/" class="astro-bksbaatw"><span class="astro-bksbaatw">Repository README</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/roadmap/" class="astro-bksbaatw"><span class="astro-bksbaatw">Roadmap</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/security/" class="astro-bksbaatw"><span class="astro-bksbaatw">Security policy</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/source-documents/" class="astro-bksbaatw"><span class="astro-bksbaatw">Source documents</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/teams/" class="astro-bksbaatw"><span class="astro-bksbaatw">Hermes teams</span></a></li><li class="astro-bksbaatw"><a href="/hermes-agent-helm/reference/values/" class="astro-bksbaatw"><span class="astro-bksbaatw">Chart values</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-qnya63x6"><div class="social-icons astro-qnya63x6"><a class="github-stars sl-flex" href="https://github.com/jyje/hermes-agent-helm" rel="me" aria-label="GitHub repository"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg><span class="sr-only">GitHub repository</span><span class="github-stars__metric" aria-label="GitHub stars"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M22 9.67a1 1 0 0 0-.86-.67l-5.69-.83L12.9 3a1 1 0 0 0-1.8 0L8.55 8.16 2.86 9a1 1 0 0 0-.81.68 1 1 0 0 0 .25 1l4.13 4-1 5.68a1 1 0 0 0 1.45 1.07L12 18.76l5.1 2.68c.14.08.3.12.46.12a1 1 0 0 0 .99-1.19l-1-5.68 4.13-4A1 1 0 0 0 22 9.67Zm-6.15 4a1 1 0 0 0-.29.89l.72 4.19-3.76-2a1 1 0 0 0-.94 0l-3.76 2 .72-4.19a1 1 0 0 0-.29-.89l-3-3 4.21-.61a1 1 0 0 0 .76-.55L12 5.7l1.88 3.82a1 1 0 0 0 .76.55l4.21.61-3 2.99Z"/></svg><span class="github-stars__count" data-github-stars aria-live="polite">Stars</span></span></a><script>(function(){const repository = "jyje/hermes-agent-helm";
+
+  const counts = document.querySelectorAll('[data-github-stars]');
+  const updateCounts = (value) => counts.forEach((count) => { count.textContent = value; });
+
+  fetch(`https://api.github.com/repos/${repository}`, { headers: { Accept: 'application/vnd.github+json' } })
+    .then((response) => response.ok ? response.json() : Promise.reject(response))
+    .then(({ stargazers_count }) => {
+      if (typeof stargazers_count === 'number') {
+        updateCounts(new Intl.NumberFormat().format(stargazers_count));
+      }
+    })
+    .catch(() => updateCounts('GitHub'));
+})();</script></div><!-- This documentation site intentionally uses a fixed light theme. --><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-mp62kjdu"><span class="sr-only astro-mp62kjdu">Select language</span><svg aria-hidden="true" class="icon label-icon astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg><select autocomplete="off" class="astro-mp62kjdu"><option value="/hermes-agent-helm/charts/hermes-agent/reference/readme/" class="astro-mp62kjdu">English</option><option value="/hermes-agent-helm/ko/charts/hermes-agent/reference/readme/" class="astro-mp62kjdu">한국어</option></select><svg aria-hidden="true" class="icon caret astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-lang-select></div></div></div></div></nav><div class="main-frame astro-u3bpnxmj"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-oewa5tin"><aside class="right-sidebar-container print:hidden astro-oewa5tin"><div class="right-sidebar astro-oewa5tin"><div class="lg:sl-hidden astro-cxfap2ew"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-xaqkphtz"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-xaqkphtz"><details id="starlight__mobile-toc" class="astro-xaqkphtz"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-xaqkphtz"><span class="toggle sl-flex astro-xaqkphtz">On this page<svg aria-hidden="true" class="caret astro-xaqkphtz astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-xaqkphtz"></span></summary><div class="dropdown astro-xaqkphtz"><ul class="isMobile astro-bku6lzjs" style="--depth: 0;"><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#_top" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Overview</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#tldr" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">TL;DR</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#configure-your-provider" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Configure your provider</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#test" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Test</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#overview" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Overview</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#provider--messenger-setup" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Provider &amp; messenger setup</span></a><ul class="isMobile astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#install-options-llm-provider" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Install options: LLM provider</span></a></li><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#messenger-integrations-telegram--discord" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Messenger integrations (Telegram / Discord)</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#login-via-oauth-device-flow-github-copilot" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Login via OAuth device flow (GitHub Copilot)</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#agent-team" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Agent team</span></a><ul class="isMobile astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#how-agents-hand-off-by-mention" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">How agents hand off by @mention</span></a></li><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#quick-start-two-agents-one-channel" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Quick start: two agents, one channel</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#advanced-testing" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Advanced testing</span></a><ul class="isMobile astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#verifying-a-provider-end-to-end-testschatenabled" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Verifying a provider end-to-end (tests.chat.enabled)</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#configuration-model" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Configuration model</span></a><ul class="isMobile astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#secret-provisioning-strategies" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Secret provisioning strategies</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#gateway-lifecycle-rollouts-shutdown-and-drain" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Gateway lifecycle: rollouts, shutdown, and drain</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#unattended-approvals" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Unattended approvals</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#environment-variables" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Environment variables</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#faq" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">FAQ</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#more-examples" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">More examples</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#values" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Values</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/hermes-agent-helm/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-cxfap2ew"><div class="sl-container astro-cxfap2ew"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-bku6lzjs" style="--depth: 0;"><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#_top" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Overview</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#tldr" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">TL;DR</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#configure-your-provider" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Configure your provider</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#test" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Test</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#overview" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Overview</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#provider--messenger-setup" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Provider &amp; messenger setup</span></a><ul class="astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#install-options-llm-provider" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Install options: LLM provider</span></a></li><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#messenger-integrations-telegram--discord" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Messenger integrations (Telegram / Discord)</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#login-via-oauth-device-flow-github-copilot" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Login via OAuth device flow (GitHub Copilot)</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#agent-team" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Agent team</span></a><ul class="astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#how-agents-hand-off-by-mention" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">How agents hand off by @mention</span></a></li><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#quick-start-two-agents-one-channel" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Quick start: two agents, one channel</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#advanced-testing" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Advanced testing</span></a><ul class="astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#verifying-a-provider-end-to-end-testschatenabled" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Verifying a provider end-to-end (tests.chat.enabled)</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#configuration-model" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Configuration model</span></a><ul class="astro-bku6lzjs" style="--depth: 1;"><li style="--depth: 1;" class="astro-bku6lzjs"><a href="#secret-provisioning-strategies" style="--depth: 1;" class="astro-bku6lzjs"><span style="--depth: 1;" class="astro-bku6lzjs">Secret provisioning strategies</span></a></li></ul></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#gateway-lifecycle-rollouts-shutdown-and-drain" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Gateway lifecycle: rollouts, shutdown, and drain</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#unattended-approvals" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Unattended approvals</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#environment-variables" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Environment variables</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#faq" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">FAQ</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#more-examples" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">More examples</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#values" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Values</span></a></li></ul></nav></starlight-toc><script type="module" src="/hermes-agent-helm/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-oewa5tin"><main data-pagefind-body class="astro-zar2v3cf" lang="en" dir="ltr"><div class="content-panel astro-fnsmk2gy"><div class="sl-container astro-fnsmk2gy"><h1 id="_top" class="astro-b2l64apt">Chart README</h1></div></div><div class="content-panel astro-fnsmk2gy"><div class="sl-container astro-fnsmk2gy"><div class="sl-markdown-content"><div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/charts/hermes-agent/README.md">
+  <a href="/hermes-agent-helm/source/charts/hermes-agent/README.md">Open raw Markdown</a>
+  <button type="button" data-copy-source>Copy source</button>
+</div>
+<div align="center">
+<div class="sl-heading-wrapper level-h1"><h1 id="hermes-agent-helmhermes-agent">hermes-agent-helm/hermes-agent</h1><a class="sl-anchor-link" href="#hermes-agent-helmhermes-agent"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “hermes-agent-helm/hermes-agent”</span></a></div>
+<img height="240" src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
+</div>
+<p>👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight</p>
+<p>Run <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.</p>
+<p><a href="https://github.com/jyje/hermes-agent-helm"><img src="https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github" alt="GitHub"></a> <a href="https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <img src="https://img.shields.io/badge/Version-1.0.0-informational?style=flat" alt="Version: 1.0.0"> <img src="https://img.shields.io/badge/Type-application-informational?style=flat" alt="Type: application"> <img src="https://img.shields.io/badge/AppVersion-v2026.7.20-informational?style=flat" alt="AppVersion: v2026.7.20"></p>
+<p><a href="README.md">English</a> · <a href="README-ko.md">한국어</a></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="tldr">TL;DR</h2><a class="sl-anchor-link" href="#tldr"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “TL;DR”</span></a></div>
+<div class="expressive-code"><link rel="stylesheet" href="/hermes-agent-helm/_astro/ec.w36nc.css"><script type="module" src="/hermes-agent-helm/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># OCI (recommended)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#ECC48D;--1:#3B61B0">oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--version</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">1.0.0</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">sk-...</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-agent \  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.0.0 \  --namespace hermes-agent --create-namespace \  --set-string env.OPENAI_API_KEY=&#x27;sk-...&#x27; --wait"><div></div></button></div></figure></div>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># Classic Helm repo</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">repo</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">add</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">https://jyje.github.io/hermes-agent-helm</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">repo</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">update</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">sk-...</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm repo add hermes-agent https://jyje.github.io/hermes-agent-helmhelm repo updatehelm upgrade --install hermes-agent hermes-agent/hermes-agent \  --namespace hermes-agent --create-namespace \  --set-string env.OPENAI_API_KEY=&#x27;sk-...&#x27; --wait"><div></div></button></div></figure></div>
+<ul>
+<li><strong>ArgoCD</strong> — ready-to-apply <code dir="auto">Application</code> manifests, one per provider/messenger
+combo: <a href="../../examples/argocd/"><code dir="auto">examples/argocd/</code></a>.</li>
+<li><strong>GitOps without committing real secrets</strong> — SealedSecret + <code dir="auto">extraEnvFrom</code>
+walkthrough: <a href="../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord"><code dir="auto">examples/argocd/</code> § SealedSecret</a>.</li>
+<li><strong>Agent team</strong> — run multiple instances that hand off by <code dir="auto">@mention</code> over a shared Discord channel:
+<a href="../../examples/argocd/hermes-collab-pair.yaml"><code dir="auto">examples/argocd/hermes-collab-pair.yaml</code></a>,
+see <a href="../../docs/teams.md">Teams</a> + <a href="../../docs/collaboration.md">Collaboration guide</a>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="configure-your-provider">Configure your provider</h2><a class="sl-anchor-link" href="#configure-your-provider"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Configure your provider”</span></a></div>
+<p>Set <code dir="auto">config.model.provider</code> to a built-in key, supply its key under <code dir="auto">env</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th><code dir="auto">config.model.provider</code></th>
+<th>Key env var</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><code dir="auto">openai-api</code></td>
+<td><code dir="auto">OPENAI_API_KEY</code></td>
+<td><a href="values-openai.yaml"><code dir="auto">values-openai.yaml</code></a></td>
+</tr>
+<tr>
+<td>Anthropic (Claude)</td>
+<td><code dir="auto">anthropic</code></td>
+<td><code dir="auto">ANTHROPIC_API_KEY</code></td>
+<td><a href="values-anthropic.yaml"><code dir="auto">values-anthropic.yaml</code></a></td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td><code dir="auto">gemini</code></td>
+<td><code dir="auto">GOOGLE_API_KEY</code></td>
+<td><a href="values-gemini.yaml"><code dir="auto">values-gemini.yaml</code></a></td>
+</tr>
+<tr>
+<td>Google Vertex AI</td>
+<td><code dir="auto">vertex</code></td>
+<td>none — OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC)</td>
+<td><a href="values-google-vertex.yaml"><code dir="auto">values-google-vertex.yaml</code></a></td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code dir="auto">openrouter</code></td>
+<td><code dir="auto">OPENROUTER_API_KEY</code></td>
+<td><a href="values-openrouter.yaml"><code dir="auto">values-openrouter.yaml</code></a></td>
+</tr>
+<tr>
+<td>NVIDIA NIM</td>
+<td><code dir="auto">nvidia</code></td>
+<td><code dir="auto">NVIDIA_API_KEY</code></td>
+<td><a href="values-nvidia-nim-and-discord.yaml"><code dir="auto">values-nvidia-nim-and-discord.yaml</code></a></td>
+</tr>
+<tr>
+<td>Fireworks AI</td>
+<td><code dir="auto">fireworks</code></td>
+<td><code dir="auto">FIREWORKS_API_KEY</code></td>
+<td><a href="values-fireworks.yaml"><code dir="auto">values-fireworks.yaml</code></a></td>
+</tr>
+<tr>
+<td>DeepInfra</td>
+<td><code dir="auto">deepinfra</code></td>
+<td><code dir="auto">DEEPINFRA_API_KEY</code></td>
+<td><a href="values-deepinfra.yaml"><code dir="auto">values-deepinfra.yaml</code></a></td>
+</tr>
+<tr>
+<td>Upstage Solar</td>
+<td><code dir="auto">upstage</code></td>
+<td><code dir="auto">UPSTAGE_API_KEY</code></td>
+<td><a href="values-upstage.yaml"><code dir="auto">values-upstage.yaml</code></a></td>
+</tr>
+<tr>
+<td>GitHub Copilot</td>
+<td><code dir="auto">copilot</code></td>
+<td><code dir="auto">COPILOT_GITHUB_TOKEN</code> (OAuth device-flow — no API key needed)</td>
+<td><a href="values-github-copilot.yaml"><code dir="auto">values-github-copilot.yaml</code></a></td>
+</tr>
+<tr>
+<td>Mixture-of-Agents (MoA)</td>
+<td><code dir="auto">moa</code></td>
+<td>depends on the reference/aggregator models in the preset</td>
+<td><a href="values-moa.yaml"><code dir="auto">values-moa.yaml</code></a></td>
+</tr>
+<tr>
+<td>Custom (LiteLLM / vLLM / LM Studio)</td>
+<td>your own id, under <code dir="auto">config.providers</code></td>
+<td>depends on proxy</td>
+<td><a href="values-litellm.yaml"><code dir="auto">values-litellm.yaml</code></a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code dir="auto">openai</code> (no suffix) is <strong>not</strong> a valid provider key — it aliases to
+OpenRouter. Use <code dir="auto">openai-api</code>.</p>
+</blockquote>
+<p>Full provider walkthrough (<code dir="auto">--set</code> examples per provider) and messenger
+(Discord/Telegram) setup: see <a href="#provider--messenger-setup">Provider &amp; messenger setup</a>
+below.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="test">Test</h2><a class="sl-anchor-link" href="#test"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Test”</span></a></div>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">test</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">kubectl</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">logs</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-l</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">app.kubernetes.io/component=test</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--tail=-1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm test hermes-agent -n hermes-agentkubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1"><div></div></button></div></figure></div>
+<p>Runs a <code dir="auto">hermes doctor</code>-style health check Job after install. To also verify a
+real provider round-trip, see <a href="#advanced-testing">Advanced testing</a> below.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="overview">Overview</h2><a class="sl-anchor-link" href="#overview"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Overview”</span></a></div>
+<p>Run <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> on Kubernetes.
+It deploys:</p>
+<ul>
+<li>a <strong>Deployment</strong> (default) or <strong>StatefulSet</strong> (<code dir="auto">controller.type</code>), single
+replica with persistent <code dir="auto">HERMES_HOME</code>, running the image’s s6-supervised
+gateway</li>
+<li>a <strong>ConfigMap</strong> holding the partial <code dir="auto">config.yaml</code></li>
+<li>a <strong>Secret</strong> holding the <code dir="auto">.env</code> (injected via <code dir="auto">envFrom</code>)</li>
+<li>for <code dir="auto">controller.type=statefulset</code>: a headless Service for DNS/governance
+(no inbound port — the gateway is outbound); for <code dir="auto">deployment</code>: a standalone
+PVC instead. Either way, an <strong>optional</strong> ClusterIP Service for the dashboard,
+and an <strong>optional</strong> Ingress in front of it (<code dir="auto">ingress.enabled</code>)</li>
+<li>a <strong>Helm test</strong> Job (<code dir="auto">helm test</code>) that runs a <code dir="auto">hermes doctor</code> style check</li>
+</ul>
+<p>The agent’s command execution uses the <strong><code dir="auto">local</code> backend</strong> (commands run inside
+the pod; the pod is the sandbox). The <code dir="auto">docker</code> backend is intentionally <strong>not
+supported in-cluster</strong> — it requires a Docker daemon/socket, absent on
+containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.</p>
+<blockquote>
+<p>Image tags are <strong>date-based</strong> (e.g. <code dir="auto">v2026.6.5</code> == Hermes v0.16.0); the image
+is multi-arch (amd64 + arm64), so it runs on Raspberry Pi clusters.</p>
+</blockquote>
+<blockquote>
+<p><strong>Scaling note.</strong> Hermes is a single-instance personal agent, so this chart
+pins <code dir="auto">replicaCount: 1</code> and there is no multi-replica mode (see the
+<code dir="auto">replicaCount</code> note in the <a href="#values">values table</a>). To grow, scale <em>up</em> (more
+<code dir="auto">resources</code>, larger <code dir="auto">persistence.size</code>) — and when one agent isn’t enough, run
+several instances and group them into a <strong>team</strong> that shares one gateway
+channel. See <a href="../../docs/teams.md">Hermes teams</a>.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="provider--messenger-setup">Provider &amp; messenger setup</h2><a class="sl-anchor-link" href="#provider--messenger-setup"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Provider &amp; messenger setup”</span></a></div>
+<p>Installing from a local chart checkout (e.g. to try an unreleased change):</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">sk-...</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-agent ./charts/hermes-agent \  --namespace hermes-agent --create-namespace \  --set-string env.OPENAI_API_KEY=&#x27;sk-...&#x27; --wait"><div></div></button></div></figure></div>
+<p>The chart ships a placeholder <code dir="auto">OPENAI_API_KEY</code>; override it (and <code dir="auto">config.model</code>)
+for your provider at install/upgrade time, or supply a values file.</p>
+<blockquote>
+<p>Tip: using a release name equal to the chart name (<code dir="auto">hermes-agent</code>) keeps
+resource names clean (<code dir="auto">hermes-agent-0</code>) instead of doubling the prefix
+(<code dir="auto">hermes-agent-hermes-agent-0</code>). Or set <code dir="auto">fullnameOverride</code>.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="install-options-llm-provider">Install options: LLM provider</h3><a class="sl-anchor-link" href="#install-options-llm-provider"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Install options: LLM provider”</span></a></div>
+<p>This is the main thing you configure at install time — <em>which</em> LLM backend
+Hermes talks to. (For chat platforms, see
+<a href="#messenger-integrations-telegram--discord">Messenger integrations</a> below.)</p>
+<ul>
+<li>
+<p><strong>Built-in provider</strong> — set <code dir="auto">config.model.provider</code> to one of Hermes’
+built-in keys (<code dir="auto">openai-api</code>, <code dir="auto">anthropic</code>, <code dir="auto">gemini</code>, <code dir="auto">openrouter</code>, <code dir="auto">nvidia</code>,
+<code dir="auto">deepseek</code>, <code dir="auto">lmstudio</code>, …) and <code dir="auto">config.model.default</code> to a model id for that
+provider. Supply the matching key under <code dir="auto">env</code> (<code dir="auto">OPENAI_API_KEY</code>,
+<code dir="auto">ANTHROPIC_API_KEY</code>, <code dir="auto">GOOGLE_API_KEY</code>, <code dir="auto">NVIDIA_API_KEY</code>, …).</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># OpenAI</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.provider=openai-api</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.default=gpt-4o-mini</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">sk-...</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># Gemini</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.provider=gemini</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.default=gemini-2.5-flash</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.GOOGLE_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">&lt;your-key&gt;</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=unused</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># NVIDIA NIM (this is the provider CI exercises end-to-end)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.provider=nvidia</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.default=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.NVIDIA_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">nvapi-...</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=unused</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \  --set-string config.model.provider=openai-api \  --set-string config.model.default=gpt-4o-mini \  --set-string env.OPENAI_API_KEY=&#x27;sk-...&#x27; --waithelm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \  --set-string config.model.provider=gemini \  --set-string config.model.default=gemini-2.5-flash \  --set-string env.GOOGLE_API_KEY=&#x27;<your-key>&#x27; \  --set-string env.OPENAI_API_KEY=unused --waithelm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \  --set-string config.model.provider=nvidia \  --set-string config.model.default=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning \  --set-string env.NVIDIA_API_KEY=&#x27;nvapi-...&#x27; \  --set-string env.OPENAI_API_KEY=unused --wait"><div></div></button></div></figure></div>
+</li>
+<li>
+<p><strong>Custom OpenAI-compatible provider</strong> (LiteLLM, vLLM, LM Studio, …) — register
+it under <code dir="auto">config.providers.&lt;id&gt;</code> (<code dir="auto">base_url</code>, <code dir="auto">key_env</code>) and point
+<code dir="auto">config.model.provider</code> at that <code dir="auto">&lt;id&gt;</code>. See <code dir="auto">values-litellm.yaml</code> (remote
+proxy) or <code dir="auto">values-litellm-k8s.yaml</code> (in-cluster) in
+<a href="#more-examples">“More examples”</a>.</p>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="messenger-integrations-telegram--discord">Messenger integrations (Telegram / Discord)</h3><a class="sl-anchor-link" href="#messenger-integrations-telegram--discord"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Messenger integrations (Telegram / Discord)”</span></a></div>
+<p><code dir="auto">hermes gateway run</code> (the workload’s command) connects whatever chat platforms
+it finds <strong>credentials</strong> for — so wiring a messenger is just a matter of
+supplying its bot token. The token is sensitive, so put it under <code dir="auto">.Values.env</code>
+(rendered into the Secret); the non-secret knobs (allowed users, home channel)
+can go under <code dir="auto">.Values.extraEnv</code> (plain env). Setting the token is enough to
+<strong>auto-enable</strong> the platform — no <code dir="auto">config.yaml</code> change required.</p>
+<blockquote>
+<p><strong>Verification status:</strong> the chart renders the right Secret/env and the agent
+picks the platform up. On trusted CI runs where the <code dir="auto">DISCORD_BOT_TOKEN</code> and
+<code dir="auto">DISCORD_HOME_CHANNEL</code> secrets are configured, CI does a full live
+round-trip — <code dir="auto">hermes send</code> to that channel, then reads the channel back via
+the Discord API to confirm the message arrived — and <strong>fails if it can’t be
+verified</strong> (the bot needs <em>View Channel</em> + <em>Read Message History</em>). Fork PRs
+skip it since secrets aren’t exposed. Telegram is still placeholder-only.
+Provide a real bot token to try either in your own cluster.</p>
+</blockquote>
+<ul>
+<li>
+<p><strong>Discord</strong> — create a bot at the
+<a href="https://discord.com/developers/applications">Discord Developer Portal</a>,
+enable the <strong>Message Content Intent</strong>, and invite it to your server.</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.provider=nvidia</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">config.model.default=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.NVIDIA_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">nvapi-...</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.OPENAI_API_KEY=unused</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.DISCORD_BOT_TOKEN=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">&lt;bot-token&gt;</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \  --set-string config.model.provider=nvidia \  --set-string config.model.default=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning \  --set-string env.NVIDIA_API_KEY=&#x27;nvapi-...&#x27; \  --set-string env.OPENAI_API_KEY=unused \  --set-string env.DISCORD_BOT_TOKEN=&#x27;<bot-token>&#x27; --wait"><div></div></button></div></figure></div>
+<p>Optional non-secret knobs (via <code dir="auto">extraEnv</code>, or <code dir="auto">--set</code>):</p>
+<table>
+<thead>
+<tr>
+<th>env var</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">DISCORD_ALLOWED_USERS</code></td>
+<td>comma-separated user IDs allowed to talk to the bot</td>
+</tr>
+<tr>
+<td><code dir="auto">DISCORD_ALLOW_ALL_USERS</code></td>
+<td><code dir="auto">true</code> to allow anyone (dev only)</td>
+</tr>
+<tr>
+<td><code dir="auto">DISCORD_HOME_CHANNEL</code></td>
+<td>channel ID for cron / notification delivery</td>
+</tr>
+<tr>
+<td><code dir="auto">DISCORD_HOME_CHANNEL_NAME</code></td>
+<td>display name for that home channel</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>Telegram</strong> — create a bot via <a href="https://t.me/BotFather">@BotFather</a> and set
+<code dir="auto">env.TELEGRAM_BOT_TOKEN</code> (optionally <code dir="auto">TELEGRAM_HOME_CHANNEL</code>,
+<code dir="auto">TELEGRAM_ALLOWED_USERS</code> via <code dir="auto">extraEnv</code>).</p>
+</li>
+</ul>
+<p>See <code dir="auto">values-anthropic-and-discord.yaml</code> / <code dir="auto">values-openai-and-telegram.yaml</code> in
+<a href="#more-examples">“More examples”</a> for copy-pasteable messenger blocks.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="login-via-oauth-device-flow-github-copilot">Login via OAuth device flow (GitHub Copilot)</h2><a class="sl-anchor-link" href="#login-via-oauth-device-flow-github-copilot"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Login via OAuth device flow (GitHub Copilot)”</span></a></div>
+<p>Some providers issue short-lived OAuth tokens you cannot paste ahead of time —
+<strong>GitHub Copilot</strong> is the headline case: its token API rejects PATs and wants a
+<code dir="auto">gho_</code>/<code dir="auto">ghu_</code> device-flow token. Set <code dir="auto">auth.deviceFlow.enabled=true</code> and the
+chart adds an <strong><code dir="auto">auth-device-login</code> init container</strong> that performs the
+<a href="https://datatracker.ietf.org/doc/html/rfc8628">OAuth 2.0 Device Authorization Grant (RFC 8628)</a>
+at pod startup, surfaces the verification URL + user code for a human to
+approve (your Discord home channel by default — phone-friendly), waits, then
+persists the resulting token to <code dir="auto">HERMES_HOME/.env</code> exactly where Hermes reads
+it. The token lives on the persistent volume, so it is reused across restarts;
+re-login only happens when it is missing or revoked (skip-if-valid).</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">-f</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">charts/hermes-agent/values-github-copilot.yaml</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.DISCORD_BOT_TOKEN=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">&lt;bot-token&gt;</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># then approve the prompt posted to Discord (or read it from the logs):</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">kubectl</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">logs</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">sts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-c</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">auth-device-login</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-f</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \  -f charts/hermes-agent/values-github-copilot.yaml \  --set-string env.DISCORD_BOT_TOKEN=&#x27;<bot-token>&#x27; --waitkubectl logs sts/hermes-agent -n hermes-agent -c auth-device-login -f"><div></div></button></div></figure></div>
+<p>Notes:</p>
+<ul>
+<li><strong>Requires <code dir="auto">persistence.enabled=true</code></strong> — without a volume the token is lost
+on restart and you would re-approve every time.</li>
+<li><strong><code dir="auto">notify</code></strong> is <code dir="auto">discord</code> (reuses <code dir="auto">DISCORD_BOT_TOKEN</code> + <code dir="auto">DISCORD_HOME_CHANNEL</code>)
+or <code dir="auto">logs</code> (verification prompt printed to the init container logs only).</li>
+<li>The init container runs as <strong>root</strong> so it can write to any storage class, then
+<strong>chowns</strong> the token file to <code dir="auto">auth.deviceFlow.tokenOwner</code> (default uid/gid
+<code dir="auto">10000</code> — the upstream image’s runtime user) so the non-root agent can read it.</li>
+<li><strong>Catalog model:</strong> <code dir="auto">auth.deviceFlow.providers</code> is a map keyed by provider id
+(each with its own <code dir="auto">clientId</code>/<code dir="auto">authHost</code>/<code dir="auto">tokenEnv</code>/…); <code dir="auto">auth.deviceFlow.provider</code>
+selects which one runs. Only <code dir="auto">github-copilot</code> ships today — add a map entry to
+support another device-flow provider. The Copilot <code dir="auto">clientId</code> default is the
+shared client Hermes upstream itself uses.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="agent-team">Agent team</h2><a class="sl-anchor-link" href="#agent-team"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Agent team”</span></a></div>
+<p>Hermes is a <strong>single-instance personal agent</strong> — it does not scale out. Instead,
+run several well-managed instances and group them into a team that shares <strong>one
+Discord channel</strong> as the context bus. Each agent gets its own bot token, pod,
+private <code dir="auto">HERMES_HOME</code> PVC, and identity. Task coordination is shared only through
+the Discord channel; team-specific knowledge volumes are mounted separately.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="how-agents-hand-off-by-mention">How agents hand off by <code dir="auto">@mention</code></h3><a class="sl-anchor-link" href="#how-agents-hand-off-by-mention"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “How agents hand off by @mention”</span></a></div>
+<p>Point every instance at the same <code dir="auto">DISCORD_HOME_CHANNEL</code> (with a different
+<code dir="auto">DISCORD_BOT_TOKEN</code> each). Agents hand the conversation to each other by placing
+an explicit <code dir="auto">&lt;@BOT_USER_ID&gt;</code> in the <strong>body</strong> of a Discord message — not as a
+reply reference. Four env vars make the handoff reliable and prevent infinite
+bot-to-bot ping-pong:</p>
+<table>
+<thead>
+<tr>
+<th>Env var</th>
+<th>Recommended value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">DISCORD_ALLOW_BOTS</code></td>
+<td><code dir="auto">mentions</code></td>
+<td>Respond to another bot only when it <code dir="auto">@mentions</code> us.</td>
+</tr>
+<tr>
+<td><code dir="auto">DISCORD_THREAD_REQUIRE_MENTION</code></td>
+<td><code dir="auto">true</code></td>
+<td>In shared threads, fire only on explicit mention.</td>
+</tr>
+<tr>
+<td><code dir="auto">DISCORD_REPLY_TO_MODE</code></td>
+<td><code dir="auto">off</code></td>
+<td>Don’t attach a reply-reference — it auto-pings the partner and restarts the loop.</td>
+</tr>
+<tr>
+<td><code dir="auto">DISCORD_ALLOW_MENTION_REPLIED_USER</code></td>
+<td><code dir="auto">false</code></td>
+<td>Never treat an auto reply-ping as a real mention.</td>
+</tr>
+</tbody>
+</table>
+<p>Set these under <code dir="auto">env</code> / <code dir="auto">extraEnv</code> (not under <code dir="auto">config</code> — they are read directly
+by the Discord adapter via <code dir="auto">os.getenv</code>).</p>
+<p>Also set <code dir="auto">config.group_sessions_per_user: false</code> and keep
+<code dir="auto">config.discord.history_backfill: true</code>. Hermes otherwise isolates the human
+and each bot sender into different sessions inside the same visible thread.
+Backfill supplies visible messages that arrived while a bot was not mentioned.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="quick-start-two-agents-one-channel">Quick start: two agents, one channel</h3><a class="sl-anchor-link" href="#quick-start-two-agents-one-channel"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Quick start: two agents, one channel”</span></a></div>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-planner</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-team</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">-f</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">charts/hermes-agent/values-multi-agent-collab.yaml</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.DISCORD_BOT_TOKEN=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">&lt;planner-bot-token&gt;</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-builder</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-team</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">-f</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">charts/hermes-agent/values-multi-agent-collab.yaml</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.DISCORD_BOT_TOKEN=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">&lt;builder-bot-token&gt;</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-planner ./charts/hermes-agent \  --namespace hermes-team --create-namespace \  -f charts/hermes-agent/values-multi-agent-collab.yaml \  --set-string env.DISCORD_BOT_TOKEN=&#x27;<planner-bot-token>&#x27; --waithelm upgrade --install hermes-builder ./charts/hermes-agent \  --namespace hermes-team \  -f charts/hermes-agent/values-multi-agent-collab.yaml \  --set-string env.DISCORD_BOT_TOKEN=&#x27;<builder-bot-token>&#x27; --wait"><div></div></button></div></figure></div>
+<p>For a declarative roster (3+ agents, GitOps), use an <strong>ArgoCD ApplicationSet</strong>
+— adding a teammate becomes a one-line diff. See
+<a href="../../examples/argocd/hermes-collab-pair.yaml"><code dir="auto">examples/argocd/hermes-collab-pair.yaml</code></a>
+and the full guide in <a href="../../docs/teams.md">Teams</a> + <a href="../../docs/collaboration.md">Collaboration</a>.</p>
+<p>For a leader plus several members, use
+<a href="values-team-leader.yaml"><code dir="auto">values-team-leader.yaml</code></a> and
+<a href="values-team-member.yaml"><code dir="auto">values-team-member.yaml</code></a>. That reference protocol
+serializes one explicit bot mention at a time and keeps every task, result, and
+review in the Discord thread. A separate pre-provisioned RWX PVC carries
+durable shared knowledge, but never tasks, status, or result handoffs. The team
+recipe requires that claim: leader read-write, members read-only.
+The <code dir="auto">file</code> and <code dir="auto">memory</code> toolsets remain available for each agent’s own work;
+only cross-agent handoffs through files, memory, hooks, or background work are
+prohibited.</p>
+<blockquote>
+<p>Upstream currently documents Hermes bot-to-bot Discord conversation as an
+unsupported topology with no built-in circuit breaker. The example is
+experimental: use a dedicated trusted channel, keep a manual stop path, and
+require a live proof with your pinned image before relying on it.</p>
+</blockquote>
+<p>The reference sequence completed live on kind with <code dir="auto">v2026.7.20</code>; see the
+timestamped <a href="../../docs/teams.md#leader-orchestrated-teams">team evidence</a>.</p>
+<blockquote>
+<p><strong>Alternative: one pod, many profiles.</strong> If what you actually need is
+routing different Discord guilds/channels/threads to different agent
+<em>profiles</em> from a <strong>single bot token</strong> — rather than several bots sharing
+one channel — set <code dir="auto">config.gateway.multiplex_profiles: true</code> (env override:
+<code dir="auto">GATEWAY_MULTIPLEX_PROFILES=1</code>). That’s one pod instead of one-per-teammate;
+it solves a different problem than the hand-off pattern above (routing, not
+collaboration), so pick based on which shape your use case actually needs.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="advanced-testing">Advanced testing</h2><a class="sl-anchor-link" href="#advanced-testing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Advanced testing”</span></a></div>
+<p>The <a href="#test"><code dir="auto">helm test</code></a> Job (hook <code dir="auto">helm.sh/hook: test</code>) runs <code dir="auto">hermes --version</code>, verifies the seeded <code dir="auto">config.yaml</code>, checks docker availability
+(informational, since the backend is <code dir="auto">local</code>), and runs <code dir="auto">hermes doctor</code>.
+Disable it with <code dir="auto">--set tests.enabled=false</code>; make doctor failures fatal with
+<code dir="auto">--set tests.doctorStrict=true</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="verifying-a-provider-end-to-end-testschatenabled">Verifying a provider end-to-end (<code dir="auto">tests.chat.enabled</code>)</h3><a class="sl-anchor-link" href="#verifying-a-provider-end-to-end-testschatenabled"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Verifying a provider end-to-end (tests.chat.enabled)”</span></a></div>
+<p><code dir="auto">tests.chat.enabled=true</code> adds a 5th check: a real <code dir="auto">hermes chat</code> round-trip
+using the <strong>same <code dir="auto">config</code>/<code dir="auto">env</code> the release was installed with</strong> (the test Job
+mounts the same ConfigMap and Secret as the main workload — no separate
+provider key needed), with the <strong>full conversation (prompt + response) printed
+to the test Job’s logs</strong>. Since <code dir="auto">helm test</code> doesn’t take <code dir="auto">--set</code>, flip the flag
+with <code dir="auto">helm upgrade --reuse-values</code> and then run the test:</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--reuse-values</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--set</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--1:#3B61B0"><span style="--0:#ECC48D">tests.chat.enabled=</span><span style="--0:#82AAFF">true</span></span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">test</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">kubectl</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">logs</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-n</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">-l</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">app.kubernetes.io/component=test</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--tail=-1</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade hermes-agent ./charts/hermes-agent -n hermes-agent \  --reuse-values --set tests.chat.enabled=true --waithelm test hermes-agent -n hermes-agentkubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1"><div></div></button></div></figure></div>
+<p>Sample output (NVIDIA NIM, prompt <code dir="auto">tests.chat.prompt</code> default “Just say hi.”):</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">[5/5] hermes chat round-trip</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">--- prompt ---</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Just say hi.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">--- model: (config default) (timeout 180s) ---</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Query: Just say hi.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Initializing agent...</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">────────────────────────────────────────</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">╭─ ⚕ Hermes ───────────────────────────────────────────────────────────────────╮</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">Hi.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">╰──────────────────────────────────────────────────────────────────────────────╯</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">--- end response ---</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="[5/5] hermes chat round-trip--- prompt ---Just say hi.--- model: (config default) (timeout 180s) ---Query: Just say hi.Initializing agent...────────────────────────────────────────╭─ ⚕ Hermes ───────────────────────────────────────────────────────────────────╮    Hi.╰──────────────────────────────────────────────────────────────────────────────╯--- end response ---"><div></div></button></div></figure></div>
+<p>By default a failed/empty round-trip is <strong>non-fatal</strong> (logged only); set
+<code dir="auto">tests.chat.failOnError=true</code> to make it fail the test job (this is what CI
+does when an <code dir="auto">NVIDIA_API_KEY</code> secret is available).</p>
+<p>For free-tier providers where a single model can be flaky/overloaded, set
+<code dir="auto">tests.chat.models</code> to a list of <code dir="auto">provider/model</code> ids — the test Job tries
+each in order via <code dir="auto">hermes chat -m &lt;id&gt; --provider &lt;config.model.provider&gt;</code>
+(its own <code dir="auto">tests.chat.timeout</code> per attempt) and passes as soon as one succeeds.
+This is what CI does (a small pool of free NVIDIA NIM models).</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="configuration-model">Configuration model</h2><a class="sl-anchor-link" href="#configuration-model"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Configuration model”</span></a></div>
+<p>Hermes reads <code dir="auto">$HERMES_HOME/config.yaml</code> and secrets from the environment as
+<strong>partial overrides</strong> on top of its version-specific built-in defaults
+(precedence: CLI &gt; <code dir="auto">config.yaml</code> &gt; <code dir="auto">.env</code> &gt; built-in defaults). This chart
+follows that model — you only set what you want to change, and never reproduce
+the full upstream config (which would drift across Hermes versions).</p>
+<blockquote>
+<p><strong>The passthrough principle.</strong> <code dir="auto">.Values.config</code> is rendered into
+<code dir="auto">config.yaml</code> <strong>as-is</strong> — every level allows arbitrary additional keys (see
+<code dir="auto">values.schema.json</code>). That means <strong>any</strong> key documented in Hermes’ own
+<a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration">Configuration guide</a>
+or <a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables">Environment Variables reference</a>
+is already settable today — under <code dir="auto">config.&lt;path&gt;</code> or <code dir="auto">env</code>/<code dir="auto">extraEnv</code> — with
+<strong>no chart change required</strong>. This README only curates the handful of
+settings most people touch at install time (provider, messenger, team
+topology); it is deliberately not a mirror of the upstream docs. See
+<a href="#faq">FAQ</a> below for the lookup recipe.</p>
+</blockquote>
+<ul>
+<li><strong><code dir="auto">config.yaml</code></strong> — set only override keys under <code dir="auto">.Values.config</code>. It is
+rendered into a ConfigMap and <strong>seeded into <code dir="auto">HERMES_HOME</code></strong> (the persistent
+volume) by an init container, because Hermes also writes to its home at
+runtime (skills, <code dir="auto">auth.json</code>, self-improvement). <code dir="auto">bootstrap.overwrite=true</code>
+(default) re-seeds on every deploy; set <code dir="auto">false</code> to seed only when absent.</li>
+<li><strong>Secrets / API keys</strong> — set under <code dir="auto">.Values.env</code>. Rendered into a Secret and
+injected via <code dir="auto">envFrom</code> as environment variables (env wins over <code dir="auto">config.yaml</code>).</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="secret-provisioning-strategies">Secret provisioning strategies</h3><a class="sl-anchor-link" href="#secret-provisioning-strategies"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Secret provisioning strategies”</span></a></div>
+<p>Pick one per deployment — they compose (e.g. SealedSecret for the provider key,
+Bitwarden for everything else):</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>When to use</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain <code dir="auto">.Values.env</code></td>
+<td>Local/dev, or a values file you never commit with real values</td>
+<td>this README’s provider examples</td>
+</tr>
+<tr>
+<td>SealedSecret + <code dir="auto">extraEnvFrom</code></td>
+<td>GitOps — encrypt real secrets so they’re safe to commit</td>
+<td><a href="../../examples/argocd/"><code dir="auto">examples/argocd/</code></a></td>
+</tr>
+<tr>
+<td>Bitwarden Secrets Manager</td>
+<td>Centralize N provider keys behind one rotating bootstrap token</td>
+<td><a href="values-bitwarden.yaml"><code dir="auto">values-bitwarden.yaml</code></a></td>
+</tr>
+<tr>
+<td>1Password</td>
+<td>Not yet covered by this chart — its secret source needs the <code dir="auto">op</code> CLI present in the image/PATH at startup, which is more than a values example can add on its own. Track or pick up new work upstream-side first.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>For GitOps, avoid committing real keys in <code dir="auto">env</code> — instead deploy a
+<code dir="auto">SealedSecret</code> (or similar) via <code dir="auto">extraResources</code> and reference the Secret it
+produces with <code dir="auto">extraEnvFrom</code> (applied after the chart’s own Secret, so it
+wins). See <a href="../../examples/argocd/"><code dir="auto">examples/argocd/</code></a> for a complete
+SealedSecret + <code dir="auto">extraEnvFrom</code> GitOps example.</p>
+<p>Bitwarden Secrets Manager resolves provider keys at startup from
+<code dir="auto">config.secrets.bitwarden</code>. Keep only its <code dir="auto">BWS_ACCESS_TOKEN</code> bootstrap
+credential in an externally managed Kubernetes Secret referenced through
+<code dir="auto">extraEnvFrom</code>; see <a href="values-bitwarden.yaml"><code dir="auto">values-bitwarden.yaml</code></a>. The
+first startup downloads the checksum-verified <code dir="auto">bws</code> CLI into <code dir="auto">HERMES_HOME</code>,
+so the pod needs egress to Bitwarden and GitHub Releases.</p>
+<ul>
+<li><strong>Dashboard Ingress</strong> — the management dashboard (<code dir="auto">service.port</code>, default
+9119) requires <code dir="auto">--insecure</code> to bind beyond <code dir="auto">127.0.0.1</code>, which the upstream
+warns <strong>exposes API keys on the network</strong>. Set <code dir="auto">service.enabled: true</code> and
+<code dir="auto">ingress.enabled: true</code> only behind authentication (e.g. an
+oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
+<code dir="auto">ingress.hosts</code> / <code dir="auto">ingress.tls</code> in <code dir="auto">values.yaml</code>.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="gateway-lifecycle-rollouts-shutdown-and-drain">Gateway lifecycle: rollouts, shutdown, and drain</h2><a class="sl-anchor-link" href="#gateway-lifecycle-rollouts-shutdown-and-drain"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Gateway lifecycle: rollouts, shutdown, and drain”</span></a></div>
+<p>As of image <code dir="auto">v2026.7.1</code> the gateway defaults <code dir="auto">agent.restart_drain_timeout</code> to
+<strong>0</strong>: on pod stop (rollout, node drain, <code dir="auto">kubectl delete pod</code>) it interrupts
+any in-flight agent run immediately, persists the conversation transcript, and
+exits fast. Rollouts are quick by default, and the Kubernetes default
+30-second termination grace period is plenty.</p>
+<p>To opt into a graceful drain window instead (wait for running agent turns
+before interrupting), set both halves — the drain in Hermes config and the
+grace period on the pod:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">config</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">agent</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">restart_drain_timeout</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">60</span><span style="--0:#D6DEEB;--1:#403F53">    </span><span style="--0:#919F9F;--1:#5F636F"># seconds to wait for in-flight runs</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">terminationGracePeriodSeconds</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">90</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#919F9F;--1:#5F636F"># keep WELL ABOVE the drain timeout</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="config:  agent:    restart_drain_timeout: 60    # seconds to wait for in-flight runsterminationGracePeriodSeconds: 90 # keep WELL ABOVE the drain timeout"><div></div></button></div></figure></div>
+<p>If the grace period is not comfortably above the drain timeout, the kubelet
+SIGKILLs the gateway mid-drain — upstream documents this exact race (against
+systemd’s <code dir="auto">TimeoutStopSec</code>) as leaving a stale lock that crash-loops the
+gateway, which is why its default moved to 0. A drain window also cannot
+“save” an unbounded agent turn; treat it as a courtesy, not a guarantee.</p>
+<blockquote>
+<p><strong>Scale-to-zero is not applicable in-cluster.</strong> Upstream <code dir="auto">v2026.7.1</code> also
+added scale-to-zero idle detection (dormant-quiesce), but it is exclusive to
+Nous’ managed relay deployment: it is enabled by a platform-stamped
+<code dir="auto">HERMES_SCALE_TO_ZERO</code> env (not a user config key), arms only when messaging
+is relay-only with a registered wake URL, and relies on the hosting platform
+suspending the VM. With this chart’s direct Discord/Telegram/Slack
+connections it never arms, and Kubernetes would keep the pod Running
+regardless — so the chart deliberately does not expose it.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="unattended-approvals">Unattended approvals</h2><a class="sl-anchor-link" href="#unattended-approvals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Unattended approvals”</span></a></div>
+<p>The gateway pod has <strong>no TTY</strong> — Hermes’ interactive approval prompt (for
+dangerous <code dir="auto">terminal</code>/<code dir="auto">execute_code</code> commands) has no human to answer it there,
+so a run can stall waiting on one. Tune this under <code dir="auto">config.approvals</code>:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">config</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">approvals</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">mode</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">manual</span><span style="--0:#D6DEEB;--1:#403F53">        </span><span style="--0:#919F9F;--1:#5F636F"># "manual" (default) prompts; the gateway has nobody to answer</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">deny</span><span style="--0:#D6DEEB;--1:#403F53">:                </span><span style="--0:#919F9F;--1:#5F636F"># commands matching these patterns are refused BEFORE</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">      </span></span><span style="--0:#D6DEEB;--1:#403F53">- </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">rm -rf /</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">       </span><span style="--0:#919F9F;--1:#5F636F"># any approval/yolo logic even sees them — safe to keep</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">      </span></span><span style="--0:#D6DEEB;--1:#403F53">- </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">curl.*</span><span style="--0:#F78C6C;--1:#AA0982">\\</span><span style="--0:#ECC48D;--1:#984E4D">|.*sh</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">  </span><span style="--0:#919F9F;--1:#5F636F"># even in yolo mode</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">cron_mode</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">deny</span><span style="--0:#D6DEEB;--1:#403F53">       </span><span style="--0:#919F9F;--1:#5F636F"># unattended cron runs: "deny" (default) or "approve"</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">discord_prompt_timeout</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">120</span><span style="--0:#D6DEEB;--1:#403F53">  </span><span style="--0:#919F9F;--1:#5F636F"># seconds a Discord button prompt stays live</span></div></div><div class="ec-line"><div class="code"><span class="indent">                                 </span><span style="--0:#919F9F;--1:#5F636F"># (clamped upstream; default 300s / 5 min)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="config:  approvals:    mode: manual        # &quot;manual&quot; (default) prompts; the gateway has nobody to answer    deny:                # commands matching these patterns are refused BEFORE      - &quot;rm -rf /&quot;       # any approval/yolo logic even sees them — safe to keep      - &quot;curl.*\\|.*sh&quot;  # even in yolo mode    cron_mode: deny       # unattended cron runs: &quot;deny&quot; (default) or &quot;approve&quot;    discord_prompt_timeout: 120  # seconds a Discord button prompt stays live                                 # (clamped upstream; default 300s / 5 min)"><div></div></button></div></figure></div>
+<p><code dir="auto">approvals.deny</code> is a allowlist-of-refusals, not a full policy — it exists to
+hard-block specific dangerous patterns regardless of any other approval mode
+you run with. It does not, by itself, make the gateway non-interactive; pair
+it with whatever HERMES_YOLO_MODE / approval-mode setting fits your risk
+tolerance (see the <a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration">Configuration guide</a>
+for the full picture — approvals policy is deliberately not duplicated here).</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="environment-variables">Environment variables</h2><a class="sl-anchor-link" href="#environment-variables"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Environment variables”</span></a></div>
+<p>This chart only walks through the <a href="#install-options-llm-provider">provider</a>
+and <a href="#messenger-integrations-telegram--discord">messenger</a> variables needed to
+get started — Hermes itself reads many more from its environment. Any of them
+can be set the same way as the ones above: secrets under <code dir="auto">.Values.env</code>
+(Secret), non-secret knobs under <code dir="auto">.Values.extraEnv</code> (plain env), or via
+<code dir="auto">extraEnvFrom</code> for externally-managed secrets (see
+<a href="#configuration-model">Configuration model</a>).</p>
+<p>Full reference (kept current with each Hermes release):
+<strong><a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables">Environment Variables — Hermes Agent docs</a></strong>.</p>
+<p>A few more commonly-used ones, current as of image <code dir="auto">v2026.7.20</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">DEEPSEEK_API_KEY</code></td>
+<td>DeepSeek provider</td>
+</tr>
+<tr>
+<td><code dir="auto">FIREWORKS_API_KEY</code></td>
+<td>Fireworks AI provider</td>
+</tr>
+<tr>
+<td><code dir="auto">DEEPINFRA_API_KEY</code> / <code dir="auto">DEEPINFRA_BASE_URL</code></td>
+<td>DeepInfra provider and optional endpoint override</td>
+</tr>
+<tr>
+<td><code dir="auto">UPSTAGE_API_KEY</code> / <code dir="auto">UPSTAGE_BASE_URL</code></td>
+<td>Upstage Solar provider and optional endpoint override</td>
+</tr>
+<tr>
+<td><code dir="auto">ZAI_API_KEY</code></td>
+<td>Z.AI / GLM provider (built-in key <code dir="auto">zai</code>; <code dir="auto">GLM_BASE_URL</code> picks the Global/China/Coding-Plan endpoint)</td>
+</tr>
+<tr>
+<td><code dir="auto">AWS_REGION</code> / <code dir="auto">AWS_PROFILE</code></td>
+<td>Amazon Bedrock provider</td>
+</tr>
+<tr>
+<td><code dir="auto">AZURE_FOUNDRY_API_KEY</code></td>
+<td>Microsoft Foundry / Azure OpenAI provider</td>
+</tr>
+<tr>
+<td><code dir="auto">NOUS_INFERENCE_BASE_URL</code></td>
+<td>Override the Nous OAuth inference endpoint</td>
+</tr>
+<tr>
+<td><code dir="auto">HERMES_WRITE_SAFE_ROOT</code></td>
+<td>Restrict <code dir="auto">write_file</code>/<code dir="auto">patch</code> to these root dirs (OS path separator for multiple)</td>
+</tr>
+<tr>
+<td><code dir="auto">SLACK_BOT_TOKEN</code> / <code dir="auto">SLACK_APP_TOKEN</code></td>
+<td>Slack bot (Socket Mode)</td>
+</tr>
+<tr>
+<td><code dir="auto">MATRIX_HOMESERVER</code> / <code dir="auto">MATRIX_ACCESS_TOKEN</code></td>
+<td>Matrix homeserver integration</td>
+</tr>
+<tr>
+<td><code dir="auto">WHATSAPP_CLOUD_PHONE_NUMBER_ID</code> / <code dir="auto">WHATSAPP_CLOUD_ACCESS_TOKEN</code></td>
+<td>WhatsApp Cloud API</td>
+</tr>
+<tr>
+<td><code dir="auto">HERMES_MAX_ITERATIONS</code></td>
+<td>Tool-calling loop limit (default: 90)</td>
+</tr>
+<tr>
+<td><code dir="auto">HERMES_AGENT_TIMEOUT</code></td>
+<td>Gateway inactivity timeout (default: 1800s / 30 min)</td>
+</tr>
+<tr>
+<td><code dir="auto">SESSION_IDLE_MINUTES</code></td>
+<td>Idle session reset window (default: 1440)</td>
+</tr>
+<tr>
+<td><code dir="auto">HERMES_TIMEZONE</code></td>
+<td>IANA timezone override</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Not env-configurable:</strong> context compression, fallback providers, and
+provider routing live in <code dir="auto">config.yaml</code> only (under <code dir="auto">.Values.config</code>), with
+no environment variable equivalent.</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="faq">FAQ</h2><a class="sl-anchor-link" href="#faq"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “FAQ”</span></a></div>
+<p><strong>I want to set a Hermes setting this README doesn’t mention — how?</strong></p>
+<p>This README only covers install-time basics (provider, messenger, team
+topology). For anything else:</p>
+<ol>
+<li>Check the official
+<a href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration">Configuration guide</a>
+(for <code dir="auto">config.yaml</code> keys) or
+<a href="https://hermes-agent.nousresearch.com/docs/reference/environment-variables">Environment Variables reference</a>
+(for env vars) — search for what you want to change.</li>
+<li>Found a <code dir="auto">config.yaml</code> key, e.g. <code dir="auto">foo.bar: baz</code>? Set it under
+<code dir="auto">.Values.config.foo.bar</code> in your values file (or <code dir="auto">--set-string config.foo.bar=baz</code>). Found an env var, e.g. <code dir="auto">SOME_TOKEN</code>? Set it under
+<code dir="auto">.Values.env.SOME_TOKEN</code> (secret) or <code dir="auto">.Values.extraEnv</code> (non-secret).</li>
+<li><code dir="auto">helm upgrade</code> and confirm with <code dir="auto">kubectl exec &lt;pod&gt; -- hermes doctor</code> or
+<code dir="auto">helm test</code>.</li>
+</ol>
+<p>No chart change is ever needed for a setting Hermes itself already supports —
+see <a href="#configuration-model">The passthrough principle</a> above. This chart’s own
+<code dir="auto">values.yaml</code>/example files exist only for the settings worth a starter
+template (a new provider’s full block, a messenger’s loop-brake env vars,
+team topology) — not as a second copy of Hermes’ own reference docs.</p>
+<p><strong>Why did an upstream release note not turn into a new <code dir="auto">values.yaml</code> key?</strong></p>
+<p>Most upstream “add config X” requests turn out to already be reachable through
+the passthrough above with zero chart changes — see recent examples:
+<a href="https://github.com/jyje/hermes-agent-helm/issues/45">#45</a>,
+<a href="https://github.com/jyje/hermes-agent-helm/issues/46">#46</a>,
+<a href="https://github.com/jyje/hermes-agent-helm/issues/48">#48</a>. A new
+<code dir="auto">values-*.yaml</code> example file only gets added when a setting is complex enough
+to be worth a copy-pasteable starting point (a new provider, a new secret
+source) — not for every individual key upstream ships.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="more-examples">More examples</h2><a class="sl-anchor-link" href="#more-examples"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “More examples”</span></a></div>
+<p>Ready-to-adapt <code dir="auto">-f</code> overlays for common setups, aimed at a small/home cluster
+(e.g. a Raspberry Pi / arm64 k3s cluster). All secrets in these files are
+<strong>dummy placeholders</strong> — override them at install time with <code dir="auto">--set-string</code> (see
+the command in each file’s header comment), or via the SealedSecret +
+<code dir="auto">extraEnvFrom</code> pattern above.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Model provider</th>
+<th>Extras</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="values-nvidia-nim-and-discord.yaml"><code dir="auto">values-nvidia-nim-and-discord.yaml</code></a></td>
+<td>NVIDIA NIM</td>
+<td><strong>Discord bot</strong> wired in</td>
+</tr>
+<tr>
+<td><a href="values-github-copilot.yaml"><code dir="auto">values-github-copilot.yaml</code></a></td>
+<td>GitHub Copilot (<code dir="auto">copilot</code>)</td>
+<td><strong>OAuth device-flow login</strong> + Discord bot</td>
+</tr>
+<tr>
+<td><a href="values-anthropic-and-discord.yaml"><code dir="auto">values-anthropic-and-discord.yaml</code></a></td>
+<td>Anthropic (Claude)</td>
+<td><strong>Discord bot</strong> wired in</td>
+</tr>
+<tr>
+<td><a href="values-openai-and-telegram.yaml"><code dir="auto">values-openai-and-telegram.yaml</code></a></td>
+<td>OpenAI (<code dir="auto">openai-api</code>)</td>
+<td><strong>Telegram bot</strong> wired in</td>
+</tr>
+<tr>
+<td><a href="values-openai.yaml"><code dir="auto">values-openai.yaml</code></a></td>
+<td>OpenAI (<code dir="auto">openai-api</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="values-anthropic.yaml"><code dir="auto">values-anthropic.yaml</code></a></td>
+<td>Anthropic (Claude)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="values-gemini.yaml"><code dir="auto">values-gemini.yaml</code></a></td>
+<td>Google Gemini</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="values-google-vertex.yaml"><code dir="auto">values-google-vertex.yaml</code></a></td>
+<td>Google Vertex AI (<code dir="auto">vertex</code>)</td>
+<td><strong>Service-account JSON mounted</strong> via <code dir="auto">extraVolumes</code> (no static API key)</td>
+</tr>
+<tr>
+<td><a href="values-openrouter.yaml"><code dir="auto">values-openrouter.yaml</code></a></td>
+<td>OpenRouter</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="values-fireworks.yaml"><code dir="auto">values-fireworks.yaml</code></a></td>
+<td>Fireworks AI</td>
+<td>Native Fireworks model IDs</td>
+</tr>
+<tr>
+<td><a href="values-deepinfra.yaml"><code dir="auto">values-deepinfra.yaml</code></a></td>
+<td>DeepInfra</td>
+<td>Endpoint override via <code dir="auto">DEEPINFRA_BASE_URL</code></td>
+</tr>
+<tr>
+<td><a href="values-upstage.yaml"><code dir="auto">values-upstage.yaml</code></a></td>
+<td>Upstage Solar</td>
+<td>Endpoint override via <code dir="auto">UPSTAGE_BASE_URL</code></td>
+</tr>
+<tr>
+<td><a href="values-moa.yaml"><code dir="auto">values-moa.yaml</code></a></td>
+<td>Mixture-of-Agents (<code dir="auto">moa</code>)</td>
+<td>Reference models run in parallel, an aggregator model synthesizes the result</td>
+</tr>
+<tr>
+<td><a href="values-bitwarden.yaml"><code dir="auto">values-bitwarden.yaml</code></a></td>
+<td>any</td>
+<td><strong>Bitwarden Secrets Manager</strong> supplies provider keys at startup</td>
+</tr>
+<tr>
+<td><a href="values-litellm.yaml"><code dir="auto">values-litellm.yaml</code></a></td>
+<td>LiteLLM proxy (remote/Ingress)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="values-litellm-k8s.yaml"><code dir="auto">values-litellm-k8s.yaml</code></a></td>
+<td>LiteLLM proxy (in-cluster Service DNS)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="values-ingress.yaml"><code dir="auto">values-ingress.yaml</code></a></td>
+<td>OpenAI (<code dir="auto">openai-api</code>)</td>
+<td><strong>Dashboard Ingress</strong> wired in (basic-auth)</td>
+</tr>
+<tr>
+<td><a href="values-multi-agent-collab.yaml"><code dir="auto">values-multi-agent-collab.yaml</code></a></td>
+<td>any</td>
+<td><strong>Collaborating pair</strong> — two agents handing off by @mention in a shared Discord channel</td>
+</tr>
+<tr>
+<td><a href="values-team-leader.yaml"><code dir="auto">values-team-leader.yaml</code></a> + <a href="values-team-member.yaml"><code dir="auto">values-team-member.yaml</code></a></td>
+<td>NVIDIA NIM (any works)</td>
+<td><strong>Leader-orchestrated team</strong> — serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see <a href="../../docs/teams.md">Teams</a></td>
+</tr>
+<tr>
+<td><a href="values-shared-knowledge.yaml"><code dir="auto">values-shared-knowledge.yaml</code></a></td>
+<td>Anthropic (Claude)</td>
+<td><strong>Shared RWX PVC</strong> — multiple agents reading/writing to the same knowledge base</td>
+</tr>
+</tbody>
+</table>
+<p>Deploying via ArgoCD instead of plain <code dir="auto">helm</code>/<code dir="auto">-f</code>? See
+<a href="../../examples/argocd/"><code dir="auto">examples/argocd/</code></a> — it has one Application manifest
+per example above, each with its <code dir="auto">extraEnvFrom</code>-based secret pattern.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="values">Values</h2><a class="sl-anchor-link" href="#values"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Values”</span></a></div>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>affinity</td>
+<td>object</td>
+<td>Affinity rules for Pod scheduling.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>args</td>
+<td>list</td>
+<td>Arguments appended to <code dir="auto">command</code>.</td>
+<td><code dir="auto">["gateway","run"]</code></td>
+</tr>
+<tr>
+<td>auth</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"}},"resources":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.enabled</td>
+<td>bool</td>
+<td>Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from <code dir="auto">env</code>/<code dir="auto">extraEnvFrom</code>.</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.forceRelogin</td>
+<td>bool</td>
+<td>Force a fresh login even if a token already exists on the volume.</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.image</td>
+<td>object</td>
+<td>Login image. stdlib-only Python; no extra dependencies are installed.</td>
+<td><code dir="auto">{"repository":"python","tag":"3.13-slim"}</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.notify</td>
+<td>string</td>
+<td>Where to deliver the verification URL + user code for human approval.    <code dir="auto">discord</code> reuses the agent’s bot creds (DISCORD_BOT_TOKEN +    DISCORD_HOME_CHANNEL from <code dir="auto">env</code>/<code dir="auto">extraEnvFrom</code>). The code is always    also printed to the init container logs as a fallback.</td>
+<td><code dir="auto">"discord"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.provider</td>
+<td>string</td>
+<td>Which provider profile to authenticate. Must be a key under    <code dir="auto">providers</code> below. Only one device-flow login runs at a time.</td>
+<td><code dir="auto">"github-copilot"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.providers.github-copilot.authHost</td>
+<td>string</td>
+<td>Host serving the device-code + token endpoints (GitHub-style paths).</td>
+<td><code dir="auto">"github.com"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.providers.github-copilot.clientId</td>
+<td>string</td>
+<td>OAuth client id for the device grant. The shared opencode/Copilot-CLI    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py).</td>
+<td><code dir="auto">"Ov23li8tweQw6odWQebz"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.providers.github-copilot.scope</td>
+<td>string</td>
+<td>OAuth scope requested in the device grant.</td>
+<td><code dir="auto">"read:user"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.providers.github-copilot.tokenEnv</td>
+<td>string</td>
+<td>.env key Hermes reads this provider’s token from (resolution order    COPILOT_GITHUB_TOKEN &gt; GH_TOKEN &gt; GITHUB_TOKEN).</td>
+<td><code dir="auto">"COPILOT_GITHUB_TOKEN"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.providers.github-copilot.validateUrl</td>
+<td>string</td>
+<td>Optional endpoint to verify an existing token is still live; on    401/403 the init container re-runs the login. Empty = skip the check.</td>
+<td><code dir="auto">"https://api.github.com/copilot_internal/v2/token"</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.resources</td>
+<td>object</td>
+<td>Resources for the login init container.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.timeoutSeconds</td>
+<td>int</td>
+<td>Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider’s device-code validity.</td>
+<td><code dir="auto">870</code></td>
+</tr>
+<tr>
+<td>auth.deviceFlow.tokenOwner</td>
+<td>object</td>
+<td>uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid —    the upstream image’s s6-overlay runs the agent as uid/gid 10000 — so the    non-root agent can read the credential.</td>
+<td><code dir="auto">{"gid":10000,"uid":10000}</code></td>
+</tr>
+<tr>
+<td>bootstrap.enabled</td>
+<td>bool</td>
+<td>Seed the rendered config.yaml into HERMES_HOME via an init container.</td>
+<td><code dir="auto">true</code></td>
+</tr>
+<tr>
+<td>bootstrap.overwrite</td>
+<td>bool</td>
+<td>true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits).</td>
+<td><code dir="auto">true</code></td>
+</tr>
+<tr>
+<td>command</td>
+<td>list</td>
+<td>Container entrypoint. The image’s DEFAULT CMD is the interactive <code dir="auto">hermes</code> chat, which exits immediately in a pod (no TTY -&gt; EOF -&gt; “Goodbye”), causing a restart loop. So run the long-lived gateway explicitly; inside the s6-overlay image <code dir="auto">gateway run</code> is auto-redirected to the SUPERVISED s6 service (auto-restart on crash). Append <code dir="auto">--no-supervise</code> only if you want to bypass s6.</td>
+<td><code dir="auto">["hermes"]</code></td>
+</tr>
+<tr>
+<td>config</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}</code></td>
+</tr>
+<tr>
+<td>controller</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"type":"deployment"}</code></td>
+</tr>
+<tr>
+<td>controller.type</td>
+<td>string</td>
+<td>Workload kind: “deployment” or “statefulset”.</td>
+<td><code dir="auto">"deployment"</code></td>
+</tr>
+<tr>
+<td>env</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"OPENAI_API_KEY":"sk-REPLACE_ME"}</code></td>
+</tr>
+<tr>
+<td>extraEnv</td>
+<td>list</td>
+<td>Plain (non-secret) env vars injected directly on the container.</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>extraEnvFrom</td>
+<td>list</td>
+<td>Extra envFrom sources (reference existing ConfigMaps/Secrets).</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>extraInitContainers</td>
+<td>list</td>
+<td>Extra init containers, appended after the chart’s own (seed-config,    device-flow login). Full container spec; combine with <code dir="auto">extraVolumes</code> for    one-time preparation of a user-provided volume (for example, a shared    knowledge volume used independently of the Discord team handoff).</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>extraResources</td>
+<td>list</td>
+<td>Extra raw manifests rendered as-is alongside this chart’s resources.    Each entry is <code dir="auto">tpl</code>-rendered, so <code dir="auto">{{ .Release.Namespace }}</code> etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn’t model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    <code dir="auto">extraEnvFrom</code> (see examples/argocd/).</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>extraVolumeMounts</td>
+<td>list</td>
+<td>Extra volume mounts on the hermes-agent container (pairs with extraVolumes).</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>extraVolumes</td>
+<td>list</td>
+<td>Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var — e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml).</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>fullnameOverride</td>
+<td>string</td>
+<td>Fully override the generated resource name (release-name-chart).</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>image.pullPolicy</td>
+<td>string</td>
+<td>Image pull policy.</td>
+<td><code dir="auto">"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td>image.repository</td>
+<td>string</td>
+<td>Container image repository (multi-arch: amd64 + arm64).</td>
+<td><code dir="auto">"nousresearch/hermes-agent"</code></td>
+</tr>
+<tr>
+<td>image.tag</td>
+<td>string</td>
+<td>Image tag. Upstream uses DATE-based tags (e.g. “v2026.6.5” == Hermes v0.16.0), plus <code dir="auto">latest</code> / <code dir="auto">main</code>. There is no semver tag. Empty defaults to <code dir="auto">.Chart.AppVersion</code>.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>imagePullSecrets</td>
+<td>list</td>
+<td>Image pull secrets for private registries.</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>ingress.annotations</td>
+<td>object</td>
+<td>Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules).</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>ingress.className</td>
+<td>string</td>
+<td>IngressClass name (e.g. “nginx”, “traefik”). Empty uses the cluster default.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>ingress.enabled</td>
+<td>bool</td>
+<td>Create an Ingress resource.</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>ingress.hosts</td>
+<td>list</td>
+<td>Host/path rules, all routed to the Service port above.</td>
+<td><code dir="auto">[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]</code></td>
+</tr>
+<tr>
+<td>ingress.tls</td>
+<td>list</td>
+<td>TLS configuration for the Ingress.</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>nameOverride</td>
+<td>string</td>
+<td>Override the chart name used in resource names.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>nodeSelector</td>
+<td>object</td>
+<td>Node selector for Pod scheduling.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>persistence</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","mountPath":"/opt/data","size":"5Gi","storageClass":""}</code></td>
+</tr>
+<tr>
+<td>persistence.existingClaim</td>
+<td>string</td>
+<td>Use an existing PVC instead of creating a new one. When specified, the chart will use this PVC and skip creating its own.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>persistence.storageClass</td>
+<td>string</td>
+<td>StorageClass for the volumeClaimTemplate. Empty = cluster default.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>podAnnotations</td>
+<td>object</td>
+<td>Annotations to add to the Pod.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>podLabels</td>
+<td>object</td>
+<td>Labels to add to the Pod.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>podSecurityContext</td>
+<td>object</td>
+<td>Pod-level securityContext. Left empty by default to stay compatible with the image’s s6-overlay init (which starts as root and drops privileges itself). Add hardening here once verified for your environment.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>probes</td>
+<td>object</td>
+<td>Health probes. Empty = none. The image’s s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: [“hermes”,“gateway”,“status”] }     initialDelaySeconds: 30     periodSeconds: 30</td>
+<td><code dir="auto">{"liveness":{},"readiness":{}}</code></td>
+</tr>
+<tr>
+<td>probes.liveness</td>
+<td>object</td>
+<td>Liveness probe spec. Empty = no liveness probe.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>probes.readiness</td>
+<td>object</td>
+<td>Readiness probe spec. Empty = no readiness probe.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>replicaCount</td>
+<td>int</td>
+<td>DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can’t mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart.</td>
+<td><code dir="auto">1</code></td>
+</tr>
+<tr>
+<td>resources</td>
+<td>object</td>
+<td>Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64).</td>
+<td><code dir="auto">{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}</code></td>
+</tr>
+<tr>
+<td>securityContext</td>
+<td>object</td>
+<td>Container-level securityContext. Same caveat as <code dir="auto">podSecurityContext</code> above.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>service</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}</code></td>
+</tr>
+<tr>
+<td>service.annotations</td>
+<td>object</td>
+<td>Annotations to add to the Service.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>service.enabled</td>
+<td>bool</td>
+<td>Create a ClusterIP Service (only useful if you expose the dashboard).</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>service.port</td>
+<td>int</td>
+<td>Service port (and the dashboard’s container port).</td>
+<td><code dir="auto">9119</code></td>
+</tr>
+<tr>
+<td>service.type</td>
+<td>string</td>
+<td>Service type.</td>
+<td><code dir="auto">"ClusterIP"</code></td>
+</tr>
+<tr>
+<td>serviceAccount.annotations</td>
+<td>object</td>
+<td>Annotations to add to the ServiceAccount.</td>
+<td><code dir="auto">{}</code></td>
+</tr>
+<tr>
+<td>serviceAccount.create</td>
+<td>bool</td>
+<td>Create a ServiceAccount for the pod.</td>
+<td><code dir="auto">true</code></td>
+</tr>
+<tr>
+<td>serviceAccount.name</td>
+<td>string</td>
+<td>Name to use; generated from fullname when empty.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>terminationGracePeriodSeconds</td>
+<td>string</td>
+<td>Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults <code dir="auto">agent.restart_drain_timeout</code> to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast — the default grace period is plenty. If you opt into a drain window via <code dir="auto">config.agent.restart_drain_timeout: &lt;seconds&gt;</code>, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop — the same race upstream warns about with systemd’s TimeoutStopSec). See “Gateway lifecycle” in the README.</td>
+<td><code dir="auto">""</code></td>
+</tr>
+<tr>
+<td>tests</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}</code></td>
+</tr>
+<tr>
+<td>tests.chat</td>
+<td>object</td>
+<td>———————————————————————––</td>
+<td><code dir="auto">{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}</code></td>
+</tr>
+<tr>
+<td>tests.chat.enabled</td>
+<td>bool</td>
+<td>Run a <code dir="auto">hermes chat</code> round-trip and log the conversation.</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>tests.chat.failOnError</td>
+<td>bool</td>
+<td>When true, a failed/empty round-trip fails the test job.</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>tests.chat.maxTurns</td>
+<td>int</td>
+<td>Max agent turns for the round-trip.</td>
+<td><code dir="auto">1</code></td>
+</tr>
+<tr>
+<td>tests.chat.models</td>
+<td>list</td>
+<td>Optional pool of <code dir="auto">provider/model</code> ids to try in order (via <code dir="auto">hermes chat    -m &lt;id&gt; --provider config.model.provider</code>), each with its own <code dir="auto">timeout</code>.    Passes as soon as one succeeds — useful for free-tier models that are    sometimes overloaded. Leave empty to use <code dir="auto">config.model.default</code> as-is    (single attempt, no <code dir="auto">-m</code>/<code dir="auto">--provider</code> override).</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+<tr>
+<td>tests.chat.prompt</td>
+<td>string</td>
+<td>Prompt sent to the agent.</td>
+<td><code dir="auto">"Just say hi."</code></td>
+</tr>
+<tr>
+<td>tests.chat.timeout</td>
+<td>int</td>
+<td>Seconds to allow each round-trip attempt to run before timing out.</td>
+<td><code dir="auto">180</code></td>
+</tr>
+<tr>
+<td>tests.doctorStrict</td>
+<td>bool</td>
+<td>When true, <code dir="auto">hermes doctor</code> issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes –version, seeded config) fail.</td>
+<td><code dir="auto">false</code></td>
+</tr>
+<tr>
+<td>tests.doctorTimeout</td>
+<td>int</td>
+<td>Seconds to allow <code dir="auto">hermes doctor</code> to run before timing out.</td>
+<td><code dir="auto">120</code></td>
+</tr>
+<tr>
+<td>tests.enabled</td>
+<td>bool</td>
+<td>Render the chart test Job.</td>
+<td><code dir="auto">true</code></td>
+</tr>
+<tr>
+<td>tests.image</td>
+<td>object</td>
+<td>Image used by the test Job. Empty fields fall back to the main <code dir="auto">image.*</code> (so the hermes CLI + doctor are available and arch matches).</td>
+<td><code dir="auto">{"pullPolicy":"","repository":"","tag":""}</code></td>
+</tr>
+<tr>
+<td>tests.resources</td>
+<td>object</td>
+<td>Resource requests/limits for the test Job’s container.</td>
+<td><code dir="auto">{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}</code></td>
+</tr>
+<tr>
+<td>tolerations</td>
+<td>list</td>
+<td>Tolerations for Pod scheduling.</td>
+<td><code dir="auto">[]</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p>Autogenerated from chart metadata using <a href="https://github.com/norwoodj/helm-docs/releases/v1.14.2">helm-docs v1.14.2</a></p>
+</div><footer class="sl-flex astro-2oe3ggd2"><div class="meta sl-flex astro-2oe3ggd2"></div><div class="pagination-links print:hidden astro-bo7o5j4x" dir="ltr"><a href="/hermes-agent-helm/charts/hermes-agent/reference/" rel="prev" class="astro-bo7o5j4x"><svg aria-hidden="true" class="astro-bo7o5j4x astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-bo7o5j4x">Previous<br class="astro-bo7o5j4x"><span class="link-title astro-bo7o5j4x">Reference</span></span></a><a href="/hermes-agent-helm/examples/providers/" rel="next" class="astro-bo7o5j4x"><svg aria-hidden="true" class="astro-bo7o5j4x astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-bo7o5j4x">Next<br class="astro-bo7o5j4x"><span class="link-title astro-bo7o5j4x">Providers</span></span></a></div></footer></div></div></main></div></div></div></div></body></html>
