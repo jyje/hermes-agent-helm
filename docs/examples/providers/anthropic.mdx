@@ -1,0 +1,61 @@
+---
+title: Anthropic
+description: Configure Claude as Hermes Agent’s default model provider.
+---
+
+import RawDocumentActions from '@components/RawDocumentActions.astro';
+
+<div className="example-meta">
+  <div><strong>Required secret</strong>ANTHROPIC_API_KEY</div>
+  <div><strong>Overlay</strong>values-anthropic.yaml</div>
+</div>
+
+## When to use it
+
+An Anthropic API key and access to a Claude model are required.
+
+## Install
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-anthropic.yaml \
+  --set-string env.ANTHROPIC_API_KEY='<real-value>' --wait
+```
+
+When an example requires more than one credential, pass every listed value with `--set-string` or use `extraEnvFrom` to reference an existing Secret.
+
+## Adapt before deploying
+
+Keep the provider set to `anthropic` and inject the Anthropic key through a Secret.
+
+<RawDocumentActions rawPath="/hermes-agent-helm/source/charts/hermes-agent/values-anthropic.yaml" label="Open Raw YAML" />
+
+## Complete overlay
+
+```yaml title="charts/hermes-agent/values-anthropic.yaml"
+# values-anthropic.yaml
+#
+# Hermes Agent using Anthropic (Claude) as the model provider.
+# Dummy key — override at install time.
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-anthropic.yaml \
+#     --set-string env.ANTHROPIC_API_KEY='sk-ant-<real>' --wait
+
+config:
+  model:
+    provider: anthropic
+    # A current Claude model id — see https://docs.anthropic.com for the list
+    # (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).
+    default: claude-sonnet-4-6
+  terminal:
+    backend: local
+
+env:
+  ANTHROPIC_API_KEY: "sk-ant-DUMMY_replace_me_0000000000000000000000"
+  # Unused by the anthropic provider; overrides the chart's OpenAI placeholder.
+  OPENAI_API_KEY: "unused"
+
+```

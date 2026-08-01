@@ -4,15 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "prepare-content": "node scripts/prepare-content.mjs",
-    "dev": "npm run prepare-content && astro dev",
-    "build": "npm run prepare-content && astro build",
+    "dev": "astro dev",
+    "build": "astro build",
     "preview": "astro preview",
-    "check": "npm run prepare-content && astro build"
+    "check:docs": "node scripts/validate-docs.mjs",
+    "check": "pnpm check:docs && astro build"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.5",
     "astro": "^7.1.6",
+    "js-yaml": "^4.3.0",
     "sharp": "^0.35.3"
   },
   "devDependencies": {

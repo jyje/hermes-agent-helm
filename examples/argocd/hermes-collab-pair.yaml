@@ -2,7 +2,7 @@
 # PAIR of Hermes agents (planner + builder) that hand the conversation to each
 # other by @mention in one shared Discord channel, with the four loop-brake env
 # vars that stop them from ping-ponging forever. Full walkthrough:
-# docs/collaboration.md.
+# docs/reference/collaboration.md.
 #
 # Two Applications, one per agent — distinct releaseName/metadata.name keep the
 # fullnames unique so they coexist in one namespace (see README.md → "the one

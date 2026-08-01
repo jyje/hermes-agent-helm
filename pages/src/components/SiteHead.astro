@@ -6,21 +6,153 @@ const { head } = Astro.locals.starlightRoute;
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
 
+<style is:inline>
+  /* Avoid exposing the plain fallback links before the source menu is enhanced. */
+  .raw-document-actions:not([data-source-menu-ready]) > :is(a, button) { visibility: hidden; }
+</style>
+
+<noscript><style>.raw-document-actions > :is(a, button) { visibility: visible; }</style></noscript>
+
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
+    const icon = (name) => {
+      const element = document.createElement('span');
+      element.className = `source-menu__icon source-menu__icon--${name}`;
+      element.setAttribute('aria-hidden', 'true');
+      return element;
+    };
+
+    const itemCopy = (title, description) => {
+      const copy = document.createElement('span');
+      copy.className = 'source-menu__item-copy';
+      const strong = document.createElement('strong');
+      strong.textContent = title;
+      const small = document.createElement('small');
+      small.textContent = description;
+      copy.append(strong, small);
+      return copy;
+    };
+
+    document.querySelectorAll('.raw-document-actions').forEach((actions) => {
+      if (!(actions instanceof HTMLElement) || actions.dataset.sourceMenuReady) return;
+      const rawPath = actions.dataset.rawPath;
+      const open = actions.querySelector('a');
+      const copy = actions.querySelector('button');
+      if (!rawPath || !(open instanceof HTMLAnchorElement) || !(copy instanceof HTMLButtonElement)) return;
+
+      if (actions.hasAttribute('data-page-source-actions')) {
+        const content = actions.closest('.sl-markdown-content');
+        if (content) content.prepend(actions);
+      }
+
+      const isYaml = /\.ya?ml(?:$|[?#])/i.test(rawPath);
+      const openLabel = isYaml ? 'Open Raw YAML' : 'Open Raw Markdown';
+      const openDescription = isYaml
+        ? 'View the original YAML as plain text'
+        : 'View the original Markdown as plain text';
+
+      const details = document.createElement('details');
+      details.className = 'source-menu';
+      const summary = document.createElement('summary');
+      summary.append(icon('copy'));
+      const triggerLabel = document.createElement('span');
+      triggerLabel.textContent = 'Copy Source';
+      summary.append(triggerLabel, icon('chevron'));
+
+      const panel = document.createElement('div');
+      panel.className = 'source-menu__panel';
+      copy.className = 'source-menu__item';
+      copy.dataset.copySource = '';
+      copy.dataset.copyLabel = 'Copy Source';
+      copy.replaceChildren(icon('copy'), itemCopy('Copy Source', 'Copy the original source to clipboard'));
+      copy.querySelector('strong')?.setAttribute('data-copy-status', '');
+
+      open.className = 'source-menu__item';
+      open.target = '_blank';
+      open.rel = 'noopener noreferrer';
+      open.replaceChildren(icon('file'), itemCopy(openLabel, openDescription), icon('external'));
+
+      panel.append(copy, open);
+      details.append(summary, panel);
+      actions.replaceChildren(details);
+      actions.dataset.sourceMenuReady = 'true';
+    });
+
     document.querySelectorAll('[data-copy-source]').forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
+      if (!(button instanceof HTMLButtonElement) || button.dataset.copyBound) return;
+      button.dataset.copyBound = 'true';
       button.addEventListener('click', async () => {
-        const rawPath = button.closest('[data-raw-path]')?.dataset.rawPath;
-        if (!rawPath) return;
+        const actions = button.closest('[data-raw-path]');
+        const rawPath = actions?.dataset.rawPath;
+        const status = button.querySelector('[data-copy-status]');
+        if (!rawPath || !(status instanceof HTMLElement)) return;
+        const original = button.dataset.copyLabel ?? 'Copy Source';
         try {
-          await navigator.clipboard.writeText(await (await fetch(rawPath)).text());
-          button.textContent = 'Copied';
-          window.setTimeout(() => { button.textContent = 'Copy source'; }, 1600);
+          const response = await fetch(rawPath);
+          if (!response.ok) throw new Error(`Source request failed: ${response.status}`);
+          await navigator.clipboard.writeText(await response.text());
+          status.textContent = 'Copied';
+          button.classList.add('is-success');
+          window.setTimeout(() => button.closest('details')?.removeAttribute('open'), 650);
+          window.setTimeout(() => {
+            status.textContent = original;
+            button.classList.remove('is-success');
+          }, 1600);
         } catch {
-          button.textContent = 'Copy failed';
+          status.textContent = 'Copy failed';
+          window.setTimeout(() => { status.textContent = original; }, 1600);
         }
       });
+    });
+
+    document.querySelectorAll('details.source-menu').forEach((menu) => {
+      menu.addEventListener('toggle', () => {
+        if (!menu.open) return;
+        document.querySelectorAll('details.source-menu[open]').forEach((other) => {
+          if (other !== menu) other.removeAttribute('open');
+        });
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('details.source-menu')) return;
+      document.querySelectorAll('details.source-menu[open]').forEach((menu) => menu.removeAttribute('open'));
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      document.querySelectorAll('details.source-menu[open]').forEach((menu) => menu.removeAttribute('open'));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!(event.target instanceof Element)) return;
+      const toggle = event.target.closest('button[data-sidebar-group-toggle]');
+      if (toggle instanceof HTMLButtonElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        const details = toggle.closest('details');
+        if (!(details instanceof HTMLDetailsElement)) return;
+        details.open = !details.open;
+        toggle.setAttribute('aria-expanded', String(details.open));
+        return;
+      }
+
+      const summary = event.target.closest('details > summary');
+      if (!summary) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const link = event.target.closest('a[data-sidebar-group-link]');
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        window.open(link.href, '_blank', 'noopener');
+        return;
+      }
+      window.location.assign(link.href);
+    });
+
+    document.querySelectorAll('button[data-sidebar-group-toggle]').forEach((toggle) => {
+      const details = toggle.closest('details');
+      if (details instanceof HTMLDetailsElement) toggle.setAttribute('aria-expanded', String(details.open));
     });
   });
 </script>

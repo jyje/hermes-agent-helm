@@ -3,21 +3,22 @@
 This directory contains the Astro Starlight site published at
 `https://jyje.github.io/hermes-agent-helm`.
 
-The repository Markdown and files under `charts/*/` remain the source of truth.
-`scripts/prepare-content.mjs` discovers every `charts/*/Chart.yaml` and creates
-a chart-scoped Starlight area with installation, values, overlays, and raw
-source endpoints immediately before development and production builds. Rich
-Hermes Agent guides continue to be generated from their maintained sources.
+The documentation tree under [`../docs`](../docs) is the source of truth.
+Starlight reads that directory directly through `src/content/docs`; there is no
+content generation step. Page URLs follow their Markdown paths, page names come
+from frontmatter, and `docs/navigation.yml` owns the sidebar hierarchy and
+ordering.
 
-To add another chart, place its Helm files under `charts/<chart-name>/` with a
-`Chart.yaml` and `values.yaml`. Its documentation catalog entry is generated
-without adding the chart name to site code.
+To document another chart, add its pages under `docs/charts/<chart-name>/`, add
+the desired hierarchy to `docs/navigation.yml`, and link raw values to the
+corresponding file under `charts/<chart-name>/`.
 
 ```bash
 pnpm -C pages install
 pnpm -C pages dev
+pnpm -C pages check:docs
 pnpm -C pages build
 ```
 
-Do not edit `src/content/docs/`, `public/source/`, or `public/llms*.txt`
-directly: they are generated and ignored by Git.
+`src/content/docs` and the entries under `public/source` are repository-relative
+links. Edit the canonical files in `docs/`, `charts/`, and `examples/` instead.
