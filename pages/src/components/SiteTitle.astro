@@ -32,6 +32,7 @@ const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered
       flex: 0 0 4.75rem;
       width: 4.75rem;
       height: 2rem;
+      background: var(--sl-color-bg-nav);
       overflow: hidden;
     }
 
@@ -48,17 +49,18 @@ const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered
     .site-title__copy {
       display: grid;
       min-width: 0;
-      line-height: 1.05;
+      overflow: hidden;
       white-space: nowrap;
     }
 
     .site-title__copy strong {
-      overflow: hidden;
+      display: block;
+      padding-block: 0.08em;
       font-family: var(--sl-font-mono);
       font-size: 0.82rem;
       font-weight: 700;
       letter-spacing: -0.035em;
-      text-overflow: ellipsis;
+      line-height: 1.2;
     }
 
     .site-title__copy small {
@@ -67,6 +69,7 @@ const subtitle = lang === 'ko' ? '커뮤니티 Helm 차트' : 'Community-powered
       font-size: 0.62rem;
       font-weight: 600;
       letter-spacing: 0.015em;
+      line-height: 1.2;
     }
 
     @media (max-width: 30rem) {

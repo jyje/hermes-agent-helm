@@ -1,5 +1,7 @@
 :root {
   color-scheme: light;
+  /* Match the header artwork's #f4f4f4 canvas exactly. */
+  --sl-color-bg-nav: #f4f4f4;
   --sl-color-accent-low: #d8f7f4;
   --sl-color-accent: #087f7a;
   --sl-color-accent-high: #03534f;
