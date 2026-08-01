@@ -31,7 +31,7 @@ body { background-image:none; }
 .sl-markdown-content pre { border-left: 3px solid var(--sl-color-accent); }
 .sl-markdown-content table { display: table; width: 100%; }
 .example-meta { display:grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .75rem; margin: 1.5rem 0; }
-.example-meta > div { border-top: 2px solid var(--sl-color-accent); padding: .65rem 0; font-size: .9rem; }
+.example-meta > div { margin: 0; border-top: 2px solid var(--sl-color-accent); padding: .65rem 0; font-size: .9rem; }
 .example-meta strong { display:block; color: var(--sl-color-text); font-family: var(--sl-font-mono); font-size: .72rem; letter-spacing:.08em; text-transform:uppercase; }
 .raw-document-actions { display:flex; gap:.7rem; align-items:center; margin: 1.25rem 0; }
 .raw-document-actions :is(a, button) { border:1px solid var(--sl-color-gray-5); background:var(--sl-color-bg); color:var(--sl-color-text); padding:.45rem .65rem; text-decoration:none; font:inherit; cursor:pointer; }
