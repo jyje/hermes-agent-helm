@@ -1,0 +1,53 @@
+name: 📚 deploy-docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pages/**"
+      - "README.md"
+      - "README-ko.md"
+      - "docs/**"
+      - "examples/**"
+      - "charts/hermes-agent/README*"
+      - "charts/hermes-agent/values*.yaml"
+      - ".github/workflows/deploy-docs.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pages/pnpm-lock.yaml
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Install site dependencies
+        run: pnpm -C pages install --frozen-lockfile
+
+      - name: Build the documentation site
+        run: pnpm -C pages run build
+
+      # Keep the chart repository's index.yaml and packaged .tgz files that
+      # release-chart.yaml publishes to the same gh-pages branch.
+      - name: Publish docs without replacing Helm artifacts
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: pages/dist
+          keep_files: true
