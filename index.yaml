@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Add a Starlight documentation portal with chart-scoped install, values overlay, example, and reference pages."
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.7.30."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.7.30
+    created: "2026-08-02T07:19:03.642613201Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      — a multi-provider LLM agent framework — on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: c6db92754845336dae3f1c9fad01f7c92dc492a1387c7dd46a3ddf52666c9476
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.1.0.tgz
+    version: 1.1.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Added group_sessions_per_user, discord mention and thread settings to leader and member values for thread‑native team coordination."
         - kind: "changed"
           description: "Changed default shared knowledge PVC access mode from ReadWriteMany to ReadWriteOnce, requiring existing PVCs to meet new access mode."
@@ -903,4 +939,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-07-30T03:57:24.442551464Z"
+generated: "2026-08-02T07:19:03.639623504Z"
