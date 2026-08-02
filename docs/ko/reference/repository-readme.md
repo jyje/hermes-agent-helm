@@ -151,17 +151,16 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 - **모든 PR과 `dev`/`main`로의 push**는 [validate-chart.yaml](.github/workflows/validate-chart.yaml)을 실행합니다:
   `helm lint`, `helm template`, 차트-docs 드리프트 체크, 그리고 임시 **kind** 클러스터에서의
   완전한 설치 + 테스트 (NVIDIA_API_KEY 시크릿이 있을 때는 실제 `hermes chat` 라운드트립).
-- **릴리즈는 버전 범프 기반**이며, 태그 푸시 기반이 아닙니다. [propose-release.yaml](.github/workflows/propose-release.yaml)을 실행합니다
-  (Actions → "📋 propose-release"): main과 마지막 릴리즈 태그를 비교해서
-  체인지로그를 **결정적으로** 생성하고(git-cliff), **NVIDIA NIM**에게 semver 범프 추천을 요청하고
-  (키 없으면 transparent한 휴리스틱으로 폴백), 모든 커밋과 PR 작성자를 크레딧한 단일
-  **릴리즈 PR**을 생성/업데이트합니다. 버전이 마음에 안 들면 조정한 후 머지하세요.
-  (또는 제안을 건너뛰고 `Chart.yaml`을 직접 범프하거나 `/version vX.Y.Z`를 코멘트하세요.)
-  PR이 `main`으로 머지되면 [release-chart.yaml](.github/workflows/release-chart.yaml)이
-  `vX.Y.Z` 태그를 생성하고, GitHub Release를 작성하고, 차트를 `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`에 배포합니다.
+- **릴리즈는 Changesets 기반**이며, 태그 푸시 기반이 아닙니다. 사용자에게 보이는 차트 변경은
+  [`.changeset/`](.changeset/)에 `patch`·`minor`·`major` 항목을 추가합니다. 이 항목이
+  `main`에 도달하면 [propose-release.yaml](.github/workflows/propose-release.yaml)이 하나의
+  검토용 릴리즈 PR로 합치고, `CHANGELOG.md`와 비공개 릴리즈 manifest·`Chart.yaml`·Artifact Hub
+  메타데이터·차트 문서·버전별 예제를 함께 동기화합니다. PR을 검토·머지하면
+  [release-chart.yaml](.github/workflows/release-chart.yaml)이 `vX.Y.Z` 태그와 GitHub Release를
+  만들고 차트를 `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`에 배포합니다.
 
 즉: lint + test가 모든 변경사항을 게이트합니다; *릴리즈* 자체는 단순한
-리뷰된 PR (버전 범프) — AI는 조언만 하고, 머지가 배포합니다.
+리뷰된 PR (버전 범프) — 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
 전체 릴리즈 플레이북은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
 
 ## 로드맵

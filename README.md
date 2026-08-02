@@ -147,19 +147,18 @@ principles are in [AGENTS.md](AGENTS.md).
   `helm lint`, `helm template`, a chart-docs drift check, and a full install +
   test on an ephemeral **kind** cluster (real `hermes chat` round-trip when an
   `NVIDIA_API_KEY` secret is available).
-- **Releases are version-bump-driven, not tag-push-driven.** Run
-  [propose-release.yaml](.github/workflows/propose-release.yaml) (Actions →
-  "📋 propose-release"): it diffs `main` against the last release tag, builds the
-  changelog **deterministically** (git-cliff), asks **NVIDIA NIM** to recommend
-  a semver bump + summary (graceful heuristic fallback when no key), and
-  opens/updates a single **release PR** crediting every commit & PR author.
-  Adjust the version if you disagree, then merge. (Or skip the proposal and bump
-  `Chart.yaml` yourself / comment `/version vX.Y.Z`.) Once that PR merges to
-  `main`, [release-chart.yaml](.github/workflows/release-chart.yaml) tags `vX.Y.Z`, writes the
-  GitHub Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`.
+- **Releases are Changesets-driven, not tag-push-driven.** A user-visible chart
+  change adds a `patch`, `minor`, or `major` entry under [`.changeset/`](.changeset/).
+  When entries reach `main`, [propose-release.yaml](.github/workflows/propose-release.yaml)
+  combines them into one reviewable release PR, writes its `CHANGELOG.md` notes,
+  and synchronizes the private release manifest with `Chart.yaml`, Artifact Hub
+  metadata, chart docs, and versioned examples. Review and merge that PR; then
+  [release-chart.yaml](.github/workflows/release-chart.yaml) tags `vX.Y.Z`, writes the GitHub
+  Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`.
 
 So: lint + test gate every change; the *release* itself is just a normal
-reviewed PR (the version bump) — the AI only advises, merging is what ships. See
+reviewed PR (the version bump) — the pending Changesets decide its SemVer,
+merging is what ships. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the full release playbook.
 
 ## Roadmap

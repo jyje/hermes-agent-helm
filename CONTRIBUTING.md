@@ -12,54 +12,42 @@ No long-lived `rc`/`release` branches — a release is a tag/event.
 
 ## How to cut a release
 
-The chart **`version` in `charts/hermes-agent/Chart.yaml` is the source of truth**.
-A release is just a reviewed PR that bumps that version; **merging it to `main`
-is what ships**. There are three ways to produce that bump — pick one:
+Changesets is the source of the next SemVer decision. Each user-visible chart
+change adds a Markdown entry under [`.changeset/`](.changeset/), naming this
+private release manifest and its `patch`, `minor`, or `major` impact. The
+manifest and `charts/hermes-agent/Chart.yaml` always receive the same resulting
+version in the generated release PR; the manifest is never published to npm.
 
-### 1. AI-assisted proposal (recommended)
+### Add a Changeset (recommended)
 
-Run [propose-release.yaml](.github/workflows/propose-release.yaml) via
-`workflow_dispatch` (Actions tab → "📋 propose-release" → "Run workflow"). It:
+Run `pnpm changeset`, select `@jyje/hermes-agent-helm`, choose the chart's
+SemVer impact, and write a concise user-facing summary. Commit that file with
+the implementation PR. CI does not require a Changeset for CI-only, tooling,
+or other unreleased maintenance work.
 
-- diffs `main` against the last release tag and builds the changelog
-  **deterministically** (git / git-cliff) — no AI in this part;
-- asks **NVIDIA NIM** to recommend a semver bump and write a summary (falls
-  back to a transparent heuristic when no `NVIDIA_API_KEY` secret is present);
-- bumps `Chart.yaml` + refreshes `CHANGELOG.md`, and opens/updates a single
-  **release PR** (branch `release/next`, idempotent) that credits every commit
-  and PR author and includes step-by-step ship instructions.
+When pending Changesets reach `main`,
+[propose-release.yaml](.github/workflows/propose-release.yaml) opens or updates
+one release PR automatically. Its custom version step:
 
-Review it, adjust the version if you disagree with the recommendation (edit
-`Chart.yaml` on the branch, or comment `/version vX.Y.Z`), then merge.
+- combines the pending patch/minor/major entries into one SemVer version;
+- writes the corresponding `CHANGELOG.md` section;
+- synchronizes `package.json`, `Chart.yaml`, Artifact Hub changes, chart docs,
+  and versioned install examples.
 
-> The AI only **advises**. The changelog, diff, contributors, and the version
-> arithmetic are all deterministic; you make the final call by merging.
+Review the calculated version and generated notes, then merge the release PR.
+If the release impact is wrong, edit or add the pending Changeset instead of
+editing the generated chart version directly. A later Changeset merged to
+`main` automatically refreshes the same release PR. You can also run the
+workflow manually to refresh it.
 
-Dry-run the same proposal locally (no PR, no push) with `make propose`.
-
-If more commits land on `main` while the proposal PR is open, comment
-`/rescan` on it. [command-rescan-changes.yaml](.github/workflows/command-rescan-changes.yaml)
-re-runs `propose-release.yaml`, refreshing the changelog, AI advice, and
-version recommendation in place.
-
-### 2. `/version vX.Y.Z` PR comment
-
-A maintainer (OWNER/MEMBER/COLLABORATOR) comments `/version vX.Y.Z` on the
-release proposal PR. [command-version-change.yaml](.github/workflows/command-version-change.yaml)
-re-runs `propose-release.yaml` with that exact version, which regenerates the
-whole proposal in place — `Chart.yaml`, `CHANGELOG.md`, chart docs, and the PR
-body (showing the override and the AI's original suggestion for comparison).
-
-### 3. Manual bump
-
-Bump `version` in `Chart.yaml`, run `make changelog`, commit both, and open a
-PR yourself.
+For a non-mutating local preview, run `make propose`. On a disposable release
+branch, `make release-version` applies the same generated version step.
 
 ### What merging does
 
 Once any of the above merges to `main`,
 [release-chart.yaml](.github/workflows/release-chart.yaml) sees the new version, and if no
-`vX.Y.Z` tag exists yet it creates the tag + GitHub Release (git-cliff notes)
+`vX.Y.Z` tag exists yet it creates the tag + GitHub Release (Changesets notes)
 and publishes the chart to **both**:
 
 - `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent` (OCI artifact), and
@@ -75,8 +63,8 @@ description) are safe — the tag-existence guard makes them no-ops.
 ## Conventional Commits (recommended)
 
 Not enforced, but [Conventional Commits](https://www.conventionalcommits.org/)
-(`feat:`, `fix:`, `docs:`, `ci:`, `refactor:`, …) make the git-cliff changelog
-clean and grouped. `chore(release):` commits are skipped in the changelog.
+(`feat:`, `fix:`, `docs:`, `ci:`, `refactor:`, …) keep history readable.
+Changeset summaries, rather than commit subjects, are the release changelog.
 
 ## CI validation
 
@@ -102,7 +90,8 @@ make lint        # helm lint
 make template    # render manifests
 make docs        # regenerate the chart README (helm-docs) — commit the result
 make test        # install + helm test (needs a cluster/kind)
-make changelog   # regenerate CHANGELOG.md (when bumping version)
+pnpm changeset   # add a release intent for a user-visible chart change
+make propose     # preview the pending calculated version
 ```
 
 CI fails if the chart README is out of date, so always `make docs` after editing
