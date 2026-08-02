@@ -293,8 +293,8 @@ Discord 스레드 리더 팀도 사람 → 리더 → 멤버 둘 → 리더 라�
 <code dir="auto">helm lint</code>, <code dir="auto">helm template</code>, 차트-docs 드리프트 체크, 그리고 임시 <strong>kind</strong> 클러스터에서의
 완전한 설치 + 테스트 (NVIDIA_API_KEY 시크릿이 있을 때는 실제 <code dir="auto">hermes chat</code> 라운드트립).</li>
 <li><strong>릴리즈는 Changesets 기반</strong>이며, 태그 푸시 기반이 아닙니다. 사용자에게 보이는 차트 변경은
-<a href=".changeset/"><code dir="auto">.changeset/</code></a>에 <code dir="auto">patch</code>·<code dir="auto">minor</code>·<code dir="auto">major</code> 항목을 추가합니다. 이 항목이
-<code dir="auto">main</code>에 도달하면 <a href=".github/workflows/propose-release.yaml">propose-release.yaml</a>이 하나의
+<a href=".changeset/"><code dir="auto">.changeset/</code></a>에 <code dir="auto">patch</code>·<code dir="auto">minor</code>·<code dir="auto">major</code> 항목을 추가합니다. 릴리즈할 준비가 되면
+<a href=".github/workflows/propose-release.yaml">propose-release.yaml</a>을 수동 실행하여 대기 중인 항목을 하나의
 검토용 릴리즈 PR로 합치고, <code dir="auto">CHANGELOG.md</code>와 비공개 릴리즈 manifest·<code dir="auto">Chart.yaml</code>·Artifact Hub
 메타데이터·차트 문서·버전별 예제를 함께 동기화합니다. PR을 검토·머지하면
 <a href=".github/workflows/release-chart.yaml">release-chart.yaml</a>이 <code dir="auto">vX.Y.Z</code> 태그와 GitHub Release를

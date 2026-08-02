@@ -142,8 +142,8 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   `helm lint`, `helm template`, 차트-docs 드리프트 체크, 그리고 임시 **kind** 클러스터에서의
   완전한 설치 + 테스트 (NVIDIA_API_KEY 시크릿이 있을 때는 실제 `hermes chat` 라운드트립).
 - **릴리즈는 Changesets 기반**이며, 태그 푸시 기반이 아닙니다. 사용자에게 보이는 차트 변경은
-  [`.changeset/`](.changeset/)에 `patch`·`minor`·`major` 항목을 추가합니다. 이 항목이
-  `main`에 도달하면 [propose-release.yaml](.github/workflows/propose-release.yaml)이 하나의
+  [`.changeset/`](.changeset/)에 `patch`·`minor`·`major` 항목을 추가합니다. 릴리즈할 준비가 되면
+  [propose-release.yaml](.github/workflows/propose-release.yaml)을 수동 실행하여 대기 중인 항목을 하나의
   검토용 릴리즈 PR로 합치고, `CHANGELOG.md`와 비공개 릴리즈 manifest·`Chart.yaml`·Artifact Hub
   메타데이터·차트 문서·버전별 예제를 함께 동기화합니다. PR을 검토·머지하면
   [release-chart.yaml](.github/workflows/release-chart.yaml)이 `vX.Y.Z` 태그와 GitHub Release를

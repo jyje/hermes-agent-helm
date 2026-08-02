@@ -300,8 +300,9 @@ test on an ephemeral <strong>kind</strong> cluster (real <code dir="auto">hermes
 <code dir="auto">NVIDIA_API_KEY</code> secret is available).</li>
 <li><strong>Releases are Changesets-driven, not tag-push-driven.</strong> A user-visible chart
 change adds a <code dir="auto">patch</code>, <code dir="auto">minor</code>, or <code dir="auto">major</code> entry under <a href=".changeset/"><code dir="auto">.changeset/</code></a>.
-When entries reach <code dir="auto">main</code>, <a href=".github/workflows/propose-release.yaml">propose-release.yaml</a>
-combines them into one reviewable release PR, writes its <code dir="auto">CHANGELOG.md</code> notes,
+When you are ready to release, manually run
+<a href=".github/workflows/propose-release.yaml">propose-release.yaml</a> to combine pending
+entries into one reviewable release PR, write its <code dir="auto">CHANGELOG.md</code> notes,
 and synchronizes the private release manifest with <code dir="auto">Chart.yaml</code>, Artifact Hub
 metadata, chart docs, and versioned examples. Review and merge that PR; then
 <a href=".github/workflows/release-chart.yaml">release-chart.yaml</a> tags <code dir="auto">vX.Y.Z</code>, writes the GitHub

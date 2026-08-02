@@ -35,9 +35,9 @@ SemVer impact, and write a concise user-facing summary. Commit that file with
 the implementation PR. CI does not require a Changeset for CI-only, tooling,
 or other unreleased maintenance work.
 
-When pending Changesets reach `main`,
-[propose-release.yaml](.github/workflows/propose-release.yaml) opens or updates
-one release PR automatically. Its custom version step:
+Pending Changesets remain on `main` until you manually run
+[propose-release.yaml](.github/workflows/propose-release.yaml) from the Actions
+tab. It opens or updates one release PR. Its custom version step:
 
 - combines the pending patch/minor/major entries into one SemVer version;
 - writes the corresponding `CHANGELOG.md` section;
@@ -46,9 +46,8 @@ one release PR automatically. Its custom version step:
 
 Review the calculated version and generated notes, then merge the release PR.
 If the release impact is wrong, edit or add the pending Changeset instead of
-editing the generated chart version directly. A later Changeset merged to
-`main` automatically refreshes the same release PR. You can also run the
-workflow manually to refresh it.
+editing the generated chart version directly, then manually run the workflow
+again to refresh the same release PR.
 
 For a non-mutating local preview, run `make propose`. On a disposable release
 branch, `make release-version` applies the same generated version step.
