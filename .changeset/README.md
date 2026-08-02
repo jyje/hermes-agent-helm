@@ -12,19 +12,22 @@ frontmatter and the free-form Markdown summary below it. Keep the frontmatter
 to package names and `major`, `minor`, or `patch`; do not add custom YAML keys
 such as `type`, `scope`, or `author` there.
 
-Use this repository convention for the first line of every summary. It records
-the release-note category in the free-form Markdown that Changesets preserves:
+Use this repository convention for every summary. It records structured
+release-note data in Markdown that Changesets preserves:
 
 ```md
-Category(scope): Title — concise user-facing detail
+Category(scope): Title
+
+Concise user-facing detail.
 ```
 
 - **Category** is one of `Feature`, `Fix`, `Security`, `Dependency`,
   `Documentation`, `Deprecated`, or `Removed`.
 - **scope** is a short affected area such as `chart`, `values`, `docs`,
   `image`, `persistence`, or `dashboard`.
-- **Title** is the short bold label shown in a release note; the detail starts
-  with an imperative, user-facing description.
+- **Title** is the short bold label shown in a release note.
+- **detail** is a separate paragraph beginning with an imperative,
+  user-facing description.
 - Use singular `Feature` and `Dependency` in a Changeset. A release-note
   renderer can group them under the plural headings **Features** and
   **Dependencies**. The category does not change the SemVer level.
@@ -36,8 +39,9 @@ For example:
 "@jyje/hermes-agent-helm": minor
 ---
 
-Feature(docs): Documentation portal — Add chart-scoped install, values overlay,
-example, and reference pages.
+Feature(docs): Documentation portal
+
+Add chart-scoped install, values overlay, example, and reference pages.
 ```
 
 ```md
@@ -45,8 +49,9 @@ example, and reference pages.
 "@jyje/hermes-agent-helm": patch
 ---
 
-Fix(persistence): Bootstrap preservation — Preserve an existing Hermes
-configuration during bootstrap.
+Fix(persistence): Bootstrap preservation
+
+Preserve an existing Hermes configuration during bootstrap.
 ```
 
 Use `major` only for an incompatible upgrade path, `minor` for a backwards-
@@ -58,6 +63,17 @@ Do not write a GitHub username into the summary. Attribution is not native
 Changesets data; a custom release-note renderer may resolve the GitHub identity
 from the commit or pull request that added the item. Keep that information out
 of the summary so it has one source of truth.
+
+When rendered, keep the reference compact. Prefer the pull request; if none
+exists, fall back to the Changeset-adding commit:
+
+```md
+[#101](https://github.com/jyje/hermes-agent-helm/pull/101) (minor) [@jyje](https://github.com/jyje)
+```
+
+```md
+[`abc1234`](https://github.com/jyje/hermes-agent-helm/commit/abc1234) (minor) [@jyje](https://github.com/jyje)
+```
 
 When a maintainer manually runs the release proposal workflow, it consumes
 pending entries, updates the private release manifest and

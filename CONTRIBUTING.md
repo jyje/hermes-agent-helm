@@ -29,10 +29,13 @@ or other unreleased maintenance work.
 
 The YAML frontmatter is native Changesets data: keep it limited to package
 names and `major`, `minor`, or `patch`. Categories are therefore recorded in
-the Markdown summary, using this repository convention for its first line:
+the Markdown summary, using this repository convention for its heading and
+detail paragraph:
 
 ```md
-Category(scope): Title — concise user-facing detail
+Category(scope): Title
+
+Concise user-facing detail.
 ```
 
 Use `Feature`, `Fix`, `Security`, `Dependency`, `Documentation`, `Deprecated`,
@@ -46,17 +49,23 @@ singular item categories; a release-note renderer can group them beneath
 "@jyje/hermes-agent-helm": minor
 ---
 
-Feature(docs): Documentation portal — Add chart-scoped install, values overlay,
-example, and reference pages.
+Feature(docs): Documentation portal
+
+Add chart-scoped install, values overlay, example, and reference pages.
 ```
 
-Write in imperative, user-facing language; do not repeat `minor`, `major`, or
-`patch` in the summary. SemVer is native Changesets frontmatter data; Category
-is a release-note convention and does not affect it. GitHub attribution is not
-native Changesets data, so do not duplicate a username in the summary; a custom
-release-note renderer can derive it from the commit or pull request. See
+Write the detail paragraph in imperative, user-facing language; do not repeat
+`minor`, `major`, or `patch` in the summary. SemVer is native Changesets
+frontmatter data; Category is a release-note convention and does not affect it.
+GitHub attribution is not native Changesets data, so do not duplicate a
+username in the summary; a custom release-note renderer can derive it from the
+commit or pull request. See
 [`.changeset/README.md`](.changeset/README.md) for the complete guide,
 including SemVer selection and a fix example.
+
+Rendered references stay compact: prefer the implementation PR as
+`[#101](https://github.com/jyje/hermes-agent-helm/pull/101) (minor) [@jyje](https://github.com/jyje)`;
+when there is no PR, use a linked short commit hash in the same position.
 
 Pending Changesets remain on `main` until you manually run
 [propose-release.yaml](.github/workflows/propose-release.yaml) from the Actions

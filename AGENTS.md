@@ -75,12 +75,13 @@ as a **Secret**.
 - **Changeset release items are a contributor contract.** For every
   user-visible chart change, add one `.changeset/*.md` item. Its frontmatter
   contains only the package and `major`/`minor`/`patch`; its first summary line
-  follows `Category(scope): Title — user-facing detail` using the approved
-  categories in `.changeset/README.md`. The category is Markdown convention,
-  not native Changesets frontmatter, and does not determine SemVer. Do not add
-  a Changeset for CI, release automation, or other unreleased tooling, and do
-  not duplicate a GitHub username in the summary: a custom release-note
-  renderer resolves attribution from repository history.
+  follows `Category(scope): Title` using the approved categories in
+  `.changeset/README.md`; after a blank line, write the user-facing detail.
+  The category is Markdown convention, not native Changesets frontmatter, and
+  does not determine SemVer. Do not add a Changeset for CI, release automation,
+  or other unreleased tooling, and do not duplicate a GitHub username in the
+  summary: a custom release-note renderer resolves attribution from repository
+  history.
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
   `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
   This only updates `README.md`; if the change affects prose covered in
