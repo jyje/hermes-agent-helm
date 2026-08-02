@@ -14,4 +14,4 @@ helm upgrade --install <release-name> <repository-name>/hermes-agent \
   --namespace <namespace> --create-namespace
 ```
 
-Use the chart’s [values reference](/hermes-agent-helm/charts/hermes-agent/reference/values/) or an overlay before deploying.
+Use the chart’s [base values reference](/hermes-agent-helm/charts/hermes-agent/reference/values/) and choose a [values overlay](/hermes-agent-helm/charts/hermes-agent/overlays/) before deploying.
