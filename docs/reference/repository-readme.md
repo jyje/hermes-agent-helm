@@ -159,8 +159,9 @@ principles are in [AGENTS.md](AGENTS.md).
   `NVIDIA_API_KEY` secret is available).
 - **Releases are Changesets-driven, not tag-push-driven.** A user-visible chart
   change adds a `patch`, `minor`, or `major` entry under [`.changeset/`](.changeset/).
-  When entries reach `main`, [propose-release.yaml](.github/workflows/propose-release.yaml)
-  combines them into one reviewable release PR, writes its `CHANGELOG.md` notes,
+  When you are ready to release, manually run
+  [propose-release.yaml](.github/workflows/propose-release.yaml) to combine pending
+  entries into one reviewable release PR, write its `CHANGELOG.md` notes,
   and synchronizes the private release manifest with `Chart.yaml`, Artifact Hub
   metadata, chart docs, and versioned examples. Review and merge that PR; then
   [release-chart.yaml](.github/workflows/release-chart.yaml) tags `vX.Y.Z`, writes the GitHub
