@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- 5f12f7e: Add a Starlight documentation portal with chart-scoped install, values overlay,
+  example, and reference pages.
+- 5f12f7e: Update the default Hermes Agent image to v2026.7.30.
 
 ## [1.0.0] - 2026-07-30
 
