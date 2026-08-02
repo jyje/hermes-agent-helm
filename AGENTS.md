@@ -72,6 +72,13 @@ as a **Secret**.
   applies to it too. Exception: the chart README's auto-generated `## Values`
   table (see below) stays English-only in both files to avoid a second
   hand-translated copy drifting from `values.yaml`.
+- **Changeset release items are a contributor contract.** For every
+  user-visible chart change, add one `.changeset/*.md` item. Its frontmatter
+  contains only the package and `major`/`minor`/`patch`; its first summary line
+  follows `Type(scope): user-facing change` using the approved types in
+  `.changeset/README.md`. Do not add a Changeset for CI, release automation,
+  or other unreleased tooling, and do not duplicate a GitHub username in the
+  summary: release attribution comes from the commit that adds the item.
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
   `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
   This only updates `README.md`; if the change affects prose covered in

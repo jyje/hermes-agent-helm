@@ -25,9 +25,38 @@ SemVer impact, and write a concise user-facing summary. Commit that file with
 the implementation PR. CI does not require a Changeset for CI-only, tooling,
 or other unreleased maintenance work.
 
-When pending Changesets reach `main`,
-[propose-release.yaml](.github/workflows/propose-release.yaml) opens or updates
-one release PR automatically. Its custom version step:
+### Write an item that can become a release note
+
+The YAML frontmatter is native Changesets data: keep it limited to package
+names and `major`, `minor`, or `patch`. Use the summary's first line for this
+repository's release-note convention:
+
+```md
+Type(scope): concise user-facing change
+```
+
+Use `Feature`, `Fix`, `Security`, `Dependency`, `Documentation`, `Deprecated`,
+or `Removed` for `Type`, and a short affected area such as `chart`, `values`,
+`docs`, or `image` for `scope`. For example:
+
+```md
+---
+"@jyje/hermes-agent-helm": minor
+---
+
+Feature(docs): Add a chart-scoped Starlight documentation portal.
+```
+
+Write in imperative, user-facing language; do not repeat `minor`, `major`, or
+`patch` in the summary. The release renderer presents the SemVer impact at the
+end of the item. GitHub attribution is derived from the commit that adds the
+Changeset, so do not duplicate a username in the summary. See
+[`.changeset/README.md`](.changeset/README.md) for the complete guide,
+including SemVer selection and a fix example.
+
+Pending Changesets remain on `main` until you manually run
+[propose-release.yaml](.github/workflows/propose-release.yaml) from the Actions
+tab. It opens or updates one release PR. Its custom version step:
 
 - combines the pending patch/minor/major entries into one SemVer version;
 - writes the corresponding `CHANGELOG.md` section;
@@ -36,9 +65,8 @@ one release PR automatically. Its custom version step:
 
 Review the calculated version and generated notes, then merge the release PR.
 If the release impact is wrong, edit or add the pending Changeset instead of
-editing the generated chart version directly. A later Changeset merged to
-`main` automatically refreshes the same release PR. You can also run the
-workflow manually to refresh it.
+editing the generated chart version directly, then manually run the workflow
+again to refresh the same release PR.
 
 For a non-mutating local preview, run `make propose`. On a disposable release
 branch, `make release-version` applies the same generated version step.

@@ -35,6 +35,35 @@ SemVer impact, and write a concise user-facing summary. Commit that file with
 the implementation PR. CI does not require a Changeset for CI-only, tooling,
 or other unreleased maintenance work.
 
+### Write an item that can become a release note
+
+The YAML frontmatter is native Changesets data: keep it limited to package
+names and `major`, `minor`, or `patch`. Use the summary's first line for this
+repository's release-note convention:
+
+```md
+Type(scope): concise user-facing change
+```
+
+Use `Feature`, `Fix`, `Security`, `Dependency`, `Documentation`, `Deprecated`,
+or `Removed` for `Type`, and a short affected area such as `chart`, `values`,
+`docs`, or `image` for `scope`. For example:
+
+```md
+---
+"@jyje/hermes-agent-helm": minor
+---
+
+Feature(docs): Add a chart-scoped Starlight documentation portal.
+```
+
+Write in imperative, user-facing language; do not repeat `minor`, `major`, or
+`patch` in the summary. The release renderer presents the SemVer impact at the
+end of the item. GitHub attribution is derived from the commit that adds the
+Changeset, so do not duplicate a username in the summary. See
+[`.changeset/README.md`](.changeset/README.md) for the complete guide,
+including SemVer selection and a fix example.
+
 Pending Changesets remain on `main` until you manually run
 [propose-release.yaml](.github/workflows/propose-release.yaml) from the Actions
 tab. It opens or updates one release PR. Its custom version step:
