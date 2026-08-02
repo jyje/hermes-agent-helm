@@ -292,17 +292,16 @@ Discord 스레드 리더 팀도 사람 → 리더 → 멤버 둘 → 리더 라�
 <li><strong>모든 PR과 <code dir="auto">dev</code>/<code dir="auto">main</code>로의 push</strong>는 <a href=".github/workflows/validate-chart.yaml">validate-chart.yaml</a>을 실행합니다:
 <code dir="auto">helm lint</code>, <code dir="auto">helm template</code>, 차트-docs 드리프트 체크, 그리고 임시 <strong>kind</strong> 클러스터에서의
 완전한 설치 + 테스트 (NVIDIA_API_KEY 시크릿이 있을 때는 실제 <code dir="auto">hermes chat</code> 라운드트립).</li>
-<li><strong>릴리즈는 버전 범프 기반</strong>이며, 태그 푸시 기반이 아닙니다. <a href=".github/workflows/propose-release.yaml">propose-release.yaml</a>을 실행합니다
-(Actions → “📋 propose-release”): main과 마지막 릴리즈 태그를 비교해서
-체인지로그를 <strong>결정적으로</strong> 생성하고(git-cliff), <strong>NVIDIA NIM</strong>에게 semver 범프 추천을 요청하고
-(키 없으면 transparent한 휴리스틱으로 폴백), 모든 커밋과 PR 작성자를 크레딧한 단일
-<strong>릴리즈 PR</strong>을 생성/업데이트합니다. 버전이 마음에 안 들면 조정한 후 머지하세요.
-(또는 제안을 건너뛰고 <code dir="auto">Chart.yaml</code>을 직접 범프하거나 <code dir="auto">/version vX.Y.Z</code>를 코멘트하세요.)
-PR이 <code dir="auto">main</code>으로 머지되면 <a href=".github/workflows/release-chart.yaml">release-chart.yaml</a>이
-<code dir="auto">vX.Y.Z</code> 태그를 생성하고, GitHub Release를 작성하고, 차트를 <code dir="auto">oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm/hermes-agent</code>에 배포합니다.</li>
+<li><strong>릴리즈는 Changesets 기반</strong>이며, 태그 푸시 기반이 아닙니다. 사용자에게 보이는 차트 변경은
+<a href=".changeset/"><code dir="auto">.changeset/</code></a>에 <code dir="auto">patch</code>·<code dir="auto">minor</code>·<code dir="auto">major</code> 항목을 추가합니다. 이 항목이
+<code dir="auto">main</code>에 도달하면 <a href=".github/workflows/propose-release.yaml">propose-release.yaml</a>이 하나의
+검토용 릴리즈 PR로 합치고, <code dir="auto">CHANGELOG.md</code>와 비공개 릴리즈 manifest·<code dir="auto">Chart.yaml</code>·Artifact Hub
+메타데이터·차트 문서·버전별 예제를 함께 동기화합니다. PR을 검토·머지하면
+<a href=".github/workflows/release-chart.yaml">release-chart.yaml</a>이 <code dir="auto">vX.Y.Z</code> 태그와 GitHub Release를
+만들고 차트를 <code dir="auto">oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm/hermes-agent</code>에 배포합니다.</li>
 </ul>
 <p>즉: lint + test가 모든 변경사항을 게이트합니다; <em>릴리즈</em> 자체는 단순한
-리뷰된 PR (버전 범프) — AI는 조언만 하고, 머지가 배포합니다.
+리뷰된 PR (버전 범프) — 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
 전체 릴리즈 플레이북은 <a href="CONTRIBUTING.md">CONTRIBUTING.md</a>를 참고하세요.</p>
 <div class="sl-heading-wrapper level-h2"><h2 id="로드맵">로드맵</h2><a class="sl-anchor-link" href="#로드맵"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>섹션 제목: “로드맵”</span></a></div>
 <p>이 차트는 <strong>하나</strong>의 에이전트를 잘 배포·관리하며, 오늘은 ArgoCD ApplicationSet

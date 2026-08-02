@@ -59,11 +59,12 @@ Grouped by area and ordered by priority within each group.
     each to be re-run independently
 
 - [ ] **Close the "release commit is not tested" gap**
-  - `release/next` PRs touch only `Chart.yaml` + `README.md` +
-    `CHANGELOG.md`, so `functional=false` → kind cluster test is skipped
+  - Changesets release PRs touch only generated version metadata,
+    `Chart.yaml`, docs, and `CHANGELOG.md`, so `functional=false` → kind
+    cluster test is skipped
   - The last merged commit before shipping is never integration-tested
-  - Options: (a) add a lightweight smoke test that always runs on
-    `release/next`, or (b) document the gap and accept it as a known trade-off
+  - Options: (a) add a lightweight smoke test that always runs on a release
+    PR, or (b) document the gap and accept it as a known trade-off
     given that the preceding feature commit was tested
 
 ### 🟢 Low priority

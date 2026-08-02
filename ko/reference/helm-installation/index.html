@@ -288,7 +288,7 @@ later envFrom wins over the chart’s placeholder):</p>
 <blockquote>
 <p><strong>CI owns the <code dir="auto">.tgz</code> lifecycle.</strong> Bumping <code dir="auto">version</code> in <code dir="auto">Chart.yaml</code> on <code dir="auto">main</code>
 triggers <code dir="auto">.github/workflows/release-chart.yaml</code>, which tags <code dir="auto">vX.Y.Z</code>, writes release
-notes (git-cliff), and pushes to <code dir="auto">oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm</code> — the package
+notes (Changesets), and pushes to <code dir="auto">oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm</code> — the package
 is never committed. The commands below are the equivalent manual/local flow.</p>
 </blockquote>
 <div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># 1) package (also runs docs + lint via the Makefile target)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">make</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">package</span><span style="--0:#D6DEEB;--1:#403F53">                      </span><span style="--0:#919F9F;--1:#5F636F"># -&gt; dist/hermes-agent-1.0.0.tgz</span></div></div><div class="ec-line"><div class="code">

@@ -150,7 +150,7 @@ helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-
 
 > **CI owns the `.tgz` lifecycle.** Bumping `version` in `Chart.yaml` on `main`
 > triggers `.github/workflows/release-chart.yaml`, which tags `vX.Y.Z`, writes release
-> notes (git-cliff), and pushes to `oci://ghcr.io/<owner>/hermes-agent-helm` — the package
+> notes (Changesets), and pushes to `oci://ghcr.io/<owner>/hermes-agent-helm` — the package
 > is never committed. The commands below are the equivalent manual/local flow.
 
 ```bash

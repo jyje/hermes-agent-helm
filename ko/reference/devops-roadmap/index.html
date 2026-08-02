@@ -276,11 +276,12 @@ each to be re-run independently</li>
 <li class="task-list-item">
 <p><input type="checkbox" disabled> <strong>Close the “release commit is not tested” gap</strong></p>
 <ul>
-<li><code dir="auto">release/next</code> PRs touch only <code dir="auto">Chart.yaml</code> + <code dir="auto">README.md</code> +
-<code dir="auto">CHANGELOG.md</code>, so <code dir="auto">functional=false</code> → kind cluster test is skipped</li>
+<li>Changesets release PRs touch only generated version metadata,
+<code dir="auto">Chart.yaml</code>, docs, and <code dir="auto">CHANGELOG.md</code>, so <code dir="auto">functional=false</code> → kind
+cluster test is skipped</li>
 <li>The last merged commit before shipping is never integration-tested</li>
-<li>Options: (a) add a lightweight smoke test that always runs on
-<code dir="auto">release/next</code>, or (b) document the gap and accept it as a known trade-off
+<li>Options: (a) add a lightweight smoke test that always runs on a release
+PR, or (b) document the gap and accept it as a known trade-off
 given that the preceding feature commit was tested</li>
 </ul>
 </li>
