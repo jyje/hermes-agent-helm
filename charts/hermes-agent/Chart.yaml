@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.0.0
+version: 1.1.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -35,8 +35,6 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: "added"
-      description: "Added group_sessions_per_user, discord mention and thread settings to leader and member values for thread‑native team coordination."
-    - kind: "changed"
-      description: "Changed default shared knowledge PVC access mode from ReadWriteMany to ReadWriteOnce, requiring existing PVCs to meet new access mode."
+      description: "Add a Starlight documentation portal with chart-scoped install, values overlay, example, and reference pages."
     - kind: "added"
-      description: "Added AUGUST_BOT_USER_ID and TEAM_KNOWLEDGE_ROOT values to support leader‑orchestrated team workflows."
+      description: "Update the default Hermes Agent image to v2026.7.30."
