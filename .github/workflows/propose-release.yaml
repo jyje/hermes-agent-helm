@@ -1,102 +1,61 @@
 name: 📋 propose-release
 
-# Opens (or updates) a single "release proposal" PR for the current state of
-# `main`. The changelog, diff, change signals, and contributors are produced
-# deterministically by git / git-cliff; only the version recommendation and the
-# human summary are AI-assisted (NVIDIA NIM, with a heuristic fallback when no
-# key is available). Nothing is published here — merging the PR triggers
-# release-chart.yaml, which is what actually tags + pushes the chart.
-#
-# Trigger is workflow_dispatch only: it is maintainer-initiated and never runs
-# on untrusted PR events, so the NIM secret and write permissions are never
-# exposed to forks.
+# A Changeset records the release intent with the change that needs it. On main,
+# this workflow consumes all pending entries into one reviewable release PR. The
+# custom version command keeps the private npm release manifest, Chart.yaml,
+# Artifact Hub changes, chart README, and examples on the same version.
+# Nothing is published here; release-chart.yaml publishes only after this PR
+# merges to main.
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".changeset/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/propose-release.yaml"
+      - ".github/scripts/release/version-chart.mjs"
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Exact version to propose, e.g. 0.0.2 (overrides the AI recommendation; leave blank to let the AI/heuristic decide)"
-        type: string
-        default: ""
-      bump:
-        description: "Version bump level (ignored if 'version' is set; auto = use the AI/heuristic recommendation)"
-        type: choice
-        default: auto
-        options: [auto, patch, minor, major]
 
 permissions:
-  contents: write        # push the release/next branch
-  pull-requests: write   # open / update the proposal PR
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: propose-release
   cancel-in-progress: true
 
-env:
-  GIT_CLIFF_VERSION: "2.13.1"
-  OUT: dist/release
-
 jobs:
   propose:
     runs-on: ubuntu-26.04-arm
     steps:
-      # PRs opened by the default GITHUB_TOKEN are attributed to
-      # github-actions[bot] and now require a maintainer to manually approve
-      # the resulting "validate-chart" run on every push (GitHub's June 2026
-      # bot-PR-approval policy). Minting an installation token for our own
-      # GitHub App attributes the push/PR to a trusted, write-access identity
-      # instead, so it skips that approval gate.
+      # Use the repository App identity for the push/PR, so the validation PR
+      # is treated as trusted rather than requiring a per-run bot approval.
       - name: Generate GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.APP_ID }}
+          app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v7
         with:
           ref: main
-          fetch-depth: 0   # full history + tags for the diff/changelog baseline
-          # Don't leave a persisted auth header — it collides with the token
-          # create-pull-request uses to push (git "Duplicate header: Authorization").
-          # The read-only git/git-cliff steps here need no credentials.
+          fetch-depth: 0
           persist-credentials: false
 
-      - name: Install git-cliff
-        run: |
-          curl -sSL "https://github.com/orhun/git-cliff/releases/download/v${GIT_CLIFF_VERSION}/git-cliff-${GIT_CLIFF_VERSION}-$(uname -m)-unknown-linux-gnu.tar.gz" \
-            | tar -xz --strip-components=1 -C /usr/local/bin "git-cliff-${GIT_CLIFF_VERSION}/git-cliff"
-          git-cliff --version
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.14.0
 
-      - name: Collect release context (deterministic)
-        env:
-          GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
-        run: bash .github/scripts/release/collect.sh "$OUT"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: AI advice (NVIDIA NIM, graceful fallback)
-        env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-        run: python3 .github/scripts/release/advise.py "$OUT"
-
-      - name: Resolve next version + selection source
-        id: ver
-        run: |
-          version_in="${{ inputs.version }}"
-          bump_in="${{ inputs.bump }}"
-          bump_from="$(python3 -c "import json;print(json.load(open('$OUT/context.json'))['bump_from'])")"
-
-          # Precedence: explicit version > explicit bump level > AI/heuristic.
-          # Anything other than the plain AI recommendation is a maintainer choice.
-          if [ -n "$version_in" ]; then
-            new="${version_in#v}"; selection=manual
-          elif [ "$bump_in" != "auto" ]; then
-            new="$(bash .github/scripts/release/semver.sh next "$bump_from" "$bump_in")"; selection=manual
-          else
-            bump="$(python3 -c "import json;print(json.load(open('$OUT/advice.json'))['bump'])")"
-            new="$(bash .github/scripts/release/semver.sh next "$bump_from" "$bump")"; selection=ai
-          fi
-          echo "new=$new"             >> "$GITHUB_OUTPUT"
-          echo "selection=$selection" >> "$GITHUB_OUTPUT"
-          echo "::notice::proposing v$new (selection=$selection, from v$bump_from)"
+      - name: Install release tooling
+        run: pnpm --filter @jyje/hermes-agent-helm install --frozen-lockfile
 
       - name: Install helm-docs
         env:
@@ -107,99 +66,11 @@ jobs:
             | tar -xz helm-docs
           sudo install helm-docs /usr/local/bin/
 
-      - name: Bump Chart.yaml + refresh CHANGELOG.md + chart docs
+      - name: Create or update the Changesets release PR
+        uses: changesets/action@v1
+        with:
+          version: pnpm release:version
+          commit: "🔧 chore(release): propose chart version"
+          title: "🚀 release(hermes-agent): version chart"
         env:
-          GITHUB_TOKEN: ${{ github.token }}   # lets git-cliff resolve @usernames
-        run: |
-          new="${{ steps.ver.outputs.new }}"
-          old="$(python3 -c "import json;print(json.load(open('$OUT/context.json'))['bump_from'])")"
-          sed -i "s/^version: .*/version: ${new}/" charts/hermes-agent/Chart.yaml
-          python3 .github/scripts/release/update-artifacthub-changes.py \
-            charts/hermes-agent/Chart.yaml "$OUT/advice.json"
-          # Only credit main's first-parent chain (#56): a PR merged with a
-          # merge commit puts BOTH the merge commit (titled after the PR) and
-          # every branch commit inside it onto main, and git-cliff would list
-          # them all — the same change twice, plus its fixup commits. Skipping
-          # everything off the first-parent chain keeps exactly one line per
-          # PR while leaving direct-to-main and squash-merged commits intact.
-          skip_args=()
-          while IFS= read -r sha; do
-            skip_args+=(--skip-commit "$sha")
-          done < <(comm -23 <(git rev-list HEAD | sort) \
-                            <(git rev-list --first-parent HEAD | sort))
-          git-cliff --tag "v${new}" ${skip_args[@]+"${skip_args[@]}"} -o CHANGELOG.md
-          # Regenerate the chart README so its version badge matches Chart.yaml —
-          # otherwise validate-chart.yaml's docs-drift check fails on the release PR.
-          helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
-          # Keep the OCI install-example versions in examples/helm/README.md in sync.
-          sed -i "s/${old}/${new}/g" examples/helm/README.md
-          # Same for the chart's Korean README — it has no .gotmpl (hand-translated
-          # prose), so its version badge/OCI example would otherwise go stale.
-          sed -i "s/${old}/${new}/g" charts/hermes-agent/README-ko.md
-
-      - name: Build contributors block
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const fs = require('fs');
-            const ctx = JSON.parse(fs.readFileSync(`${process.env.OUT}/context.json`, 'utf8'));
-            const { owner, repo } = context.repo;
-
-            // Commit authors (GitHub logins) via the compare API over the range.
-            const commitLogins = new Set();
-            try {
-              const cmp = await github.rest.repos.compareCommitsWithBasehead({
-                owner, repo,
-                basehead: `${ctx.last_release || ctx.base_ref}...main`,
-              });
-              for (const c of cmp.data.commits || []) {
-                if (c.author && c.author.login) commitLogins.add(c.author.login);
-              }
-            } catch (e) {
-              core.warning(`compare API failed: ${e.message}`);
-            }
-
-            // Pull requests referenced in the range -> author + title.
-            const prLines = [];
-            for (const n of ctx.pr_refs || []) {
-              try {
-                const pr = await github.rest.pulls.get({ owner, repo, pull_number: n });
-                const a = pr.data.user ? `@${pr.data.user.login}` : '(unknown)';
-                prLines.push(`- #${n} ${pr.data.title} — ${a}`);
-                if (pr.data.user) commitLogins.add(pr.data.user.login);
-              } catch (e) {
-                core.warning(`pr #${n} lookup failed: ${e.message}`);
-              }
-            }
-
-            let md = '';
-            const commits = [...commitLogins].sort();
-            md += commits.length
-              ? `**Commit authors:** ${commits.map(l => `@${l}`).join(', ')}\n`
-              : `**Commit authors:** ${(ctx.commit_contributors || []).join(', ') || '(none)'}\n`;
-            if (prLines.length) md += `\n**Pull requests:**\n${prLines.join('\n')}\n`;
-            fs.writeFileSync(`${process.env.OUT}/contributors.md`, md);
-            core.info(md);
-
-      - name: Render PR body
-        run: |
-          bash .github/scripts/release/render-pr-body.sh \
-            "$OUT" "${{ steps.ver.outputs.new }}" "$OUT/contributors.md" \
-            "${{ steps.ver.outputs.selection }}" > "$OUT/PR_BODY.md"
-
-      - name: Create or update the release PR
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          base: main
-          branch: release/next            # fixed branch -> updates in place (idempotent)
-          add-paths: |
-            charts/hermes-agent/Chart.yaml
-            charts/hermes-agent/README.md
-            examples/helm/README.md
-            CHANGELOG.md
-          commit-message: "🔧 chore(release): propose v${{ steps.ver.outputs.new }}"
-          title: "🚀 release(hermes-agent): merge v${{ steps.ver.outputs.new }} release proposal"
-          body-path: ${{ env.OUT }}/PR_BODY.md
-          labels: release
-          delete-branch: true
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
