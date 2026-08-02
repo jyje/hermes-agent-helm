@@ -14,6 +14,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  RELEASE_PACKAGE: "@jyje/hermes-agent-helm"
+
 concurrency:
   group: propose-release
   cancel-in-progress: true
@@ -57,11 +60,30 @@ jobs:
             | tar -xz helm-docs
           sudo install helm-docs /usr/local/bin/
 
+      - name: Calculate release version
+        id: release-version
+        run: |
+          pnpm changeset status --output /tmp/changeset-status.json
+          version="$(node -e '
+            const status = require("/tmp/changeset-status.json");
+            const release = status.releases.find(({ name }) => name === process.argv[1]);
+            console.log(release?.newVersion ?? "");
+          ' "$RELEASE_PACKAGE")"
+          if [ -z "$version" ]; then
+            echo "No pending Changesets; no release PR to create or update."
+            echo "has-release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Preparing chart release v$version"
+          echo "has-release=true" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Create or update the Changesets release PR
+        if: steps.release-version.outputs.has-release == 'true'
         uses: changesets/action@v1
         with:
           version: pnpm release:version
-          commit: "🔧 chore(release): propose chart version"
-          title: "🚀 release(hermes-agent): version chart"
+          commit: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
+          title: "🚀 release(hermes-agent): v${{ steps.release-version.outputs.version }}"
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
