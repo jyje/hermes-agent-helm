@@ -35,6 +35,48 @@ SemVer impact, and write a concise user-facing summary. Commit that file with
 the implementation PR. CI does not require a Changeset for CI-only, tooling,
 or other unreleased maintenance work.
 
+### Write an item that can become a release note
+
+The YAML frontmatter is native Changesets data: keep it limited to package
+names and `major`, `minor`, or `patch`. Categories are therefore recorded in
+the Markdown summary, using this repository convention for its heading and
+detail paragraph:
+
+```md
+Category(scope): Title
+
+Concise user-facing detail.
+```
+
+Use `Feature`, `Fix`, `Security`, `Dependency`, `Documentation`, `Deprecated`,
+or `Removed` for `Category`, and a short affected area such as `chart`,
+`values`, `docs`, or `image` for `scope`. `Feature` and `Dependency` are
+singular item categories; a release-note renderer can group them beneath
+**Features** and **Dependencies**. For example:
+
+```md
+---
+"@jyje/hermes-agent-helm": minor
+---
+
+Feature(docs): Documentation portal
+
+Add chart-scoped install, values overlay, example, and reference pages.
+```
+
+Write the detail paragraph in imperative, user-facing language; do not repeat
+`minor`, `major`, or `patch` in the summary. SemVer is native Changesets
+frontmatter data; Category is a release-note convention and does not affect it.
+GitHub attribution is not native Changesets data, so do not duplicate a
+username in the summary; a custom release-note renderer can derive it from the
+commit or pull request. See
+[`.changeset/README.md`](.changeset/README.md) for the complete guide,
+including SemVer selection and a fix example.
+
+Rendered references stay compact: prefer the implementation PR as
+`[#101](https://github.com/jyje/hermes-agent-helm/pull/101) (minor) [@jyje](https://github.com/jyje)`;
+when there is no PR, use a linked short commit hash in the same position.
+
 Pending Changesets remain on `main` until you manually run
 [propose-release.yaml](.github/workflows/propose-release.yaml) from the Actions
 tab. It opens or updates one release PR. Its custom version step:
