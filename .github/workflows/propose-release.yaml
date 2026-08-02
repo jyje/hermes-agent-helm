@@ -1,20 +1,13 @@
 name: 📋 propose-release
 
-# A Changeset records the release intent with the change that needs it. On main,
-# this workflow consumes all pending entries into one reviewable release PR. The
-# custom version command keeps the private npm release manifest, Chart.yaml,
-# Artifact Hub changes, chart README, and examples on the same version.
-# Nothing is published here; release-chart.yaml publishes only after this PR
-# merges to main.
+# A Changeset records the release intent with the change that needs it. A
+# maintainer starts this workflow when it is time to prepare a release; it then
+# consumes all pending entries into one reviewable release PR. The custom
+# version command keeps the private npm release manifest, Chart.yaml, Artifact
+# Hub changes, chart README, and examples on the same version. Nothing is
+# published here; release-chart.yaml publishes only after this PR merges to
+# main.
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".changeset/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/propose-release.yaml"
-      - ".github/scripts/release/version-chart.mjs"
   workflow_dispatch:
 
 permissions:
