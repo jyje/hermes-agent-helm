@@ -9,3 +9,4 @@ dist/
 
 # Starlight local dependency store
 .pnpm-store/
+node_modules/

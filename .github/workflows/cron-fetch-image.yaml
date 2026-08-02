@@ -13,8 +13,8 @@ name: ⏰ cron-fetch-image
 #     itself should react to, and files one GitHub Issue per item, labeled
 #     `upstream-review` + a priority. The maintainer triages each
 #     independently — accept (branch + implement) or reject (close it).
-# The chart `version` bump, CHANGELOG, and release are handled separately by
-# propose-release.yaml once the bump-pr is merged into main.
+# The bump PR includes a minor Changeset. Once it merges, propose-release.yaml
+# consumes that entry into the reviewed chart version and release PR.
 on:
   schedule:
     - cron: '0 */6 * * *'
@@ -162,7 +162,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.APP_ID }}
+          app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Export GH_TOKEN for gh CLI steps
@@ -213,7 +213,20 @@ jobs:
           # Keep the generated README in sync (validate-chart fails on a stale README).
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
 
-          git add "${CHART}/Chart.yaml" "${CHART}/README.md" "${CHART}/values.yaml"
+          # A new upstream Hermes Agent image is a user-visible capability
+          # update, so it receives a minor chart release.
+          # The Changesets release workflow consumes this file after the PR
+          # merges; do not bump Chart.yaml's chart version here.
+          printf '%s\n' \
+            '---' \
+            '"@jyje/hermes-agent-helm": minor' \
+            '---' \
+            '' \
+            "Update the default Hermes Agent image to ${TARGET_VERSION}." \
+            > ".changeset/image-${TARGET_VERSION#v}.md"
+
+          git add "${CHART}/Chart.yaml" "${CHART}/README.md" "${CHART}/values.yaml" \
+            ".changeset/image-${TARGET_VERSION#v}.md"
           git commit \
             -m "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
             -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it), sync the OAuth init-container Python version from the upstream Dockerfile, and regenerate the README badge." \

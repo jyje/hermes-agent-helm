@@ -1,8 +1,8 @@
 name: 🚀 release-chart
 
-# Release model: the chart `version` in Chart.yaml is the source of truth.
-# When a commit on `main` changes it to a version that has no tag yet, CI tags
-# it, writes release notes (git-cliff), and publishes to GitHub Packages (OCI).
+# Release model: Changesets creates a reviewed version PR, and its custom
+# version step synchronizes the private release manifest with Chart.yaml.
+# When that PR reaches `main`, CI tags it and publishes to GitHub Packages (OCI).
 # CI never pushes to `main` — the tag/release/artifact are the only outputs.
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0   # full history + tags for git-cliff and the tag guard
+          fetch-depth: 0   # tags are needed for the release guard
 
       - name: Resolve chart version
         id: ver
@@ -36,17 +36,26 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Extract changelog section for this version
+      - name: Extract Changesets changelog section for this version
         if: steps.ver.outputs.exists == 'false'
         run: |
-          awk -v marker="[${{ steps.ver.outputs.version }}]" '
-            /^## \[/ {
+          awk -v version="${{ steps.ver.outputs.version }}" '
+            /^## / {
               if (found) exit
-              if (index($0, marker) > 0) { found=1 }
+              heading = $0
+              sub(/^##[[:space:]]+/, "", heading)
+              sub(/^\[/, "", heading)
+              sub(/\].*$/, "", heading)
+              sub(/[[:space:]]+-.*$/, "", heading)
+              if (heading == version) { found=1 }
               next
             }
             found { print }
           ' CHANGELOG.md > CHANGELOG_SECTION.md
+          test -s CHANGELOG_SECTION.md || {
+            echo "::error::No CHANGELOG.md section found for v${{ steps.ver.outputs.version }}"
+            exit 1
+          }
 
       - name: Render release notes
         if: steps.ver.outputs.exists == 'false'
