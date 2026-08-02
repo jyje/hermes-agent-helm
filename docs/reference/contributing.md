@@ -38,29 +38,33 @@ or other unreleased maintenance work.
 ### Write an item that can become a release note
 
 The YAML frontmatter is native Changesets data: keep it limited to package
-names and `major`, `minor`, or `patch`. Use the summary's first line for this
-repository's release-note convention:
+names and `major`, `minor`, or `patch`. Categories are therefore recorded in
+the Markdown summary, using this repository convention for its first line:
 
 ```md
-Type(scope): concise user-facing change
+Category(scope): Title — concise user-facing detail
 ```
 
 Use `Feature`, `Fix`, `Security`, `Dependency`, `Documentation`, `Deprecated`,
-or `Removed` for `Type`, and a short affected area such as `chart`, `values`,
-`docs`, or `image` for `scope`. For example:
+or `Removed` for `Category`, and a short affected area such as `chart`,
+`values`, `docs`, or `image` for `scope`. `Feature` and `Dependency` are
+singular item categories; a release-note renderer can group them beneath
+**Features** and **Dependencies**. For example:
 
 ```md
 ---
 "@jyje/hermes-agent-helm": minor
 ---
 
-Feature(docs): Add a chart-scoped Starlight documentation portal.
+Feature(docs): Documentation portal — Add chart-scoped install, values overlay,
+example, and reference pages.
 ```
 
 Write in imperative, user-facing language; do not repeat `minor`, `major`, or
-`patch` in the summary. The release renderer presents the SemVer impact at the
-end of the item. GitHub attribution is derived from the commit that adds the
-Changeset, so do not duplicate a username in the summary. See
+`patch` in the summary. SemVer is native Changesets frontmatter data; Category
+is a release-note convention and does not affect it. GitHub attribution is not
+native Changesets data, so do not duplicate a username in the summary; a custom
+release-note renderer can derive it from the commit or pull request. See
 [`.changeset/README.md`](.changeset/README.md) for the complete guide,
 including SemVer selection and a fix example.
 
