@@ -19,7 +19,12 @@ PRIORITY_LABEL = {"high": "priority:high", "medium": "priority:medium", "low": "
 
 
 def gh(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["gh", *args], capture_output=True, text=True, check=True)
+    result = subprocess.run(["gh", *args], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(result.stdout, file=sys.stdout, end="")
+        print(result.stderr, file=sys.stderr, end="")
+        result.check_returncode()
+    return result
 
 
 def issue_title(target_version: str, title: str) -> str:
