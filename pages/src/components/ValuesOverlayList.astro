@@ -1,0 +1,45 @@
+---
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { Code } from '@astrojs/starlight/components';
+import RawDocumentActions from './RawDocumentActions.astro';
+
+interface Props {
+  /** Directory name below charts/. It must be a single path segment. */
+  chart: string;
+}
+
+const { chart } = Astro.props;
+
+if (!/^[a-z0-9][a-z0-9-]*$/.test(chart)) {
+  throw new Error(`Invalid chart name: ${chart}`);
+}
+
+// process.cwd() is the astro project root (`pages/`) in dev, build, AND the
+// prerendered SSG chunk that ends up running this — unlike import.meta.url,
+// which shifts depth once Rollup relocates this component into a bundled
+// chunk under dist/.prerender/chunks/, breaking a fixed count of `../`.
+const chartDirectory = path.join(process.cwd(), '..', 'charts', chart);
+const overlayNames = (await readdir(chartDirectory, { withFileTypes: true }))
+  .filter((entry) => entry.isFile() && /^values-.+\.ya?ml$/.test(entry.name))
+  .map((entry) => entry.name)
+  .sort((left, right) => left.localeCompare(right));
+
+const overlays = await Promise.all(overlayNames.map(async (name) => ({
+  name,
+  source: await readFile(path.join(chartDirectory, name), 'utf8'),
+})));
+---
+
+{overlays.map(({ name, source }) => {
+  const chartPath = `charts/${chart}/${name}`;
+  const rawPath = `${import.meta.env.BASE_URL}/source/${chartPath}`;
+
+  return (
+    <section class="values-overlay" aria-labelledby={`overlay-${name}`}>
+      <h2 id={`overlay-${name}`}>{name}</h2>
+      <RawDocumentActions rawPath={rawPath} label="Open Raw YAML" pageLevel={false} />
+      <Code code={source} lang="yaml" meta={`title="${chartPath}"`} />
+    </section>
+  );
+})}

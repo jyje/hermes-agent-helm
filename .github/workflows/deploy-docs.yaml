@@ -46,6 +46,9 @@ jobs:
       - name: Install site dependencies
         run: pnpm -C pages install --frozen-lockfile
 
+      - name: Check docs (navigation, frontmatter, source-mirror drift)
+        run: pnpm -C pages run check:docs && pnpm -C pages run check:mirrors
+
       - name: Build the documentation site
         run: pnpm -C pages run build
 
