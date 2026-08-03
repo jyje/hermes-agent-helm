@@ -13,5 +13,6 @@ sidebar:
 👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight
 
 - [Install](/hermes-agent-helm/charts/hermes-agent/install/)
-- [Values and overlays](/hermes-agent-helm/charts/hermes-agent/reference/values/)
+- [Values overlays](/hermes-agent-helm/charts/hermes-agent/overlays/)
+- [Chart values](/hermes-agent-helm/charts/hermes-agent/reference/values/)
 - [Chart README](/hermes-agent-helm/charts/hermes-agent/reference/readme/)
