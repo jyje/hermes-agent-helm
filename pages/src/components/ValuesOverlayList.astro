@@ -1,6 +1,6 @@
 ---
 import { readdir, readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { Code } from '@astrojs/starlight/components';
 import RawDocumentActions from './RawDocumentActions.astro';
 
@@ -15,8 +15,11 @@ if (!/^[a-z0-9][a-z0-9-]*$/.test(chart)) {
   throw new Error(`Invalid chart name: ${chart}`);
 }
 
-const chartsDirectory = fileURLToPath(new URL('../../../charts/', import.meta.url));
-const chartDirectory = fileURLToPath(new URL(`${chart}/`, new URL(chartsDirectory, 'file:')));
+// process.cwd() is the astro project root (`pages/`) in dev, build, AND the
+// prerendered SSG chunk that ends up running this — unlike import.meta.url,
+// which shifts depth once Rollup relocates this component into a bundled
+// chunk under dist/.prerender/chunks/, breaking a fixed count of `../`.
+const chartDirectory = path.join(process.cwd(), '..', 'charts', chart);
 const overlayNames = (await readdir(chartDirectory, { withFileTypes: true }))
   .filter((entry) => entry.isFile() && /^values-.+\.ya?ml$/.test(entry.name))
   .map((entry) => entry.name)
@@ -24,7 +27,7 @@ const overlayNames = (await readdir(chartDirectory, { withFileTypes: true }))
 
 const overlays = await Promise.all(overlayNames.map(async (name) => ({
   name,
-  source: await readFile(new URL(name, new URL(chartDirectory, 'file:')), 'utf8'),
+  source: await readFile(path.join(chartDirectory, name), 'utf8'),
 })));
 ---
 
