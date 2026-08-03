@@ -18,12 +18,19 @@ private release manifest and its `patch`, `minor`, or `major` impact. The
 manifest and `charts/hermes-agent/Chart.yaml` always receive the same resulting
 version in the generated release PR; the manifest is never published to npm.
 
-### Add a Changeset (recommended)
+### Add a Changeset (required for user-visible changes)
 
-Run `pnpm changeset`, select `@jyje/hermes-agent-helm`, choose the chart's
-SemVer impact, and write a concise user-facing summary. Commit that file with
-the implementation PR. CI does not require a Changeset for CI-only, tooling,
-or other unreleased maintenance work.
+Every user-visible chart change — a new `values-*.yaml` example, a new
+ArgoCD example, a `values.yaml` default change, template/behavior changes,
+docs the user reads — needs a Changeset. This includes additions that look
+"just" like an example or doc file: if it ships in the chart or its
+documented examples, it's user-visible. Run `pnpm changeset`, select
+`@jyje/hermes-agent-helm`, choose the chart's SemVer impact, and write a
+concise user-facing summary. Commit that file with the implementation PR.
+CI does not enforce this, so review your own diff before opening the PR.
+The only exemption is CI-only, tooling, or other unreleased maintenance
+work (workflow YAML, scripts, this contributing guide) that ships nothing
+a chart user would see.
 
 ### Write an item that can become a release note
 

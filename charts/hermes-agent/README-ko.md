@@ -506,6 +506,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | 파일 | 모델 제공자 | 추가 사항 |
 | --- | --- | --- |
 | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord 봇** 연결됨 |
+| [`values-nvidia-nim-and-buzz.yaml`](values-nvidia-nim-and-buzz.yaml) | NVIDIA NIM | **Buzz 봇** 연결됨 (Block의 Nostr 기반 사람+에이전트 플랫폼) |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord 봇** 연결됨 |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram 봇** 연결됨 |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
