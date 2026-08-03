@@ -73,7 +73,9 @@ as a **Secret**.
   table (see below) stays English-only in both files to avoid a second
   hand-translated copy drifting from `values.yaml`.
 - **Changeset release items are a contributor contract.** For every
-  user-visible chart change, add one `.changeset/*.md` item. Its frontmatter
+  user-visible chart change — including a new `values-*.yaml` example, a new
+  ArgoCD example, or docs a user reads, not just template/default changes —
+  add one `.changeset/*.md` item before opening the PR. Its frontmatter
   contains only the package and `major`/`minor`/`patch`; its first summary line
   follows `Category(scope): Title` using the approved categories in
   `.changeset/README.md`; after a blank line, write the user-facing detail.
