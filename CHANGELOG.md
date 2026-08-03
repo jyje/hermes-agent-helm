@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- d69d814: Feature(chart): Buzz platform example
+
+  Add values-nvidia-nim-and-buzz.yaml demonstrating the bundled Buzz
+  (Nostr) platform adapter.
+
+- 8f560dd: Update the default Hermes Agent image to v2026.8.3.
+
 ## 1.1.0
 
 ### Minor Changes
