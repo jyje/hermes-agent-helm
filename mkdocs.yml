@@ -1,0 +1,134 @@
+site_name: jyje/hermes-agent-helm
+site_description: Community-powered Helm chart for running Hermes Agent on Kubernetes.
+site_url: https://jyje.github.io/hermes-agent-helm/
+repo_url: https://github.com/jyje/hermes-agent-helm
+repo_name: jyje/hermes-agent-helm
+docs_dir: docs
+
+theme:
+  name: material
+  logo: images/hermes-agent-helm.png
+  favicon: images/hermes-agent-helm.png
+  palette:
+    scheme: default
+    primary: custom
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+
+edit_uri: edit/main/docs/
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+  - macros:
+      # This repo's docs document GitHub Actions (${{ }}) and Helm template
+      # ({{ .Values.x }}) syntax verbatim in many pages — macros' Jinja
+      # processing would mangle that literal text. Opt in per-page instead
+      # of processing the whole site (see docs/charts/hermes-agent/overlays
+      # /index.md's `render_macros: true` frontmatter for the one page that
+      # needs it).
+      render_by_default: false
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ko
+          name: 한국어
+          build: true
+          nav_translations:
+            Home: 홈
+            Charts: 차트
+            Getting started: 시작하기
+            Install: 설치
+            Examples: 예제
+            Providers: 공급자
+            Integrations: 통합
+            Advanced: 고급
+            Guides: 가이드
+            Reference: 참고 자료
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path:
+        - "."
+      check_paths: true
+
+nav:
+  - Home: index.md
+  - Charts:
+      - charts/index.md
+      - Hermes Agent:
+          - charts/hermes-agent/index.md
+          - Install: charts/hermes-agent/install.md
+          - Values overlays: charts/hermes-agent/overlays/index.md
+          - Reference:
+              - charts/hermes-agent/reference/index.md
+              - Chart values: charts/hermes-agent/reference/values.md
+  - Getting started:
+      - getting-started/index.md
+      - Install: getting-started/install.md
+  - Examples:
+      - examples/index.md
+      - Providers:
+          - examples/providers/index.md
+          - Anthropic: examples/providers/anthropic.md
+          - DeepInfra: examples/providers/deepinfra.md
+          - Fireworks: examples/providers/fireworks.md
+          - Gemini: examples/providers/gemini.md
+          - GitHub Copilot: examples/providers/github-copilot.md
+          - Google Vertex: examples/providers/google-vertex.md
+          - NVIDIA NIM + Discord: examples/providers/nvidia-nim-and-discord.md
+          - OpenAI: examples/providers/openai.md
+          - OpenRouter: examples/providers/openrouter.md
+          - Upstage: examples/providers/upstage.md
+      - Integrations:
+          - examples/integrations/index.md
+          - Anthropic + Discord: examples/integrations/anthropic-and-discord.md
+          - Ingress: examples/integrations/ingress.md
+          - LiteLLM: examples/integrations/litellm.md
+          - LiteLLM (in-cluster): examples/integrations/litellm-k8s.md
+          - OpenAI + Telegram: examples/integrations/openai-and-telegram.md
+      - Advanced:
+          - examples/advanced/index.md
+          - Bitwarden Secrets Manager: examples/advanced/bitwarden.md
+          - Mixture-of-Agents: examples/advanced/moa.md
+          - Multi-agent collaboration: examples/advanced/multi-agent-collab.md
+          - Shared knowledge base: examples/advanced/shared-knowledge.md
+          - Team leader: examples/advanced/team-leader.md
+          - Team member: examples/advanced/team-member.md
+  - Guides:
+      - guides/index.md
+      - Configuration model: guides/configuration.md
+      - Secrets and persistence: guides/secrets-and-storage.md
+      - Operations and testing: guides/operations.md
+  - Reference:
+      - reference/index.md
+      - Contributing: reference/contributing.md
+      - CI guide: reference/ci.md
+      - Hermes teams: reference/teams.md
+      - Hermes collaboration: reference/collaboration.md
+      - Roadmap: reference/roadmap.md
+      - DevOps roadmap: reference/devops-roadmap.md
+      - Local development guide: reference/local-development.md
+      - Helm installation guide: reference/helm-installation.md
+      - ArgoCD guide: reference/argocd.md
+      - Helm repository index: reference/helm-repository.md
+      - Chart README: reference/chart-readme.md
+      - Repository README: reference/repository-readme.md
+      - Security policy: reference/security.md
+      - Source documents: reference/source-documents.md

@@ -7,6 +7,11 @@ dist/
 .idea/
 .vscode/
 
-# Starlight local dependency store
-.pnpm-store/
-node_modules/
+# Retired Astro/Starlight docs site — kept on disk for reference, no longer
+# tracked. MkDocs Material (mkdocs.yml, docs/) is the maintained docs site.
+/pages/
+
+# MkDocs local build
+/site/
+.venv-mkdocs/
+__pycache__/

@@ -1,0 +1,69 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
+@font-face {
+  font-family: 'MesloLGS Nerd Font';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/Meslo/S/Regular/MesloLGSNerdFont-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'MesloLGS Nerd Font';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/ryanoasis/nerd-fonts@3.4.0/patched-fonts/Meslo/S/Bold/MesloLGSNerdFont-Bold.ttf') format('truetype');
+}
+
+:root {
+  --md-text-font: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --md-code-font: "MesloLGS Nerd Font", "MesloLGS NF", "JetBrainsMono Nerd Font", ui-monospace, monospace;
+}
+
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color: #087f7a;
+  --md-primary-fg-color--light: #0a9a94;
+  --md-primary-fg-color--dark: #03534f;
+  --md-accent-fg-color: #087f7a;
+}
+
+/* Crop the logo artwork's vertical whitespace instead of showing it letterboxed. */
+.md-header__button.md-logo img {
+  width: 4.5rem;
+  height: 2rem;
+  object-fit: cover;
+  object-position: center;
+}
+
+.md-nav__title .md-nav__button.md-logo img {
+  width: 5.5rem;
+  height: 2.4rem;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Ported from the retired Astro site: the per-example metadata card
+   (required secret / overlay filename) shown at the top of each example page. */
+.example-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: .75rem;
+  margin: 1.5rem 0;
+}
+
+.example-meta > div {
+  margin: 0;
+  border-top: 2px solid var(--md-primary-fg-color);
+  padding: .65rem 0;
+  font-size: .9rem;
+}
+
+.example-meta strong {
+  display: block;
+  color: var(--md-default-fg-color);
+  font-family: var(--md-code-font);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
