@@ -1,228 +1,2745 @@
-<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-zar2v3cf"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Anthropic | jyje/hermes-agent-helm</title><link rel="canonical" href="https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/"/><link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/"/><link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/examples/providers/anthropic/"/><link rel="alternate" hreflang="x-default" href="https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/"/><link rel="sitemap" href="/hermes-agent-helm/sitemap-index.xml"/><link rel="shortcut icon" href="/hermes-agent-helm/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.6"/><meta name="generator" content="Starlight v0.41.5"/><meta property="og:title" content="Anthropic"/><meta property="og:type" content="article"/><meta property="og:url" content="https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Configure Claude as Hermes Agent’s default model provider."/><meta property="og:site_name" content="jyje/hermes-agent-helm"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Configure Claude as Hermes Agent’s default model provider."/><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"><style>
-  /* Avoid exposing the plain fallback links before the source menu is enhanced. */
-  .raw-document-actions:not([data-source-menu-ready]) > :is(a, button) { visibility: hidden; }
-</style><noscript><style>.raw-document-actions > :is(a, button) { visibility: visible; }</style></noscript><script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const icon = (name) => {
-      const element = document.createElement('span');
-      element.className = `source-menu__icon source-menu__icon--${name}`;
-      element.setAttribute('aria-hidden', 'true');
-      return element;
-    };
 
-    const itemCopy = (title, description) => {
-      const copy = document.createElement('span');
-      copy.className = 'source-menu__item-copy';
-      const strong = document.createElement('strong');
-      strong.textContent = title;
-      const small = document.createElement('small');
-      small.textContent = description;
-      copy.append(strong, small);
-      return copy;
-    };
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Configure Claude as Hermes Agent’s default model provider.">
+      
+      
+      
+        <link rel="canonical" href="https://jyje.github.io/hermes-agent-helm/examples/providers/anthropic/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../deepinfra/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../../ko/examples/providers/anthropic/" hreflang="ko">
+        
+      
+      
+      <link rel="icon" href="../../../images/hermes-agent-helm.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Anthropic - jyje/hermes-agent-helm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
 
-    document.querySelectorAll('.raw-document-actions').forEach((actions) => {
-      if (!(actions instanceof HTMLElement) || actions.dataset.sourceMenuReady) return;
-      const rawPath = actions.dataset.rawPath;
-      const open = actions.querySelector('a');
-      const copy = actions.querySelector('button');
-      if (!rawPath || !(open instanceof HTMLAnchorElement) || !(copy instanceof HTMLButtonElement)) return;
 
-      if (actions.hasAttribute('data-page-source-actions')) {
-        const content = actions.closest('.sl-markdown-content');
-        if (content) content.prepend(actions);
-      }
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
 
-      const isYaml = /\.ya?ml(?:$|[?#])/i.test(rawPath);
-      const openLabel = isYaml ? 'Open Raw YAML' : 'Open Raw Markdown';
-      const openDescription = isYaml
-        ? 'View the original YAML as plain text'
-        : 'View the original Markdown as plain text';
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#when-to-use-it" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
 
-      const details = document.createElement('details');
-      details.className = 'source-menu';
-      const summary = document.createElement('summary');
-      summary.append(icon('copy'));
-      const triggerLabel = document.createElement('span');
-      triggerLabel.textContent = 'Copy Source';
-      summary.append(triggerLabel, icon('chevron'));
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="jyje/hermes-agent-helm" class="md-header__button md-logo" aria-label="jyje/hermes-agent-helm" data-md-component="logo">
+      
+  <img src="../../../images/hermes-agent-helm.png" alt="logo">
 
-      const panel = document.createElement('div');
-      panel.className = 'source-menu__panel';
-      copy.className = 'source-menu__item';
-      copy.dataset.copySource = '';
-      copy.dataset.copyLabel = 'Copy Source';
-      copy.replaceChildren(icon('copy'), itemCopy('Copy Source', 'Copy the original source to clipboard'));
-      copy.querySelector('strong')?.setAttribute('data-copy-status', '');
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            jyje/hermes-agent-helm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Anthropic
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../ko/examples/providers/anthropic/" hreflang="ko" class="md-select__link">
+              한국어
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jyje/hermes-agent-helm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jyje/hermes-agent-helm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
 
-      open.className = 'source-menu__item';
-      open.target = '_blank';
-      open.rel = 'noopener noreferrer';
-      open.replaceChildren(icon('file'), itemCopy(openLabel, openDescription), icon('external'));
+      </a>
+    </li>
+  
 
-      panel.append(copy, open);
-      details.append(summary, panel);
-      actions.replaceChildren(details);
-      actions.dataset.sourceMenuReady = 'true';
-    });
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../charts/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Charts
 
-    document.querySelectorAll('[data-copy-source]').forEach((button) => {
-      if (!(button instanceof HTMLButtonElement) || button.dataset.copyBound) return;
-      button.dataset.copyBound = 'true';
-      button.addEventListener('click', async () => {
-        const actions = button.closest('[data-raw-path]');
-        const rawPath = actions?.dataset.rawPath;
-        const status = button.querySelector('[data-copy-status]');
-        if (!rawPath || !(status instanceof HTMLElement)) return;
-        const original = button.dataset.copyLabel ?? 'Copy Source';
-        try {
-          const response = await fetch(rawPath);
-          if (!response.ok) throw new Error(`Source request failed: ${response.status}`);
-          await navigator.clipboard.writeText(await response.text());
-          status.textContent = 'Copied';
-          button.classList.add('is-success');
-          window.setTimeout(() => button.closest('details')?.removeAttribute('open'), 650);
-          window.setTimeout(() => {
-            status.textContent = original;
-            button.classList.remove('is-success');
-          }, 1600);
-        } catch {
-          status.textContent = 'Copy failed';
-          window.setTimeout(() => { status.textContent = original; }, 1600);
-        }
-      });
-    });
+        </a>
+      </li>
+    
+  
 
-    document.querySelectorAll('details.source-menu').forEach((menu) => {
-      menu.addEventListener('toggle', () => {
-        if (!menu.open) return;
-        document.querySelectorAll('details.source-menu[open]').forEach((other) => {
-          if (other !== menu) other.removeAttribute('open');
-        });
-      });
-    });
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting started
 
-    document.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('details.source-menu')) return;
-      document.querySelectorAll('details.source-menu[open]').forEach((menu) => menu.removeAttribute('open'));
-    });
+        </a>
+      </li>
+    
+  
 
-    document.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      document.querySelectorAll('details.source-menu[open]').forEach((menu) => menu.removeAttribute('open'));
-    });
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Examples
 
-    document.addEventListener('click', (event) => {
-      if (!(event.target instanceof Element)) return;
-      const toggle = event.target.closest('button[data-sidebar-group-toggle]');
-      if (toggle instanceof HTMLButtonElement) {
-        event.preventDefault();
-        event.stopPropagation();
-        const details = toggle.closest('details');
-        if (!(details instanceof HTMLDetailsElement)) return;
-        details.open = !details.open;
-        toggle.setAttribute('aria-expanded', String(details.open));
-        return;
-      }
+        </a>
+      </li>
+    
+  
 
-      const summary = event.target.closest('details > summary');
-      if (!summary) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const link = event.target.closest('a[data-sidebar-group-link]');
-      if (!(link instanceof HTMLAnchorElement)) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-        window.open(link.href, '_blank', 'noopener');
-        return;
-      }
-      window.location.assign(link.href);
-    });
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../guides/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guides
 
-    document.querySelectorAll('button[data-sidebar-group-toggle]').forEach((toggle) => {
-      const details = toggle.closest('details');
-      if (details instanceof HTMLDetailsElement) toggle.setAttribute('aria-expanded', String(details.open));
-    });
-  });
-</script><script>
-  document.documentElement.dataset.theme = 'light';
-</script><link rel="stylesheet" href="/hermes-agent-helm/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/hermes-agent-helm/_astro/common.B8ZMK7ud.css"><script type="module" src="/hermes-agent-helm/_astro/page.LAbJoB63.js"></script></head><body class="astro-zar2v3cf"><a class="sl-skip-link astro-bkt3z3w3" href="#_top">Skip to content</a><div class="page sl-flex astro-u3bpnxmj"><header class="header astro-u3bpnxmj"><div class="header astro-hbouc7pm"><div class="title-wrapper sl-flex astro-hbouc7pm"><a href="/hermes-agent-helm/" class="site-title astro-hen6hmfb"><span class="site-title__mark astro-hen6hmfb" aria-hidden="true"><img src="/hermes-agent-helm/_astro/hermes-agent-helm.DE9qkHMB.png" alt="" width="1000" height="500" class="astro-hen6hmfb"></span><span class="site-title__copy astro-hen6hmfb"><strong translate="no" class="astro-hen6hmfb">jyje/hermes-agent-helm</strong><small class="astro-hen6hmfb">Hermes Agent Helm chart</small></span></a></div><div class="sl-flex print:hidden astro-hbouc7pm"><site-search class="astro-hbouc7pm astro-glthw752" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-glthw752"><svg aria-hidden="true" class="astro-glthw752 astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-glthw752" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-glthw752" style="display: none;"><kbd class="astro-glthw752">Ctrl</kbd><kbd class="astro-glthw752">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-glthw752"><div class="dialog-frame sl-flex astro-glthw752"><button data-close-modal class="sl-flex md:sl-hidden astro-glthw752">Cancel</button><div class="search-container astro-glthw752"><div id="starlight__search" class="astro-glthw752"></div></div></div></dialog></site-search><script>
-	(() => {
-		const openBtn = document.querySelector('button[data-open-modal]');
-		const shortcut = openBtn?.querySelector('kbd');
-		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
-		const platformKey = shortcut.querySelector('kbd');
-		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
-			platformKey.textContent = '⌘';
-			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
-		}
-		shortcut.style.display = '';
-	})();
-</script><script type="module" src="/hermes-agent-helm/_astro/Search.astro_astro_type_script_index_0_lang.Bl6m8HSo.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-hbouc7pm"><div class="sl-flex social-icons astro-hbouc7pm"><a class="github-stars sl-flex" href="https://github.com/jyje/hermes-agent-helm" rel="me" aria-label="GitHub repository"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg><span class="sr-only">GitHub repository</span><span class="github-stars__metric" aria-label="GitHub stars"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M22 9.67a1 1 0 0 0-.86-.67l-5.69-.83L12.9 3a1 1 0 0 0-1.8 0L8.55 8.16 2.86 9a1 1 0 0 0-.81.68 1 1 0 0 0 .25 1l4.13 4-1 5.68a1 1 0 0 0 1.45 1.07L12 18.76l5.1 2.68c.14.08.3.12.46.12a1 1 0 0 0 .99-1.19l-1-5.68 4.13-4A1 1 0 0 0 22 9.67Zm-6.15 4a1 1 0 0 0-.29.89l.72 4.19-3.76-2a1 1 0 0 0-.94 0l-3.76 2 .72-4.19a1 1 0 0 0-.29-.89l-3-3 4.21-.61a1 1 0 0 0 .76-.55L12 5.7l1.88 3.82a1 1 0 0 0 .76.55l4.21.61-3 2.99Z"/></svg><span class="github-stars__count" data-github-stars aria-live="polite">Stars</span></span></a><script>(function(){const repository = "jyje/hermes-agent-helm";
+        </a>
+      </li>
+    
+  
 
-  const counts = document.querySelectorAll('[data-github-stars]');
-  const updateCounts = (value) => counts.forEach((count) => { count.textContent = value; });
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../reference/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
 
-  fetch(`https://api.github.com/repos/${repository}`, { headers: { Accept: 'application/vnd.github+json' } })
-    .then((response) => response.ok ? response.json() : Promise.reject(response))
-    .then(({ stargazers_count }) => {
-      if (typeof stargazers_count === 'number') {
-        updateCounts(new Intl.NumberFormat().format(stargazers_count));
-      }
-    })
-    .catch(() => updateCounts('GitHub'));
-})();</script></div><!-- This documentation site intentionally uses a fixed light theme. --><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-mp62kjdu"><span class="sr-only astro-mp62kjdu">Select language</span><svg aria-hidden="true" class="icon label-icon astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg><select autocomplete="off" class="astro-mp62kjdu"><option value="/hermes-agent-helm/examples/providers/anthropic/" class="astro-mp62kjdu">English</option><option value="/hermes-agent-helm/ko/examples/providers/anthropic/" class="astro-mp62kjdu">한국어</option></select><svg aria-hidden="true" class="icon caret astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-lang-select><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-u3bpnxmj" aria-label="Main"><starlight-menu-button class="print:hidden astro-qo2k72wy"><button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-qo2k72wy"><svg aria-hidden="true" class="open-menu astro-qo2k72wy astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-qo2k72wy astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg></button></starlight-menu-button><script type="module">var e=class extends HTMLElement{btn=this.querySelector(`button`);constructor(){super(),this.btn.addEventListener(`click`,()=>this.toggleExpanded());let e=this.closest(`nav`);e&&e.addEventListener(`keyup`,e=>this.closeOnEscape(e)),matchMedia(`(min-width: 50em)`).addEventListener(`change`,()=>this.setExpanded(!1))}setExpanded(e){this.setAttribute(`aria-expanded`,String(e)),document.body.toggleAttribute(`data-mobile-menu-expanded`,e),document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}toggleExpanded(){this.setExpanded(this.getAttribute(`aria-expanded`)!==`true`)}closeOnEscape(e){e.code===`Escape`&&(this.setExpanded(!1),this.btn.focus())}};customElements.define(`starlight-menu-button`,e);</script><div id="starlight__sidebar" class="sidebar-pane astro-u3bpnxmj"><div class="sidebar-content sl-flex astro-u3bpnxmj"><sl-sidebar-state-persist data-hash="0s5ke63" class="astro-rljcf4bx"><script aria-hidden="true">
-		(() => {
-			try {
-				if (!matchMedia('(min-width: 50em)').matches) return;
-				/** @type {HTMLElement | null} */
-				const target = document.querySelector('sl-sidebar-state-persist');
-				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
-				if (!target || !state || target.dataset.hash !== state.hash) return;
-				window._starlightScrollRestore = state.scroll;
-				customElements.define(
-					'sl-sidebar-restore',
-					class SidebarRestore extends HTMLElement {
-						connectedCallback() {
-							try {
-								const idx = parseInt(this.dataset.index || '');
-								const details = this.closest('details');
-								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
-							} catch {}
-						}
-					}
-				);
-			} catch {}
-		})();
-	</script><ul class="top-level astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/" class="large astro-fqbhme3l" data-sidebar-order="0"><span class="astro-fqbhme3l">Home</span></a></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link large astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/charts/"><span class="astro-fqbhme3l">Charts</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Charts" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/charts/hermes-agent/"><span class="astro-fqbhme3l">Hermes Agent</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Hermes Agent" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/charts/hermes-agent/install/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Install</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/charts/hermes-agent/overlays/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Values overlays</span></a></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/charts/hermes-agent/reference/"><span class="astro-fqbhme3l">Reference</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Reference" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/charts/hermes-agent/reference/values/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Chart values</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/charts/hermes-agent/reference/readme/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Chart README</span></a></li></ul></details></li></ul></details></li></ul></details></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link large astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/getting-started/"><span class="astro-fqbhme3l">Getting Started</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Getting Started" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/getting-started/install/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Install Hermes Agent</span></a></li></ul></details></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link large astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/examples/"><span class="astro-fqbhme3l">Examples</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Examples" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/examples/providers/"><span class="astro-fqbhme3l">Providers</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Providers" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/anthropic/" aria-current="page" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Anthropic</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/deepinfra/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">DeepInfra</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/fireworks/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Fireworks AI</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/gemini/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Google Gemini</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/github-copilot/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">GitHub Copilot</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/google-vertex/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Google Vertex AI</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/nvidia-nim-and-discord/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">NVIDIA NIM + Discord</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/openai/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">OpenAI</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/openrouter/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">OpenRouter</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/providers/upstage/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Upstage Solar</span></a></li></ul></details></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/examples/integrations/"><span class="astro-fqbhme3l">Integrations</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Integrations" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/integrations/anthropic-and-discord/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Anthropic + Discord</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/integrations/ingress/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Dashboard Ingress</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/integrations/litellm/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">LiteLLM (external)</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/integrations/litellm-k8s/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">LiteLLM (in cluster)</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/integrations/openai-and-telegram/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">OpenAI + Telegram</span></a></li></ul></details></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/examples/advanced/"><span class="astro-fqbhme3l">Advanced</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Advanced" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/advanced/bitwarden/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Bitwarden Secrets Manager</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/advanced/moa/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Mixture of Agents</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/advanced/multi-agent-collab/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Collaborating pair</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/advanced/shared-knowledge/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Shared knowledge PVC</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/advanced/team-leader/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Team leader</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/examples/advanced/team-member/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Team member</span></a></li></ul></details></li></ul></details></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link large astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/guides/"><span class="astro-fqbhme3l">Guides</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Guides" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/guides/configuration/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Configuration model</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/guides/secrets-and-storage/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Secrets and persistence</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/guides/operations/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Operations and testing</span></a></li></ul></details></li><li class="astro-fqbhme3l"><details open class="astro-fqbhme3l"><summary class="astro-fqbhme3l" tabindex="-1"><a class="sidebar-group-link large astro-fqbhme3l" data-sidebar-group-link href="/hermes-agent-helm/reference/"><span class="astro-fqbhme3l">Reference</span></a><button class="sidebar-group-toggle astro-fqbhme3l" data-sidebar-group-toggle type="button" aria-label="Toggle Reference" aria-expanded="true"><svg class="caret astro-fqbhme3l" viewBox="0 0 16 16" width="1.25rem" height="1.25rem" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-fqbhme3l"></path></svg></button></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-fqbhme3l"><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/argocd/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">ArgoCD guide</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/chart-readme/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Chart README</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/ci/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">CI guide</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/collaboration/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Hermes collaboration</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/contributing/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Contributing</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/devops-roadmap/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">DevOps roadmap</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/helm-installation/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Helm installation guide</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/helm-repository/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Helm repository index</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/local-development/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Local development guide</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/repository-readme/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Repository README</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/roadmap/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Roadmap</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/security/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Security policy</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/source-documents/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Source documents</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/teams/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Hermes teams</span></a></li><li class="astro-fqbhme3l"><a href="/hermes-agent-helm/reference/values/" class="astro-fqbhme3l"><span class="astro-fqbhme3l">Chart values</span></a></li></ul></details></li></ul><script aria-hidden="true">
-		(() => {
-			const scroller = document.getElementById('starlight__sidebar');
-			if (!window._starlightScrollRestore || !scroller) return;
-			scroller.scrollTop = window._starlightScrollRestore;
-			delete window._starlightScrollRestore;
-		})();
-	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-qnya63x6"><div class="social-icons astro-qnya63x6"><a class="github-stars sl-flex" href="https://github.com/jyje/hermes-agent-helm" rel="me" aria-label="GitHub repository"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg><span class="sr-only">GitHub repository</span><span class="github-stars__metric" aria-label="GitHub stars"><svg aria-hidden="true" class=" astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M22 9.67a1 1 0 0 0-.86-.67l-5.69-.83L12.9 3a1 1 0 0 0-1.8 0L8.55 8.16 2.86 9a1 1 0 0 0-.81.68 1 1 0 0 0 .25 1l4.13 4-1 5.68a1 1 0 0 0 1.45 1.07L12 18.76l5.1 2.68c.14.08.3.12.46.12a1 1 0 0 0 .99-1.19l-1-5.68 4.13-4A1 1 0 0 0 22 9.67Zm-6.15 4a1 1 0 0 0-.29.89l.72 4.19-3.76-2a1 1 0 0 0-.94 0l-3.76 2 .72-4.19a1 1 0 0 0-.29-.89l-3-3 4.21-.61a1 1 0 0 0 .76-.55L12 5.7l1.88 3.82a1 1 0 0 0 .76.55l4.21.61-3 2.99Z"/></svg><span class="github-stars__count" data-github-stars aria-live="polite">Stars</span></span></a><script>(function(){const repository = "jyje/hermes-agent-helm";
+        </a>
+      </li>
+    
+  
 
-  const counts = document.querySelectorAll('[data-github-stars]');
-  const updateCounts = (value) => counts.forEach((count) => { count.textContent = value; });
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
 
-  fetch(`https://api.github.com/repos/${repository}`, { headers: { Accept: 'application/vnd.github+json' } })
-    .then((response) => response.ok ? response.json() : Promise.reject(response))
-    .then(({ stargazers_count }) => {
-      if (typeof stargazers_count === 'number') {
-        updateCounts(new Intl.NumberFormat().format(stargazers_count));
-      }
-    })
-    .catch(() => updateCounts('GitHub'));
-})();</script></div><!-- This documentation site intentionally uses a fixed light theme. --><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-mp62kjdu"><span class="sr-only astro-mp62kjdu">Select language</span><svg aria-hidden="true" class="icon label-icon astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg><select autocomplete="off" class="astro-mp62kjdu"><option value="/hermes-agent-helm/examples/providers/anthropic/" class="astro-mp62kjdu">English</option><option value="/hermes-agent-helm/ko/examples/providers/anthropic/" class="astro-mp62kjdu">한국어</option></select><svg aria-hidden="true" class="icon caret astro-mp62kjdu astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-lang-select></div></div></div></div></nav><div class="main-frame astro-u3bpnxmj"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-oewa5tin"><aside class="right-sidebar-container print:hidden astro-oewa5tin"><div class="right-sidebar astro-oewa5tin"><div class="lg:sl-hidden astro-cxfap2ew"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-xaqkphtz"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-xaqkphtz"><details id="starlight__mobile-toc" class="astro-xaqkphtz"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-xaqkphtz"><span class="toggle sl-flex astro-xaqkphtz">On this page<svg aria-hidden="true" class="caret astro-xaqkphtz astro-pen47phw" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-xaqkphtz"></span></summary><div class="dropdown astro-xaqkphtz"><ul class="isMobile astro-bku6lzjs" style="--depth: 0;"><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#_top" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Overview</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#when-to-use-it" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">When to use it</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#install" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Install</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#adapt-before-deploying" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Adapt before deploying</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#complete-overlay" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Complete overlay</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/hermes-agent-helm/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-cxfap2ew"><div class="sl-container astro-cxfap2ew"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-bku6lzjs" style="--depth: 0;"><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#_top" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Overview</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#when-to-use-it" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">When to use it</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#install" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Install</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#adapt-before-deploying" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Adapt before deploying</span></a></li><li style="--depth: 0;" class="astro-bku6lzjs"><a href="#complete-overlay" style="--depth: 0;" class="astro-bku6lzjs"><span style="--depth: 0;" class="astro-bku6lzjs">Complete overlay</span></a></li></ul></nav></starlight-toc><script type="module" src="/hermes-agent-helm/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-oewa5tin"><main data-pagefind-body class="astro-zar2v3cf" lang="en" dir="ltr"><div class="content-panel astro-fnsmk2gy"><div class="sl-container astro-fnsmk2gy"><h1 id="_top" class="astro-b2l64apt">Anthropic</h1></div></div><div class="content-panel astro-fnsmk2gy"><div class="sl-container astro-fnsmk2gy"><div class="sl-markdown-content"><div class="example-meta"><div><strong>Required secret</strong>ANTHROPIC_API_KEY</div><div><strong>Overlay</strong>values-anthropic.yaml</div></div>
-<h2 id="when-to-use-it">When to use it</h2>
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="jyje/hermes-agent-helm" class="md-nav__button md-logo" aria-label="jyje/hermes-agent-helm" data-md-component="logo">
+      
+  <img src="../../../images/hermes-agent-helm.png" alt="logo">
+
+    </a>
+    jyje/hermes-agent-helm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jyje/hermes-agent-helm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jyje/hermes-agent-helm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../charts/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Charts
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Charts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../charts/hermes-agent/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes Agent
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hermes Agent
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../charts/hermes-agent/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../charts/hermes-agent/overlays/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Values overlays
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../charts/hermes-agent/reference/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_2_4" id="__nav_2_2_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../charts/hermes-agent/reference/values/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart values
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../getting-started/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anthropic
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anthropic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapt-before-deploying" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapt before deploying
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete overlay
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deepinfra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DeepInfra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fireworks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fireworks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gemini/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gemini
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../github-copilot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Copilot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../google-vertex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Google Vertex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nvidia-nim-and-discord/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NVIDIA NIM + Discord
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openrouter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenRouter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upstage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upstage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../integrations/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_3" id="__nav_4_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/anthropic-and-discord/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anthropic + Discord
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/ingress/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ingress
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/litellm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LiteLLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/litellm-k8s/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LiteLLM (in-cluster)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/openai-and-telegram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI + Telegram
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../advanced/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_4" id="__nav_4_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/bitwarden/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bitwarden Secrets Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/moa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mixture-of-Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/multi-agent-collab/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-agent collaboration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/shared-knowledge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared knowledge base
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/team-leader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Team leader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/team-member/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Team member
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../guides/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/secrets-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secrets and persistence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../reference/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/teams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes teams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/collaboration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hermes collaboration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/devops-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DevOps roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/local-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local development guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/helm-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm installation guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/argocd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ArgoCD guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/helm-repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm repository index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/chart-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chart README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/repository-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository README
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/source-documents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Source documents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapt-before-deploying" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapt before deploying
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-overlay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete overlay
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/jyje/hermes-agent-helm/edit/main/docs/examples/providers/anthropic.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>Anthropic</h1>
+
+<div class="example-meta">
+  <div><strong>Required secret</strong>ANTHROPIC_API_KEY</div>
+  <div><strong>Overlay</strong>values-anthropic.yaml</div>
+</div>
+
+<h2 id="when-to-use-it">When to use it<a class="headerlink" href="#when-to-use-it" title="Permanent link">&para;</a></h2>
 <p>An Anthropic API key and access to a Claude model are required.</p>
-<h2 id="install">Install</h2>
-<div class="expressive-code"><link rel="stylesheet" href="/hermes-agent-helm/_astro/ec.w36nc.css"><script type="module" src="/hermes-agent-helm/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">Terminal window</span></figcaption><pre data-language="bash"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">helm</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">upgrade</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--install</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">./charts/hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">hermes-agent</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--create-namespace</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">-f</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">charts/hermes-agent/values-anthropic.yaml</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#F78C6C;--1:#AA0982">\</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#82AAFF;--1:#3B61B0">--set-string</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#ECC48D;--1:#3B61B0">env.ANTHROPIC_API_KEY=</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">&lt;real-value&gt;</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">--wait</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="helm upgrade --install hermes-agent ./charts/hermes-agent \  --namespace hermes-agent --create-namespace \  -f charts/hermes-agent/values-anthropic.yaml \  --set-string env.ANTHROPIC_API_KEY=&#x27;<real-value>&#x27; --wait"><div></div></button></div></figure></div>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>hermes-agent<span class="w"> </span>./charts/hermes-agent<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--namespace<span class="w"> </span>hermes-agent<span class="w"> </span>--create-namespace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>charts/hermes-agent/values-anthropic.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set-string<span class="w"> </span>env.ANTHROPIC_API_KEY<span class="o">=</span><span class="s1">&#39;&lt;real-value&gt;&#39;</span><span class="w"> </span>--wait
+</code></pre></div>
 <p>When an example requires more than one credential, pass every listed value with <code>--set-string</code> or use <code>extraEnvFrom</code> to reference an existing Secret.</p>
-<h2 id="adapt-before-deploying">Adapt before deploying</h2>
+<h2 id="adapt-before-deploying">Adapt before deploying<a class="headerlink" href="#adapt-before-deploying" title="Permanent link">&para;</a></h2>
 <p>Keep the provider set to <code>anthropic</code> and inject the Anthropic key through a Secret.</p>
-<div class="raw-document-actions" data-page-source-actions data-raw-path="/hermes-agent-helm/source/charts/hermes-agent/values-anthropic.yaml"><a href="/hermes-agent-helm/source/charts/hermes-agent/values-anthropic.yaml">Open Raw YAML</a><button type="button" data-copy-source>Copy Source</button></div>
-<h2 id="complete-overlay">Complete overlay</h2>
-<div class="expressive-code"><figure class="frame has-title not-content"><figcaption class="header"><span class="title">charts/hermes-agent/values-anthropic.yaml</span></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># values-anthropic.yaml</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F">#</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># Hermes Agent using Anthropic (Claude) as the model provider.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># Dummy key — override at install time.</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F">#</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F">#     --namespace hermes-agent --create-namespace \</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F">#     -f charts/hermes-agent/values-anthropic.yaml \</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F">#     --set-string env.ANTHROPIC_API_KEY='sk-ant-&lt;real&gt;' --wait</span></div></div><div class="ec-line"><div class="code">
-</div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">config</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">model</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">provider</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">anthropic</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#919F9F;--1:#5F636F"># A current Claude model id — see https://docs.anthropic.com for the list</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#919F9F;--1:#5F636F"># (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">default</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">claude-sonnet-4-6</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">terminal</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">backend</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">local</span></div></div><div class="ec-line"><div class="code">
-</div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">env</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">ANTHROPIC_API_KEY</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">sk-ant-DUMMY_replace_me_0000000000000000000000</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#919F9F;--1:#5F636F"># Unused by the anthropic provider; overrides the chart's OpenAI placeholder.</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">OPENAI_API_KEY</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">unused</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="# values-anthropic.yaml## Hermes Agent using Anthropic (Claude) as the model provider.# Dummy key — override at install time.##   helm upgrade --install hermes-agent ./charts/hermes-agent \#     --namespace hermes-agent --create-namespace \#     -f charts/hermes-agent/values-anthropic.yaml \#     --set-string env.ANTHROPIC_API_KEY=&#x27;sk-ant-<real>&#x27; --waitconfig:  model:    provider: anthropic    # A current Claude model id — see https://docs.anthropic.com for the list    # (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).    default: claude-sonnet-4-6  terminal:    backend: localenv:  ANTHROPIC_API_KEY: &quot;sk-ant-DUMMY_replace_me_0000000000000000000000&quot;  # Unused by the anthropic provider; overrides the chart&#x27;s OpenAI placeholder.  OPENAI_API_KEY: &quot;unused&quot;"><div></div></button></div></figure></div></div><footer class="sl-flex astro-2oe3ggd2"><div class="meta sl-flex astro-2oe3ggd2"></div><div class="pagination-links print:hidden astro-pjsglb2r" dir="ltr"><a href="/hermes-agent-helm/examples/providers/" rel="prev" class="astro-pjsglb2r"><svg viewBox="0 0 24 24" width="1.5rem" height="1.5rem" aria-hidden="true" class="astro-pjsglb2r"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="astro-pjsglb2r"></path></svg><span class="astro-pjsglb2r">Previous<br class="astro-pjsglb2r"><span class="link-title astro-pjsglb2r">Providers</span></span></a><a href="/hermes-agent-helm/examples/providers/deepinfra/" rel="next" class="astro-pjsglb2r"><svg viewBox="0 0 24 24" width="1.5rem" height="1.5rem" aria-hidden="true" class="astro-pjsglb2r"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="astro-pjsglb2r"></path></svg><span class="astro-pjsglb2r">Next<br class="astro-pjsglb2r"><span class="link-title astro-pjsglb2r">DeepInfra</span></span></a></div></footer></div></div></main></div></div></div></div></body></html>
+<p><a href="https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-anthropic.yaml">Open Raw YAML</a></p>
+<h2 id="complete-overlay">Complete overlay<a class="headerlink" href="#complete-overlay" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">charts/hermes-agent/values-anthropic.yaml</span><pre><span></span><code><span class="c1"># values-anthropic.yaml</span>
+<span class="c1">#</span>
+<span class="c1"># Hermes Agent using Anthropic (Claude) as the model provider.</span>
+<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1">#</span>
+<span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
+<span class="c1">#     --namespace hermes-agent --create-namespace \</span>
+<span class="c1">#     -f charts/hermes-agent/values-anthropic.yaml \</span>
+<span class="c1">#     --set-string env.ANTHROPIC_API_KEY=&#39;sk-ant-&lt;real&gt;&#39; --wait</span>
+
+<span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">model</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anthropic</span>
+<span class="w">    </span><span class="c1"># A current Claude model id — see https://docs.anthropic.com for the list</span>
+<span class="w">    </span><span class="c1"># (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).</span>
+<span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">claude-sonnet-4-6</span>
+<span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+
+<span class="nt">env</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ANTHROPIC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sk-ant-DUMMY_replace_me_0000000000000000000000&quot;</span>
+<span class="w">  </span><span class="c1"># Unused by the anthropic provider; overrides the chart&#39;s OpenAI placeholder.</span>
+<span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
+</code></pre></div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "content.code.copy", "content.action.edit"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
