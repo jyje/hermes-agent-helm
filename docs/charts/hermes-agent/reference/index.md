@@ -6,4 +6,4 @@ sidebar:
   order: 20
 ---
 
-Use the chart README for complete configuration details, or inspect a source values file directly.
+Use the [chart README](../../../reference/chart-readme.md) for complete configuration details, or inspect the base [chart values](values.md) directly.

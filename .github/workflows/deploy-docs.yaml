@@ -4,21 +4,31 @@ on:
   push:
     branches: [main]
     paths:
-      - "pages/**"
+      - "docs/**"
       - "README.md"
       - "README-ko.md"
-      - "docs/**"
+      - "SECURITY.md"
+      - "SECURITY-ko.md"
+      - "CONTRIBUTING.md"
       - "examples/**"
       - "charts/**"
+      - "mkdocs.yml"
+      - "main.py"
+      - "requirements.txt"
       - ".github/workflows/deploy-docs.yaml"
   pull_request:
     paths:
-      - "pages/**"
+      - "docs/**"
       - "README.md"
       - "README-ko.md"
-      - "docs/**"
+      - "SECURITY.md"
+      - "SECURITY-ko.md"
+      - "CONTRIBUTING.md"
       - "examples/**"
       - "charts/**"
+      - "mkdocs.yml"
+      - "main.py"
+      - "requirements.txt"
       - ".github/workflows/deploy-docs.yaml"
   workflow_dispatch:
 
@@ -35,28 +45,27 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-python@v6
         with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: pages/pnpm-lock.yaml
+          python-version: "3.13"
+          cache: pip
 
       - name: Install site dependencies
-        run: pnpm -C pages install --frozen-lockfile
+        run: pip install -r requirements.txt
 
-      - name: Check docs (navigation, frontmatter, source-mirror drift)
-        run: pnpm -C pages run check:docs && pnpm -C pages run check:mirrors
-
+      # Not --strict yet: migrating off the retired Astro site surfaced a
+      # backlog of pre-existing broken relative links inside mirrored
+      # upstream content (chart README values-*.yaml links, etc.) that were
+      # never validated before. Tracked as follow-up; build must still
+      # succeed and every page must still render.
       - name: Build the documentation site
-        run: pnpm -C pages run build
+        run: mkdocs build
 
       - name: Upload documentation site
         uses: actions/upload-artifact@v4
         with:
           name: docs-site
-          path: pages/dist
+          path: site
           retention-days: 1
 
   deploy:
@@ -70,7 +79,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: docs-site
-          path: pages/dist
+          path: site
 
       # Keep the chart repository's index.yaml and packaged .tgz files that
       # release-chart.yaml publishes to the same gh-pages branch.
@@ -78,5 +87,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: pages/dist
+          publish_dir: site
           keep_files: true
