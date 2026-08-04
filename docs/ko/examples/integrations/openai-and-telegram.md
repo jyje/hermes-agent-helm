@@ -3,10 +3,9 @@ title: OpenAI + Telegram
 description: OpenAI provider와 Telegram bot을 결합한 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENAI_API_KEY, TELEGRAM_BOT_TOKEN</div>
-  <div><strong>오버레이</strong>values-openai-and-telegram.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENAI_API_KEY, TELEGRAM_BOT_TOKEN` | `values-openai-and-telegram.yaml` |
 
 ## 언제 사용하나요?
 

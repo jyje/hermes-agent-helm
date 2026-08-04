@@ -3,10 +3,9 @@ title: LiteLLM (in cluster)
 description: Connect to LiteLLM through a Service in the same Kubernetes cluster.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENAI_API_KEY</div>
-  <div><strong>Overlay</strong>values-litellm-k8s.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENAI_API_KEY` | `values-litellm-k8s.yaml` |
 
 ## When to use it
 

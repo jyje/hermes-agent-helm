@@ -3,10 +3,9 @@ title: NVIDIA NIM + Discord
 description: NVIDIA NIM 모델과 Discord bot을 함께 연결하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>NVIDIA_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>오버레이</strong>values-nvidia-nim-and-discord.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `NVIDIA_API_KEY, DISCORD_BOT_TOKEN` | `values-nvidia-nim-and-discord.yaml` |
 
 ## 언제 사용하나요?
 

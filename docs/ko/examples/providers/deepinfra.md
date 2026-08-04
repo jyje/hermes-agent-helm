@@ -3,10 +3,9 @@ title: DeepInfra
 description: DeepInfra OpenAI-compatible endpoint에 연결하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>DEEPINFRA_API_KEY</div>
-  <div><strong>오버레이</strong>values-deepinfra.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `DEEPINFRA_API_KEY` | `values-deepinfra.yaml` |
 
 ## 언제 사용하나요?
 

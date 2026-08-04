@@ -3,10 +3,9 @@ title: OpenAI
 description: OpenAI API로 가장 빠르게 시작하는 기본 provider 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENAI_API_KEY</div>
-  <div><strong>오버레이</strong>values-openai.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENAI_API_KEY` | `values-openai.yaml` |
 
 ## 언제 사용하나요?
 

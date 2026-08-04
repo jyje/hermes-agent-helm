@@ -3,10 +3,9 @@ title: Bitwarden Secrets Manager
 description: Bitwarden에서 provider key를 시작 시 가져오는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>BWS_ACCESS_TOKEN</div>
-  <div><strong>오버레이</strong>values-bitwarden.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `BWS_ACCESS_TOKEN` | `values-bitwarden.yaml` |
 
 ## 언제 사용하나요?
 

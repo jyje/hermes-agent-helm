@@ -3,10 +3,9 @@ title: GitHub Copilot
 description: Discord를 통해 GitHub OAuth device login을 완료하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>DISCORD_BOT_TOKEN</div>
-  <div><strong>오버레이</strong>values-github-copilot.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `DISCORD_BOT_TOKEN` | `values-github-copilot.yaml` |
 
 ## 언제 사용하나요?
 

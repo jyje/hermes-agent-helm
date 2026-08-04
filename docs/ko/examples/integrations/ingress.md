@@ -3,10 +3,9 @@ title: Dashboard Ingress
 description: 민감한 management dashboard를 인증된 Ingress 뒤에 노출하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENAI_API_KEY, basic-auth Secret</div>
-  <div><strong>오버레이</strong>values-ingress.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENAI_API_KEY, basic-auth Secret` | `values-ingress.yaml` |
 
 ## 언제 사용하나요?
 

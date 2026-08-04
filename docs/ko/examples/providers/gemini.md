@@ -3,10 +3,9 @@ title: Google Gemini
 description: Google AI Studio Gemini API를 사용하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>GOOGLE_API_KEY</div>
-  <div><strong>오버레이</strong>values-gemini.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `GOOGLE_API_KEY` | `values-gemini.yaml` |
 
 ## 언제 사용하나요?
 

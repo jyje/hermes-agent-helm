@@ -3,10 +3,9 @@ title: OpenAI + Telegram
 description: Combine the OpenAI provider and a Telegram bot in one release.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENAI_API_KEY, TELEGRAM_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-openai-and-telegram.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENAI_API_KEY, TELEGRAM_BOT_TOKEN` | `values-openai-and-telegram.yaml` |
 
 ## When to use it
 

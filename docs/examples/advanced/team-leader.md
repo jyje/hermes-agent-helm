@@ -3,10 +3,9 @@ title: Team leader
 description: Run the leader of a Discord thread-based agent team.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>NVIDIA_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-team-leader.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `NVIDIA_API_KEY, DISCORD_BOT_TOKEN` | `values-team-leader.yaml` |
 
 ## When to use it
 

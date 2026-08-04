@@ -3,10 +3,9 @@ title: Bitwarden Secrets Manager
 description: Fetch provider credentials from Bitwarden Secrets Manager at startup.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>BWS_ACCESS_TOKEN</div>
-  <div><strong>Overlay</strong>values-bitwarden.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `BWS_ACCESS_TOKEN` | `values-bitwarden.yaml` |
 
 ## When to use it
 

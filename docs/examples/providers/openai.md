@@ -3,10 +3,9 @@ title: OpenAI
 description: A minimal provider configuration for getting started quickly with the OpenAI API.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENAI_API_KEY</div>
-  <div><strong>Overlay</strong>values-openai.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENAI_API_KEY` | `values-openai.yaml` |
 
 ## When to use it
 

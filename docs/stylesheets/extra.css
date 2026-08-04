@@ -21,14 +21,34 @@
   --md-code-font: "MesloLGS Nerd Font", "MesloLGS NF", "JetBrainsMono Nerd Font", ui-monospace, monospace;
 }
 
+/* The retired Astro site's header/nav bar was never teal — teal
+   (--sl-color-accent) was an ACCENT for links and active states only.
+   The bar itself sat on --sl-color-bg-nav: #f4f4f4. Reproduce that split
+   here: --md-primary-fg-color drives the header/tab bar background in
+   Material, so it gets the light gray; --md-accent-fg-color keeps teal. */
 [data-md-color-primary="custom"] {
-  --md-primary-fg-color: #087f7a;
-  --md-primary-fg-color--light: #0a9a94;
-  --md-primary-fg-color--dark: #03534f;
+  --md-primary-fg-color: #f4f4f4;
+  --md-primary-fg-color--light: #f4f4f4;
+  --md-primary-fg-color--dark: #e2e2e2;
+  --md-primary-bg-color: #24292f;
+  --md-primary-bg-color--light: rgba(36, 41, 47, 0.7);
   --md-accent-fg-color: #087f7a;
+  /* Body-content link color defaults to --md-primary-fg-color in Material,
+     which is now a near-white gray — decouple it back to the teal accent
+     so links stay legible instead of nearly invisible on a white page. */
+  --md-typeset-a-color: #087f7a;
 }
 
-/* Crop the logo artwork's vertical whitespace instead of showing it letterboxed. */
+/* Crop the logo artwork's vertical whitespace instead of showing it letterboxed.
+   The PNG is fully opaque (no alpha channel) with its own light canvas baked
+   around the icons; now that the header itself is also #f4f4f4, the crop sits
+   on a continuous background with no seam either way. */
+.md-header__button.md-logo,
+.md-nav__title .md-nav__button.md-logo {
+  background-color: #f4f4f4;
+  border-radius: 4px;
+}
+
 .md-header__button.md-logo img {
   width: 4.5rem;
   height: 2rem;
@@ -41,29 +61,4 @@
   height: 2.4rem;
   object-fit: cover;
   object-position: center;
-}
-
-/* Ported from the retired Astro site: the per-example metadata card
-   (required secret / overlay filename) shown at the top of each example page. */
-.example-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: .75rem;
-  margin: 1.5rem 0;
-}
-
-.example-meta > div {
-  margin: 0;
-  border-top: 2px solid var(--md-primary-fg-color);
-  padding: .65rem 0;
-  font-size: .9rem;
-}
-
-.example-meta strong {
-  display: block;
-  color: var(--md-default-fg-color);
-  font-family: var(--md-code-font);
-  font-size: .72rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
 }

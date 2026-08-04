@@ -3,10 +3,9 @@ title: LiteLLM (external)
 description: Connect to a LiteLLM proxy reachable over the network.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENAI_API_KEY</div>
-  <div><strong>Overlay</strong>values-litellm.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENAI_API_KEY` | `values-litellm.yaml` |
 
 ## When to use it
 

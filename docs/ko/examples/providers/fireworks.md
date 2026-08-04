@@ -3,10 +3,9 @@ title: Fireworks AI
 description: Fireworks의 OpenAI-compatible provider를 사용하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>FIREWORKS_API_KEY</div>
-  <div><strong>오버레이</strong>values-fireworks.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `FIREWORKS_API_KEY` | `values-fireworks.yaml` |
 
 ## 언제 사용하나요?
 

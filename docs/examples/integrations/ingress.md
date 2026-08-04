@@ -3,10 +3,9 @@ title: Dashboard Ingress
 description: Expose the sensitive management dashboard behind an authenticated Ingress.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENAI_API_KEY, basic-auth Secret</div>
-  <div><strong>Overlay</strong>values-ingress.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENAI_API_KEY, basic-auth Secret` | `values-ingress.yaml` |
 
 ## When to use it
 

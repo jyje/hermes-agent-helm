@@ -3,10 +3,9 @@ title: NVIDIA NIM + Discord
 description: Connect NVIDIA NIM and a Discord bot in one release.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>NVIDIA_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-nvidia-nim-and-discord.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `NVIDIA_API_KEY, DISCORD_BOT_TOKEN` | `values-nvidia-nim-and-discord.yaml` |
 
 ## When to use it
 

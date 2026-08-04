@@ -3,10 +3,9 @@ title: LiteLLM (external)
 description: 네트워크로 도달 가능한 LiteLLM proxy에 연결하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENAI_API_KEY</div>
-  <div><strong>오버레이</strong>values-litellm.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENAI_API_KEY` | `values-litellm.yaml` |
 
 ## 언제 사용하나요?
 

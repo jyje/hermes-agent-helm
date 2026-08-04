@@ -3,10 +3,9 @@ title: Collaborating pair
 description: Run the planner half of a collaborating pair in the same Discord channel.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>NVIDIA_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-multi-agent-collab.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `NVIDIA_API_KEY, DISCORD_BOT_TOKEN` | `values-multi-agent-collab.yaml` |
 
 ## When to use it
 

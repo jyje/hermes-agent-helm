@@ -3,10 +3,9 @@ title: LiteLLM (in cluster)
 description: 같은 Kubernetes 클러스터 안의 LiteLLM Service DNS를 사용하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENAI_API_KEY</div>
-  <div><strong>오버레이</strong>values-litellm-k8s.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENAI_API_KEY` | `values-litellm-k8s.yaml` |
 
 ## 언제 사용하나요?
 

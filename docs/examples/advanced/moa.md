@@ -3,10 +3,9 @@ title: Mixture of Agents
 description: Combine multiple reference models with an aggregator model.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENROUTER_API_KEY</div>
-  <div><strong>Overlay</strong>values-moa.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENROUTER_API_KEY` | `values-moa.yaml` |
 
 ## When to use it
 
