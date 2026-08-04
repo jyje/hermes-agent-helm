@@ -3,10 +3,9 @@ title: GitHub Copilot
 description: Complete GitHub Copilot device login through Discord.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>DISCORD_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-github-copilot.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `DISCORD_BOT_TOKEN` | `values-github-copilot.yaml` |
 
 ## When to use it
 

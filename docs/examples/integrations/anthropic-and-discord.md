@@ -3,10 +3,9 @@ title: Anthropic + Discord
 description: Combine the Claude provider and a Discord bot in one release.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>ANTHROPIC_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-anthropic-and-discord.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `ANTHROPIC_API_KEY, DISCORD_BOT_TOKEN` | `values-anthropic-and-discord.yaml` |
 
 ## When to use it
 

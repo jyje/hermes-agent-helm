@@ -3,10 +3,9 @@ title: OpenRouter
 description: Select models from multiple upstream providers with one OpenRouter key.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENROUTER_API_KEY</div>
-  <div><strong>Overlay</strong>values-openrouter.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `OPENROUTER_API_KEY` | `values-openrouter.yaml` |
 
 ## When to use it
 

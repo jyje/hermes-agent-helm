@@ -3,10 +3,9 @@ title: Google Vertex AI
 description: GCP 서비스 계정으로 Vertex AI Gemini에 연결하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>GCP service-account Secret</div>
-  <div><strong>오버레이</strong>values-google-vertex.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `GCP service-account Secret` | `values-google-vertex.yaml` |
 
 ## 언제 사용하나요?
 

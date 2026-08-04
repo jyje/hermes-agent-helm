@@ -3,11 +3,6 @@ title: Roadmap
 description: Project roadmap and release readiness.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/reference/roadmap.md">
-  <a href="/hermes-agent-helm/source/docs/reference/roadmap.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # Roadmap
 
 [English](roadmap.md) · [한국어](roadmap-ko.md)

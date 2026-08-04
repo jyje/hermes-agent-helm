@@ -3,10 +3,9 @@ title: Anthropic
 description: Claude를 Hermes Agent의 기본 모델로 사용하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>ANTHROPIC_API_KEY</div>
-  <div><strong>오버레이</strong>values-anthropic.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | `values-anthropic.yaml` |
 
 ## 언제 사용하나요?
 

@@ -3,10 +3,9 @@ title: Mixture of Agents
 description: 여러 reference model과 aggregator model을 결합하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENROUTER_API_KEY</div>
-  <div><strong>오버레이</strong>values-moa.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENROUTER_API_KEY` | `values-moa.yaml` |
 
 ## 언제 사용하나요?
 

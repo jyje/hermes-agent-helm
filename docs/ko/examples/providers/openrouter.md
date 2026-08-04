@@ -3,10 +3,9 @@ title: OpenRouter
 description: 하나의 OpenRouter key로 다양한 upstream 모델을 선택하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>OPENROUTER_API_KEY</div>
-  <div><strong>오버레이</strong>values-openrouter.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `OPENROUTER_API_KEY` | `values-openrouter.yaml` |
 
 ## 언제 사용하나요?
 

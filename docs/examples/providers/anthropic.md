@@ -3,10 +3,9 @@ title: Anthropic
 description: Configure Claude as Hermes Agent’s default model provider.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>ANTHROPIC_API_KEY</div>
-  <div><strong>Overlay</strong>values-anthropic.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | `values-anthropic.yaml` |
 
 ## When to use it
 

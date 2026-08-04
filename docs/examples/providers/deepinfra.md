@@ -3,10 +3,9 @@ title: DeepInfra
 description: Connect to the DeepInfra OpenAI-compatible endpoint.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>DEEPINFRA_API_KEY</div>
-  <div><strong>Overlay</strong>values-deepinfra.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `DEEPINFRA_API_KEY` | `values-deepinfra.yaml` |
 
 ## When to use it
 

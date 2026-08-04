@@ -3,11 +3,6 @@ title: DevOps roadmap
 description: Operational improvement roadmap.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/reference/devops-roadmap.md">
-  <a href="/hermes-agent-helm/source/docs/reference/devops-roadmap.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # DevOps Roadmap
 
 This document tracks CI/CD pipeline improvements for `hermes-agent-helm`.

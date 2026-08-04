@@ -3,10 +3,9 @@ title: Google Gemini
 description: Use the Google AI Studio Gemini API as the model provider.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>GOOGLE_API_KEY</div>
-  <div><strong>Overlay</strong>values-gemini.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `GOOGLE_API_KEY` | `values-gemini.yaml` |
 
 ## When to use it
 

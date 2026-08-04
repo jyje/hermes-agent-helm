@@ -3,12 +3,15 @@ title: Source documents
 description: The original repository Markdown, available as rendered pages and raw files.
 ---
 
-- [Repository README](/hermes-agent-helm/reference/repository-readme/)
-- [Chart README and generated values table](/hermes-agent-helm/reference/chart-readme/)
-- [Helm installation guide](/hermes-agent-helm/reference/helm-installation/)
-- [ArgoCD guide](/hermes-agent-helm/reference/argocd/)
-- [Local development guide](/hermes-agent-helm/reference/local-development/)
-- [CI guide](/hermes-agent-helm/reference/ci/)
-- [Teams guide](/hermes-agent-helm/reference/teams/)
-- [Collaboration guide](/hermes-agent-helm/reference/collaboration/)
-- [Roadmap](/hermes-agent-helm/reference/roadmap/)
+- [Home](../index.md) — the repository's top-level README
+- [Chart README and generated values table](chart-readme.md)
+- [Contributing guide](contributing.md)
+- [Security policy](security.md)
+- [Helm installation guide](helm-installation.md)
+- [ArgoCD guide](argocd.md)
+- [Local development guide](local-development.md)
+- [CI guide](ci.md)
+- [Teams guide](teams.md)
+- [Collaboration guide](collaboration.md)
+- [Roadmap](roadmap.md)
+- [DevOps roadmap](devops-roadmap.md)

@@ -3,10 +3,9 @@ title: Shared knowledge PVC
 description: 여러 agent가 RWX PVC를 공용 지식 저장소로 mount하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>Provider key</div>
-  <div><strong>오버레이</strong>values-shared-knowledge.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `Provider key` | `values-shared-knowledge.yaml` |
 
 ## 언제 사용하나요?
 

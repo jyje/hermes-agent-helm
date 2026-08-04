@@ -3,10 +3,9 @@ title: Team member
 description: Run an individual member release in a leader-led team.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>NVIDIA_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>Overlay</strong>values-team-member.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `NVIDIA_API_KEY, DISCORD_BOT_TOKEN` | `values-team-member.yaml` |
 
 ## When to use it
 

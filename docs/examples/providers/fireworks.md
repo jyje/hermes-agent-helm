@@ -3,10 +3,9 @@ title: Fireworks AI
 description: Use Fireworks AI through its OpenAI-compatible provider endpoint.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>FIREWORKS_API_KEY</div>
-  <div><strong>Overlay</strong>values-fireworks.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `FIREWORKS_API_KEY` | `values-fireworks.yaml` |
 
 ## When to use it
 

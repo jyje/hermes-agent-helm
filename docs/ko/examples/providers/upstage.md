@@ -3,10 +3,9 @@ title: Upstage Solar
 description: Upstage Solar provider를 사용하는 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>UPSTAGE_API_KEY</div>
-  <div><strong>오버레이</strong>values-upstage.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `UPSTAGE_API_KEY` | `values-upstage.yaml` |
 
 ## 언제 사용하나요?
 

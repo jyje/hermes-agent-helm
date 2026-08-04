@@ -3,11 +3,6 @@ title: Local development guide
 description: Local Kubernetes and development workflows.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/reference/local-development.md">
-  <a href="/hermes-agent-helm/source/docs/reference/local-development.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # Local development guide
 
 ## Local Kubernetes cluster

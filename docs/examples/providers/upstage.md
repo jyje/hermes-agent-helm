@@ -3,10 +3,9 @@ title: Upstage Solar
 description: Use Upstage Solar as the model provider.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>UPSTAGE_API_KEY</div>
-  <div><strong>Overlay</strong>values-upstage.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `UPSTAGE_API_KEY` | `values-upstage.yaml` |
 
 ## When to use it
 

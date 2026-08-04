@@ -3,11 +3,6 @@ title: Hermes 협업
 description: 협업 문서의 한국어 원문입니다.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/ko/reference/collaboration.md">
-  <a href="/hermes-agent-helm/source/docs/ko/reference/collaboration.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # Hermes 협업: 봇들이 서로 대화하게 만들기
 
 [English](collaboration.md) · [한국어](collaboration-ko.md)

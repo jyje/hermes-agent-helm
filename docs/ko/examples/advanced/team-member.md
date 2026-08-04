@@ -3,10 +3,9 @@ title: Team member
 description: leader 팀에 참여하는 개별 member release 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>NVIDIA_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>오버레이</strong>values-team-member.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `NVIDIA_API_KEY, DISCORD_BOT_TOKEN` | `values-team-member.yaml` |
 
 ## 언제 사용하나요?
 

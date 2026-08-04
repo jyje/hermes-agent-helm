@@ -3,10 +3,9 @@ title: Shared knowledge PVC
 description: Mount an RWX PVC as shared knowledge for multiple agents.
 ---
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>Provider key</div>
-  <div><strong>Overlay</strong>values-shared-knowledge.yaml</div>
-</div>
+| Required secret | Overlay |
+| --- | --- |
+| `Provider key` | `values-shared-knowledge.yaml` |
 
 ## When to use it
 

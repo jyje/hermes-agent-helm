@@ -3,10 +3,9 @@ title: Anthropic + Discord
 description: Claude provider와 Discord bot을 한 릴리스에 결합한 구성
 ---
 
-<div class="example-meta">
-  <div><strong>필수 Secret</strong>ANTHROPIC_API_KEY, DISCORD_BOT_TOKEN</div>
-  <div><strong>오버레이</strong>values-anthropic-and-discord.yaml</div>
-</div>
+| 필수 Secret | 오버레이 |
+| --- | --- |
+| `ANTHROPIC_API_KEY, DISCORD_BOT_TOKEN` | `values-anthropic-and-discord.yaml` |
 
 ## 언제 사용하나요?
 
