@@ -96,9 +96,4 @@ for (const path of [
   writeFileSync(path, source.replaceAll(release.oldVersion, packageVersion));
 }
 
-// The version bump above touches README.md/README-ko.md and
-// examples/helm/README.md, which docs/reference/*.md pages hand-mirror for
-// the Starlight site — resync them so a release can never leave one stale.
-run('node', [resolve(root, 'pages/scripts/check-source-mirrors.mjs'), '--write']);
-
 console.log(`Prepared Hermes Agent chart v${packageVersion} from ${entries.length} Changeset(s).`);
