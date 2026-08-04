@@ -67,6 +67,11 @@ markdown_extensions:
       base_path:
         - "."
       check_paths: true
+  # Without this, Markdown syntax inside raw HTML blocks (the <div
+  # align="center">...</div> wrapper the READMEs use for their header) is
+  # left as literal, unrendered text instead of being parsed — this is
+  # standard Python-Markdown behavior, not an MkDocs quirk.
+  - md_in_html
 
 nav:
   - Home: index.md
@@ -129,6 +134,5 @@ nav:
       - ArgoCD guide: reference/argocd.md
       - Helm repository index: reference/helm-repository.md
       - Chart README: reference/chart-readme.md
-      - Repository README: reference/repository-readme.md
       - Security policy: reference/security.md
       - Source documents: reference/source-documents.md

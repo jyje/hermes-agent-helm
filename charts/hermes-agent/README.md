@@ -1,4 +1,4 @@
-<div align="center">
+<div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
 
