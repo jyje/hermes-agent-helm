@@ -3,11 +3,6 @@ title: CI guide
 description: Continuous validation and release checks.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/reference/ci.md">
-  <a href="/hermes-agent-helm/source/docs/reference/ci.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # CI / continuous validation
 
 This repo has three GitHub Actions workflows that together validate a change

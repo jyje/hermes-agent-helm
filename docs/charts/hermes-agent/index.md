@@ -1,11 +1,6 @@
 ---
 title: "Hermes Agent"
 description: "👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight"
-sidebar:
-  label: "Hermes Agent"
-  order: 10
-  attrs:
-    data-sidebar-order: '10'
 ---
 
 # Hermes Agent

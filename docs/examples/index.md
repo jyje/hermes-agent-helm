@@ -1,9 +1,4 @@
 ---
-sidebar:
-  label: Examples
-  order: 20
-  attrs:
-    data-sidebar-order: '20'
 title: Choose a values example
 description: Start from a runnable overlay, then replace only its dummy credentials and environment-specific identifiers.
 ---

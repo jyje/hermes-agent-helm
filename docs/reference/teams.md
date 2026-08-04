@@ -3,11 +3,6 @@ title: Hermes teams
 description: Leader-and-member team workflow.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/reference/teams.md">
-  <a href="/hermes-agent-helm/source/docs/reference/teams.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # Hermes teams: scale *up*, then group
 
 [English](teams.md) · [한국어](teams-ko.md)

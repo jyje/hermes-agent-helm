@@ -3,11 +3,6 @@ title: Hermes 팀
 description: 팀 운영 문서의 한국어 원문입니다.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/ko/reference/teams.md">
-  <a href="/hermes-agent-helm/source/docs/ko/reference/teams.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # Hermes 팀: 스케일 *업*, 그리고 그룹
 
 [English](teams.md) · [한국어](teams-ko.md)

@@ -3,11 +3,6 @@ title: Hermes collaboration
 description: Pair collaboration and handoff protocol.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/reference/collaboration.md">
-  <a href="/hermes-agent-helm/source/docs/reference/collaboration.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # Hermes collaboration: make the bots talk to each other
 
 [English](collaboration.md) · [한국어](collaboration-ko.md)

@@ -3,11 +3,6 @@ title: 로드맵
 description: 프로젝트 로드맵의 한국어 원문입니다.
 ---
 
-<div class="raw-document-actions" data-raw-path="/hermes-agent-helm/source/docs/ko/reference/roadmap.md">
-  <a href="/hermes-agent-helm/source/docs/ko/reference/roadmap.md">Open raw Markdown</a>
-  <button type="button" data-copy-source>Copy source</button>
-</div>
-
 # 로드맵
 
 [English](roadmap.md) · [한국어](roadmap-ko.md)

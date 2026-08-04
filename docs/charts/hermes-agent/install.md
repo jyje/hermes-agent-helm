@@ -1,8 +1,6 @@
 ---
 title: Install
 description: Install Hermes Agent from this Helm repository.
-sidebar:
-  order: 10
 ---
 
 ## Install from the Helm repository
