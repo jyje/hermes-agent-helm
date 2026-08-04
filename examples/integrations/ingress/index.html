@@ -2085,8 +2085,6 @@
       
         
       
-        
-      
     
     
     
@@ -2456,34 +2454,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/repository-readme/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository README
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../reference/security/" class="md-nav__link">
         
   
@@ -2635,11 +2605,20 @@
 
   <h1>Ingress</h1>
 
-<div class="example-meta">
-  <div><strong>Required secret</strong>OPENAI_API_KEY, basic-auth Secret</div>
-  <div><strong>Overlay</strong>values-ingress.yaml</div>
-</div>
-
+<table>
+<thead>
+<tr>
+<th>Required secret</th>
+<th>Overlay</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPENAI_API_KEY, basic-auth Secret</code></td>
+<td><code>values-ingress.yaml</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="when-to-use-it">When to use it<a class="headerlink" href="#when-to-use-it" title="Permanent link">&para;</a></h2>
 <p>An OpenAI API key, a basic-auth Secret, and an Ingress controller are required.</p>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>

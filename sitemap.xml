@@ -337,13 +337,6 @@
         <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/reference/local-development/"/>
     </url>
     <url>
-        <loc>https://jyje.github.io/hermes-agent-helm/reference/repository-readme/</loc>
-        <lastmod>2026-08-04</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/reference/repository-readme/"/>
-        <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/reference/repository-readme/"/>
-    </url>
-    <url>
         <loc>https://jyje.github.io/hermes-agent-helm/reference/roadmap/</loc>
         <lastmod>2026-08-04</lastmod>
         <changefreq>daily</changefreq>
@@ -657,13 +650,6 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/reference/collaboration/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/reference/collaboration/"/>
-    </url>
-    <url>
-        <loc>https://jyje.github.io/hermes-agent-helm/ko/reference/repository-readme/</loc>
-        <lastmod>2026-08-04</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/reference/repository-readme/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/reference/repository-readme/"/>
     </url>
     <url>
         <loc>https://jyje.github.io/hermes-agent-helm/ko/reference/roadmap/</loc>
