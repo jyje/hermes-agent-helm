@@ -151,8 +151,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .deploy
           keep_files: true
-
-      - name: Clean up release/next branch (post-merge)
-        if: always() && steps.ver.outputs.exists == 'false'
-        run: |
-          git push origin --delete release/next 2>/dev/null || true
