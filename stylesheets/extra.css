@@ -37,6 +37,10 @@
      which is now a near-white gray — decouple it back to the teal accent
      so links stay legible instead of nearly invisible on a white page. */
   --md-typeset-a-color: #087f7a;
+  /* The retired Astro site's page background was also #f4f4f4
+     (html, body { background-color: #f4f4f4 }), not Material's default
+     white — match it so the header and page body read as one surface. */
+  --md-default-bg-color: #f4f4f4;
 }
 
 /* Crop the logo artwork's vertical whitespace instead of showing it letterboxed.
