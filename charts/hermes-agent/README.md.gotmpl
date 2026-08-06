@@ -39,7 +39,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   walkthrough: [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
 - **Agent team**: run multiple instances that hand off by `@mention` over a shared Discord channel:
   [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml),
-  see [Teams](../../docs/reference/teams.md) + [Collaboration guide](../../docs/reference/collaboration.md).
+  see [Teams](https://jyje.github.io/hermes-agent-helm/reference/teams/) + [Collaboration guide](https://jyje.github.io/hermes-agent-helm/reference/collaboration/).
 
 ## Configure your provider
 
@@ -106,7 +106,7 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 > `replicaCount` note in the [values table](#values)). To grow, scale *up* (more
 > `resources`, larger `persistence.size`) - and when one agent isn't enough, run
 > several instances and group them into a **team** that shares one gateway
-> channel. See [Hermes teams](../../docs/reference/teams.md).
+> channel. See [Hermes teams](https://jyje.github.io/hermes-agent-helm/reference/teams/).
 
 ## Provider & messenger setup
 
@@ -296,7 +296,7 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**;
 adding a teammate becomes a one-line diff. See
 [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
-and the full guide in [Teams](../../docs/reference/teams.md) + [Collaboration](../../docs/reference/collaboration.md).
+and the full guide in [Teams](https://jyje.github.io/hermes-agent-helm/reference/teams/) + [Collaboration](https://jyje.github.io/hermes-agent-helm/reference/collaboration/).
 
 For a leader plus several members, use
 [`values-team-leader.yaml`](values-team-leader.yaml) and
@@ -315,7 +315,7 @@ prohibited.
 > require a live proof with your pinned image before relying on it.
 
 The reference sequence completed live on kind with `v2026.7.20`; see the
-timestamped [team evidence](../../docs/reference/teams.md#leader-orchestrated-teams).
+timestamped [team evidence](https://jyje.github.io/hermes-agent-helm/reference/teams/#leader-orchestrated-teams).
 
 > **Alternative: one pod, many profiles.** If what you actually need is
 > routing different Discord guilds/channels/threads to different agent
@@ -599,7 +599,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
-| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/reference/teams.md) |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](https://jyje.github.io/hermes-agent-helm/reference/teams/) |
 | [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC**: multiple agents reading/writing to the same knowledge base |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See

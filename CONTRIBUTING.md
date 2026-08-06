@@ -119,13 +119,13 @@ Changeset summaries, rather than commit subjects, are the release changelog.
 PRs and pushes run lint + an isolated **kind** install/test, and every release
 is re-verified against the published, cosign-signed artifact.
 
-See **[docs/reference/ci.md](docs/reference/ci.md)** for the full pipeline - the parallel
+See **[CI guide](https://jyje.github.io/hermes-agent-helm/reference/ci/)** for the full pipeline - the parallel
 default / existingClaim test scenarios, the failover model pool, fork-PR
 behavior, and the post-release verification.
 
 ## Local development environment
 
-See **[docs/reference/local-development.md](docs/reference/local-development.md)** for:
+See **[Local development guide](https://jyje.github.io/hermes-agent-helm/reference/local-development/)** for:
 
 - Setting up a local Kubernetes cluster (kind recommended; minikube and MicroK8s also covered)
 - Port-forwarding a remote cluster agent for dev testing

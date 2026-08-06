@@ -67,7 +67,7 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
   요청, 작은 PVC)이면서, 스케일 아웃이 아니라 스케일 업으로 키워 프로덕션까지 갑니다. Hermes는
   단일 인스턴스 개인용 에이전트(하나의 `HERMES_HOME`·gateway·메모리)이므로 파드를
   복제하지 않고, 잘 관리된 인스턴스를 여러 개 띄워 공통 gateway 채널로 컨텍스트를
-  공유하는 **팀**으로 묶습니다. [Hermes 팀](docs/ko/reference/teams.md)을 참고하세요.
+  공유하는 **팀**으로 묶습니다. [Hermes 팀](https://jyje.github.io/hermes-agent-helm/ko/reference/teams/)을 참고하세요.
 - **엔드-투-엔드 검증.** CI가 임시 **kind** 클러스터에 차트를 설치하고
   번들된 테스트 Job(`hermes doctor`)을 실행합니다. `NVIDIA_API_KEY` 리포지토리
   시크릿이 있으면 NVIDIA NIM에 대한 **live `hermes chat` 라운드트립**도 실행합니다
@@ -80,7 +80,7 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
   <p><em>배포 증거: 리더 <code>august</code>와 멤버
   <code>may</code>/<code>march</code>가 kind에서 독립 릴리스로 실행 중.
   이 스크린샷만으로 멀티턴 멘션 루프가 증명되지는 않습니다. 현재 상태는
-  <a href="docs/ko/reference/teams.md">Hermes 팀</a> 참고.</em></p>
+  <a href="https://jyje.github.io/hermes-agent-helm/ko/reference/teams/">Hermes 팀</a> 참고.</em></p>
 </div>
 
 자세한 리소스 구조, 설정 모델, 제공자별 설치 예제(메신저 통합 포함)는
@@ -157,7 +157,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 이 차트는 **하나**의 에이전트를 잘 배포·관리하며, 오늘은 ArgoCD ApplicationSet
 기반 팀으로 확장하고, CRD 기반 오퍼레이터는 일정 없는 장기 후보입니다. 자세한
-내용은 [docs/ko/reference/roadmap.md](docs/ko/reference/roadmap.md)를 참고하세요.
+내용은 [로드맵](https://jyje.github.io/hermes-agent-helm/ko/reference/roadmap/)을 참고하세요.
 
 ## 기여하기
 
