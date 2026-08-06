@@ -8,7 +8,7 @@ description: Local Kubernetes and development workflows.
 ## Local Kubernetes cluster
 
 You need a running cluster to use `make test` or iterate on the chart locally.
-**kind** is recommended — it is the same runtime CI uses.
+**kind** is recommended - it is the same runtime CI uses.
 
 ### kind (recommended)
 
@@ -73,7 +73,7 @@ make test
 ```
 
 If you edited `values.yaml` (new value, changed default, new section),
-regenerate the chart README via helm-docs and commit the result — CI's `lint`
+regenerate the chart README via helm-docs and commit the result - CI's `lint`
 job fails on any drift between `README.md` and `README.md.gotmpl`:
 
 ```bash
@@ -85,7 +85,7 @@ make docs
 ## Running the CI test scenarios locally
 
 [validate-chart.yaml](../.github/workflows/validate-chart.yaml)'s `test` job
-runs two scenarios as a **matrix** — each on its own ephemeral kind cluster.
+runs two scenarios as a **matrix** - each on its own ephemeral kind cluster.
 The scenario logic itself lives in
 [.github/scripts](../.github/scripts) (`lib.sh` + one script per scenario), so
 you can reproduce exactly what CI does, scenario by scenario, against a local
@@ -105,19 +105,19 @@ export NVIDIA_API_KEY='nvapi-...'   # omit for a doctor-only run (no live chat)
 kind delete cluster --name hermes-verify
 ```
 
-Each script is self-contained — install, hook test, and (for
+Each script is self-contained - install, hook test, and (for
 `scenario-message.sh`, when `NVIDIA_API_KEY` is set) the skill-injection +
 chat round-trip, exactly as CI runs it. `DISCORD_BOT_TOKEN` /
 `DISCORD_HOME_CHANNEL` are optional and only consumed by
 `scenario-message.sh`. Run each scenario against its **own** cluster (as
-above) — both scripts default `NS` to `test-hermes-chart`, matching CI's
+above) - both scripts default `NS` to `test-hermes-chart`, matching CI's
 per-matrix-job isolation; reusing one cluster for both back-to-back will
 collide unless you delete the namespace or override `NS` between runs.
 
 > macOS ships bash 3.2 (`/bin/bash --version`), which has a long-fixed-upstream
 > bug where expanding an **empty** array under `set -u` raises "unbound
 > variable" (fixed in bash 4.4+). The scripts already guard for this
-> (`"${arr[@]+"${arr[@]}"}"`), so this should just work — if you hit a similar
+> (`"${arr[@]+"${arr[@]}"}"`), so this should just work - if you hit a similar
 > error while extending these scripts, that's almost certainly the cause.
 
 ### Using a different provider for the round-trip
@@ -125,14 +125,14 @@ collide unless you delete the namespace or override `NS` between runs.
 `scenario-message.sh` is hardcoded to NVIDIA NIM (the provider CI exercises),
 but `lib.sh`'s `install_release` is a thin wrapper around `helm upgrade`, so
 nothing stops you from copying a scenario script and pointing
-`config.model.provider` elsewhere for a quick local check — e.g. a local LM
+`config.model.provider` elsewhere for a quick local check - e.g. a local LM
 Studio server as a custom OpenAI-compatible provider (see
 [Configure your provider](../charts/hermes-agent/README.md#configure-your-provider)
 in the chart README). Note this isn't validated end-to-end here: the agent pod
 runs inside the kind node's network namespace, so reaching an LM Studio
 instance on the host requires the pod to resolve the host (e.g.
 `host.docker.internal`, which may or may not resolve from inside a pod
-depending on your container runtime/CNI) — work this out before relying on it.
+depending on your container runtime/CNI) - work this out before relying on it.
 
 ---
 
@@ -158,7 +158,7 @@ kubectl exec -it deploy/hermes-agent -n hermes-agent -- sh
 hermes gateway status
 ```
 
-> The agent connects **outbound** to Discord and the AI provider — there is no
+> The agent connects **outbound** to Discord and the AI provider - there is no
 > inbound webhook to expose. Port-forwarding is only needed to reach the
 > management dashboard or to run ad-hoc `hermes` CLI commands through the pod.
 

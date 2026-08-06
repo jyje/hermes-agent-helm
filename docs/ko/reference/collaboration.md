@@ -7,14 +7,14 @@ description: 협업 문서의 한국어 원문입니다.
 
 [English](collaboration.md) · [한국어](collaboration-ko.md)
 
-> TL;DR — [팀](teams-ko.md)은 여러 단일 인스턴스를 **하나의 공유 채널**로 묶는
+> TL;DR: [팀](teams-ko.md)은 여러 단일 인스턴스를 **하나의 공유 채널**로 묶는
 > 것입니다. *협업*은 그 다음 단계로, 에이전트들이 **`@mention`으로 대화를 서로
-> 넘기게** 하고 — 무엇보다 — 무한히 핑퐁하지 않도록 **멈추게** 하는 것입니다.
+> 넘기게** 하고 - 무엇보다 - 무한히 핑퐁하지 않도록 **멈추게** 하는 것입니다.
 > Hermes에는 봇 대 봇 턴 제한기가 내장돼 있지 않으므로, 그 브레이크는 프롬프트
 > 계약과 4개의 Discord 환경변수로 만듭니다.
 
 이 문서는 [teams-ko.md](teams-ko.md#팀이-맥락을-공유하는-방법)의 "솔직한 현황"
-노트 — 에이전트 간 직접 인식은 업스트림에서 아직 진화 중 — 뒤에 있는 구체적
+노트 - 에이전트 간 직접 인식은 업스트림에서 아직 진화 중 - 뒤에 있는 구체적
 레시피입니다. **공유 채널의 역할별 에이전트 둘 사이의 `@mention` 핸드오프**는 아래
 안전장치로 동작하는 것이 관찰됐습니다. 하지만 upstream은 봇 대 봇 대화를 내장
 circuit breaker가 없는 미지원 토폴로지로 문서화합니다. 실험적 레시피로 취급하고
@@ -25,17 +25,17 @@ circuit breaker가 없는 미지원 토폴로지로 문서화합니다. 실험�
 
 ## 협업하는 쌍의 모습
 
-두 개의 독립적인 단일 인스턴스(각자 자체 릴리스·봇 토큰·PVC·정체성 —
+두 개의 독립적인 단일 인스턴스(각자 자체 릴리스·봇 토큰·PVC·정체성,
 [teams-ko.md](teams-ko.md) 참고)가 하나의 Discord 채널을 공유합니다. 이들은
 **역할**(`config.agent.environment_hint`로 주입)이 다르고, 심지어 **모델 백엔드**도
-다를 수 있습니다 — 하나는 LiteLLM 프록시로, 다른 하나는 Copilot device-flow
+다를 수 있습니다 - 하나는 LiteLLM 프록시로, 다른 하나는 Copilot device-flow
 로그인으로 돌 수 있습니다. 공유 채널이 맥락 버스이고, 메시지 **본문**에 명시적으로
 넣은 `@mention`이 핸드오프 신호입니다.
 
 ```mermaid
 graph TB
     Human((Human)) -->|"@mentions either bot"| Channel
-    subgraph Channel["#team — one shared Discord channel (context bus)"]
+    subgraph Channel["#team - one shared Discord channel (context bus)"]
         direction LR
         Planner["planner<br/>role: scope &amp; plan<br/>backend: LiteLLM proxy"]
         Builder["builder<br/>role: implement<br/>backend: Copilot device-flow"]
@@ -64,7 +64,7 @@ graph TB
 각 에이전트는 **파트너가 누구인지**와 **어떻게 넘길지**를 시스템 프롬프트
 (`config.agent.environment_hint`)를 통해 듣습니다. 파트너는 **Discord 사용자 ID**로
 지목하며, 메시지 **본문**에 명시적인 `<@ID>` 멘션으로 넣습니다(reply-reference가
-아니라 — 아래 루프 브레이크 참고).
+아니라 - 아래 루프 브레이크 참고).
 
 ```yaml
 config:
@@ -75,7 +75,7 @@ config:
       To hand the conversation to builder, put an explicit
       <@BUILDER_BOT_USER_ID> mention in the BODY of your message. Only mention
       builder when you have something substantive to say or genuinely need their
-      input. When a topic reaches a natural conclusion, do NOT mention builder —
+      input. When a topic reaches a natural conclusion, do NOT mention builder -
       address the human instead and end your turn, so the exchange stops. Never
       send a filler or "let me know if you need anything" message that mentions
       builder; that only restarts the loop.
@@ -108,24 +108,24 @@ config:
 ## ID는 어디에 사는가: 선언적 hint vs. 런타임 메모리
 
 에이전트는 "누구를 멘션할지"를 **두 레이어**로 익히며, 실제 배포는 둘 다 씁니다.
-이는 동작 중인 쌍에서 관찰할 수 있습니다 — 각 에이전트는 PVC의 `HERMES_HOME`
+이는 동작 중인 쌍에서 관찰할 수 있습니다 - 각 에이전트는 PVC의 `HERMES_HOME`
 (여기서는 `/opt/data`) 아래에 상태를 영속합니다:
 
 ```bash
-# 선언적 레이어 — 차트에서 주입, 배포할 때마다 다시 시드됨
+# 선언적 레이어: 차트에서 주입, 배포할 때마다 다시 시드됨
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'sed -n "/agent:/,/gateway_timeout/p" $HERMES_HOME/config.yaml'
 
-# 런타임 레이어 — 대화에서 학습해 영속된 것
+# 런타임 레이어: 대화에서 학습해 영속된 것
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'cat $HERMES_HOME/memories/USER.md'
 ```
 
-### 레이어 1 — 선언적 `environment_hint` (초기 프롬프트)
+### 레이어 1: 선언적 `environment_hint` (초기 프롬프트)
 
 차트 값(`config.agent.environment_hint`)에 설정하고 `HERMES_HOME/config.yaml`로
 렌더되어 **모든** 세션의 시스템 프롬프트에 주입됩니다. **파트너 봇의** ID가 있어야
-할 곳입니다: **확정적이고 재현 가능** — 재배포하면 항상 복원되고, 새 PVC도 올바른
+할 곳입니다: **확정적이고 재현 가능** - 재배포하면 항상 복원되고, 새 PVC도 올바른
 상태로 시작합니다. 동작 중인 `july`는 파트너(`june`)가 템플릿 그대로 배선되어
 있음을 보여줍니다:
 
@@ -138,11 +138,11 @@ agent:
     <@JUNE_BOT_USER_ID> mention in the BODY of your message ...
 ```
 
-### 레이어 2 — 런타임 메모리 (대화에서 학습)
+### 레이어 2: 런타임 메모리 (대화에서 학습)
 
 Hermes의 메모리 도구는 대화 중 학습한 영속적 사실을 `HERMES_HOME/memories/`
 (예: `USER.md`)에 기록하며, 이는 PVC에 있어 **재시작에도 살아남습니다**. **런타임에**
-가르친 ID가 여기 들어갑니다 — 보통 **사람의** ID나 배포 후 알게 된 것. 동작 중인
+가르친 ID가 여기 들어갑니다 - 보통 **사람의** ID나 배포 후 알게 된 것. 동작 중인
 쌍에서 `july`는 차트 변경 없이 협업 의도와 사람의 멘션 ID를 모두 학습해 두었습니다:
 
 ```text
@@ -160,9 +160,9 @@ User '<name>' has the Discord user ID '<YOUR_USER_ID>' for mentions.
 기억하라고 요청하면 됩니다:
 
 ```text
-나: @july 기억해둬: 내 Discord 사용자 ID는 <@YOUR_USER_ID>야 — 사람이 필요하면
+나: @july 기억해둬: 내 Discord 사용자 ID는 <@YOUR_USER_ID>야 - 사람이 필요하면
     이걸로 멘션해. 그리고 네 파트너 june은 <@JUNE_BOT_USER_ID>이고.
-july: 알겠어 — 저장했어. 사람 입력이 필요하면 너를 @멘션하고, june에게는
+july: 알겠어 - 저장했어. 사람 입력이 필요하면 너를 @멘션하고, june에게는
       <@JUNE_BOT_USER_ID>로 넘길게.
 ```
 
@@ -173,13 +173,13 @@ july: 알겠어 — 저장했어. 사람 입력이 필요하면 너를 @멘션�
 
 | 사실 | 두는 곳 | 이유 |
 | --- | --- | --- |
-| **파트너 봇의** 사용자 ID | `environment_hint` (레이어 1) | 확정적; 첫 부팅과 재배포마다 올바라야 함 — 우연한 발견에 맡기지 않음. |
+| **파트너 봇의** 사용자 ID | `environment_hint` (레이어 1) | 확정적; 첫 부팅과 재배포마다 올바라야 함 - 우연한 발견에 맡기지 않음. |
 | **사람의** 사용자 ID | 런타임 메모리 (레이어 2) | 대화에서 자연히 학습; 사용자마다 다름; 사람 추가에 재배포 불필요. |
 | 진화하는 팀 컨텍스트(역할, 관심사, 관례) | 런타임 메모리, 또는 고정 정체성은 `SOUL.md` | 대화와 함께 자람; 매번 템플릿화는 번거로움. |
 | 새 PVC에도 **반드시** 살아남아야 하는 것 | `environment_hint` / `SOUL.md` 시드 | 런타임 메모리는 볼륨이 지워지면 사라짐; 차트는 선언적으로 다시 시드. |
 
-> **경험칙:** **핸드오프 배선**(파트너 봇 ID + 루프 브레이크)은 인프라다 — 선언적으로
-> 두어 재배포가 충실하게. **사람이 누구이고 팀이 무엇을 하는지**는 대화다 — 메모리가
+> **경험칙:** **핸드오프 배선**(파트너 봇 ID + 루프 브레이크)은 인프라다 - 선언적으로
+> 두어 재배포가 충실하게. **사람이 누구이고 팀이 무엇을 하는지**는 대화다 - 메모리가
 > 포착하게 두라. 레퍼런스 쌍이 정확히 이 분리를 따릅니다.
 
 ---
@@ -187,7 +187,7 @@ july: 알겠어 — 저장했어. 사람 입력이 필요하면 너를 @멘션�
 ## 루프 브레이크 (이유와 4개 노브)
 
 Hermes에는 **봇 대 봇 턴 제한기가 없습니다**. 서로를 보고 @mention할 수 있는 두
-에이전트는 기본적으로 무한히 핑퐁합니다 — 각 응답이 상대를 다시 깨우기 때문입니다.
+에이전트는 기본적으로 무한히 핑퐁합니다 - 각 응답이 상대를 다시 깨우기 때문입니다.
 위의 프롬프트 계약은 멈추라고 *요청*하지만, 아래 4개 Discord 환경변수가 파트너를
 **오직 메시지 본문의 명시적 `<@id>`에만** 반응하게 만들어 "멈춤"을 실제로 가능하게
 합니다.
@@ -195,7 +195,7 @@ Hermes에는 **봇 대 봇 턴 제한기가 없습니다**. 서로를 보고 @me
 | 환경변수 | 값 | 이유 |
 | --- | --- | --- |
 | `DISCORD_ALLOW_BOTS` | `mentions` | 다른 **봇**에는 그 봇이 우리를 `@mention`할 때만 반응. `off`면 파트너를 완전히 무시, `all`이면 모든 봇 메시지에 반응. 협업 자체를 켜는 노브. |
-| `DISCORD_THREAD_REQUIRE_MENTION` | `true` | 두 봇이 모두 속한 스레드에서 멘션될 때만 반응 — 아니면 모든 봇이 스레드의 모든 메시지에 반응. |
+| `DISCORD_THREAD_REQUIRE_MENTION` | `true` | 두 봇이 모두 속한 스레드에서 멘션될 때만 반응: 아니면 모든 봇이 스레드의 모든 메시지에 반응. |
 | `DISCORD_REPLY_TO_MODE` | `off` | 보내는 메시지에 **reply-reference**를 붙이지 않음. Discord는 reply-reference를 멘션(`replied_user`)으로 계산하므로, 파트너에게 *답글*을 다는 봇은 본문에 `<@id>`가 없어도 상대를 자동 핑 → `ALLOW_BOTS=mentions`를 만족시킴. 이것이 미묘한 무한루프의 원인. |
 | `DISCORD_ALLOW_MENTION_REPLIED_USER` | `false` | 위에 대한 이중 안전장치: 자동 reply-ping을 절대 진짜 멘션으로 취급하지 않음. |
 
@@ -231,9 +231,118 @@ sequenceDiagram
 
 ---
 
+## Discord 너머: Telegram과 Slack
+
+여기까지는 모두 Discord 기준입니다. Discord는 협업 쌍이 **라이브로 검증된
+유일한 플랫폼**이고, [teams-ko.md](teams-ko.md#라이브-증거)에 실린 리더 팀
+라이브 증거도 Discord에서 나왔습니다. 하지만 같은 `@mention` 핸드오프와 같은
+루프 브레이크가 Telegram과 Slack에도 있습니다. Hermes는 세 플랫폼의 봇
+게이팅을 `{PLATFORM}_ALLOW_BOTS`라는 하나의 공유 authorization 경로로
+처리하고, 어댑터마다 "reply가 파트너를 조용히 다시 깨우지 못하게" 막는 수단을
+따로 둡니다. 아래에 플랫폼별로 검증된 대응 노브와 실제 예시를 정리했습니다.
+다만 Telegram과 Slack은 Discord처럼 멀티 봇 라이브 증명을 거치지 않았습니다.
+근거 있는 출발 레시피로 보시되 보장으로 받아들이지는 마세요. 무인 운영에
+맡기기 전에, 지켜볼 수 있는 채널에서 먼저 검증하시기 바랍니다.
+
+### 노브 대응표
+
+| 목적 | Discord | Telegram | Slack |
+| --- | --- | --- | --- |
+| 다른 봇에는 명시적 멘션이 있을 때만 반응 | `DISCORD_ALLOW_BOTS=mentions` | `TELEGRAM_ALLOW_BOTS=mentions` | `SLACK_ALLOW_BOTS=mentions` |
+| 애초에 명시적 멘션을 요구(자유 응답 금지) | `DISCORD_REQUIRE_MENTION=true` | `TELEGRAM_REQUIRE_MENTION=true` | `SLACK_REQUIRE_MENTION=true` |
+| 한 번 멘션된 스레드/토픽이 이후 멘션 없이 계속 자동 반응하지 않게 | `DISCORD_THREAD_REQUIRE_MENTION=true` | 불필요: Telegram 그룹은 매 메시지를 `TELEGRAM_REQUIRE_MENTION`으로 게이팅하며, 따로 닫아야 할 "sticky 스레드" 기억이 없음 | `SLACK_STRICT_MENTION=true`: 기본값 off. 그대로 두면 Slack은 멘션된 스레드를 기억해 계속 자동 응답함 |
+| 파트너를 암묵적으로 다시 멘션하는 native reply 참조를 **보내지** 않기 | `DISCORD_REPLY_TO_MODE=off` | `TELEGRAM_REPLY_TO_MODE=off` | 해당 없음: Slack에는 별도 reply 참조 멘션이 없고, `SLACK_STRICT_MENTION=true`가 "봇 스레드에 답글" 자동 트리거를 이미 차단 |
+| 수신한 reply 참조를 암묵적 멘션으로 취급하지 않기 | `DISCORD_ALLOW_MENTION_REPLIED_USER=false` | 발신 측 `TELEGRAM_REPLY_TO_MODE=off`로 커버됨: 별도 수신 플래그 없음 | `SLACK_STRICT_MENTION=true`로 커버됨 |
+
+Discord에서 노브 4개가 필요한 일을 Telegram은 3개, Slack은 2개로 해냅니다.
+보호가 약해서가 아닙니다. 암묵적 멘션이 끼어들 표면 자체가 더 좁기 때문입니다.
+
+### Telegram
+
+Telegram에서는 봇을 `@username`으로 멘션합니다(봇에게는 username이 반드시
+있어야 하고, 그 username은 `bot`으로 끝나야 합니다. 예:
+`@hermes_builder_bot`). 찾아 쓸 숫자 `<@id>` 토큰은 없습니다. Discord 패턴
+그대로, `environment_hint`에 **정확한 `@username`**을 적으세요:
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Telegram group. Your partner is "builder", Telegram username
+      @hermes_builder_bot. To hand the conversation to builder, put an
+      explicit @hermes_builder_bot mention in the BODY of your message -
+      never rely on Telegram's native "reply" feature to address them, since
+      a reply does not carry the same explicit-mention guarantee this recipe
+      depends on. When a topic reaches a natural conclusion, do NOT mention
+      builder - address the human instead and end your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: TELEGRAM_HOME_CHANNEL      # 공유 그룹 채팅 id
+    value: "<shared-chat-id>"
+  - name: TELEGRAM_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: TELEGRAM_ALLOW_BOTS
+    value: "mentions"
+  - name: TELEGRAM_REQUIRE_MENTION
+    value: "true"
+  - name: TELEGRAM_REPLY_TO_MODE
+    value: "off"
+```
+
+`TELEGRAM_EXCLUSIVE_BOT_MENTIONS`는 기본값이 `true`인데, 그대로 두시길
+권합니다. `bot`으로 끝나는 봇 username 하나를 콕 집어 멘션한 메시지는 같은
+그룹에 있는 **다른** 모든 봇이 아예 무시합니다. Discord에는 대응물이 없는,
+공짜로 얻는 방어층 하나입니다.
+
+### Slack
+
+Slack 멘션은 Discord와 똑같은 `<@USER_ID>` 마크업을 씁니다. 그래서 Discord용
+`environment_hint` 패턴을 그대로 복사한 뒤 파트너의 Slack member ID만 바꿔
+넣으면 됩니다(*프로필 보기 → 더 보기 → 멤버 ID 복사*로 확인하세요):
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Slack channel. Your partner is "builder", Slack user <@U0BUILDERID>.
+      To hand the conversation to builder, put an explicit <@U0BUILDERID>
+      mention in the BODY of your message. When a topic reaches a natural
+      conclusion, do NOT mention builder - address the human instead and end
+      your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: SLACK_HOME_CHANNEL         # 공유 채널 id
+    value: "<shared-channel-id>"
+  - name: SLACK_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: SLACK_ALLOW_BOTS
+    value: "mentions"
+  - name: SLACK_REQUIRE_MENTION
+    value: "true"
+  - name: SLACK_STRICT_MENTION
+    value: "true"
+```
+
+가장 중요한 노브는 `SLACK_STRICT_MENTION`입니다. Slack은 기본적으로 봇이 한 번
+멘션된 스레드를 기억합니다. 그래서 그다음부터는 멘션이 없어도 그 스레드 내내
+계속 반응합니다. Discord의 "sticky 스레드"와 같은 모양이라, 파트너까지 그
+스레드에 있으면 조용히 봇 대 봇 루프로 번질 수 있습니다. `true`로 두면 매 턴
+새 `<@id>`를 요구하므로, 이 레시피의 "끝나면 멈춘다" 지시가 비로소 제대로
+먹힙니다.
+
+---
+
 ## 한 쌍에 서로 다른 백엔드 섞기
 
-협업하는 에이전트가 모델 백엔드를 **공유할 필요는 없습니다** — 공유하는 것은 채널뿐.
+협업하는 에이전트가 모델 백엔드를 **공유할 필요는 없습니다** - 공유하는 것은 채널뿐.
 레퍼런스 쌍은 비대칭으로 돌아갑니다:
 
 | 에이전트 | Provider | 인증 | 비고 |
@@ -252,20 +361,20 @@ sequenceDiagram
 편집이 쉬워집니다.
 
 **팀의 모든 에이전트가 공유**(동일한 값):
-- `DISCORD_HOME_CHANNEL` — 하나의 공유 채널 id (맥락 버스)
-- `DISCORD_ALLOWED_USERS` — 팀에게 말할 수 있는 사람
+- `DISCORD_HOME_CHANNEL`: 하나의 공유 채널 id (맥락 버스)
+- `DISCORD_ALLOWED_USERS`: 팀에게 말할 수 있는 사람
 - 위의 4개 루프 브레이크 노브
-- `config.group_sessions_per_user: false`와 Discord history backfill — 사람과
+- `config.group_sessions_per_user: false`와 Discord history backfill - 사람과
   봇 발신자를 아우르는 하나의 보이는 스레드 대화 기록
 
 **에이전트별**(고유):
-- `releaseName` / `metadata.name` — 고유해야 함
+- `releaseName` / `metadata.name`: 고유해야 함
   ([유일 규칙](../examples/argocd/README.md#the-one-rule-unique-fullname-per-instance))
-- `DISCORD_BOT_TOKEN` — 에이전트당 봇 하나
-- `config.agent.environment_hint` — 역할 + **파트너의** 사용자 ID
+- `DISCORD_BOT_TOKEN`: 에이전트당 봇 하나
+- `config.agent.environment_hint`: 역할 + **파트너의** 사용자 ID
 - 모델 백엔드와 그 인증
 
-### 방법 A — 에이전트당 values 파일 하나 (여기서 시작)
+### 방법 A: 에이전트당 values 파일 하나 (여기서 시작)
 
 [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml)을
 에이전트마다 복사해 역할/파트너-id와 봇 토큰만 바꾸고 나란히 설치합니다:
@@ -277,17 +386,17 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   -f charts/hermes-agent/values-multi-agent-collab.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' --wait
 
-# builder — 같은 채널, 다른 봇, 자체 파일에서 파트너 id 교체
+# builder: 같은 채널, 다른 봇, 자체 파일에서 파트너 id 교체
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-builder.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' --wait
 ```
 
-### 방법 B — ArgoCD ApplicationSet (3개 이상이면 권장)
+### 방법 B: ArgoCD ApplicationSet (3개 이상이면 권장)
 
 **공유** 노브를 `template`으로 올리고 **에이전트별** 필드만 generator 리스트에
-남기면 — 팀원 추가가 한 줄 diff가 됩니다. 이는 [teams-ko.md](teams-ko.md)의 팀
+남기면 - 팀원 추가가 한 줄 diff가 됩니다. 이는 [teams-ko.md](teams-ko.md)의 팀
 ApplicationSet에 협업 노브를 더한 형태입니다:
 
 ```yaml
@@ -366,11 +475,11 @@ ApplicationSet 없이 두 릴리스를 손으로 펼친 버전은
       backfill을 설정해 발신자별 분리 세션이 아니라 스레드가 문맥을 운반하도록 함.
 - [ ] 각 `environment_hint`가 **파트너의** 사용자 ID와 "끝나면 멈춤" 지시 포함.
 - [ ] 에이전트당 고유한 `releaseName` == `metadata.name`.
-- [ ] 백엔드 혼합 가능 — 채널만 일치하면 됨.
+- [ ] 백엔드 혼합 가능: 채널만 일치하면 됨.
 
 ## 함께 보기
 
-- [teams-ko.md](teams-ko.md) — 단일 인스턴스를 팀으로 묶기(이 문서의 전제).
-- [roadmap-ko.md](roadmap-ko.md) — ApplicationSet 팀 패턴과 `hermes-operator` 후보 조건.
+- [teams-ko.md](teams-ko.md): 단일 인스턴스를 팀으로 묶기(이 문서의 전제).
+- [roadmap-ko.md](roadmap-ko.md): ApplicationSet 팀 패턴과 `hermes-operator` 후보 조건.
 - [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)
 - Hermes [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/) 문서.

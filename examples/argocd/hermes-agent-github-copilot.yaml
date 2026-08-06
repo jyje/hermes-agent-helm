@@ -3,13 +3,13 @@
 # sealed-secrets controller decrypts into a Secret, referenced via extraEnvFrom.
 #
 # GitHub Copilot is authenticated at startup via the OAuth device flow, so there
-# is NO Copilot key to seal — the only secret here is the Discord bot token
+# is NO Copilot key to seal: the only secret here is the Discord bot token
 # (which the login init container also reuses to post the verification link).
-# Nothing here is a real secret — `encryptedData` below is a placeholder;
+# Nothing here is a real secret: `encryptedData` below is a placeholder;
 # replace it with your own `kubeseal` output.
 #
 # Full step-by-step (creating the Secret, sealing it, and pasting the result
-# here) is in examples/argocd/README.md — "SealedSecret walkthrough".
+# here) is in examples/argocd/README.md: "SealedSecret walkthrough".
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -33,7 +33,7 @@ spec:
         # (hermes-agent, hermes-agent-env, hermes-agent-0, ...) instead of
         # repeating the long Application/release name on every resource. Only
         # run ONE Application with fullnameOverride: hermes-agent per
-        # namespace — see "The one rule" in examples/argocd/README.md.
+        # namespace: see "The one rule" in examples/argocd/README.md.
         fullnameOverride: hermes-agent
         config:
           model:
@@ -59,7 +59,7 @@ spec:
           # The Copilot token is fetched at runtime via device flow, so the
           # chart's OpenAI placeholder is unused here.
           OPENAI_API_KEY: "unused"
-          # Setting the token is enough to auto-enable Discord — no config.yaml
+          # Setting the token is enough to auto-enable Discord: no config.yaml
           # change. The login init container reuses this same bot to post the
           # verification link. Create the bot at
           # https://discord.com/developers/applications, enable the
@@ -68,19 +68,19 @@ spec:
         extraEnvFrom:
           - secretRef:
               name: hermes-agent-copilot-secrets
-        # Non-secret Discord knobs — plain env, not the Secret. The login init
+        # Non-secret Discord knobs: plain env, not the Secret. The login init
         # container also reads DISCORD_HOME_CHANNEL from here.
         extraEnv:
           - name: DISCORD_HOME_CHANNEL        # channel id for cron / notification / login delivery
-            value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+            value: "000000000000000000"       # DUMMY - your channel id (18 digits)
           - name: DISCORD_ALLOWED_USERS       # comma-separated user ids allowed to talk
-            value: "111111111111111111"       # DUMMY — your Discord user id
+            value: "111111111111111111"       # DUMMY - your Discord user id
           - name: DISCORD_ALLOW_ALL_USERS     # true only for throwaway/dev bots
             value: "false"
         # Persistence is required for device-flow login: the token is written
         # here so it survives restarts (otherwise you would re-approve on every
         # restart). Empty storageClass = cluster default. On a Raspberry Pi
-        # cluster that is typically local-path (k3s) or microk8s-hostpath —
+        # cluster that is typically local-path (k3s) or microk8s-hostpath;
         # both ReadWriteOnce, which is exactly what this single-writer
         # workload wants.
         persistence:
@@ -106,7 +106,7 @@ spec:
               # (hermes-agent) when omitted.
             spec:
               encryptedData:
-                # Replace with `kubeseal` output for YOUR cluster — see
+                # Replace with `kubeseal` output for YOUR cluster: see
                 # "SealedSecret walkthrough" in examples/argocd/README.md.
                 DISCORD_BOT_TOKEN: AgDUMMY_replace_with_kubeseal_output==
               template:

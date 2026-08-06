@@ -7,7 +7,7 @@ dist/
 .idea/
 .vscode/
 
-# Retired Astro/Starlight docs site — kept on disk for reference, no longer
+# Retired Astro/Starlight docs site: kept on disk for reference, no longer
 # tracked. MkDocs Material (mkdocs.yml, docs/) is the maintained docs site.
 /pages/
 

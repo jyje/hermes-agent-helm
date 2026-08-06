@@ -1,6 +1,6 @@
 ---
 name: release-flow
-description: Run the Changesets-based release proposal flow for this chart end-to-end via gh CLI — trigger propose-release, review the PR, adjust the version, watch CI, and merge. Use when the user asks to cut/propose/ship a release, check on a release PR, or change its version.
+description: Run the Changesets-based release proposal flow for this chart end-to-end via gh CLI - trigger propose-release, review the PR, adjust the version, watch CI, and merge. Use when the user asks to cut/propose/ship a release, check on a release PR, or change its version.
 ---
 
 # Release flow (propose-release via gh CLI)
@@ -18,7 +18,7 @@ a release".
 
 ## Steps
 
-1. **Trigger `propose-release.yaml`** (workflow_dispatch, no inputs —
+1. **Trigger `propose-release.yaml`** (workflow_dispatch, no inputs;
    maintainer action, never runs on fork PRs). The version is always derived
    from the pending Changesets on `main`; there is no way to pin a version or
    force a bump level at trigger time:
@@ -38,7 +38,7 @@ a release".
    ```
 
 3. **Review the release PR** (branch `changeset-release/main`, managed by the
-   `changesets/action` GitHub Action — idempotent, re-running step 1 updates
+   `changesets/action` GitHub Action - idempotent, re-running step 1 updates
    the same PR):
 
    ```bash
@@ -59,7 +59,7 @@ a release".
    gh pr checks <PR-number> --watch
    ```
 
-6. **Merge** — this triggers `release-chart.yaml`, which tags `vX.Y.Z`, writes
+6. **Merge**: this triggers `release-chart.yaml`, which tags `vX.Y.Z`, writes
    the GitHub Release, and publishes the chart to both the OCI registry
    (`oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`) and the GitHub Pages Helm repo
    (`https://<owner>.github.io/hermes-agent-helm`). Use `--merge` (not
@@ -70,7 +70,7 @@ a release".
    ```
 
 7. **Watch the release run**, then confirm `verify-release.yaml` (triggered
-   automatically afterward) also goes green — it installs the just-published
+   automatically afterward) also goes green - it installs the just-published
    OCI artifact into a fresh kind cluster and re-verifies it:
 
    ```bash
@@ -81,7 +81,7 @@ a release".
 
 ## Notes
 
-- `main` currently has no branch protection — merging is immediate, no
+- `main` currently has no branch protection: merging is immediate, no
   required reviews/checks are enforced by GitHub itself. Still wait for
   `gh pr checks` to go green before merging.
 - `release-chart.yaml` is a no-op (tag-existence guard) if the `vX.Y.Z` tag

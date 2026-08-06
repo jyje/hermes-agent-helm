@@ -49,7 +49,7 @@ Grouped by area and ordered by priority within each group.
 - [ ] **Split `release-chart` into independent OCI and gh-pages jobs**
   - Currently a single job runs OCI push → gh-pages deploy in sequence
   - If OCI push succeeds but gh-pages fails, re-running skips everything
-    (tag-existence guard) — partial deployment with no automatic recovery
+    (tag-existence guard) - partial deployment with no automatic recovery
   - Splitting into two jobs (with a shared `needs:` on a tagging step) allows
     each to be re-run independently
 

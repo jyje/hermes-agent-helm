@@ -2,8 +2,8 @@
 
 > 🇺🇸 [English Document](SECURITY.md)
 
-이 문서는 이 저장소의 **Helm 차트**(`charts/hermes-agent`) — 템플릿, 기본
-값, 예제, CI — 에 대한 보안 정책을 다룹니다. 이 차트는 커뮤니티가 유지보수하는
+이 문서는 이 저장소의 **Helm 차트**(`charts/hermes-agent`) - 템플릿, 기본
+값, 예제, CI - 에 대한 보안 정책을 다룹니다. 이 차트는 커뮤니티가 유지보수하는
 프로젝트이며, Nous Research의 공식 릴리스가 아닙니다.
 
 ## 취약점 신고
@@ -25,7 +25,7 @@
 
 ## 범위 (Scope)
 
-**범위 내 — 여기로 신고:**
+**범위 내 - 여기로 신고:**
 
 - 안전하지 않은 리소스를 렌더링하는 차트 템플릿 (예: 시크릿이 ConfigMap,
   로그, 어노테이션으로 유출; 의도치 않은 권한 상승).
@@ -36,7 +36,7 @@
 - 이 저장소의 릴리스 파이프라인(GitHub Actions 워크플로, 게시된 OCI
   아티팩트)의 공급망 문제.
 
-**범위 외 — 업스트림으로 신고:**
+**범위 외 - 업스트림으로 신고:**
 
 - Hermes Agent 자체(이미지 내부 애플리케이션)의 취약점. 업스트림 정책을
   따르세요:
@@ -65,15 +65,15 @@
   만듭니다. 유일한 HTTP 표면은 선택적 관리 **대시보드**(포트 9119)이며,
   `127.0.0.1`에 바인딩되고 **API 키를 노출**합니다. 차트는
   `service.enabled: false`, `ingress.enabled: false`로 배포되며, 대시보드
-  노출은 명시적 옵트인과 업스트림의 `--insecure` 플래그가 필요합니다 —
+  노출은 명시적 옵트인과 업스트림의 `--insecure` 플래그가 필요합니다.
   반드시 앞단에 인증을 두세요(`values-ingress.yaml` 참고).
-- **시크릿은 `envFrom`으로 주입**되며 Kubernetes `Secret`으로 렌더링됩니다 —
+- **시크릿은 `envFrom`으로 주입**되며 Kubernetes `Secret`으로 렌더링됩니다.
   ConfigMap에는 절대 들어가지 않습니다. GitOps에서는 실제 시크릿을 커밋하지
   말고 [`examples/argocd/`](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord)의
   SealedSecret 패턴을 사용하세요.
 - **`podSecurityContext` / `securityContext`는 기본적으로 비어 있습니다**
   (이미지 호환성 때문). 이미지가 허용하는 범위에서 강화(non-root, 읽기 전용
-  루트 파일시스템, capability 제거)를 권장합니다 — 사용 환경에서 검증하세요.
+  루트 파일시스템, capability 제거)를 권장합니다 - 사용 환경에서 검증하세요.
 
 ## 저장소 보호 장치
 

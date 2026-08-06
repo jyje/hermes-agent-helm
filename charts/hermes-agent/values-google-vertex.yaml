@@ -35,7 +35,7 @@ config:
     backend: local
 
 env:
-  # No Vertex API key exists — tokens are minted from the mounted SA JSON.
+  # No Vertex API key exists: tokens are minted from the mounted SA JSON.
   # This only overrides the chart's OpenAI placeholder.
   OPENAI_API_KEY: "unused"
 
@@ -46,7 +46,7 @@ extraEnv:
   - name: VERTEX_CREDENTIALS_PATH
     value: /var/run/secrets/vertex/sa.json
   # The vertex provider needs `google-auth`, which upstream ships as an opt-in
-  # extra handled by its lazy-install mechanism — it is NOT baked into the
+  # extra handled by its lazy-install mechanism: it is NOT baked into the
   # image, and the image disables lazy installs by default. Re-enable them so
   # the first Vertex call can install it into HERMES_LAZY_INSTALL_TARGET on
   # the persistent volume (one-time, needs network egress; survives restarts).
@@ -66,7 +66,7 @@ extraVolumeMounts:
 # NOTE: as of a recent Hermes security hardening, VERTEX_CREDENTIALS_PATH and
 # GOOGLE_APPLICATION_CREDENTIALS are stripped from the environment of
 # subprocesses the agent spawns (terminal, execute_code, browser,
-# computer_use) — they still work for the model's own API calls above. If a
+# computer_use): they still work for the model's own API calls above. If a
 # tool call in your session needs Vertex credentials too (e.g. shelling out to
 # `gcloud`), re-allow it explicitly:
 #

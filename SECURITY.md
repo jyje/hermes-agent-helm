@@ -3,7 +3,7 @@
 > 🇰🇷 [한국어 문서 (Korean)](SECURITY-ko.md)
 
 This document covers security for the **Helm chart** in this repository
-(`charts/hermes-agent`) — its templates, default values, examples, and CI.
+(`charts/hermes-agent`) - its templates, default values, examples, and CI.
 It is a community-maintained chart, not an official Nous Research release.
 
 ## Reporting a vulnerability
@@ -26,7 +26,7 @@ volunteer-maintained project without an SLA or bug bounty program.
 
 ## Scope
 
-**In scope — report here:**
+**In scope - report here:**
 
 - Chart templates rendering insecure resources (e.g. secrets leaked into
   ConfigMaps, logs, or annotations; unintended privilege escalation).
@@ -37,7 +37,7 @@ volunteer-maintained project without an SLA or bug bounty program.
 - Supply-chain issues in this repository's release pipeline (GitHub Actions
   workflows, published OCI artifacts).
 
-**Out of scope — report upstream:**
+**Out of scope - report upstream:**
 
 - Vulnerabilities in Hermes Agent itself (the application inside the image).
   Follow the upstream policy:
@@ -58,23 +58,23 @@ security fixes. Older versions are not patched; upgrade to the latest release.
 Facts worth knowing before deploying:
 
 - **The pod is the sandbox.** The agent runs commands inside its own pod
-  (`config.terminal.backend: local`). Kubernetes-level isolation — namespace,
-  `securityContext`, resource limits, NetworkPolicy — is the security
+  (`config.terminal.backend: local`). Kubernetes-level isolation - namespace,
+  `securityContext`, resource limits, NetworkPolicy - is the security
   boundary. The `docker` terminal backend is unsupported in-cluster because it
   would require a Docker daemon/socket.
 - **No inbound API by default.** The agent makes outbound connections only.
   The single HTTP surface is the optional management **dashboard** (port 9119),
   which binds to `127.0.0.1` and **exposes API keys**. The chart ships with
   `service.enabled: false` and `ingress.enabled: false`; exposing the
-  dashboard requires an explicit opt-in and upstream's `--insecure` flag —
+  dashboard requires an explicit opt-in and upstream's `--insecure` flag;
   put authentication in front of it (see `values-ingress.yaml`).
 - **Secrets are injected via `envFrom`**, rendered into a Kubernetes `Secret`
-  — never into the ConfigMap. For GitOps, don't commit real secrets; use the
+  - never into the ConfigMap. For GitOps, don't commit real secrets; use the
   SealedSecret pattern in
   [`examples/argocd/`](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
 - **`podSecurityContext` / `securityContext` are empty by default** for image
   compatibility. Hardening them (non-root, read-only root filesystem, dropped
-  capabilities) is recommended where the image permits — validate in your
+  capabilities) is recommended where the image permits - validate in your
   environment.
 
 ## Repository protections

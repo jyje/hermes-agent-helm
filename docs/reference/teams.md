@@ -7,7 +7,7 @@ description: Leader-and-member team workflow.
 
 [English](teams.md) · [한국어](teams-ko.md)
 
-> TL;DR — **Don't scale a Hermes pod out. Run several well-managed single
+> TL;DR: **Don't scale a Hermes pod out. Run several well-managed single
 > instances and group them into a team that shares one gateway channel.**
 
 ## Why Hermes is a single instance
@@ -17,7 +17,7 @@ Hermes Agent is a **personal agent**: one `HERMES_HOME`, one
 one memory/identity (`SOUL`, skills, `auth.json`, self-improvement state). The
 gateway is explicitly "a single background process that connects to all your
 configured platforms, handles sessions, runs cron jobs, and delivers
-messages" — it is the *one* hub a single agent talks through.
+messages" - it is the *one* hub a single agent talks through.
 
 That makes a single instance a **single-writer workload**, which is why this
 chart pins `replicaCount: 1` and refuses to scale out (see the `replicaCount`
@@ -26,7 +26,7 @@ note in the [chart README](../charts/hermes-agent/README.md)):
 - `controller.type=deployment` → extra replicas hang `Pending` (they can't mount
   the same `ReadWriteOnce` PVC).
 - `controller.type=statefulset` → extra replicas become **separate, disconnected
-  agents** with their own PVC/identity — not a bigger version of the same agent.
+  agents** with their own PVC/identity - not a bigger version of the same agent.
 
 So raising `replicaCount` never gives you "more of the same Hermes." There is no
 supported multi-replica mode, by design.
@@ -34,14 +34,14 @@ supported multi-replica mode, by design.
 ## The model: from lightweight to production
 
 The path from a homelab toy to a production deployment is **scale up, then
-group** — never scale out a single agent:
+group** - never scale out a single agent:
 
 1. **Scale up the one instance.** Give it more `resources`, a larger
    `persistence.size`, a real `storageClass`, probes, and proper secrets
    management (SealedSecret / external-secrets). One instance, well managed.
 2. **Group several instances into a team.** When one agent isn't enough (more
-   people, more roles, more parallel work), deploy *multiple* single instances —
-   each its own release — and join them to **one shared gateway channel** so
+   people, more roles, more parallel work), deploy *multiple* single instances
+   (each its own release) and join them to **one shared gateway channel** so
    they and your team share a common context bus.
 
 Step 2 is what this page is about.
@@ -53,7 +53,7 @@ example, one Discord channel). That shared channel becomes the team's context
 bus:
 
 - Each agent reads and posts messages in the channel, so the **conversation
-  itself is the shared context** every member — human or agent — sees.
+  itself is the shared context** every member - human or agent - sees.
 - The channel doubles as the **home channel** (`*_HOME_CHANNEL`): where each
   agent delivers cron results and proactive notifications, per the
   [messaging gateway docs](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/).
@@ -78,8 +78,8 @@ bus:
 > reliable team pattern is **humans plus one or more role-scoped agents in a
 > shared channel**, each agent addressed by `@mention`. Treat the channel as the
 > source of truth; richer cross-agent context injection is on the upstream
-> roadmap. For the concrete recipe — how two agents hand the conversation to
-> each other by `@mention`, and how to stop them looping forever — see
+> roadmap. For the concrete recipe - how two agents hand the conversation to
+> each other by `@mention`, and how to stop them looping forever - see
 > [collaboration.md](collaboration.md).
 
 ## Build a Hermes team on Discord
@@ -91,7 +91,7 @@ A concrete two-agent team in one Discord channel.
 For each agent you want, create a bot in the
 [Discord Developer Portal](https://discord.com/developers/applications), enable
 the **Message Content Intent**, and invite **all** of them to the **same server
-and the same channel**. Note that channel's ID — it is your shared
+and the same channel**. Note that channel's ID - it is your shared
 `DISCORD_HOME_CHANNEL`, and collect your team's Discord user IDs for
 `DISCORD_ALLOWED_USERS`.
 
@@ -102,7 +102,7 @@ Deploy each agent as its **own release**, each with its **own
 `DISCORD_ALLOWED_USERS`**. With plain Helm, run two installs side by side:
 
 ```bash
-# Agent A — "planner"
+# Agent A: "planner"
 helm upgrade --install hermes-planner ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-anthropic-and-discord.yaml \
@@ -111,7 +111,7 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   --set-string extraEnv[0].name=DISCORD_HOME_CHANNEL \
   --set-string extraEnv[0].value='<shared-channel-id>' --wait
 
-# Agent B — "builder" (same channel, different bot token)
+# Agent B: "builder" (same channel, different bot token)
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-anthropic-and-discord.yaml \
@@ -122,12 +122,12 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 ```
 
 Distinct release names (`hermes-planner`, `hermes-builder`) keep every resource
-separate — each agent gets its own pod, PVC, and identity, so they are genuinely
+separate - each agent gets its own pod, PVC, and identity, so they are genuinely
 independent single instances that happen to share a channel.
 
 ### 3. Or generate the team with an ArgoCD ApplicationSet (recommended)
 
-Steps 1–2 don't scale past a couple of members — one Application/install per
+Steps 1–2 don't scale past a couple of members - one Application/install per
 agent means hand-editing files for every roster change. An
 [ApplicationSet](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/)
 turns the roster into **data** and the per-agent Application into a
@@ -183,7 +183,7 @@ This gives you, for the unique-`fullname` rule from
 ["Multiple instances in the same namespace"](../examples/argocd/README.md#multiple-instances-in-the-same-namespace)
 section, for free:
 
-- **The roster lives in one place** — `generators[0].list.elements` — instead of
+- **The roster lives in one place** - `generators[0].list.elements` - instead of
   N Application files. Adding a teammate is a one-line diff.
 - **Shared fields** (`DISCORD_HOME_CHANNEL`, `DISCORD_ALLOWED_USERS`) live once
   in the `template`; **per-member fields** (name, secret ref, role) come from
@@ -194,7 +194,7 @@ section, for free:
 
 If you'd rather see the rendered form explicitly (e.g. for review, or without
 ApplicationSet), [examples/argocd/](../examples/argocd/) has one hand-written
-Application per provider/example that you can copy per teammate — the
+Application per provider/example that you can copy per teammate - the
 ApplicationSet above is the same shape, generated.
 
 ### 4. (Optional) give each agent a role
@@ -207,8 +207,8 @@ Per-team knowledge that everyone should share goes in context files
 > **What's next (exploratory).** The ApplicationSet above covers *templating* a
 > team's releases declaratively, which is most of what "a team" needs. A
 > dedicated operator (`Agent` / `AgentTeam` CRDs, in a separate repo) would only
-> be worth building if that templating-only model falls short in practice —
-> for example:
+> be worth building if that templating-only model falls short in practice.
+> For example:
 >
 > - a **single object reporting team-wide status**
 >   (`kubectl get agentteam my-team` → "3/4 members healthy"), which an
@@ -385,11 +385,77 @@ knowledge PVC, a member can read the same content, and the member mount rejects
 writes. The existing kind screenshot separately proves the independent releases
 and private homes.
 
-This recipe is **Discord-specific** because its safety depends on Discord thread,
-mention, reply-reference, and session semantics. Telegram remains a supported
-v1 messenger for human-to-agent use, but a Telegram bot-to-bot leader team needs
-a separate platform-level proof; changing only credential environment variables
-is not presented as sufficient.
+The live evidence above is **Discord-specific** - it depends on Discord's
+thread, mention, reply-reference, and session semantics, and only Discord has
+been run through an actual multi-bot proof. Telegram and Slack both have real,
+config-verified equivalents of every loop-brake knob (see below), but neither
+has a live leader-team run behind it yet; treat the recipes that follow as a
+grounded starting point that still needs its own platform-level proof before
+you'd trust it unattended.
+
+### Telegram and Slack
+
+The star-topology protocol itself - one leader talking to the human, members
+answering only on an explicit mention, the `[TEAM run=<id> step=<n>
+TASK|RESULT]` metadata contract, the serialized one-member-at-a-time handoff -
+is entirely platform-independent; none of it is Discord API surface. What
+changes per platform is **how a mention is written** and **which env vars
+close the loop**. See [collaboration.md § Knob
+mapping](collaboration.md#knob-mapping) for the full Discord/Telegram/Slack
+comparison; the leader-team essentials are below.
+
+**Telegram.** Bots are addressed by `@username` (must end in `bot`), not a
+numeric ID - put every member's exact `@username` in the leader's
+`environment_hint`, and the leader's `@username` in every member's. Reuse the
+`values-team-leader.yaml` / `values-team-member.yaml` `environment_hint` text
+verbatim, but replace every `<@ID>` token with `@bot_username` and add one
+instruction Discord doesn't need: tell every agent to never use Telegram's
+native "reply" feature to address a teammate, since a reply is not the
+explicit-mention signal this protocol depends on. The delegation contract
+becomes:
+
+```text
+@may_bot
+
+Context: <everything needed, including accepted earlier results>
+Task: <one concrete task>
+Done when: <observable acceptance criteria>
+Reply contract: mention @august_bot and include the complete result here.
+
+[TEAM run=<short-id> step=<n> TASK]
+```
+
+Swap the leader's `extraEnv` loop-brake block for the Telegram knobs
+(`TELEGRAM_ALLOW_BOTS=mentions`, `TELEGRAM_REQUIRE_MENTION=true`,
+`TELEGRAM_REPLY_TO_MODE=off`), and set `TELEGRAM_HOME_CHANNEL` /
+`TELEGRAM_ALLOWED_USERS` to the shared group chat and trusted human IDs, same
+shape as `values-openai-and-telegram.yaml`. `TELEGRAM_EXCLUSIVE_BOT_MENTIONS`
+defaults to `true` and is worth keeping: a message that explicitly names one
+bot username is ignored by every other bot in the group outright, which adds
+a second independent guard against a member acting on a delegation meant for
+a sibling.
+
+**Slack.** Mentions use the identical `<@USER_ID>` markup Discord uses, so the
+delegation contract and every `environment_hint` carry over unchanged - just
+replace Discord user IDs with Slack member IDs. The one knob that matters most
+is `SLACK_STRICT_MENTION=true`: Slack's default behavior remembers a thread
+once a bot is mentioned in it and keeps that bot listening for the rest of the
+thread with no further mention required (the upstream source comments call
+this out directly as re-enabling "agent-to-agent ack loops" when left off).
+Set the leader and every member's loop-brake block to `SLACK_ALLOW_BOTS=mentions`,
+`SLACK_REQUIRE_MENTION=true`, `SLACK_STRICT_MENTION=true`, and point
+`SLACK_HOME_CHANNEL` / `SLACK_ALLOWED_USERS` at the shared channel and trusted
+humans.
+
+Both platforms need the same `group_sessions_per_user: false` and
+`discord.history_backfill`-equivalent care as the Discord recipe: Telegram and
+Slack sessions are keyed the same way per sender by default, so the shared
+transcript setting stays `config.group_sessions_per_user: false` regardless of
+platform. Everything about the shared-knowledge PVC, `disabled_toolsets`, the
+six-handoff ceiling, and the "never use a hook/file/memory to hand off work"
+rule in `values-team-leader.yaml` / `values-team-member.yaml` applies
+unchanged - only the platform block (`env`/`extraEnv`) and the mention token
+format in `environment_hint` differ.
 
 ### Shared knowledge is separate from coordination
 
@@ -404,14 +470,16 @@ without turning it into a hidden coordination plane.
 
 ## See also
 
-- [collaboration.md](collaboration.md) — the next step: make the grouped agents
+- [Setting up a team](../guides/team-setup.md): a friendlier, from-scratch
+  walkthrough if this is your first team; start there.
+- [collaboration.md](collaboration.md) - the next step: make the grouped agents
   hand off by `@mention` and stop them looping (the bot-to-bot recipe).
-- [Chart README](../charts/hermes-agent/README.md) — full values table, the
+- [Chart README](../charts/hermes-agent/README.md): full values table, the
   `replicaCount` single-writer rationale, and Discord/Telegram env vars.
-- [Roadmap](roadmap.md) — the ApplicationSet-based team pattern, and
+- [Roadmap](roadmap.md): the ApplicationSet-based team pattern, and
   the conditions under which a `hermes-operator` (`Agent` / `AgentTeam` CRDs)
   would become worth building.
-- [examples/argocd/](../examples/argocd/) — one Application per agent, multiple
+- [examples/argocd/](../examples/argocd/): one Application per agent, multiple
   instances per namespace, SealedSecret secret wiring.
 - Hermes official docs:
   [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/)

@@ -3,7 +3,7 @@ name: 🚀 release-chart
 # Release model: Changesets creates a reviewed version PR, and its custom
 # version step synchronizes the private release manifest with Chart.yaml.
 # When that PR reaches `main`, CI tags it and publishes to GitHub Packages (OCI).
-# CI never pushes to `main` — the tag/release/artifact are the only outputs.
+# CI never pushes to `main`: the tag/release/artifact are the only outputs.
 on:
   push:
     branches: [main]
@@ -31,7 +31,7 @@ jobs:
           echo "chart_name=$NAME" >> "$GITHUB_OUTPUT"
           if git rev-parse -q --verify "refs/tags/v$VER" >/dev/null; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::v$VER already released — nothing to do."
+            echo "::notice::v$VER already released - nothing to do."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi

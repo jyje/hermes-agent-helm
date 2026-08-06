@@ -7,9 +7,9 @@ description: Pair collaboration and handoff protocol.
 
 [English](collaboration.md) · [한국어](collaboration-ko.md)
 
-> TL;DR — A [team](teams.md) groups several single instances into **one shared
+> TL;DR: A [team](teams.md) groups several single instances into **one shared
 > channel**. *Collaboration* is the next step: letting those agents **hand the
-> conversation to each other by `@mention`** — and, crucially, **stopping** them
+> conversation to each other by `@mention`** - and, crucially, **stopping** them
 > from ping-ponging forever. Hermes has no built-in bot-to-bot turn limiter, so
 > the brake is a prompt contract plus four Discord env knobs.
 
@@ -27,16 +27,16 @@ configuration. Below is the two-agent pair used for that test.
 ## What a collaborating pair looks like
 
 Two independent single instances (each its own release, bot token, PVC, and
-identity — see [teams.md](teams.md)) share one Discord channel. They differ in
+identity - see [teams.md](teams.md)) share one Discord channel. They differ in
 **role** (injected via `config.agent.environment_hint`) and may even differ in
-**model backend** — one can run on a LiteLLM proxy while the other uses a
+**model backend** - one can run on a LiteLLM proxy while the other uses a
 Copilot device-flow login. The shared channel is the context bus; an explicit
 `@mention` in the message **body** is the handoff signal.
 
 ```mermaid
 graph TB
     Human((Human)) -->|"@mentions either bot"| Channel
-    subgraph Channel["#team — one shared Discord channel (context bus)"]
+    subgraph Channel["#team - one shared Discord channel (context bus)"]
         direction LR
         Planner["planner<br/>role: scope &amp; plan<br/>backend: LiteLLM proxy"]
         Builder["builder<br/>role: implement<br/>backend: Copilot device-flow"]
@@ -53,7 +53,7 @@ graph TB
 ```
 
 **Why a pair, not one bot with two personalities:** each instance keeps its own
-`HERMES_HOME`, memory, and `config` — so roles stay cleanly separated and you can
+`HERMES_HOME`, memory, and `config` - so roles stay cleanly separated and you can
 scale the roster (add a `reviewer`, a `researcher`) without entangling identities.
 This is the same "scale up, then group" rule from [teams.md](teams.md), extended
 with an explicit handoff protocol.
@@ -65,7 +65,7 @@ with an explicit handoff protocol.
 Each agent is told **who its partner is** and **how to hand over** through the
 system prompt, using `config.agent.environment_hint`. The partner is addressed by
 its **Discord user ID**, placed as an explicit `<@ID>` mention in the message
-**body** (not as a reply-reference — see the loop brake below).
+**body** (not as a reply-reference - see the loop brake below).
 
 ```yaml
 config:
@@ -76,14 +76,14 @@ config:
       To hand the conversation to builder, put an explicit
       <@BUILDER_BOT_USER_ID> mention in the BODY of your message. Only mention
       builder when you have something substantive to say or genuinely need their
-      input. When a topic reaches a natural conclusion, do NOT mention builder —
+      input. When a topic reaches a natural conclusion, do NOT mention builder -
       address the human instead and end your turn, so the exchange stops. Never
       send a filler or "let me know if you need anything" message that mentions
       builder; that only restarts the loop.
 ```
 
 The last three sentences are the **prompt half of the loop brake**. They are not
-optional politeness — they are what makes a finite conversation finite.
+optional politeness - they are what makes a finite conversation finite.
 
 For the visible thread to be a real context bus, every agent also needs one
 transcript across human and bot senders. Hermes defaults to a separate session
@@ -110,25 +110,25 @@ does not introduce a hidden file-based coordination channel.
 ## Where the IDs live: declarative hint vs. runtime memory
 
 An agent learns "who to mention" through **two layers**, and a real deployment
-uses both. This is observable on a running pair — each agent persists its state
+uses both. This is observable on a running pair - each agent persists its state
 under `HERMES_HOME` (here `/opt/data`) on its PVC:
 
 ```bash
-# the declarative layer — injected from the chart, re-seeded every deploy
+# the declarative layer: injected from the chart, re-seeded every deploy
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'sed -n "/agent:/,/gateway_timeout/p" $HERMES_HOME/config.yaml'
 
-# the runtime layer — what the agent learned from conversation, persisted
+# the runtime layer: what the agent learned from conversation, persisted
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'cat $HERMES_HOME/memories/USER.md'
 ```
 
-### Layer 1 — declarative `environment_hint` (initial prompt)
+### Layer 1: declarative `environment_hint` (initial prompt)
 
 Set in the chart values (`config.agent.environment_hint`), rendered into
 `HERMES_HOME/config.yaml`, and injected into **every** session's system prompt.
 This is where the **partner bot's** ID belongs: it is **deterministic and
-reproducible** — a redeploy always restores it, and a fresh PVC starts correct.
+reproducible** - a redeploy always restores it, and a fresh PVC starts correct.
 A running `july` shows its partner (`june`) wired in exactly as templated:
 
 ```yaml
@@ -140,11 +140,11 @@ agent:
     <@JUNE_BOT_USER_ID> mention in the BODY of your message ...
 ```
 
-### Layer 2 — runtime memory (learned in conversation)
+### Layer 2: runtime memory (learned in conversation)
 
 Hermes' memory tool writes durable facts it learns mid-conversation to
 `HERMES_HOME/memories/` (e.g. `USER.md`), which lives on the PVC and **survives
-restarts**. This is where IDs you teach it **at runtime** land — typically the
+restarts**. This is where IDs you teach it **at runtime** land - typically the
 **human's** ID, or anything discovered after deploy. On the live pair, `july`
 had learned, with no chart change, both the collaboration intent and the human's
 mention ID:
@@ -164,9 +164,9 @@ To seed an ID conversationally instead of (or in addition to) the chart, just
 **tell the agent in the channel** and ask it to remember:
 
 ```text
-You: @july remember this: my Discord user ID is <@YOUR_USER_ID> — mention me
+You: @july remember this: my Discord user ID is <@YOUR_USER_ID> - mention me
      with it when you need a human. Also, your partner june is <@JUNE_BOT_USER_ID>.
-july: Got it — saved. I'll @mention you for human input and hand off to june
+july: Got it - saved. I'll @mention you for human input and hand off to june
       with <@JUNE_BOT_USER_ID>.
 ```
 
@@ -178,14 +178,14 @@ command above.
 
 | Fact | Put it in | Why |
 | --- | --- | --- |
-| **Partner bot's** user ID | `environment_hint` (Layer 1) | Deterministic; must be correct on first boot and after every redeploy — not left to chance discovery. |
+| **Partner bot's** user ID | `environment_hint` (Layer 1) | Deterministic; must be correct on first boot and after every redeploy: not left to chance discovery. |
 | The **human's** user ID | runtime memory (Layer 2) | Learned naturally in chat; varies per user; no redeploy to add a person. |
 | Evolving team context (roles, focus, conventions) | runtime memory, or `SOUL.md` for a fixed identity | Grows with the conversation; templating every change is churn. |
 | Anything that **must** survive a fresh PVC | `environment_hint` / `SOUL.md` seeding | Runtime memory is lost if the volume is wiped; the chart re-seeds declaratively. |
 
 > **Rule of thumb:** the **handoff wiring** (partner bot IDs + loop brake) is
-> infrastructure — keep it declarative so a redeploy is faithful. **Who the
-> humans are and what the team is working on** is conversation — let memory
+> infrastructure - keep it declarative so a redeploy is faithful. **Who the
+> humans are and what the team is working on** is conversation - let memory
 > capture it. The reference pair does exactly this split.
 
 ---
@@ -193,7 +193,7 @@ command above.
 ## The loop brake (why, and the four knobs)
 
 Hermes has **no built-in bot-to-bot turn limiter**. Two agents that can see and
-@mention each other will, by default, ping-pong forever — each reply re-triggers
+@mention each other will, by default, ping-pong forever - each reply re-triggers
 the partner. The prompt contract above asks them to stop; these four Discord env
 vars make "stop" actually possible by ensuring a partner fires **only on an
 explicit `<@id>` in the message body**, nothing else.
@@ -201,19 +201,19 @@ explicit `<@id>` in the message body**, nothing else.
 | Env var | Value | Why it matters |
 | --- | --- | --- |
 | `DISCORD_ALLOW_BOTS` | `mentions` | Respond to another **bot** only when it `@mentions` us. `off` would ignore the partner entirely; `all` would react to every bot message. This is the knob that enables collaboration at all. |
-| `DISCORD_THREAD_REQUIRE_MENTION` | `true` | In a thread both bots already belong to, fire only when mentioned — otherwise every bot reacts to every message in the thread. |
-| `DISCORD_REPLY_TO_MODE` | `off` | Don't attach a **reply-reference** to outgoing messages. Discord counts a reply-reference as a mention (`replied_user`), so a bot *replying* to its partner auto-pings it — satisfying `ALLOW_BOTS=mentions` even with no `<@id>` in the body. This is the subtle infinite-loop source. |
+| `DISCORD_THREAD_REQUIRE_MENTION` | `true` | In a thread both bots already belong to, fire only when mentioned: otherwise every bot reacts to every message in the thread. |
+| `DISCORD_REPLY_TO_MODE` | `off` | Don't attach a **reply-reference** to outgoing messages. Discord counts a reply-reference as a mention (`replied_user`), so a bot *replying* to its partner auto-pings it: satisfying `ALLOW_BOTS=mentions` even with no `<@id>` in the body. This is the subtle infinite-loop source. |
 | `DISCORD_ALLOW_MENTION_REPLIED_USER` | `false` | Belt-and-suspenders for the above: never treat the auto reply-ping as a real mention. |
 
 > **Why both `REPLY_TO_MODE` and `ALLOW_MENTION_REPLIED_USER`?** The first stops
 > *sending* the auto-ping; the second stops *acting on* one if it arrives by any
 > other path. With both off, the only thing that wakes a partner is a deliberate
-> `<@id>` in the body — so the "stop mentioning when done" instruction in the
+> `<@id>` in the body - so the "stop mentioning when done" instruction in the
 > prompt is the real, enforceable end condition.
 
 These are **real environment variables** read directly by the Discord adapter
 (`os.getenv`). Unlike `require_mention` / `allowed_channels`, they are **not**
-bridged from the `config.yaml` `discord:` block — so they must be set as `env` /
+bridged from the `config.yaml` `discord:` block - so they must be set as `env` /
 `extraEnv`, not under `config`.
 
 ### How a turn ends
@@ -239,9 +239,120 @@ sequenceDiagram
 
 ---
 
+## Beyond Discord: Telegram and Slack
+
+Everything above uses Discord, the only platform with a **live-proven**
+collaborating pair (and the only one behind the leader-team live evidence in
+[teams.md](teams.md#live-evidence)). The same `@mention` handoff and the same
+four-knob loop brake exist for Telegram and Slack too - Hermes routes bot
+gating for all three through one shared authorization path
+(`{PLATFORM}_ALLOW_BOTS`), and each platform adapter has its own equivalent of
+"don't let a reply silently re-trigger the partner." The sections below give
+the verified equivalent knobs and a worked example for each. Neither has been
+run through a live multi-bot proof the way the Discord recipe has - treat them
+as a well-grounded starting recipe, not a guarantee, and validate in a channel
+you can watch before trusting it unattended.
+
+### Knob mapping
+
+| Purpose | Discord | Telegram | Slack |
+| --- | --- | --- | --- |
+| Only respond to another bot on an explicit mention | `DISCORD_ALLOW_BOTS=mentions` | `TELEGRAM_ALLOW_BOTS=mentions` | `SLACK_ALLOW_BOTS=mentions` |
+| Require an explicit mention at all (vs. free-response) | `DISCORD_REQUIRE_MENTION=true` | `TELEGRAM_REQUIRE_MENTION=true` | `SLACK_REQUIRE_MENTION=true` |
+| Stop a thread/topic from auto-triggering once mentioned, without a fresh mention | `DISCORD_THREAD_REQUIRE_MENTION=true` | not needed: Telegram groups gate every message on `TELEGRAM_REQUIRE_MENTION`; there is no separate "sticky thread" memory to close | `SLACK_STRICT_MENTION=true`: off by default; Slack otherwise remembers a mentioned thread and keeps auto-responding in it |
+| Stop *sending* a native reply-reference that would silently mention the partner back | `DISCORD_REPLY_TO_MODE=off` | `TELEGRAM_REPLY_TO_MODE=off` | not applicable: Slack has no separate reply-reference mention; `SLACK_STRICT_MENTION=true` already closes the "reply in a bot's thread" auto-trigger |
+| Never treat an inbound reply-reference as an implicit mention | `DISCORD_ALLOW_MENTION_REPLIED_USER=false` | covered by `TELEGRAM_REPLY_TO_MODE=off` on the sending side: there is no separate inbound flag | covered by `SLACK_STRICT_MENTION=true` |
+
+Telegram and Slack each fold what takes four knobs on Discord into three (Telegram)
+or two (Slack) - the platforms have less surface area for an implicit mention
+to sneak in, not less protection.
+
+### Telegram
+
+Telegram mentions a bot by its `@username` (bots must have one, and it must
+end in `bot`, e.g. `@hermes_builder_bot`) - there is no numeric `<@id>` token
+to look up. Put the **exact `@username`** in `environment_hint`, matching the
+Discord pattern:
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Telegram group. Your partner is "builder", Telegram username
+      @hermes_builder_bot. To hand the conversation to builder, put an
+      explicit @hermes_builder_bot mention in the BODY of your message -
+      never rely on Telegram's native "reply" feature to address them, since
+      a reply does not carry the same explicit-mention guarantee this recipe
+      depends on. When a topic reaches a natural conclusion, do NOT mention
+      builder - address the human instead and end your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: TELEGRAM_HOME_CHANNEL      # shared group chat id
+    value: "<shared-chat-id>"
+  - name: TELEGRAM_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: TELEGRAM_ALLOW_BOTS
+    value: "mentions"
+  - name: TELEGRAM_REQUIRE_MENTION
+    value: "true"
+  - name: TELEGRAM_REPLY_TO_MODE
+    value: "off"
+```
+
+`TELEGRAM_EXCLUSIVE_BOT_MENTIONS` defaults to `true` and is worth leaving
+alone: when a message explicitly `@mentions` one bot username ending in
+`bot`, every *other* bot in the group ignores that message outright, even if
+it's also present. That is an extra layer this recipe gets for free on
+Telegram with no Discord equivalent.
+
+### Slack
+
+Slack mentions use the exact same `<@USER_ID>` markup as Discord - copy the
+Discord `environment_hint` pattern verbatim, just swap in the partner's Slack
+member ID (find it via *View profile → More → Copy member ID*):
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Slack channel. Your partner is "builder", Slack user <@U0BUILDERID>.
+      To hand the conversation to builder, put an explicit <@U0BUILDERID>
+      mention in the BODY of your message. When a topic reaches a natural
+      conclusion, do NOT mention builder - address the human instead and end
+      your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: SLACK_HOME_CHANNEL         # shared channel id
+    value: "<shared-channel-id>"
+  - name: SLACK_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: SLACK_ALLOW_BOTS
+    value: "mentions"
+  - name: SLACK_REQUIRE_MENTION
+    value: "true"
+  - name: SLACK_STRICT_MENTION
+    value: "true"
+```
+
+`SLACK_STRICT_MENTION` is the one knob to get right: Slack's default behavior
+remembers a thread once a bot is `@mentioned` in it and keeps that bot
+listening for the rest of the thread with no further mention required - the
+same "sticky thread" shape as Discord, and just as capable of quietly turning
+into a bot-to-bot loop if the partner is also in that thread. Setting it to
+`true` forces a fresh `<@id>` on every single turn, which is what this
+recipe's "stop when done" instruction actually depends on to work.
+
 ## Mixed backends in one pair
 
-Collaborating agents need **not** share a model backend — the channel is the only
+Collaborating agents need **not** share a model backend - the channel is the only
 thing they share. The reference pair runs asymmetrically:
 
 | Agent | Provider | Auth | Notes |
@@ -260,20 +371,20 @@ You have a single shared knob set and a per-agent knob set. Keep them separate a
 the roster stays easy to edit.
 
 **Shared by every agent in the team** (identical values):
-- `DISCORD_HOME_CHANNEL` — the one shared channel id (the context bus)
-- `DISCORD_ALLOWED_USERS` — who may talk to the team
+- `DISCORD_HOME_CHANNEL`: the one shared channel id (the context bus)
+- `DISCORD_ALLOWED_USERS`: who may talk to the team
 - the four loop-brake knobs above
-- `config.group_sessions_per_user: false` and Discord history backfill — one
+- `config.group_sessions_per_user: false` and Discord history backfill - one
   visible thread transcript across human and bot senders
 
 **Per agent** (unique):
-- `releaseName` / `metadata.name` — must be unique (the
+- `releaseName` / `metadata.name`: must be unique (the
   [one rule](../examples/argocd/README.md#the-one-rule-unique-fullname-per-instance))
-- `DISCORD_BOT_TOKEN` — one bot per agent
-- `config.agent.environment_hint` — role + the **partner's** user ID
+- `DISCORD_BOT_TOKEN`: one bot per agent
+- `config.agent.environment_hint`: role + the **partner's** user ID
 - model backend + its auth
 
-### Option A — one values file per agent (start here)
+### Option A: one values file per agent (start here)
 
 Copy [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml)
 once per agent, change the role/partner-id and bot token, and install side by side:
@@ -285,17 +396,17 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   -f charts/hermes-agent/values-multi-agent-collab.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' --wait
 
-# builder — same channel, different bot, partner id swapped in its own file
+# builder: same channel, different bot, partner id swapped in its own file
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-builder.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' --wait
 ```
 
-### Option B — ArgoCD ApplicationSet (recommended for 3+)
+### Option B: ArgoCD ApplicationSet (recommended for 3+)
 
 Promote the **shared** knobs into the `template` and keep only the **per-agent**
-fields in the generator list — adding a teammate becomes a one-line diff. This
+fields in the generator list - adding a teammate becomes a one-line diff. This
 extends the team ApplicationSet in [teams.md](teams.md#3-or-generate-the-team-with-an-argocd-applicationset-recommended)
 with the collaboration knobs:
 
@@ -375,11 +486,13 @@ if you'd rather see both releases spelled out.
       agent so the thread, rather than sender-isolated sessions, carries context.
 - [ ] Each `environment_hint` names the **partner's** user ID and includes the "stop when done" instruction.
 - [ ] Unique `releaseName` == `metadata.name` per agent.
-- [ ] Mixed backends are fine — only the channel must match.
+- [ ] Mixed backends are fine: only the channel must match.
 
 ## See also
 
-- [teams.md](teams.md) — group single instances into a team (the prerequisite to this page).
-- [roadmap.md](roadmap.md) — the ApplicationSet team pattern and the `hermes-operator` candidacy.
+- [Setting up a team](../guides/team-setup.md): a friendlier, from-scratch
+  walkthrough if this is your first team; start there.
+- [teams.md](teams.md): group single instances into a team (the prerequisite to this page).
+- [roadmap.md](roadmap.md): the ApplicationSet team pattern and the `hermes-operator` candidacy.
 - [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)
 - Hermes [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/) docs.

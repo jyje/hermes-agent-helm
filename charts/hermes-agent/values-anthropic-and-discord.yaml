@@ -1,7 +1,7 @@
 # values-anthropic-and-discord.yaml
 #
 # Hermes Agent using Anthropic (Claude) as the model provider AND running as a
-# Discord bot — both wired in one file.
+# Discord bot: both wired in one file.
 #
 # All secrets below are DUMMY placeholders. Do NOT commit real keys: override
 # them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom
@@ -16,7 +16,7 @@
 config:
   model:
     provider: anthropic
-    # A current Claude model id — see https://docs.anthropic.com for the list
+    # A current Claude model id: see https://docs.anthropic.com for the list
     # (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).
     default: claude-sonnet-4-6
   terminal:
@@ -29,7 +29,7 @@ env:
   OPENAI_API_KEY: "unused"
 
   # --- Discord bot (secret bits) ------------------------------------------
-  # Setting the token is enough to auto-enable Discord — no config.yaml change.
+  # Setting the token is enough to auto-enable Discord: no config.yaml change.
   # Create the bot at https://discord.com/developers/applications, enable the
   # "Message Content Intent", and invite it to your server.
   DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
@@ -37,8 +37,8 @@ env:
 # Non-secret Discord knobs go here (plain env, not the Secret).
 extraEnv:
   - name: DISCORD_HOME_CHANNEL        # channel id for cron / notification delivery
-    value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+    value: "000000000000000000"       # DUMMY - your channel id (18 digits)
   - name: DISCORD_ALLOWED_USERS       # comma-separated user ids allowed to talk
-    value: "111111111111111111"       # DUMMY — your Discord user id
+    value: "111111111111111111"       # DUMMY - your Discord user id
   - name: DISCORD_ALLOW_ALL_USERS     # true only for throwaway/dev bots
     value: "false"

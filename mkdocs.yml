@@ -29,7 +29,7 @@ plugins:
   - search
   - macros:
       # This repo's docs document GitHub Actions (${{ }}) and Helm template
-      # ({{ .Values.x }}) syntax verbatim in many pages — macros' Jinja
+      # ({{ .Values.x }}) syntax verbatim in many pages: macros' Jinja
       # processing would mangle that literal text. Opt in per-page instead
       # of processing the whole site (see docs/charts/hermes-agent/overlays
       # /index.md's `render_macros: true` frontmatter for the one page that
@@ -62,14 +62,18 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.snippets:
       base_path:
         - "."
       check_paths: true
   # Without this, Markdown syntax inside raw HTML blocks (the <div
   # align="center">...</div> wrapper the READMEs use for their header) is
-  # left as literal, unrendered text instead of being parsed — this is
+  # left as literal, unrendered text instead of being parsed: this is
   # standard Python-Markdown behavior, not an MkDocs quirk.
   - md_in_html
 
@@ -121,6 +125,7 @@ nav:
       - Configuration model: guides/configuration.md
       - Secrets and persistence: guides/secrets-and-storage.md
       - Operations and testing: guides/operations.md
+      - Setting up a team: guides/team-setup.md
   - Reference:
       - reference/index.md
       - Contributing: reference/contributing.md

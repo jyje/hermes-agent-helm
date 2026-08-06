@@ -16,14 +16,14 @@
 
 ---
 
-**이 프로젝트가 도움이 되셨나요? 별(⭐)을 눌러주세요 — 다른 분들이 찾는 데 도움이 됩니다.**
+**이 프로젝트가 도움이 되셨나요? 별(⭐)을 눌러주세요 - 다른 분들이 찾는 데 도움이 됩니다.**
 
 </div>
 
 ## 요약
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 Kubernetes에서
-`helm install` 한 번으로 실행하세요 — Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
+`helm install` 한 번으로 실행하세요 - Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
 단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님)
 **커뮤니티 기반** 차트입니다. Nous Research 공식 릴리즈가 아닙니다.
 
@@ -60,7 +60,7 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
 - **Hermes가 지원하는 모든 제공자를 `values.yaml`로.** `openai-api`, `anthropic`,
   `gemini`, `openrouter`, `nvidia`, `deepseek`, 또는
   [LiteLLM](https://github.com/BerriAI/litellm) 같은 OpenAI 호환 엔드포인트는
-  이미 Hermes 자체가 환경변수로 지원하는 기능입니다 — 이 차트는 그 설정을
+  이미 Hermes 자체가 환경변수로 지원하는 기능입니다 - 이 차트는 그 설정을
   `values.yaml`로 편하게 노출하고, 제공자별 즉시 사용 가능한 예제를 제공할 뿐,
   템플릿에 특정 제공자를 하드코딩하지 않습니다.
 - **경량 → 프로덕션.** 기본값은 홈랩/싱글노드/엣지 클러스터용(단일 레플리카, 적당한
@@ -71,7 +71,7 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
 - **엔드-투-엔드 검증.** CI가 임시 **kind** 클러스터에 차트를 설치하고
   번들된 테스트 Job(`hermes doctor`)을 실행합니다. `NVIDIA_API_KEY` 리포지토리
   시크릿이 있으면 NVIDIA NIM에 대한 **live `hermes chat` 라운드트립**도 실행합니다
-  — 목(mock)이 아닙니다.
+  - 목(mock)이 아닙니다.
   Discord 스레드 리더 팀도 사람 → 리더 → 멤버 둘 → 리더 라이브 라운드트립을
   완주했습니다. Telegram 팀 오케스트레이션은 별도 실증 대상입니다.
 
@@ -93,7 +93,7 @@ charts/hermes-agent/                     # Helm 차트 (전체 값 테이블은 
 charts/hermes-agent/values-*.yaml        # 즉시 사용 가능한 예제: 제공자별, Discord/Telegram, LiteLLM (차트 README "More examples" 참고)
 examples/helm/                           # Git 및 OCI(ghcr.io)에서 설치 + 배포 가이드
 examples/argocd/                         # ArgoCD Application 예제 (values-*.yaml별 1개) + GitOps/SealedSecret 패턴
-charts/hermes-operator/                  # ⏸️ 장기·미착수: Agent/AgentTeam CRD 오퍼레이터의 가능한 설치용 차트 — 플레이스홀더, TBA (로드맵 참고)
+charts/hermes-operator/                  # ⏸️ 장기·미착수: Agent/AgentTeam CRD 오퍼레이터의 가능한 설치용 차트 - 플레이스홀더, TBA (로드맵 참고)
 docs/                                    # 심화 가이드: teams-ko.md (인스턴스를 팀으로 묶기), collaboration-ko.md (@mention으로 핸드오프시키기), roadmap-ko.md
 .github/workflows/                       # ci (lint + docs-drift + kind에서 실제 라운드트립) 및 release (버전 범프 -> 태그 -> ghcr OCI)
 CONTRIBUTING.md                          # 브랜치 모델 (dev/main + tags) + 버전 범프 기반 릴리즈
@@ -150,7 +150,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   만들고 차트를 `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`에 배포합니다.
 
 즉: lint + test가 모든 변경사항을 게이트합니다; *릴리즈* 자체는 단순한
-리뷰된 PR (버전 범프) — 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
+리뷰된 PR (버전 범프) - 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
 전체 릴리즈 플레이북은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
 
 ## 로드맵
@@ -161,7 +161,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 ## 기여하기
 
-이슈, PR, 아이디어 모두 환영합니다 — [CONTRIBUTING.md](CONTRIBUTING.md)
+이슈, PR, 아이디어 모두 환영합니다 - [CONTRIBUTING.md](CONTRIBUTING.md)
 (브랜치 모델, 로컬 체크, 릴리즈 플로우)부터 시작하세요. 머지된 모든 기여는
 체인지로그와 릴리즈 노트에 크레딧됩니다.
 

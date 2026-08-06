@@ -19,7 +19,7 @@ if [ -n "${DISCORD_BOT_TOKEN:-}" ]; then
 fi
 
 # ${arr[@]+...} guards against bash's "unbound variable" on an EMPTY array
-# under `set -u` (still the default /bin/bash on macOS, 3.2 — fixed upstream
+# under `set -u` (still the default /bin/bash on macOS, 3.2: fixed upstream
 # in bash 4.4, but worth not relying on the runner's bash version).
 install_release "${discord_args[@]+"${discord_args[@]}"}"
 run_hook_test

@@ -3,7 +3,7 @@
 # single source of truth) + install snippets (latest / this version / OCI) +
 # the changelog section for this version (extracted from CHANGELOG.md, so it
 # matches the release-proposal PR exactly). Contributors are not included
-# here — GitHub renders a native contributors block on the release page
+# here: GitHub renders a native contributors block on the release page
 # already.
 #
 # Usage: render-release-notes.sh <owner/repo> <chart_name> <version> <changelog_section_file> <chart_yaml_path>
@@ -31,7 +31,7 @@ ${DESCRIPTION}
 
 ---
 
-**AppVersion:** \`${APP_VERSION}\` — the Hermes Agent image this chart version deploys.
+**AppVersion:** \`${APP_VERSION}\` - the Hermes Agent image this chart version deploys.
 
 ## Install
 

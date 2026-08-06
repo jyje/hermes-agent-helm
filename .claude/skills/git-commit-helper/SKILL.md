@@ -23,7 +23,7 @@ All commit messages must strictly follow this format:
 - **Description**: (Optional) Use this to explain "why" the change was made or provide further context.
 
 ### Skill-File Changes
-`SKILL.md` files define agent behavior, not just documentation — use `fix` (corrections/refinements to an existing skill) or `feat` (new capability/rule added to a skill), never `docs`, for changes to them. Set the domain to `skills/<skill-name>` (e.g. `(skills/git-commit-helper)`) so it reads distinctly from other domains in a repo where skills live alongside other project code. In a repo dedicated entirely to skills (e.g. this one), the bare skill name (e.g. `(git-commit-helper)`) is sufficient since there's no ambiguity.
+`SKILL.md` files define agent behavior, not just documentation - use `fix` (corrections/refinements to an existing skill) or `feat` (new capability/rule added to a skill), never `docs`, for changes to them. Set the domain to `skills/<skill-name>` (e.g. `(skills/git-commit-helper)`) so it reads distinctly from other domains in a repo where skills live alongside other project code. In a repo dedicated entirely to skills (e.g. this one), the bare skill name (e.g. `(git-commit-helper)`) is sufficient since there's no ambiguity.
 
 ---
 
@@ -64,7 +64,7 @@ commit-message:
   prefix-development: "🤖 ci"
   include: "scope"
 ```
-This renders as `🤖 ci(deps): bump <package> from X to Y` for production dependencies and `🤖 ci(deps-dev): ...` for development ones (the `(scope)` comes from `include: "scope"`, not from manually typing a domain). Without this config, Dependabot's default has no gitmoji at all, e.g. `build(deps): bump the production-dependencies group with 6 updates` — that default is the bug to fix, not a format to tolerate.
+This renders as `🤖 ci(deps): bump <package> from X to Y` for production dependencies and `🤖 ci(deps-dev): ...` for development ones (the `(scope)` comes from `include: "scope"`, not from manually typing a domain). Without this config, Dependabot's default has no gitmoji at all, e.g. `build(deps): bump the production-dependencies group with 6 updates` - that default is the bug to fix, not a format to tolerate.
 
 ---
 

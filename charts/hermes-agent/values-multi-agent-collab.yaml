@@ -5,8 +5,8 @@
 # "planner" role; copy it to a "builder" (swap the role text and the partner's
 # user ID) and deploy both as separate releases into the same channel.
 #
-# Full walkthrough — handoff protocol, the loop brake, mixed backends, and an
-# ApplicationSet that templates a whole roster — is in docs/reference/collaboration.md.
+# Full walkthrough: handoff protocol, the loop brake, mixed backends, and an
+# ApplicationSet that templates a whole roster: is in docs/reference/collaboration.md.
 #
 # Two instances collaborate when:
 #   1. they share ONE channel (same DISCORD_HOME_CHANNEL + DISCORD_ALLOWED_USERS),
@@ -50,7 +50,7 @@ config:
     history_backfill_limit: 50
   agent:
     # The handoff protocol. Names the PARTNER's Discord user ID and tells this
-    # agent how to hand over (explicit <@id> in the BODY) and — critically — how
+    # agent how to hand over (explicit <@id> in the BODY) and: critically - how
     # to STOP (address the human, drop the mention) when a topic is done. The
     # closing sentences are the prompt half of the loop brake; without them the
     # two bots ping-pong forever.
@@ -61,7 +61,7 @@ config:
       put an explicit <@BUILDER_BOT_USER_ID> mention in the BODY of your message.
       Only mention builder when you have something substantive to say or genuinely
       need their input. When a topic reaches a natural conclusion, do NOT mention
-      builder — address the human instead and end your turn, so the exchange
+      builder - address the human instead and end your turn, so the exchange
       stops. Never send a filler or "let me know if you need anything" message
       that mentions builder; that only restarts the loop.
 
@@ -77,9 +77,9 @@ env:
 # full rationale of each loop-brake var.
 extraEnv:
   - name: DISCORD_HOME_CHANNEL              # the ONE shared channel (context bus)
-    value: "000000000000000000"             # DUMMY — your channel id (18 digits)
-  - name: DISCORD_ALLOWED_USERS             # shared — who may talk to the team
-    value: "111111111111111111"             # DUMMY — comma-separated user ids
+    value: "000000000000000000"             # DUMMY - your channel id (18 digits)
+  - name: DISCORD_ALLOWED_USERS             # shared - who may talk to the team
+    value: "111111111111111111"             # DUMMY - comma-separated user ids
   # --- loop brake: a partner fires ONLY on an explicit <@id> in the body -------
   - name: DISCORD_ALLOW_BOTS                 # respond to a bot only when it @mentions us
     value: "mentions"
@@ -91,7 +91,7 @@ extraEnv:
     value: "false"
 
 # Persistence: empty storageClass = cluster default. On a Raspberry Pi cluster
-# that is typically local-path (k3s) or microk8s-hostpath — both ReadWriteOnce,
+# that is typically local-path (k3s) or microk8s-hostpath: both ReadWriteOnce,
 # which is exactly what this single-writer workload wants.
 persistence:
   enabled: true

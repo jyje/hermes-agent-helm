@@ -1,7 +1,7 @@
 # values-upstage.yaml
 #
 # Hermes Agent using Upstage Solar's built-in OpenAI-compatible provider.
-# Dummy key — override at install time.
+# Dummy key: override at install time.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
@@ -13,7 +13,7 @@ config:
     provider: upstage
     # Hosted/business-tier model. For Upstage's open-weight flagship instead
     # (250B-A15B MoE, https://huggingface.co/upstage/Solar-Open2-250B),
-    # use "solar-open2" — same provider, no other change needed. Verified
+    # use "solar-open2": same provider, no other change needed. Verified
     # working end-to-end: https://github.com/jyje/pilot-upstage-solar-open2/tree/main/02-hermes-agent-solar-open2
     default: solar-pro3
   terminal:

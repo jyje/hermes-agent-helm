@@ -8,7 +8,7 @@
 
 👩🏻‍💻 A Helm chart to run Hermes Agent on Kubernetes, community-powered, lightweight
 
-Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) — a multi-provider LLM agent framework — on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
+Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) - a multi-provider LLM agent framework - on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
 [![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.8.3](https://img.shields.io/badge/AppVersion-v2026.8.3-informational?style=flat)
 
@@ -33,11 +33,11 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
-- **ArgoCD** — ready-to-apply `Application` manifests, one per provider/messenger
+- **ArgoCD**: ready-to-apply `Application` manifests, one per provider/messenger
   combo: [`examples/argocd/`](../../examples/argocd/).
-- **GitOps without committing real secrets** — SealedSecret + `extraEnvFrom`
+- **GitOps without committing real secrets**: SealedSecret + `extraEnvFrom`
   walkthrough: [`examples/argocd/` § SealedSecret](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord).
-- **Agent team** — run multiple instances that hand off by `@mention` over a shared Discord channel:
+- **Agent team**: run multiple instances that hand off by `@mention` over a shared Discord channel:
   [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml),
   see [Teams](../../docs/reference/teams.md) + [Collaboration guide](../../docs/reference/collaboration.md).
 
@@ -50,17 +50,17 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | OpenAI | `openai-api` | `OPENAI_API_KEY` | [`values-openai.yaml`](values-openai.yaml) |
 | Anthropic (Claude) | `anthropic` | `ANTHROPIC_API_KEY` | [`values-anthropic.yaml`](values-anthropic.yaml) |
 | Google Gemini | `gemini` | `GOOGLE_API_KEY` | [`values-gemini.yaml`](values-gemini.yaml) |
-| Google Vertex AI | `vertex` | none — OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC) | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
+| Google Vertex AI | `vertex` | none: OAuth2 tokens auto-minted from a mounted service-account JSON (or ADC) | [`values-google-vertex.yaml`](values-google-vertex.yaml) |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | [`values-openrouter.yaml`](values-openrouter.yaml) |
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) |
 | Fireworks AI | `fireworks` | `FIREWORKS_API_KEY` | [`values-fireworks.yaml`](values-fireworks.yaml) |
 | DeepInfra | `deepinfra` | `DEEPINFRA_API_KEY` | [`values-deepinfra.yaml`](values-deepinfra.yaml) |
 | Upstage Solar | `upstage` | `UPSTAGE_API_KEY` | [`values-upstage.yaml`](values-upstage.yaml) |
-| GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow — no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
+| GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow: no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
 
-> `openai` (no suffix) is **not** a valid provider key — it aliases to
+> `openai` (no suffix) is **not** a valid provider key - it aliases to
 > OpenRouter. Use `openai-api`.
 
 Full provider walkthrough (`--set` examples per provider) and messenger
@@ -88,14 +88,14 @@ It deploys:
 - a **ConfigMap** holding the partial `config.yaml`
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
-  (no inbound port — the gateway is outbound); for `deployment`: a standalone
+  (no inbound port - the gateway is outbound); for `deployment`: a standalone
   PVC instead. Either way, an **optional** ClusterIP Service for the dashboard,
   and an **optional** Ingress in front of it (`ingress.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 The agent's command execution uses the **`local` backend** (commands run inside
 the pod; the pod is the sandbox). The `docker` backend is intentionally **not
-supported in-cluster** — it requires a Docker daemon/socket, absent on
+supported in-cluster** - it requires a Docker daemon/socket, absent on
 containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 
 > Image tags are **date-based** (e.g. `v2026.6.5` == Hermes v0.16.0); the image
@@ -104,7 +104,7 @@ containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 > **Scaling note.** Hermes is a single-instance personal agent, so this chart
 > pins `replicaCount: 1` and there is no multi-replica mode (see the
 > `replicaCount` note in the [values table](#values)). To grow, scale *up* (more
-> `resources`, larger `persistence.size`) — and when one agent isn't enough, run
+> `resources`, larger `persistence.size`) - and when one agent isn't enough, run
 > several instances and group them into a **team** that shares one gateway
 > channel. See [Hermes teams](../../docs/reference/teams.md).
 
@@ -127,11 +127,11 @@ for your provider at install/upgrade time, or supply a values file.
 
 ### Install options: LLM provider
 
-This is the main thing you configure at install time — *which* LLM backend
+This is the main thing you configure at install time - *which* LLM backend
 Hermes talks to. (For chat platforms, see
 [Messenger integrations](#messenger-integrations-telegram--discord) below.)
 
-- **Built-in provider** — set `config.model.provider` to one of Hermes'
+- **Built-in provider**: set `config.model.provider` to one of Hermes'
   built-in keys (`openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`,
   `deepseek`, `lmstudio`, …) and `config.model.default` to a model id for that
   provider. Supply the matching key under `env` (`OPENAI_API_KEY`,
@@ -159,7 +159,7 @@ Hermes talks to. (For chat platforms, see
     --set-string env.OPENAI_API_KEY=unused --wait
   ```
 
-- **Custom OpenAI-compatible provider** (LiteLLM, vLLM, LM Studio, …) — register
+- **Custom OpenAI-compatible provider** (LiteLLM, vLLM, LM Studio, …): register
   it under `config.providers.<id>` (`base_url`, `key_env`) and point
   `config.model.provider` at that `<id>`. See `values-litellm.yaml` (remote
   proxy) or `values-litellm-k8s.yaml` (in-cluster) in
@@ -168,22 +168,22 @@ Hermes talks to. (For chat platforms, see
 ### Messenger integrations (Telegram / Discord)
 
 `hermes gateway run` (the workload's command) connects whatever chat platforms
-it finds **credentials** for — so wiring a messenger is just a matter of
+it finds **credentials** for - so wiring a messenger is just a matter of
 supplying its bot token. The token is sensitive, so put it under `.Values.env`
 (rendered into the Secret); the non-secret knobs (allowed users, home channel)
 can go under `.Values.extraEnv` (plain env). Setting the token is enough to
-**auto-enable** the platform — no `config.yaml` change required.
+**auto-enable** the platform - no `config.yaml` change required.
 
 > **Verification status:** the chart renders the right Secret/env and the agent
 > picks the platform up. On trusted CI runs where the `DISCORD_BOT_TOKEN` and
 > `DISCORD_HOME_CHANNEL` secrets are configured, CI does a full live
-> round-trip — `hermes send` to that channel, then reads the channel back via
-> the Discord API to confirm the message arrived — and **fails if it can't be
+> round-trip - `hermes send` to that channel, then reads the channel back via
+> the Discord API to confirm the message arrived - and **fails if it can't be
 > verified** (the bot needs *View Channel* + *Read Message History*). Fork PRs
 > skip it since secrets aren't exposed. Telegram is still placeholder-only.
 > Provide a real bot token to try either in your own cluster.
 
-- **Discord** — create a bot at the
+- **Discord**: create a bot at the
   [Discord Developer Portal](https://discord.com/developers/applications),
   enable the **Message Content Intent**, and invite it to your server.
 
@@ -205,7 +205,7 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
   | `DISCORD_HOME_CHANNEL` | channel ID for cron / notification delivery |
   | `DISCORD_HOME_CHANNEL_NAME` | display name for that home channel |
 
-- **Telegram** — create a bot via [@BotFather](https://t.me/BotFather) and set
+- **Telegram**: create a bot via [@BotFather](https://t.me/BotFather) and set
   `env.TELEGRAM_BOT_TOKEN` (optionally `TELEGRAM_HOME_CHANNEL`,
   `TELEGRAM_ALLOWED_USERS` via `extraEnv`).
 
@@ -214,13 +214,13 @@ See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 
 ## Login via OAuth device flow (GitHub Copilot)
 
-Some providers issue short-lived OAuth tokens you cannot paste ahead of time —
+Some providers issue short-lived OAuth tokens you cannot paste ahead of time.
 **GitHub Copilot** is the headline case: its token API rejects PATs and wants a
 `gho_`/`ghu_` device-flow token. Set `auth.deviceFlow.enabled=true` and the
 chart adds an **`auth-device-login` init container** that performs the
 [OAuth 2.0 Device Authorization Grant (RFC 8628)](https://datatracker.ietf.org/doc/html/rfc8628)
 at pod startup, surfaces the verification URL + user code for a human to
-approve (your Discord home channel by default — phone-friendly), waits, then
+approve (your Discord home channel by default - phone-friendly), waits, then
 persists the resulting token to `HERMES_HOME/.env` exactly where Hermes reads
 it. The token lives on the persistent volume, so it is reused across restarts;
 re-login only happens when it is missing or revoked (skip-if-valid).
@@ -235,22 +235,22 @@ kubectl logs sts/hermes-agent -n hermes-agent -c auth-device-login -f
 
 Notes:
 
-- **Requires `persistence.enabled=true`** — without a volume the token is lost
+- **Requires `persistence.enabled=true`**: without a volume the token is lost
   on restart and you would re-approve every time.
 - **`notify`** is `discord` (reuses `DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL`)
   or `logs` (verification prompt printed to the init container logs only).
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
-  `10000` — the upstream image's runtime user) so the non-root agent can read it.
+  `10000` - the upstream image's runtime user) so the non-root agent can read it.
 - **Catalog model:** `auth.deviceFlow.providers` is a map keyed by provider id
   (each with its own `clientId`/`authHost`/`tokenEnv`/…); `auth.deviceFlow.provider`
-  selects which one runs. Only `github-copilot` ships today — add a map entry to
+  selects which one runs. Only `github-copilot` ships today - add a map entry to
   support another device-flow provider. The Copilot `clientId` default is the
   shared client Hermes upstream itself uses.
 
 ## Agent team
 
-Hermes is a **single-instance personal agent** — it does not scale out. Instead,
+Hermes is a **single-instance personal agent** - it does not scale out. Instead,
 run several well-managed instances and group them into a team that shares **one
 Discord channel** as the context bus. Each agent gets its own bot token, pod,
 private `HERMES_HOME` PVC, and identity. Task coordination is shared only through
@@ -260,7 +260,7 @@ the Discord channel; team-specific knowledge volumes are mounted separately.
 
 Point every instance at the same `DISCORD_HOME_CHANNEL` (with a different
 `DISCORD_BOT_TOKEN` each). Agents hand the conversation to each other by placing
-an explicit `<@BOT_USER_ID>` in the **body** of a Discord message — not as a
+an explicit `<@BOT_USER_ID>` in the **body** of a Discord message - not as a
 reply reference. Four env vars make the handoff reliable and prevent infinite
 bot-to-bot ping-pong:
 
@@ -268,10 +268,10 @@ bot-to-bot ping-pong:
 | --- | --- | --- |
 | `DISCORD_ALLOW_BOTS` | `mentions` | Respond to another bot only when it `@mentions` us. |
 | `DISCORD_THREAD_REQUIRE_MENTION` | `true` | In shared threads, fire only on explicit mention. |
-| `DISCORD_REPLY_TO_MODE` | `off` | Don't attach a reply-reference — it auto-pings the partner and restarts the loop. |
+| `DISCORD_REPLY_TO_MODE` | `off` | Don't attach a reply-reference: it auto-pings the partner and restarts the loop. |
 | `DISCORD_ALLOW_MENTION_REPLIED_USER` | `false` | Never treat an auto reply-ping as a real mention. |
 
-Set these under `env` / `extraEnv` (not under `config` — they are read directly
+Set these under `env` / `extraEnv` (not under `config` - they are read directly
 by the Discord adapter via `os.getenv`).
 
 Also set `config.group_sessions_per_user: false` and keep
@@ -293,8 +293,8 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
   --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' --wait
 ```
 
-For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**
-— adding a teammate becomes a one-line diff. See
+For a declarative roster (3+ agents, GitOps), use an **ArgoCD ApplicationSet**;
+adding a teammate becomes a one-line diff. See
 [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
 and the full guide in [Teams](../../docs/reference/teams.md) + [Collaboration](../../docs/reference/collaboration.md).
 
@@ -319,8 +319,8 @@ timestamped [team evidence](../../docs/reference/teams.md#leader-orchestrated-te
 
 > **Alternative: one pod, many profiles.** If what you actually need is
 > routing different Discord guilds/channels/threads to different agent
-> *profiles* from a **single bot token** — rather than several bots sharing
-> one channel — set `config.gateway.multiplex_profiles: true` (env override:
+> *profiles* from a **single bot token** - rather than several bots sharing
+> one channel - set `config.gateway.multiplex_profiles: true` (env override:
 > `GATEWAY_MULTIPLEX_PROFILES=1`). That's one pod instead of one-per-teammate;
 > it solves a different problem than the hand-off pattern above (routing, not
 > collaboration), so pick based on which shape your use case actually needs.
@@ -337,7 +337,7 @@ Disable it with `--set tests.enabled=false`; make doctor failures fatal with
 
 `tests.chat.enabled=true` adds a 5th check: a real `hermes chat` round-trip
 using the **same `config`/`env` the release was installed with** (the test Job
-mounts the same ConfigMap and Secret as the main workload — no separate
+mounts the same ConfigMap and Secret as the main workload - no separate
 provider key needed), with the **full conversation (prompt + response) printed
 to the test Job's logs**. Since `helm test` doesn't take `--set`, flip the flag
 with `helm upgrade --reuse-values` and then run the test:
@@ -373,7 +373,7 @@ By default a failed/empty round-trip is **non-fatal** (logged only); set
 does when an `NVIDIA_API_KEY` secret is available).
 
 For free-tier providers where a single model can be flaky/overloaded, set
-`tests.chat.models` to a list of `provider/model` ids — the test Job tries
+`tests.chat.models` to a list of `provider/model` ids - the test Job tries
 each in order via `hermes chat -m <id> --provider <config.model.provider>`
 (its own `tests.chat.timeout` per attempt) and passes as soon as one succeeds.
 This is what CI does (a small pool of free NVIDIA NIM models).
@@ -383,41 +383,41 @@ This is what CI does (a small pool of free NVIDIA NIM models).
 Hermes reads `$HERMES_HOME/config.yaml` and secrets from the environment as
 **partial overrides** on top of its version-specific built-in defaults
 (precedence: CLI > `config.yaml` > `.env` > built-in defaults). This chart
-follows that model — you only set what you want to change, and never reproduce
+follows that model - you only set what you want to change, and never reproduce
 the full upstream config (which would drift across Hermes versions).
 
 > **The passthrough principle.** `.Values.config` is rendered into
-> `config.yaml` **as-is** — every level allows arbitrary additional keys (see
+> `config.yaml` **as-is** - every level allows arbitrary additional keys (see
 > `values.schema.json`). That means **any** key documented in Hermes' own
 > [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
 > or [Environment Variables reference](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
-> is already settable today — under `config.<path>` or `env`/`extraEnv` — with
+> is already settable today - under `config.<path>` or `env`/`extraEnv` - with
 > **no chart change required**. This README only curates the handful of
 > settings most people touch at install time (provider, messenger, team
 > topology); it is deliberately not a mirror of the upstream docs. See
 > [FAQ](#faq) below for the lookup recipe.
 
-- **`config.yaml`** — set only override keys under `.Values.config`. It is
+- **`config.yaml`**: set only override keys under `.Values.config`. It is
   rendered into a ConfigMap and **seeded into `HERMES_HOME`** (the persistent
   volume) by an init container, because Hermes also writes to its home at
   runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=true`
   (default) re-seeds on every deploy; set `false` to seed only when absent.
-- **Secrets / API keys** — set under `.Values.env`. Rendered into a Secret and
+- **Secrets / API keys**: set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
 
 ### Secret provisioning strategies
 
-Pick one per deployment — they compose (e.g. SealedSecret for the provider key,
+Pick one per deployment - they compose (e.g. SealedSecret for the provider key,
 Bitwarden for everything else):
 
 | Strategy | When to use | Where |
 | --- | --- | --- |
 | Plain `.Values.env` | Local/dev, or a values file you never commit with real values | this README's provider examples |
-| SealedSecret + `extraEnvFrom` | GitOps — encrypt real secrets so they're safe to commit | [`examples/argocd/`](../../examples/argocd/) |
+| SealedSecret + `extraEnvFrom` | GitOps: encrypt real secrets so they're safe to commit | [`examples/argocd/`](../../examples/argocd/) |
 | Bitwarden Secrets Manager | Centralize N provider keys behind one rotating bootstrap token | [`values-bitwarden.yaml`](values-bitwarden.yaml) |
-| 1Password | Not yet covered by this chart — its secret source needs the `op` CLI present in the image/PATH at startup, which is more than a values example can add on its own. Track or pick up new work upstream-side first. | — |
+| 1Password | Not yet covered by this chart: its secret source needs the `op` CLI present in the image/PATH at startup, which is more than a values example can add on its own. Track or pick up new work upstream-side first. |: |
 
-For GitOps, avoid committing real keys in `env` — instead deploy a
+For GitOps, avoid committing real keys in `env` - instead deploy a
 `SealedSecret` (or similar) via `extraResources` and reference the Secret it
 produces with `extraEnvFrom` (applied after the chart's own Secret, so it
 wins). See [`examples/argocd/`](../../examples/argocd/) for a complete
@@ -430,11 +430,11 @@ credential in an externally managed Kubernetes Secret referenced through
 first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
 so the pod needs egress to Bitwarden and GitHub Releases.
 
-- **Dashboard Ingress** — the management dashboard (`service.port`, default
+- **Dashboard Ingress**: the management dashboard (`service.port`, default
   9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
   warns **exposes API keys on the network**. Set `service.enabled: true` and
   `ingress.enabled: true` only behind authentication (e.g. an
-  oauth2-proxy/basic-auth Ingress annotation) or on a private network — see
+  oauth2-proxy/basic-auth Ingress annotation) or on a private network - see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
 ## Gateway lifecycle: rollouts, shutdown, and drain
@@ -446,7 +446,7 @@ exits fast. Rollouts are quick by default, and the Kubernetes default
 30-second termination grace period is plenty.
 
 To opt into a graceful drain window instead (wait for running agent turns
-before interrupting), set both halves — the drain in Hermes config and the
+before interrupting), set both halves - the drain in Hermes config and the
 grace period on the pod:
 
 ```yaml
@@ -457,7 +457,7 @@ terminationGracePeriodSeconds: 90 # keep WELL ABOVE the drain timeout
 ```
 
 If the grace period is not comfortably above the drain timeout, the kubelet
-SIGKILLs the gateway mid-drain — upstream documents this exact race (against
+SIGKILLs the gateway mid-drain - upstream documents this exact race (against
 systemd's `TimeoutStopSec`) as leaving a stale lock that crash-loops the
 gateway, which is why its default moved to 0. A drain window also cannot
 "save" an unbounded agent turn; treat it as a courtesy, not a guarantee.
@@ -469,11 +469,11 @@ gateway, which is why its default moved to 0. A drain window also cannot
 > is relay-only with a registered wake URL, and relies on the hosting platform
 > suspending the VM. With this chart's direct Discord/Telegram/Slack
 > connections it never arms, and Kubernetes would keep the pod Running
-> regardless — so the chart deliberately does not expose it.
+> regardless - so the chart deliberately does not expose it.
 
 ## Unattended approvals
 
-The gateway pod has **no TTY** — Hermes' interactive approval prompt (for
+The gateway pod has **no TTY** - Hermes' interactive approval prompt (for
 dangerous `terminal`/`execute_code` commands) has no human to answer it there,
 so a run can stall waiting on one. Tune this under `config.approvals`:
 
@@ -482,32 +482,32 @@ config:
   approvals:
     mode: manual        # "manual" (default) prompts; the gateway has nobody to answer
     deny:                # commands matching these patterns are refused BEFORE
-      - "rm -rf /"       # any approval/yolo logic even sees them — safe to keep
+      - "rm -rf /"       # any approval/yolo logic even sees them: safe to keep
       - "curl.*\\|.*sh"  # even in yolo mode
     cron_mode: deny       # unattended cron runs: "deny" (default) or "approve"
     discord_prompt_timeout: 120  # seconds a Discord button prompt stays live
                                  # (clamped upstream; default 300s / 5 min)
 ```
 
-`approvals.deny` is a allowlist-of-refusals, not a full policy — it exists to
+`approvals.deny` is a allowlist-of-refusals, not a full policy - it exists to
 hard-block specific dangerous patterns regardless of any other approval mode
 you run with. It does not, by itself, make the gateway non-interactive; pair
 it with whatever HERMES_YOLO_MODE / approval-mode setting fits your risk
 tolerance (see the [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
-for the full picture — approvals policy is deliberately not duplicated here).
+for the full picture - approvals policy is deliberately not duplicated here).
 
 ## Environment variables
 
 This chart only walks through the [provider](#install-options-llm-provider)
 and [messenger](#messenger-integrations-telegram--discord) variables needed to
-get started — Hermes itself reads many more from its environment. Any of them
+get started - Hermes itself reads many more from its environment. Any of them
 can be set the same way as the ones above: secrets under `.Values.env`
 (Secret), non-secret knobs under `.Values.extraEnv` (plain env), or via
 `extraEnvFrom` for externally-managed secrets (see
 [Configuration model](#configuration-model)).
 
 Full reference (kept current with each Hermes release):
-**[Environment Variables — Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
+**[Environment Variables - Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
 A few more commonly-used ones, current as of image `v2026.8.3`:
 
@@ -536,7 +536,7 @@ A few more commonly-used ones, current as of image `v2026.8.3`:
 
 ## FAQ
 
-**I want to set a Hermes setting this README doesn't mention — how?**
+**I want to set a Hermes setting this README doesn't mention - how?**
 
 This README only covers install-time basics (provider, messenger, team
 topology). For anything else:
@@ -545,7 +545,7 @@ topology). For anything else:
    [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
    (for `config.yaml` keys) or
    [Environment Variables reference](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)
-   (for env vars) — search for what you want to change.
+   (for env vars) - search for what you want to change.
 2. Found a `config.yaml` key, e.g. `foo.bar: baz`? Set it under
    `.Values.config.foo.bar` in your values file (or `--set-string
    config.foo.bar=baz`). Found an env var, e.g. `SOME_TOKEN`? Set it under
@@ -553,28 +553,28 @@ topology). For anything else:
 3. `helm upgrade` and confirm with `kubectl exec <pod> -- hermes doctor` or
    `helm test`.
 
-No chart change is ever needed for a setting Hermes itself already supports —
+No chart change is ever needed for a setting Hermes itself already supports;
 see [The passthrough principle](#configuration-model) above. This chart's own
 `values.yaml`/example files exist only for the settings worth a starter
 template (a new provider's full block, a messenger's loop-brake env vars,
-team topology) — not as a second copy of Hermes' own reference docs.
+team topology) - not as a second copy of Hermes' own reference docs.
 
 **Why did an upstream release note not turn into a new `values.yaml` key?**
 
 Most upstream "add config X" requests turn out to already be reachable through
-the passthrough above with zero chart changes — see recent examples:
+the passthrough above with zero chart changes - see recent examples:
 [#45](https://github.com/jyje/hermes-agent-helm/issues/45),
 [#46](https://github.com/jyje/hermes-agent-helm/issues/46),
 [#48](https://github.com/jyje/hermes-agent-helm/issues/48). A new
 `values-*.yaml` example file only gets added when a setting is complex enough
 to be worth a copy-pasteable starting point (a new provider, a new secret
-source) — not for every individual key upstream ships.
+source) - not for every individual key upstream ships.
 
 ## More examples
 
 Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
 (e.g. a Raspberry Pi / arm64 k3s cluster). All secrets in these files are
-**dummy placeholders** — override them at install time with `--set-string` (see
+**dummy placeholders** - override them at install time with `--set-string` (see
 the command in each file's header comment), or via the SealedSecret +
 `extraEnvFrom` pattern above.
 
@@ -585,25 +585,25 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-github-copilot.yaml`](values-github-copilot.yaml) | GitHub Copilot (`copilot`) | **OAuth device-flow login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
-| [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | — |
-| [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | — |
-| [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | — |
+| [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
+| [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) |: |
+| [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini |: |
 | [`values-google-vertex.yaml`](values-google-vertex.yaml) | Google Vertex AI (`vertex`) | **Service-account JSON mounted** via `extraVolumes` (no static API key) |
-| [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter | — |
+| [`values-openrouter.yaml`](values-openrouter.yaml) | OpenRouter |: |
 | [`values-fireworks.yaml`](values-fireworks.yaml) | Fireworks AI | Native Fireworks model IDs |
 | [`values-deepinfra.yaml`](values-deepinfra.yaml) | DeepInfra | Endpoint override via `DEEPINFRA_BASE_URL` |
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | Endpoint override via `UPSTAGE_BASE_URL` |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | Reference models run in parallel, an aggregator model synthesizes the result |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager** supplies provider keys at startup |
-| [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) | — |
-| [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) | — |
+| [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
+| [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
-| [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair** — two agents handing off by @mention in a shared Discord channel |
-| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team** — serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/reference/teams.md) |
-| [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC** — multiple agents reading/writing to the same knowledge base |
+| [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
+| [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/reference/teams.md) |
+| [`values-shared-knowledge.yaml`](values-shared-knowledge.yaml) | Anthropic (Claude) | **Shared RWX PVC**: multiple agents reading/writing to the same knowledge base |
 
 Deploying via ArgoCD instead of plain `helm`/`-f`? See
-[`examples/argocd/`](../../examples/argocd/) — it has one Application manifest
+[`examples/argocd/`](../../examples/argocd/) - it has one Application manifest
 per example above, each with its `extraEnvFrom`-based secret pattern.
 
 ## Values
@@ -625,7 +625,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | auth.deviceFlow.providers.github-copilot.validateUrl | string | Optional endpoint to verify an existing token is still live; on    401/403 the init container re-runs the login. Empty = skip the check. | `"https://api.github.com/copilot_internal/v2/token"` |
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
-| auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid —    the upstream image's s6-overlay runs the agent as uid/gid 10000 — so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
+| auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid;    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed the rendered config.yaml into HERMES_HOME via an init container. | `true` |
 | bootstrap.overwrite | bool | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). | `true` |
 | command | list | Container entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart loop. So run the long-lived gateway explicitly; inside the s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on crash). Append `--no-supervise` only if you want to bypass s6. | `["hermes"]` |
@@ -638,7 +638,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | extraInitContainers | list | Extra init containers, appended after the chart's own (seed-config,    device-flow login). Full container spec; combine with `extraVolumes` for    one-time preparation of a user-provided volume (for example, a shared    knowledge volume used independently of the Discord team handoff). | `[]` |
 | extraResources | list | Extra raw manifests rendered as-is alongside this chart's resources.    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and    may be either an object or a multiline string (see examples/argocd/).    Useful for things this chart doesn't model directly, e.g. a SealedSecret    that a sealed-secrets controller decrypts into a Secret referenced via    `extraEnvFrom` (see examples/argocd/). | `[]` |
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
-| extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var — e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
+| extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var: e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
@@ -660,7 +660,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | probes | object | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 | `{"liveness":{},"readiness":{}}` |
 | probes.liveness | object | Liveness probe spec. Empty = no liveness probe. | `{}` |
 | probes.readiness | object | Readiness probe spec. Empty = no readiness probe. | `{}` |
-| replicaCount | int | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out — with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. | `1` |
+| replicaCount | int | DO NOT change this. Hermes Agent is a single-writer workload bound to one HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out; with controller.type=deployment extra replicas just hang Pending (can't mount the same RWO volume); with statefulset they become separate, disconnected agent instances with their own PVC/identity. There is no supported multi-replica mode for this chart. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
 | securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |
 | service | object | ------------------------------------------------------------------------- | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` |
@@ -671,13 +671,13 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
-| terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast — the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop — the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
+| terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast: the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop: the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
 | tests | object | ------------------------------------------------------------------------- | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
 | tests.chat.enabled | bool | Run a `hermes chat` round-trip and log the conversation. | `false` |
 | tests.chat.failOnError | bool | When true, a failed/empty round-trip fails the test job. | `false` |
 | tests.chat.maxTurns | int | Max agent turns for the round-trip. | `1` |
-| tests.chat.models | list | Optional pool of `provider/model` ids to try in order (via `hermes chat    -m <id> --provider config.model.provider`), each with its own `timeout`.    Passes as soon as one succeeds — useful for free-tier models that are    sometimes overloaded. Leave empty to use `config.model.default` as-is    (single attempt, no `-m`/`--provider` override). | `[]` |
+| tests.chat.models | list | Optional pool of `provider/model` ids to try in order (via `hermes chat    -m <id> --provider config.model.provider`), each with its own `timeout`.    Passes as soon as one succeeds: useful for free-tier models that are    sometimes overloaded. Leave empty to use `config.model.default` as-is    (single attempt, no `-m`/`--provider` override). | `[]` |
 | tests.chat.prompt | string | Prompt sent to the agent. | `"Just say hi."` |
 | tests.chat.timeout | int | Seconds to allow each round-trip attempt to run before timing out. | `180` |
 | tests.doctorStrict | bool | When true, `hermes doctor` issues fail the test. When false, doctor runs    for visibility but only hard checks (hermes --version, seeded config) fail. | `false` |

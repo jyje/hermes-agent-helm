@@ -4,7 +4,7 @@
 # common knowledge base on one ReadWriteMany (RWX) PVC.
 #
 # Use case: A team of Hermes agents (planner, builder, researcher, etc.) that all
-# read from and write to the same durable knowledge repository — curated notes,
+# read from and write to the same durable knowledge repository: curated notes,
 # reference documents, or vector indices. Every agent mounts the SAME knowledge
 # PVC at /opt/data/shared-knowledge while retaining its own config, memory,
 # sessions, and identity on a private HERMES_HOME PVC.
@@ -82,9 +82,9 @@ env:
 # allowed users to form a single context bus.
 extraEnv:
   - name: DISCORD_HOME_CHANNEL
-    value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+    value: "000000000000000000"       # DUMMY - your channel id (18 digits)
   - name: DISCORD_ALLOWED_USERS
-    value: "111111111111111111"       # DUMMY — comma-separated user ids
+    value: "111111111111111111"       # DUMMY - comma-separated user ids
   - name: SHARED_KNOWLEDGE_ROOT
     value: "/opt/data/shared-knowledge"
 

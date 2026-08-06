@@ -4,7 +4,7 @@ on:
   # pull_request only: every merge into main/dev goes through a PR, so the
   # pull_request run already validates the exact tree that lands on the
   # target branch. A push trigger on top of that would re-run the same
-  # (expensive, kind-cluster) validation a second time right after merge —
+  # (expensive, kind-cluster) validation a second time right after merge:
   # e.g. cron-fetch-image's bump-pr gets validated once as a PR (#120) and
   # then again on push to main seconds after merging (#121). Direct pushes
   # bypassing a PR aren't a supported workflow in this repo, so there's no
@@ -18,11 +18,11 @@ on:
 jobs:
   changes:
     # Detects whether this push/PR only touches Chart.yaml's version (plus the
-    # generated docs/changelog that follow it) — a release-bump commit. In that
+    # generated docs/changelog that follow it): a release-bump commit. In that
     # case the chart's behavior is unchanged, so the heavy `test` job below
     # (ephemeral kind cluster + real round-trip) is skipped. Exception: an
     # appVersion change swaps the default image, which IS a functional change
-    # even when Chart.yaml is the only file touched — that must still run the
+    # even when Chart.yaml is the only file touched: that must still run the
     # kind scenarios.
     runs-on: ubuntu-26.04-arm
     outputs:
@@ -45,7 +45,7 @@ jobs:
           if echo "$changed" | grep -vE '^(\.changeset/.*|charts/hermes-agent/(Chart\.yaml|README(-ko)?\.md)|examples/helm/README\.md|CHANGELOG\.md|package\.json|pnpm-lock\.yaml)$' | grep -q .; then
             echo "functional=true" >> "$GITHUB_OUTPUT"
           elif git diff "$base" "${{ github.sha }}" -- charts/hermes-agent/Chart.yaml | grep -qE '^\+appVersion:'; then
-            echo "appVersion changed — new default image, running functional tests"
+            echo "appVersion changed - new default image, running functional tests"
             echo "functional=true" >> "$GITHUB_OUTPUT"
           else
             echo "functional=false" >> "$GITHUB_OUTPUT"
@@ -79,11 +79,11 @@ jobs:
         run: |
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
           git diff --exit-code charts/hermes-agent/README.md \
-            || { echo "::error::charts/hermes-agent/README.md is stale — run 'make docs' and commit"; exit 1; }
+            || { echo "::error::charts/hermes-agent/README.md is stale: run 'make docs' and commit"; exit 1; }
 
   test:
     # Each matrix entry gets its OWN ephemeral kind cluster (a separate
-    # runner), so the scenarios are fully isolated — no shared cluster,
+    # runner), so the scenarios are fully isolated: no shared cluster,
     # no namespace partitioning, no background-process plumbing. Scenario
     # logic lives in .github/scripts/{lib,scenario-*}.sh. If an
     # NVIDIA_API_KEY secret is present (non-fork runs), the message scenario
@@ -95,7 +95,7 @@ jobs:
     # CI_MODELS is a pool of small/free NIM models (same provider/credentials,
     # different model ids). The message scenario tries each via
     # `hermes chat -m <model>` and passes as soon as one succeeds, since any
-    # single free-tier model can be flaky — this is a FAILOVER pool, not
+    # single free-tier model can be flaky: this is a FAILOVER pool, not
     # exhaustive per-model testing.
     needs: changes
     if: needs.changes.outputs.functional == 'true'
@@ -130,10 +130,10 @@ jobs:
         # from the message-scenario workload (no gateway loop needed for
         # bot-token platforms), then read the channel back through the Discord
         # API and confirm our unique marker is present. This GATES on trusted
-        # runs — if the send fails or the message can't be verified, CI fails.
+        # runs: if the send fails or the message can't be verified, CI fails.
         # Fork PRs skip it (no secret). The bot needs View Channel + Read Message
         # History on DISCORD_HOME_CHANNEL for the read-back. Only this scenario
-        # installs Discord, and only this job's own success() is checked — it
+        # installs Discord, and only this job's own success() is checked: it
         # does not wait on the existing-claim job (GitHub Actions' own check
         # status already reports overall pass/fail across the matrix).
         if: matrix.scenario == 'message' && success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
@@ -142,7 +142,7 @@ jobs:
           pod=$(kubectl get pod -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent \
             -o jsonpath='{.items[0].metadata.name}')
           nonce="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          msg="✅ hermes-agent chart message scenario verified — other checks still in progress — ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} [${nonce}]"
+          msg="✅ hermes-agent chart message scenario verified - other checks still in progress - ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7} [${nonce}]"
           echo "Sending via workload pod: $pod"
           kubectl exec -n test-hermes-chart "$pod" -- hermes send --to discord "$msg"
 
