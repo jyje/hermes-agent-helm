@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2639,8 +2669,8 @@
 <span class="c1"># &quot;planner&quot; role; copy it to a &quot;builder&quot; (swap the role text and the partner&#39;s</span>
 <span class="c1"># user ID) and deploy both as separate releases into the same channel.</span>
 <span class="c1">#</span>
-<span class="c1"># Full walkthrough — handoff protocol, the loop brake, mixed backends, and an</span>
-<span class="c1"># ApplicationSet that templates a whole roster — is in docs/reference/collaboration.md.</span>
+<span class="c1"># Full walkthrough: handoff protocol, the loop brake, mixed backends, and an</span>
+<span class="c1"># ApplicationSet that templates a whole roster: is in docs/reference/collaboration.md.</span>
 <span class="c1">#</span>
 <span class="c1"># Two instances collaborate when:</span>
 <span class="c1">#   1. they share ONE channel (same DISCORD_HOME_CHANNEL + DISCORD_ALLOWED_USERS),</span>
@@ -2684,7 +2714,7 @@
 <span class="w">    </span><span class="nt">history_backfill_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
 <span class="w">  </span><span class="nt">agent</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># The handoff protocol. Names the PARTNER&#39;s Discord user ID and tells this</span>
-<span class="w">    </span><span class="c1"># agent how to hand over (explicit &lt;@id&gt; in the BODY) and — critically — how</span>
+<span class="w">    </span><span class="c1"># agent how to hand over (explicit &lt;@id&gt; in the BODY) and: critically - how</span>
 <span class="w">    </span><span class="c1"># to STOP (address the human, drop the mention) when a topic is done. The</span>
 <span class="w">    </span><span class="c1"># closing sentences are the prompt half of the loop brake; without them the</span>
 <span class="w">    </span><span class="c1"># two bots ping-pong forever.</span>
@@ -2695,7 +2725,7 @@
 <span class="w">      </span><span class="no">put an explicit &lt;@BUILDER_BOT_USER_ID&gt; mention in the BODY of your message.</span>
 <span class="w">      </span><span class="no">Only mention builder when you have something substantive to say or genuinely</span>
 <span class="w">      </span><span class="no">need their input. When a topic reaches a natural conclusion, do NOT mention</span>
-<span class="w">      </span><span class="no">builder — address the human instead and end your turn, so the exchange</span>
+<span class="w">      </span><span class="no">builder - address the human instead and end your turn, so the exchange</span>
 <span class="w">      </span><span class="no">stops. Never send a filler or &quot;let me know if you need anything&quot; message</span>
 <span class="w">      </span><span class="no">that mentions builder; that only restarts the loop.</span>
 
@@ -2711,9 +2741,9 @@
 <span class="c1"># full rationale of each loop-brake var.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">              </span><span class="c1"># the ONE shared channel (context bus)</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">             </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">             </span><span class="c1"># shared — who may talk to the team</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">             </span><span class="c1"># DUMMY — comma-separated user ids</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">             </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">             </span><span class="c1"># shared - who may talk to the team</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">             </span><span class="c1"># DUMMY - comma-separated user ids</span>
 <span class="w">  </span><span class="c1"># --- loop brake: a partner fires ONLY on an explicit &lt;@id&gt; in the body -------</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_BOTS</span><span class="w">                 </span><span class="c1"># respond to a bot only when it @mentions us</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mentions&quot;</span>
@@ -2725,7 +2755,7 @@
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 
 <span class="c1"># Persistence: empty storageClass = cluster default. On a Raspberry Pi cluster</span>
-<span class="c1"># that is typically local-path (k3s) or microk8s-hostpath — both ReadWriteOnce,</span>
+<span class="c1"># that is typically local-path (k3s) or microk8s-hostpath: both ReadWriteOnce,</span>
 <span class="c1"># which is exactly what this single-writer workload wants.</span>
 <span class="nt">persistence</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>

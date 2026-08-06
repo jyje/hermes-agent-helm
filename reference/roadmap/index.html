@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2569,27 +2599,27 @@
 <tbody>
 <tr>
 <td><strong>Single agent</strong></td>
-<td>This chart — one well-managed Hermes instance per release</td>
+<td>This chart: one well-managed Hermes instance per release</td>
 <td>now</td>
 <td>✅ available</td>
 </tr>
 <tr>
 <td><strong>Agent team (ArgoCD ApplicationSet)</strong></td>
-<td>Generate a team's per-agent releases from one ApplicationSet (roster as data, the chart as the template) — one shared gateway channel, unique <code>fullname</code> per member, no hand-maintained Application files per teammate</td>
+<td>Generate a team's per-agent releases from one ApplicationSet (roster as data, the chart as the template): one shared gateway channel, unique <code>fullname</code> per member, no hand-maintained Application files per teammate</td>
 <td>now</td>
-<td>✅ recommended — <a href="../teams/">docs/reference/teams.md</a></td>
+<td>✅ recommended: <a href="../teams/">docs/reference/teams.md</a></td>
 </tr>
 <tr>
 <td><strong>Operator</strong></td>
-<td>A Kubernetes operator (<code>Agent</code> / <code>AgentTeam</code> CRDs, in a separate repo) — would replace the ApplicationSet with team-wide status as a single object, admission-time validation of team-level invariants, or active reconciliation. This repo would host its <strong>install chart</strong></td>
+<td>A Kubernetes operator (<code>Agent</code> / <code>AgentTeam</code> CRDs, in a separate repo): would replace the ApplicationSet with team-wide status as a single object, admission-time validation of team-level invariants, or active reconciliation. This repo would host its <strong>install chart</strong></td>
 <td>long-term</td>
-<td>⏸️ not started — placeholder in <a href="../charts/hermes-operator/"><code>charts/hermes-operator/</code></a> (TBA)</td>
+<td>⏸️ not started: placeholder in <a href="../charts/hermes-operator/"><code>charts/hermes-operator/</code></a> (TBA)</td>
 </tr>
 </tbody>
 </table>
 <p>So the trajectory is <strong>single instance → team via ApplicationSet (today) →
 operator with <code>Agent</code> / <code>AgentTeam</code> CRDs (long-term, not started)</strong>. The
-ApplicationSet already covers what "a team" needs today — the operator is
+ApplicationSet already covers what "a team" needs today - the operator is
 only worth building if its templating-only model proves insufficient in
 practice (the three reasons above), so it stays a long-term, unscheduled
 candidate rather than a near-term plan. The
@@ -2597,8 +2627,8 @@ candidate rather than a near-term plan. The
 intentionally empty placeholder for that possible future chart.</p>
 <h2 id="v10-readiness">v1.0 readiness<a class="headerlink" href="#v10-readiness" title="Permanent link">&para;</a></h2>
 <p>The chart has been pre-1.0 (<code>0.x</code>) since its first release; the gate for
-<code>1.0.0</code> is that the multi-agent team story — not just the single-agent
-path — is proven, not merely documented.</p>
+<code>1.0.0</code> is that the multi-agent team story - not just the single-agent
+path - is proven, not merely documented.</p>
 <table>
 <thead>
 <tr>
@@ -2609,7 +2639,7 @@ path — is proven, not merely documented.</p>
 <tbody>
 <tr>
 <td>Single agent, production-proven</td>
-<td>✅ done — real deployments with 15+ / 26+ day uptime</td>
+<td>✅ done: real deployments with 15+ / 26+ day uptime</td>
 </tr>
 <tr>
 <td>Pair collaboration (<code>@mention</code> handoff)</td>
@@ -2621,7 +2651,7 @@ path — is proven, not merely documented.</p>
 </tr>
 <tr>
 <td>Chart extension points for team patterns (<code>extraVolumes</code>, <code>extraVolumeMounts</code>, <code>extraInitContainers</code>)</td>
-<td>✅ done — cover file-based credentials and one-time volume prep</td>
+<td>✅ done: cover file-based credentials and one-time volume prep</td>
 </tr>
 <tr>
 <td>CI coverage (per-scenario kind matrix, functional-change detection incl. appVersion bumps, docs-drift gate, signed releases)</td>
@@ -2647,8 +2677,8 @@ path — is proven, not merely documented.</p>
 </table>
 <h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../teams/">Hermes teams</a> — the ApplicationSet-based team pattern in detail.</li>
-<li><a href="../charts/hermes-agent/README.md">Chart README</a> — full values table and the
+<li><a href="../teams/">Hermes teams</a>: the ApplicationSet-based team pattern in detail.</li>
+<li><a href="../charts/hermes-agent/README.md">Chart README</a>: full values table and the
   <code>replicaCount</code> single-writer rationale.</li>
 </ul>
 

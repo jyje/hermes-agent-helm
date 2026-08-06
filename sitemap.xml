@@ -267,6 +267,13 @@
         <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/guides/secrets-and-storage/"/>
     </url>
     <url>
+        <loc>https://jyje.github.io/hermes-agent-helm/guides/team-setup/</loc>
+        <lastmod>2026-08-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/guides/team-setup/"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/guides/team-setup/"/>
+    </url>
+    <url>
         <loc>https://jyje.github.io/hermes-agent-helm/reference/</loc>
         <lastmod>2026-08-06</lastmod>
         <changefreq>daily</changefreq>
@@ -636,6 +643,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/guides/secrets-and-storage/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/guides/secrets-and-storage/"/>
+    </url>
+    <url>
+        <loc>https://jyje.github.io/hermes-agent-helm/ko/guides/team-setup/</loc>
+        <lastmod>2026-08-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://jyje.github.io/hermes-agent-helm/ko/guides/team-setup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://jyje.github.io/hermes-agent-helm/guides/team-setup/"/>
     </url>
     <url>
         <loc>https://jyje.github.io/hermes-agent-helm/ko/reference/chart-readme/</loc>

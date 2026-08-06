@@ -1864,6 +1864,8 @@
       
         
       
+        
+      
     
     
     
@@ -1989,6 +1991,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2575,7 +2605,7 @@
 <span class="c1">#   single standalone PVC (named &lt;fullname&gt;) is created and the rollout</span>
 <span class="c1">#   strategy is forced to Recreate (so the new Pod doesn&#39;t race the old one</span>
 <span class="c1">#   for the ReadWriteOnce volume). More resource-flexible (no StatefulSet</span>
-<span class="c1">#   ordering/identity overhead) — the right choice for a single replica.</span>
+<span class="c1">#   ordering/identity overhead): the right choice for a single replica.</span>
 <span class="c1"># &quot;statefulset&quot;: stable identity, a dedicated PVC via volumeClaimTemplates</span>
 <span class="c1">#   (data-&lt;fullname&gt;-0), and a headless Service for governance/DNS. Pick this</span>
 <span class="c1">#   if you need StatefulSet semantics (ordered rollout, stable network</span>
@@ -2587,7 +2617,7 @@
 <span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deployment</span>
 
 <span class="c1"># -- DO NOT change this. Hermes Agent is a single-writer workload bound to one</span>
-<span class="c1"># HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out —</span>
+<span class="c1"># HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out;</span>
 <span class="c1"># with controller.type=deployment extra replicas just hang Pending (can&#39;t mount</span>
 <span class="c1"># the same RWO volume); with statefulset they become separate, disconnected</span>
 <span class="c1"># agent instances with their own PVC/identity. There is no supported</span>
@@ -2611,14 +2641,14 @@
 <span class="c1"># by an init container (see `bootstrap`). Keys below use the real v2026.6.5 schema.</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes supports many providers (openai, anthropic, google, openrouter, and any</span>
-<span class="c1"># OpenAI-compatible endpoint). Defaults use the provider&#39;s public endpoint —</span>
+<span class="c1"># OpenAI-compatible endpoint). Defaults use the provider&#39;s public endpoint;</span>
 <span class="c1"># override to point anywhere (see values-litellm.yaml / values-litellm-k8s.yaml).</span>
 <span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Model id for the chosen provider (no vendor prefix for built-ins).</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4o-mini</span>
-<span class="w">    </span><span class="c1"># Hermes provider key. Use a BUILT-IN key — common ones:</span>
+<span class="w">    </span><span class="c1"># Hermes provider key. Use a BUILT-IN key: common ones:</span>
 <span class="w">    </span><span class="c1">#   openai-api (api.openai.com) | anthropic | gemini | openrouter |</span>
 <span class="w">    </span><span class="c1">#   nvidia | deepseek | lmstudio | ...</span>
 <span class="w">    </span><span class="c1"># NOTE: `openai` is NOT valid (it aliases to openrouter).</span>
@@ -2677,7 +2707,7 @@
 <span class="c1">#      name: some-existing-secret</span>
 
 <span class="c1"># -- Extra volumes on the pod, for anything the agent needs as a FILE rather</span>
-<span class="c1">#    than an env var — e.g. a Secret holding a service-account JSON</span>
+<span class="c1">#    than an env var: e.g. a Secret holding a service-account JSON</span>
 <span class="c1">#    (see values-google-vertex.yaml).</span>
 <span class="nt">extraVolumes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="c1">#  - name: vertex-sa</span>
@@ -2719,7 +2749,7 @@
 <span class="c1"># it performs the **OAuth 2.0 Device Authorization Grant (RFC 8628)** at pod</span>
 <span class="c1"># startup, surfaces the verification URL + user code to a human (e.g. via the</span>
 <span class="c1"># agent&#39;s Discord bot, mobile-friendly), waits for approval, and persists the</span>
-<span class="c1"># resulting token to `HERMES_HOME/.env` — exactly where Hermes natively reads</span>
+<span class="c1"># resulting token to `HERMES_HOME/.env`: exactly where Hermes natively reads</span>
 <span class="c1"># it. The token survives restarts on the persistent volume; re-login only</span>
 <span class="c1"># happens when it is missing or revoked.</span>
 <span class="c1">#</span>
@@ -2746,8 +2776,8 @@
 <span class="w">    </span><span class="nt">forceRelogin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="c1"># -- uid/gid that should own the written token file. The login init</span>
 <span class="w">    </span><span class="c1">#    container runs as root so it can write to any storage class reliably,</span>
-<span class="w">    </span><span class="c1">#    then chowns the token to this owner. Set it to the Hermes runtime uid —</span>
-<span class="w">    </span><span class="c1">#    the upstream image&#39;s s6-overlay runs the agent as uid/gid 10000 — so the</span>
+<span class="w">    </span><span class="c1">#    then chowns the token to this owner. Set it to the Hermes runtime uid;</span>
+<span class="w">    </span><span class="c1">#    the upstream image&#39;s s6-overlay runs the agent as uid/gid 10000: so the</span>
 <span class="w">    </span><span class="c1">#    non-root agent can read the credential.</span>
 <span class="w">    </span><span class="nt">tokenOwner</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">uid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
@@ -2799,7 +2829,7 @@
 <span class="c1">#</span>
 <span class="c1"># The only inbound HTTP surface is the management `dashboard` (default port</span>
 <span class="c1"># 9119, binds to 127.0.0.1). Exposing it cluster-wide requires `--insecure`,</span>
-<span class="c1"># which the upstream warns EXPOSES API KEYS on the network — so it is opt-in.</span>
+<span class="c1"># which the upstream warns EXPOSES API KEYS on the network: so it is opt-in.</span>
 <span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># -- Create a ClusterIP Service (only useful if you expose the dashboard).</span>
@@ -2813,7 +2843,7 @@
 
 <span class="c1"># Ingress for the management dashboard. Requires `service.enabled: true` AND</span>
 <span class="c1"># the dashboard running with --insecure (see the `service` comment above for</span>
-<span class="c1"># the API-key exposure warning) — only enable this behind authentication</span>
+<span class="c1"># the API-key exposure warning): only enable this behind authentication</span>
 <span class="c1"># (e.g. an ingress-level oauth2-proxy/basic-auth annotation) or on a private</span>
 <span class="c1"># network.</span>
 <span class="nt">ingress</span><span class="p">:</span>
@@ -2873,10 +2903,10 @@
 <span class="c1"># -- Pod termination grace period in seconds. Empty = Kubernetes default (30s).</span>
 <span class="c1"># The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0:</span>
 <span class="c1"># on stop it interrupts in-flight runs immediately, persists the transcript,</span>
-<span class="c1"># and exits fast — the default grace period is plenty. If you opt into a drain</span>
+<span class="c1"># and exits fast: the default grace period is plenty. If you opt into a drain</span>
 <span class="c1"># window via `config.agent.restart_drain_timeout: &lt;seconds&gt;`, raise this WELL</span>
 <span class="c1"># ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock +</span>
-<span class="c1"># crash loop — the same race upstream warns about with systemd&#39;s</span>
+<span class="c1"># crash loop: the same race upstream warns about with systemd&#39;s</span>
 <span class="c1"># TimeoutStopSec). See &quot;Gateway lifecycle&quot; in the README.</span>
 <span class="nt">terminationGracePeriodSeconds</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
@@ -2904,7 +2934,7 @@
 <span class="w">  </span><span class="c1"># configured provider. The full conversation (prompt + response) is printed</span>
 <span class="w">  </span><span class="c1"># to the test Job&#39;s logs. Requires a working provider key in `env`/`config`</span>
 <span class="w">  </span><span class="c1"># (e.g. config.model.provider=gemini + env.GOOGLE_API_KEY, or a LiteLLM-style</span>
-<span class="w">  </span><span class="c1"># custom provider — see values-litellm.yaml). Off by default since the</span>
+<span class="w">  </span><span class="c1"># custom provider: see values-litellm.yaml). Off by default since the</span>
 <span class="w">  </span><span class="c1"># placeholder key cannot reach a real provider.</span>
 <span class="w">  </span><span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="w">  </span><span class="nt">chat</span><span class="p">:</span>
@@ -2920,7 +2950,7 @@
 <span class="w">    </span><span class="nt">failOnError</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="c1"># -- Optional pool of `provider/model` ids to try in order (via `hermes chat</span>
 <span class="w">    </span><span class="c1">#    -m &lt;id&gt; --provider config.model.provider`), each with its own `timeout`.</span>
-<span class="w">    </span><span class="c1">#    Passes as soon as one succeeds — useful for free-tier models that are</span>
+<span class="w">    </span><span class="c1">#    Passes as soon as one succeeds: useful for free-tier models that are</span>
 <span class="w">    </span><span class="c1">#    sometimes overloaded. Leave empty to use `config.model.default` as-is</span>
 <span class="w">    </span><span class="c1">#    (single attempt, no `-m`/`--provider` override).</span>
 <span class="w">    </span><span class="nt">models</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>

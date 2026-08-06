@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2638,7 +2668,7 @@
 <span class="c1"># common knowledge base on one ReadWriteMany (RWX) PVC.</span>
 <span class="c1">#</span>
 <span class="c1"># Use case: A team of Hermes agents (planner, builder, researcher, etc.) that all</span>
-<span class="c1"># read from and write to the same durable knowledge repository — curated notes,</span>
+<span class="c1"># read from and write to the same durable knowledge repository: curated notes,</span>
 <span class="c1"># reference documents, or vector indices. Every agent mounts the SAME knowledge</span>
 <span class="c1"># PVC at /opt/data/shared-knowledge while retaining its own config, memory,</span>
 <span class="c1"># sessions, and identity on a private HERMES_HOME PVC.</span>
@@ -2716,9 +2746,9 @@
 <span class="c1"># allowed users to form a single context bus.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — comma-separated user ids</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - comma-separated user ids</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SHARED_KNOWLEDGE_ROOT</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/data/shared-knowledge&quot;</span>
 

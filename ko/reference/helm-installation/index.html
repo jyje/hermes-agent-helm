@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2657,7 +2687,7 @@
 <h1 id="installing-with-helm">Installing with Helm<a class="headerlink" href="#installing-with-helm" title="Permanent link">&para;</a></h1>
 <p>Two ways to install <code>hermes-agent</code>: <strong>from Git</strong> (this repo) and <strong>from an
 OCI registry</strong> (GitHub Packages / <code>ghcr.io</code>, the form indexed by Artifact Hub).</p>
-<p>In every case, keep the API key out of the manifests — pass it at install time
+<p>In every case, keep the API key out of the manifests - pass it at install time
 or inject it from a pre-created Secret (see "Secrets").</p>
 <hr />
 <h2 id="1-from-git-local-checkout">1. From Git (local checkout)<a class="headerlink" href="#1-from-git-local-checkout" title="Permanent link">&para;</a></h2>
@@ -2712,15 +2742,15 @@ helm<span class="w"> </span>show<span class="w"> </span>readme<span class="w"> <
 <hr />
 <h2 id="upgrading-across-a-chart-rename">Upgrading across a chart rename<a class="headerlink" href="#upgrading-across-a-chart-rename" title="Permanent link">&para;</a></h2>
 <p>If you ever switch which chart a release is installed from (e.g. moving from a
-fork or a renamed local copy to this chart), a plain <code>helm upgrade</code> can fail or
-— worse — create a <strong>second, empty StatefulSet + PVC</strong> alongside your existing
+fork or a renamed local copy to this chart), a plain <code>helm upgrade</code> can fail or,
+worse, create a <strong>second, empty StatefulSet + PVC</strong> alongside your existing
 one. This happens because two things derive from the chart name (<code>Chart.Name</code>):</p>
 <ol>
-<li><strong><code>fullname</code></strong> — if your release name doesn't already contain the new chart
+<li><strong><code>fullname</code></strong>: if your release name doesn't already contain the new chart
    name, Helm computes <code>&lt;release&gt;-&lt;chart&gt;</code> (e.g. <code>myrelease-hermes-agent</code>)
    instead of reusing the existing <code>&lt;release&gt;</code> name, so it creates brand-new
    resources (including a fresh, empty PVC) rather than upgrading the old ones.</li>
-<li><strong><code>volumeClaimTemplates[].metadata.labels["helm.sh/chart"]</code></strong> — this label
+<li><strong><code>volumeClaimTemplates[].metadata.labels["helm.sh/chart"]</code></strong>: this label
    includes the chart name+version and is part of a StatefulSet's <em>immutable</em>
    <code>volumeClaimTemplates</code>, so Kubernetes rejects the upgrade outright once the
    chart name changes.</li>
@@ -2731,7 +2761,7 @@ StatefulSet:</p>
 <span class="nv">RELEASE</span><span class="o">=</span>hermes-agent
 <span class="nv">NS</span><span class="o">=</span>hermes-agent
 
-<span class="c1"># 2) drop the StatefulSet object only — Pod and PVC (and your data) are kept</span>
+<span class="c1"># 2) drop the StatefulSet object only: Pod and PVC (and your data) are kept</span>
 kubectl<span class="w"> </span>delete<span class="w"> </span>sts<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$RELEASE</span><span class="s2">&quot;</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NS</span><span class="s2">&quot;</span><span class="w"> </span>--cascade<span class="o">=</span>orphan
 
 <span class="c1"># 3) upgrade to the new chart, pinning nameOverride to the old name</span>
@@ -2767,7 +2797,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <blockquote>
 <p><strong>CI owns the <code>.tgz</code> lifecycle.</strong> Bumping <code>version</code> in <code>Chart.yaml</code> on <code>main</code>
 triggers <code>.github/workflows/release-chart.yaml</code>, which tags <code>vX.Y.Z</code>, writes release
-notes (Changesets), and pushes to <code>oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm</code> — the package
+notes (Changesets), and pushes to <code>oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm</code> - the package
 is never committed. The commands below are the equivalent manual/local flow.</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1) package (also runs docs + lint via the Makefile target)</span>

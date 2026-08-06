@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2625,7 +2655,7 @@
 <p>🇰🇷 <a href="SECURITY-ko.md">한국어 문서 (Korean)</a></p>
 </blockquote>
 <p>This document covers security for the <strong>Helm chart</strong> in this repository
-(<code>charts/hermes-agent</code>) — its templates, default values, examples, and CI.
+(<code>charts/hermes-agent</code>) - its templates, default values, examples, and CI.
 It is a community-maintained chart, not an official Nous Research release.</p>
 <h2 id="reporting-a-vulnerability">Reporting a vulnerability<a class="headerlink" href="#reporting-a-vulnerability" title="Permanent link">&para;</a></h2>
 <p>Report privately via
@@ -2643,7 +2673,7 @@ It is a community-maintained chart, not an official Nous Research release.</p>
 <p>You can expect an initial response within a reasonable time frame; this is a
 volunteer-maintained project without an SLA or bug bounty program.</p>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
-<p><strong>In scope — report here:</strong></p>
+<p><strong>In scope - report here:</strong></p>
 <ul>
 <li>Chart templates rendering insecure resources (e.g. secrets leaked into
   ConfigMaps, logs, or annotations; unintended privilege escalation).</li>
@@ -2654,7 +2684,7 @@ volunteer-maintained project without an SLA or bug bounty program.</p>
 <li>Supply-chain issues in this repository's release pipeline (GitHub Actions
   workflows, published OCI artifacts).</li>
 </ul>
-<p><strong>Out of scope — report upstream:</strong></p>
+<p><strong>Out of scope - report upstream:</strong></p>
 <ul>
 <li>Vulnerabilities in Hermes Agent itself (the application inside the image).
   Follow the upstream policy:
@@ -2672,23 +2702,23 @@ security fixes. Older versions are not patched; upgrade to the latest release.</
 <p>Facts worth knowing before deploying:</p>
 <ul>
 <li><strong>The pod is the sandbox.</strong> The agent runs commands inside its own pod
-  (<code>config.terminal.backend: local</code>). Kubernetes-level isolation — namespace,
-  <code>securityContext</code>, resource limits, NetworkPolicy — is the security
+  (<code>config.terminal.backend: local</code>). Kubernetes-level isolation - namespace,
+  <code>securityContext</code>, resource limits, NetworkPolicy - is the security
   boundary. The <code>docker</code> terminal backend is unsupported in-cluster because it
   would require a Docker daemon/socket.</li>
 <li><strong>No inbound API by default.</strong> The agent makes outbound connections only.
   The single HTTP surface is the optional management <strong>dashboard</strong> (port 9119),
   which binds to <code>127.0.0.1</code> and <strong>exposes API keys</strong>. The chart ships with
   <code>service.enabled: false</code> and <code>ingress.enabled: false</code>; exposing the
-  dashboard requires an explicit opt-in and upstream's <code>--insecure</code> flag —
+  dashboard requires an explicit opt-in and upstream's <code>--insecure</code> flag;
   put authentication in front of it (see <code>values-ingress.yaml</code>).</li>
-<li><strong>Secrets are injected via <code>envFrom</code></strong>, rendered into a Kubernetes <code>Secret</code>
-  — never into the ConfigMap. For GitOps, don't commit real secrets; use the
+<li><strong>Secrets are injected via <code>envFrom</code></strong>, rendered into a Kubernetes <code>Secret</code></li>
+<li>never into the ConfigMap. For GitOps, don't commit real secrets; use the
   SealedSecret pattern in
   <a href="examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord"><code>examples/argocd/</code></a>.</li>
 <li><strong><code>podSecurityContext</code> / <code>securityContext</code> are empty by default</strong> for image
   compatibility. Hardening them (non-root, read-only root filesystem, dropped
-  capabilities) is recommended where the image permits — validate in your
+  capabilities) is recommended where the image permits - validate in your
   environment.</li>
 </ul>
 <h2 id="repository-protections">Repository protections<a class="headerlink" href="#repository-protections" title="Permanent link">&para;</a></h2>

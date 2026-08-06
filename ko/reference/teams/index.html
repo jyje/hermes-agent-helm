@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2274,6 +2304,17 @@
     <span class="md-ellipsis">
       
         라이브 증거
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telegram-slack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telegram과 Slack
       
     </span>
   </a>
@@ -2747,6 +2788,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#telegram-slack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telegram과 Slack
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2801,7 +2853,7 @@
 <h1 id="hermes">Hermes 팀: 스케일 <em>업</em>, 그리고 그룹<a class="headerlink" href="#hermes" title="Permanent link">&para;</a></h1>
 <p><a href="./">English</a> · <a href="teams-ko.md">한국어</a></p>
 <blockquote>
-<p>한 줄 요약 — <strong>Hermes 파드를 스케일 아웃하지 마세요. 잘 관리된 단일 인스턴스를
+<p>한 줄 요약: <strong>Hermes 파드를 스케일 아웃하지 마세요. 잘 관리된 단일 인스턴스를
 여러 개 띄우고, 하나의 gateway 채널을 공유하는 팀으로 묶으세요.</strong></p>
 </blockquote>
 <h2 id="hermes_1">Hermes가 단일 인스턴스인 이유<a class="headerlink" href="#hermes_1" title="Permanent link">&para;</a></h2>
@@ -2809,7 +2861,7 @@
 <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/">gateway 프로세스</a>,
 하나의 메모리/정체성(<code>SOUL</code>, skills, <code>auth.json</code>, self-improvement 상태). gateway는
 공식 문서에서 명시하듯 "설정된 모든 플랫폼에 연결되어 세션을 처리하고 cron을 실행하며
-메시지를 전달하는 단일 백그라운드 프로세스"입니다 — 하나의 에이전트가 거치는 <em>유일한</em>
+메시지를 전달하는 단일 백그라운드 프로세스"입니다 - 하나의 에이전트가 거치는 <em>유일한</em>
 허브죠.</p>
 <p>그래서 단일 인스턴스는 <strong>단일 writer 워크로드</strong>가 되고, 이 차트가 <code>replicaCount: 1</code>을
 고정하며 스케일 아웃을 지양하는 이유입니다(<a href="../charts/hermes-agent/README.md">차트 README</a>의
@@ -2818,19 +2870,19 @@
 <li><code>controller.type=deployment</code> → 추가 레플리카는 <code>Pending</code>에 걸립니다
   (동일한 <code>ReadWriteOnce</code> PVC를 마운트할 수 없음).</li>
 <li><code>controller.type=statefulset</code> → 추가 레플리카는 각자의 PVC/정체성을 가진
-  <strong>별개의, 단절된 에이전트</strong>가 됩니다 — 같은 에이전트의 더 큰 버전이 아닙니다.</li>
+  <strong>별개의, 단절된 에이전트</strong>가 됩니다 - 같은 에이전트의 더 큰 버전이 아닙니다.</li>
 </ul>
 <p>따라서 <code>replicaCount</code>를 올려도 "같은 Hermes가 더 많아지는" 일은 없습니다. 설계상
 지원되는 멀티 레플리카 모드는 없습니다.</p>
 <h2 id="_1">모델: 경량부터 프로덕션까지<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>홈랩 장난감에서 프로덕션 배포로 가는 길은 <strong>스케일 '업'하고, 그다음 그룹 만들기</strong>입니다 — 단일
+<p>홈랩 장난감에서 프로덕션 배포로 가는 길은 <strong>스케일 '업'하고, 그다음 그룹 만들기</strong>입니다 - 단일
 에이전트를 스케일 아웃하는 게 아닙니다:</p>
 <ol>
 <li><strong>단일 인스턴스의 스팩을 키웁니다.</strong> <code>resources</code>를 늘리고, <code>persistence.size</code>를 키우고,
    실제 <code>storageClass</code>·probe·제대로 된 시크릿 관리(SealedSecret / external-secrets)를
    붙이세요. 하나의 인스턴스를, 잘.</li>
 <li><strong>여러 인스턴스를 팀으로 묶습니다.</strong> 한 에이전트로 부족할 때(사람이 늘고, 역할이
-   늘고, 병렬 작업이 늘 때) <em>여러</em> 단일 인스턴스를 — 각각 독립 릴리즈로 — 배포하고,
+   늘고, 병렬 작업이 늘 때) <em>여러</em> 단일 인스턴스를 - 각각 독립 릴리즈로 - 배포하고,
    <strong>하나의 공유 gateway 채널</strong>에 합류시켜 에이전트와 팀이 공통 컨텍스트 버스를
    공유하게 합니다.</li>
 </ol>
@@ -2841,12 +2893,12 @@
 <ul>
 <li>각 에이전트가 채널에서 메시지를 읽고 쓰므로, <strong>대화 자체가</strong> 사람이든 에이전트든
   모든 구성원이 보는 <strong>공유 컨텍스트</strong>가 됩니다.</li>
-<li>그 채널은 동시에 <strong>home 채널</strong>(<code>*_HOME_CHANNEL</code>) 역할을 합니다 — 각 에이전트가
+<li>그 채널은 동시에 <strong>home 채널</strong>(<code>*_HOME_CHANNEL</code>) 역할을 합니다: 각 에이전트가
   cron 결과와 능동적 알림을 전달하는 곳이며,
   <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/">messaging gateway 문서</a>에
   설명돼 있습니다.</li>
 <li>팀 전체가 공유해야 할 지식(기술 스택, 컨벤션, 우선순위)은 <strong>컨텍스트 파일</strong>
-  (<code>SOUL.md</code>, <code>AGENTS.md</code>)로 고정합니다 — 매 세션의 시스템 프롬프트에 주입되며,
+  (<code>SOUL.md</code>, <code>AGENTS.md</code>)로 고정합니다 - 매 세션의 시스템 프롬프트에 주입되며,
   <a href="https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant">Team Telegram Assistant 가이드</a>에
   나옵니다.</li>
 <li><strong>공유 영속적 지식</strong>(벡터 인덱스나 공유 참고 파일)을 위해 각자의 사설
@@ -2880,7 +2932,7 @@ Discord 사용자 ID를 모아 <code>DISCORD_ALLOWED_USERS</code>로 씁니다.<
 <p>각 에이전트를 <strong>독립 릴리즈</strong>로 배포하되, <strong>각자의 <code>DISCORD_BOT_TOKEN</code></strong>을 쓰고
 <strong><code>DISCORD_HOME_CHANNEL</code>과 <code>DISCORD_ALLOWED_USERS</code>는 동일하게</strong> 둡니다. 순수 Helm으로는
 두 설치를 나란히 실행합니다:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 에이전트 A — &quot;planner&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># 에이전트 A: &quot;planner&quot;</span>
 helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>hermes-planner<span class="w"> </span>./charts/hermes-agent<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--namespace<span class="w"> </span>hermes-team<span class="w"> </span>--create-namespace<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-f<span class="w"> </span>charts/hermes-agent/values-anthropic-and-discord.yaml<span class="w"> </span><span class="se">\</span>
@@ -2889,7 +2941,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <span class="w">  </span>--set-string<span class="w"> </span>extraEnv<span class="o">[</span><span class="m">0</span><span class="o">]</span>.name<span class="o">=</span>DISCORD_HOME_CHANNEL<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--set-string<span class="w"> </span>extraEnv<span class="o">[</span><span class="m">0</span><span class="o">]</span>.value<span class="o">=</span><span class="s1">&#39;&lt;shared-channel-id&gt;&#39;</span><span class="w"> </span>--wait
 
-<span class="c1"># 에이전트 B — &quot;builder&quot; (같은 채널, 다른 봇 토큰)</span>
+<span class="c1"># 에이전트 B: &quot;builder&quot; (같은 채널, 다른 봇 토큰)</span>
 helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>hermes-builder<span class="w"> </span>./charts/hermes-agent<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--namespace<span class="w"> </span>hermes-team<span class="w"> </span>--create-namespace<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-f<span class="w"> </span>charts/hermes-agent/values-anthropic-and-discord.yaml<span class="w"> </span><span class="se">\</span>
@@ -2898,11 +2950,11 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <span class="w">  </span>--set-string<span class="w"> </span>extraEnv<span class="o">[</span><span class="m">0</span><span class="o">]</span>.name<span class="o">=</span>DISCORD_HOME_CHANNEL<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--set-string<span class="w"> </span>extraEnv<span class="o">[</span><span class="m">0</span><span class="o">]</span>.value<span class="o">=</span><span class="s1">&#39;&lt;shared-channel-id&gt;&#39;</span><span class="w"> </span>--wait
 </code></pre></div>
-<p>릴리즈 이름을 다르게(<code>hermes-planner</code>, <code>hermes-builder</code>) 두면 모든 리소스가 분리됩니다 —
+<p>릴리즈 이름을 다르게(<code>hermes-planner</code>, <code>hermes-builder</code>) 두면 모든 리소스가 분리됩니다.
 각 에이전트가 자신의 파드·PVC·정체성을 가지므로, 채널만 공유할 뿐 진짜로 독립적인 단일
 인스턴스들이 됩니다.</p>
 <h3 id="3-argocd-applicationset">3. 또는 ArgoCD ApplicationSet으로 팀을 생성하기 (권장)<a class="headerlink" href="#3-argocd-applicationset" title="Permanent link">&para;</a></h3>
-<p>1~2단계는 멤버가 몇 명을 넘어가면 확장되지 않습니다 — 에이전트마다 Application/설치를
+<p>1~2단계는 멤버가 몇 명을 넘어가면 확장되지 않습니다 - 에이전트마다 Application/설치를
 하나씩 두면, 명부가 바뀔 때마다 파일을 손으로 고쳐야 합니다.
 <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/">ApplicationSet</a>은
 명부를 <strong>데이터</strong>로, 에이전트당 Application을 <strong>템플릿</strong>으로 바꿉니다:</p>
@@ -2953,10 +3005,10 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <a href="../examples/argocd/README.md#multiple-instances-in-the-same-namespace">"Multiple instances in the same namespace"</a>
 섹션의 <code>fullname</code> 유일성 규칙을 그대로 따르면서, 다음을 거의 공짜로 얻습니다:</p>
 <ul>
-<li><strong>명부가 한 곳</strong>(<code>generators[0].list.elements</code>)<strong>에 존재</strong> — N개의 Application
+<li><strong>명부가 한 곳</strong>(<code>generators[0].list.elements</code>)<strong>에 존재</strong>: N개의 Application
   파일이 아니라. 팀원 추가는 한 줄짜리 diff입니다.</li>
 <li><strong>공유 필드</strong>(<code>DISCORD_HOME_CHANNEL</code>, <code>DISCORD_ALLOWED_USERS</code>)는 <code>template</code>에
-  한 번만 두고, <strong>멤버별 필드</strong>(이름, 시크릿 참조, 역할)는 리스트에서 옵니다 —
+  한 번만 두고, <strong>멤버별 필드</strong>(이름, 시크릿 참조, 역할)는 리스트에서 옵니다.
   차트 자체의 공유/인스턴스별 분리(<code>env</code>/<code>extraEnvFrom</code>은 릴리즈별, <code>extraEnv</code>는
   template으로 공유)와 같은 모양입니다.</li>
 <li><strong>멤버별 유일한 <code>fullname</code></strong>은 <code>releaseName</code>의 <code>{{name}}</code> 치환에서 자동으로
@@ -2964,7 +3016,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 </ul>
 <p>렌더링된 형태를 명시적으로 보고 싶다면(예: 리뷰용, 또는 ApplicationSet 없이),
 <a href="../examples/argocd/">examples/argocd/</a>에 제공자/예제별로 손으로 작성한 Application이
-하나씩 있습니다 — 팀원마다 복사해서 쓸 수 있고, 위 ApplicationSet은 같은 모양을
+하나씩 있습니다 - 팀원마다 복사해서 쓸 수 있고, 위 ApplicationSet은 같은 모양을
 생성하는 것뿐입니다.</p>
 <h3 id="4">4. (선택) 각 에이전트에 역할 부여<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
 <p>각 인스턴스는 자신의 <code>config</code>와 personality를 가지므로, 한 에이전트를 복제하기보다
@@ -2975,7 +3027,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <p><strong>다음 단계(탐색적).</strong> 위 ApplicationSet은 팀의 릴리즈를 선언적으로
 <strong>템플릿화</strong>하는 부분을 커버하며, 이게 "팀"에 필요한 것의 대부분입니다.
 전용 오퍼레이터(<code>Agent</code> / <code>AgentTeam</code> CRD, 별도 레포)는 이 템플릿 전용 모델이
-실제로 부족해질 때만 가치가 있습니다 — 예를 들어:</p>
+실제로 부족해질 때만 가치가 있습니다 - 예를 들어:</p>
 <ul>
 <li><strong>팀 전체 상태를 보여주는 단일 오브젝트</strong>(<code>kubectl get agentteam my-team</code> →
   "3/4 멤버 healthy")가 필요한데, ApplicationSet은 이를 집계해주지 않을 때;</li>
@@ -3039,7 +3091,7 @@ scale down할 준비를 하세요.</p>
 리더를 다시 멘션할 때까지 기다린 뒤 결과를 검토하고 다음 멤버를 멘션합니다.
 방 전체가 하나의 세션을 쓰는 상태에서 여러 멤버가 동시에 답하면 하나의 실행 슬롯을
 두고 경합할 수 있으므로, 직렬화가 첫 실증을 결정적으로 만듭니다.</p>
-<div class="highlight"><pre><span></span><code>sequenceDiagram
+<pre class="mermaid"><code>sequenceDiagram
     participant H as 사람
     participant A as august (리더)
     participant M as may
@@ -3051,8 +3103,7 @@ scale down할 준비를 하세요.</p>
     A-&gt;&gt;R: &lt;@march&gt; [TEAM ... TASK] + 목표 + 승인된 may 결과
     R-&gt;&gt;A: &lt;@august&gt; [TEAM ... RESULT] + 리뷰/종합
     A--&gt;&gt;H: 최종 종합, 멤버 멘션 없음
-    Note over A,R: 멤버 멘션이 없으면 다음 봇 턴도 없습니다.
-</code></pre></div>
+    Note over A,R: 멤버 멘션이 없으면 다음 봇 턴도 없습니다.</code></pre>
 <p>모든 위임에는 작은 공개 계약을 넣습니다:</p>
 <div class="highlight"><pre><span></span><code>&lt;@MEMBER_ID&gt;
 
@@ -3143,10 +3194,63 @@ Discord API read-back으로 작성자/타임스탬프 순서를 확인했고, �
 증명하지만 공유 스토리지를 증명하지는 않습니다. 현재 kind 구조 시나리오는 별도로
 리더가 지식 PVC에 쓰고 멤버가 같은 내용을 읽으며 멤버의 쓰기는 거부되는 것을
 검증합니다. 기존 kind 스크린샷은 독립 릴리스 세 개와 사설 홈을 따로 증명합니다.</p>
-<p>이 레시피는 Discord 스레드, 멘션, reply-reference, 세션 의미론에 안전성이
-의존하므로 <strong>Discord 전용</strong>입니다. Telegram은 사람-에이전트 용도의 v1 메신저로
-계속 지원하지만, Telegram 봇 대 봇 리더 팀은 플랫폼 차원의 별도 실증이 필요합니다.
-자격증명 환경변수만 바꾸면 충분하다고 설명하지 않습니다.</p>
+<p>위 라이브 증거는 <strong>Discord 전용</strong>입니다. Discord 스레드, 멘션,
+reply-reference, 세션 의미론에 의존하며, 실제 멀티 봇 실증을 거친 플랫폼도
+Discord뿐입니다. Telegram과 Slack에도 모든 루프 브레이크 노브의 실제
+대응물이 설정 레벨에서 확인되지만(아래 참조), 아직 리더 팀 라이브 실행이
+뒷받침하지는 않습니다. 이어지는 레시피는 근거 있는 출발점으로 보시되,
+무인 운영에 맡기기 전에는 플랫폼 차원의 자체 실증이 필요합니다.</p>
+<h3 id="telegram-slack">Telegram과 Slack<a class="headerlink" href="#telegram-slack" title="Permanent link">&para;</a></h3>
+<p>스타 토폴로지 프로토콜 자체는 플랫폼을 가리지 않습니다. 리더만 사람과 대화하고,
+멤버는 명시적 멘션에만 응답하고, <code>[TEAM run=&lt;id&gt; step=&lt;n&gt; TASK|RESULT]</code> 메타데이터
+계약 아래 한 번에 한 명씩 직렬로 핸드오프합니다. 여기에 Discord API 표면을 타는
+부분은 하나도 없습니다. 플랫폼마다 달라지는 건 <strong>멘션을 쓰는 방법</strong>과 <strong>루프를
+닫는 환경변수</strong>뿐입니다. Discord/Telegram/Slack 전체 비교는
+<a href="collaboration-ko.md#노브-대응표">collaboration-ko.md § 노브 대응표</a>에 있으니,
+여기서는 리더 팀에 필요한 핵심만 정리합니다.</p>
+<p><strong>Telegram.</strong> 봇은 숫자 ID가 아니라 <code>@username</code>으로 부릅니다(<code>bot</code>으로 끝나야
+합니다). 리더의 <code>environment_hint</code>에는 멤버 전원의 정확한 <code>@username</code>을, 각
+멤버의 hint에는 리더의 <code>@username</code>을 넣으세요. <code>values-team-leader.yaml</code> /
+<code>values-team-member.yaml</code>의 <code>environment_hint</code> 문안은 그대로 재사용하되,
+<code>&lt;@ID&gt;</code> 토큰을 모두 <code>@bot_username</code>으로 바꾸고 Discord에는 없던 지시를 한 줄
+덧붙이세요. 팀원을 부를 때 Telegram의 native "reply" 기능을 절대 쓰지 말라는
+지시입니다. reply는 이 프로토콜이 기대는 명시적 멘션 신호가 아니기 때문입니다.
+그래서 위임 계약은 이런 형태가 됩니다:</p>
+<div class="highlight"><pre><span></span><code>@may_bot
+
+Context: &lt;everything needed, including accepted earlier results&gt;
+Task: &lt;one concrete task&gt;
+Done when: &lt;observable acceptance criteria&gt;
+Reply contract: mention @august_bot and include the complete result here.
+
+[TEAM run=&lt;short-id&gt; step=&lt;n&gt; TASK]
+</code></pre></div>
+<p>리더의 <code>extraEnv</code> 루프 브레이크 블록은 Telegram 노브로 갈아 끼우세요
+(<code>TELEGRAM_ALLOW_BOTS=mentions</code>, <code>TELEGRAM_REQUIRE_MENTION=true</code>,
+<code>TELEGRAM_REPLY_TO_MODE=off</code>). <code>TELEGRAM_HOME_CHANNEL</code> /
+<code>TELEGRAM_ALLOWED_USERS</code>에는 공유 그룹 채팅과 신뢰하는 사람 ID를 넣습니다.
+<code>values-openai-and-telegram.yaml</code>과 같은 모양입니다.
+<code>TELEGRAM_EXCLUSIVE_BOT_MENTIONS</code>는 기본값 <code>true</code>로 두실 만합니다. 봇 username
+하나를 콕 집어 지목한 메시지는 그룹의 다른 봇들이 통째로 무시하므로, 형제 멤버에게
+간 위임을 엉뚱한 멤버가 집어 드는 사고를 막아 주는 독립적인 2차 방어가 됩니다.</p>
+<p><strong>Slack.</strong> 멘션이 Discord와 똑같은 <code>&lt;@USER_ID&gt;</code> 마크업이라, 위임 계약도
+<code>environment_hint</code>도 그대로 옮겨 쓸 수 있습니다. Discord user ID를 Slack
+member ID로 바꾸기만 하면 됩니다. 가장 중요한 노브는
+<code>SLACK_STRICT_MENTION=true</code>입니다. Slack은 기본적으로 봇이 한 번 멘션된
+스레드를 기억해서, 그다음부터는 멘션이 없어도 그 스레드 내내 계속
+반응합니다(업스트림 소스 주석도 이 설정을 끄면 "agent-to-agent ack loop"가
+다시 열린다고 직접 밝힙니다). 리더와 멤버 전원의 루프 브레이크 블록을
+<code>SLACK_ALLOW_BOTS=mentions</code>, <code>SLACK_REQUIRE_MENTION=true</code>,
+<code>SLACK_STRICT_MENTION=true</code>로 두고, <code>SLACK_HOME_CHANNEL</code> /
+<code>SLACK_ALLOWED_USERS</code>에는 공유 채널과 신뢰하는 사람을 지정하세요.</p>
+<p><code>group_sessions_per_user: false</code> 관리는 두 플랫폼에서도 Discord 레시피와
+똑같습니다. Telegram과 Slack 역시 기본값으로는 발신자별로 세션을 나누기 때문에,
+공유 트랜스크립트 설정은 플랫폼을 가리지 않고
+<code>config.group_sessions_per_user: false</code>로 유지합니다. 공유 지식 PVC,
+<code>disabled_toolsets</code>, 6단계 핸드오프 상한, <code>values-team-leader.yaml</code> /
+<code>values-team-member.yaml</code>의 "hook·파일·메모리로 핸드오프하지 말 것" 규칙도 전부
+그대로 적용됩니다. 달라지는 건 플랫폼 블록(<code>env</code>/<code>extraEnv</code>)과
+<code>environment_hint</code>의 멘션 토큰 형식뿐입니다.</p>
 <h3 id="_4">공유 지식과 조정은 분리합니다<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <p>리더는 승인된 재사용 지식을 <code>/opt/data/team-knowledge</code> 아래에 큐레이션할 수 있고,
 멤버는 이를 배경 지식으로 참고할 수 있습니다. 공유 PVC에는 실행별 과제, 담당자,
@@ -3156,13 +3260,13 @@ queue, 상태, 중간 결과, 완료 마커, 다음 단계 지시를 두면 안 
 합니다. 이렇게 해야 영속 지식을 활용하면서 숨은 조정 플레인으로 변질되지 않습니다.</p>
 <h2 id="_5">함께 보기<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="collaboration-ko.md">collaboration-ko.md</a> — 다음 단계: 묶인 에이전트들이
+<li><a href="collaboration-ko.md">collaboration-ko.md</a> - 다음 단계: 묶인 에이전트들이
   <code>@mention</code>으로 핸드오프하고 무한루프를 멈추게 하기(봇 대 봇 레시피).</li>
-<li><a href="../charts/hermes-agent/README.md">차트 README</a> — 전체 값 테이블,
+<li><a href="../charts/hermes-agent/README.md">차트 README</a>: 전체 값 테이블,
   <code>replicaCount</code> 단일 writer 근거, Discord/Telegram 환경변수.</li>
-<li><a href="roadmap-ko.md">로드맵</a> — ApplicationSet 기반 팀 패턴, 그리고
+<li><a href="roadmap-ko.md">로드맵</a>: ApplicationSet 기반 팀 패턴, 그리고
   <code>hermes-operator</code>(<code>Agent</code> / <code>AgentTeam</code> CRD)가 정당화되는 조건.</li>
-<li><a href="../examples/argocd/">examples/argocd/</a> — 에이전트당 Application 1개, 네임스페이스당
+<li><a href="../examples/argocd/">examples/argocd/</a>: 에이전트당 Application 1개, 네임스페이스당
   다중 인스턴스, SealedSecret 시크릿 연결.</li>
 <li>Hermes 공식 문서:
   <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/">Messaging gateway</a>

@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2857,7 +2887,7 @@
 <h1 id="local-development-guide">Local development guide<a class="headerlink" href="#local-development-guide" title="Permanent link">&para;</a></h1>
 <h2 id="local-kubernetes-cluster">Local Kubernetes cluster<a class="headerlink" href="#local-kubernetes-cluster" title="Permanent link">&para;</a></h2>
 <p>You need a running cluster to use <code>make test</code> or iterate on the chart locally.
-<strong>kind</strong> is recommended — it is the same runtime CI uses.</p>
+<strong>kind</strong> is recommended - it is the same runtime CI uses.</p>
 <h3 id="kind-recommended">kind (recommended)<a class="headerlink" href="#kind-recommended" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Install</span>
 brew<span class="w"> </span>install<span class="w"> </span>kind<span class="w">          </span><span class="c1"># macOS</span>
@@ -2902,14 +2932,14 @@ sudo<span class="w"> </span>microk8s<span class="w"> </span>kubectl<span class="
 <div class="highlight"><pre><span></span><code>make<span class="w"> </span><span class="nb">test</span>
 </code></pre></div>
 <p>If you edited <code>values.yaml</code> (new value, changed default, new section),
-regenerate the chart README via helm-docs and commit the result — CI's <code>lint</code>
+regenerate the chart README via helm-docs and commit the result - CI's <code>lint</code>
 job fails on any drift between <code>README.md</code> and <code>README.md.gotmpl</code>:</p>
 <div class="highlight"><pre><span></span><code>make<span class="w"> </span>docs
 </code></pre></div>
 <hr />
 <h2 id="running-the-ci-test-scenarios-locally">Running the CI test scenarios locally<a class="headerlink" href="#running-the-ci-test-scenarios-locally" title="Permanent link">&para;</a></h2>
 <p><a href="../.github/workflows/validate-chart.yaml">validate-chart.yaml</a>'s <code>test</code> job
-runs two scenarios as a <strong>matrix</strong> — each on its own ephemeral kind cluster.
+runs two scenarios as a <strong>matrix</strong> - each on its own ephemeral kind cluster.
 The scenario logic itself lives in
 <a href="../.github/scripts">.github/scripts</a> (<code>lib.sh</code> + one script per scenario), so
 you can reproduce exactly what CI does, scenario by scenario, against a local
@@ -2926,33 +2956,33 @@ kind cluster:</p>
 
 kind<span class="w"> </span>delete<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>hermes-verify
 </code></pre></div>
-<p>Each script is self-contained — install, hook test, and (for
+<p>Each script is self-contained - install, hook test, and (for
 <code>scenario-message.sh</code>, when <code>NVIDIA_API_KEY</code> is set) the skill-injection +
 chat round-trip, exactly as CI runs it. <code>DISCORD_BOT_TOKEN</code> /
 <code>DISCORD_HOME_CHANNEL</code> are optional and only consumed by
 <code>scenario-message.sh</code>. Run each scenario against its <strong>own</strong> cluster (as
-above) — both scripts default <code>NS</code> to <code>test-hermes-chart</code>, matching CI's
+above) - both scripts default <code>NS</code> to <code>test-hermes-chart</code>, matching CI's
 per-matrix-job isolation; reusing one cluster for both back-to-back will
 collide unless you delete the namespace or override <code>NS</code> between runs.</p>
 <blockquote>
 <p>macOS ships bash 3.2 (<code>/bin/bash --version</code>), which has a long-fixed-upstream
 bug where expanding an <strong>empty</strong> array under <code>set -u</code> raises "unbound
 variable" (fixed in bash 4.4+). The scripts already guard for this
-(<code>"${arr[@]+"${arr[@]}"}"</code>), so this should just work — if you hit a similar
+(<code>"${arr[@]+"${arr[@]}"}"</code>), so this should just work - if you hit a similar
 error while extending these scripts, that's almost certainly the cause.</p>
 </blockquote>
 <h3 id="using-a-different-provider-for-the-round-trip">Using a different provider for the round-trip<a class="headerlink" href="#using-a-different-provider-for-the-round-trip" title="Permanent link">&para;</a></h3>
 <p><code>scenario-message.sh</code> is hardcoded to NVIDIA NIM (the provider CI exercises),
 but <code>lib.sh</code>'s <code>install_release</code> is a thin wrapper around <code>helm upgrade</code>, so
 nothing stops you from copying a scenario script and pointing
-<code>config.model.provider</code> elsewhere for a quick local check — e.g. a local LM
+<code>config.model.provider</code> elsewhere for a quick local check - e.g. a local LM
 Studio server as a custom OpenAI-compatible provider (see
 <a href="../charts/hermes-agent/README.md#configure-your-provider">Configure your provider</a>
 in the chart README). Note this isn't validated end-to-end here: the agent pod
 runs inside the kind node's network namespace, so reaching an LM Studio
 instance on the host requires the pod to resolve the host (e.g.
 <code>host.docker.internal</code>, which may or may not resolve from inside a pod
-depending on your container runtime/CNI) — work this out before relying on it.</p>
+depending on your container runtime/CNI) - work this out before relying on it.</p>
 <hr />
 <h2 id="port-forwarding-a-remote-cluster-agent">Port-forwarding a remote cluster agent<a class="headerlink" href="#port-forwarding-a-remote-cluster-agent" title="Permanent link">&para;</a></h2>
 <p>When you want to test against an agent already running in a staging or
@@ -2969,7 +2999,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 hermes<span class="w"> </span>gateway<span class="w"> </span>status
 </code></pre></div>
 <blockquote>
-<p>The agent connects <strong>outbound</strong> to Discord and the AI provider — there is no
+<p>The agent connects <strong>outbound</strong> to Discord and the AI provider - there is no
 inbound webhook to expose. Port-forwarding is only needed to reach the
 management dashboard or to run ad-hoc <code>hermes</code> CLI commands through the pod.</p>
 </blockquote>

@@ -1942,6 +1942,8 @@
       
         
       
+        
+      
     
     
     
@@ -2067,6 +2069,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2712,11 +2742,11 @@
 <a href="https://artifacthub.io/packages/search?repo=hermes-agent"><img alt="Artifact Hub" src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent" /></a></p>
 <p><a href="README.md">English</a> · <a href="README-ko.md">한국어</a> · <a href="charts/hermes-agent/README.md">Chart docs</a> · <a href="CONTRIBUTING.md">CONTRIBUTING</a> · <a href="SECURITY.md">SECURITY</a> · <a href="AGENTS.md">AGENTS</a></p>
 <hr />
-<p><strong>Found this useful? Please give it a ⭐ — it helps others find it.</strong></p>
+<p><strong>Found this useful? Please give it a ⭐ - it helps others find it.</strong></p>
 </div>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p>Run <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> on Kubernetes
-with one <code>helm install</code> — works with any LLM provider Hermes supports, scales
+with one <code>helm install</code> - works with any LLM provider Hermes supports, scales
 down to a single small node, and is verified to actually run, not just render.
 A <strong>community-powered</strong> chart, not an official Nous Research release.</p>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
@@ -2744,12 +2774,12 @@ change), see <a href="#quick-start">Quick start</a> below.</p>
   already supports <code>openai-api</code>, <code>anthropic</code>, <code>gemini</code>, <code>openrouter</code>, <code>nvidia</code>,
   <code>deepseek</code>, and any OpenAI-compatible endpoint (e.g.
   <a href="https://github.com/BerriAI/litellm">LiteLLM</a>) through environment
-  variables — this chart just exposes that config through <code>values.yaml</code> and
+  variables - this chart just exposes that config through <code>values.yaml</code> and
   ships ready-to-adapt examples per provider, with no provider baked into the
   templates.</li>
 <li><strong>Lightweight → production.</strong> Sized for homelab / single-node / edge clusters
   out of the box (one replica, modest requests, a small PVC), and ready for
-  production by scaling <em>up</em> — not <em>out</em>. Hermes is a single-instance personal
+  production by scaling <em>up</em> - not <em>out</em>. Hermes is a single-instance personal
   agent (one <code>HERMES_HOME</code>, one gateway, one memory), so you don't replicate a
   pod; you run several well-managed instances and group them into a <strong>team</strong>
   that shares context over a common gateway channel. See
@@ -2757,7 +2787,7 @@ change), see <a href="#quick-start">Quick start</a> below.</p>
 <li><strong>Verified end-to-end.</strong> CI installs the chart on an ephemeral <strong>kind</strong>
   cluster and runs the bundled test Job (<code>hermes doctor</code>). When the
   <code>NVIDIA_API_KEY</code> repository secret is available, it also runs a <strong>live
-  <code>hermes chat</code> round-trip</strong> against NVIDIA NIM — not a mock.
+  <code>hermes chat</code> round-trip</strong> against NVIDIA NIM - not a mock.
   The Discord-thread leader team has also completed a live human → leader →
   two members → leader round-trip; Telegram team orchestration remains separate.</li>
 </ul>
@@ -2777,7 +2807,7 @@ install examples (including messenger integrations), see
 charts/hermes-agent/values-*.yaml        # ready-to-adapt examples: providers, Discord/Telegram, LiteLLM (see chart README &quot;More examples&quot;)
 examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
 examples/argocd/                         # ArgoCD Application examples (one per values-*.yaml) + GitOps/SealedSecret pattern
-charts/hermes-operator/                  # ⏸️ long-term, not started: possible install chart for an Agent/AgentTeam-CRD operator — placeholder, TBA (see Roadmap)
+charts/hermes-operator/                  # ⏸️ long-term, not started: possible install chart for an Agent/AgentTeam-CRD operator - placeholder, TBA (see Roadmap)
 docs/                                    # deeper guides: teams.md (group instances into a team), collaboration.md (make them hand off by @mention), roadmap.md
 .github/workflows/                       # ci (lint + docs-drift + real round-trip on kind) and release (version bump -&gt; tag -&gt; ghcr OCI)
 CONTRIBUTING.md                          # branch model (dev/main + tags) + release-on-version-bump
@@ -2831,7 +2861,7 @@ principles are in <a href="AGENTS.md">AGENTS.md</a>.</p>
   Release, and publishes the chart to <code>oci://ghcr.io/&lt;owner&gt;/hermes-agent-helm/hermes-agent</code>.</li>
 </ul>
 <p>So: lint + test gate every change; the <em>release</em> itself is just a normal
-reviewed PR (the version bump) — the pending Changesets decide its SemVer,
+reviewed PR (the version bump) - the pending Changesets decide its SemVer,
 merging is what ships. See
 <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> for the full release playbook.</p>
 <h2 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h2>
@@ -2839,7 +2869,7 @@ merging is what ships. See
 ApplicationSet are how you scale today, and a CRD-based operator is a
 long-term, not-started candidate. See <a href="docs/reference/roadmap.md">docs/reference/roadmap.md</a>.</p>
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
-<p>Issues, PRs, and ideas are all welcome — start with
+<p>Issues, PRs, and ideas are all welcome - start with
 <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> (branch model, local checks, release flow).
 Every merged contribution is credited in the changelog and release notes.</p>
 <p>Thanks to everyone who has contributed to and starred this project ⭐</p>

@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2635,7 +2665,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-upstage.yaml</span><pre><span></span><code><span class="c1"># values-upstage.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Upstage Solar&#39;s built-in OpenAI-compatible provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -2647,7 +2677,7 @@
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">upstage</span>
 <span class="w">    </span><span class="c1"># Hosted/business-tier model. For Upstage&#39;s open-weight flagship instead</span>
 <span class="w">    </span><span class="c1"># (250B-A15B MoE, https://huggingface.co/upstage/Solar-Open2-250B),</span>
-<span class="w">    </span><span class="c1"># use &quot;solar-open2&quot; — same provider, no other change needed. Verified</span>
+<span class="w">    </span><span class="c1"># use &quot;solar-open2&quot;: same provider, no other change needed. Verified</span>
 <span class="w">    </span><span class="c1"># working end-to-end: https://github.com/jyje/pilot-upstage-solar-open2/tree/main/02-hermes-agent-solar-open2</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">solar-pro3</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>

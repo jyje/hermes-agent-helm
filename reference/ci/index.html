@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2174,7 +2204,7 @@
   <a href="#message-scenario-scenario-messagesh" class="md-nav__link">
     <span class="md-ellipsis">
       
-        message scenario — scenario-message.sh
+        message scenario: scenario-message.sh
       
     </span>
   </a>
@@ -2185,7 +2215,7 @@
   <a href="#existingclaim-scenario-scenario-existing-claimsh" class="md-nav__link">
     <span class="md-ellipsis">
       
-        existingClaim scenario — scenario-existing-claim.sh
+        existingClaim scenario: scenario-existing-claim.sh
       
     </span>
   </a>
@@ -2624,7 +2654,7 @@
   <a href="#message-scenario-scenario-messagesh" class="md-nav__link">
     <span class="md-ellipsis">
       
-        message scenario — scenario-message.sh
+        message scenario: scenario-message.sh
       
     </span>
   </a>
@@ -2635,7 +2665,7 @@
   <a href="#existingclaim-scenario-scenario-existing-claimsh" class="md-nav__link">
     <span class="md-ellipsis">
       
-        existingClaim scenario — scenario-existing-claim.sh
+        existingClaim scenario: scenario-existing-claim.sh
       
     </span>
   </a>
@@ -2742,20 +2772,20 @@ from pull request to published, signed artifact.</p>
 <h2 id="validate-chart">validate-chart<a class="headerlink" href="#validate-chart" title="Permanent link">&para;</a></h2>
 <p>Two jobs run on every functional change:</p>
 <h3 id="lint"><code>lint</code><a class="headerlink" href="#lint" title="Permanent link">&para;</a></h3>
-<p><code>helm lint</code>, <code>helm template</code>, and a <strong>helm-docs drift check</strong> — if
+<p><code>helm lint</code>, <code>helm template</code>, and a <strong>helm-docs drift check</strong> - if
 <code>charts/hermes-agent/README.md</code> is out of date relative to <code>README.md.gotmpl</code>,
 the job fails. Always run <code>make docs</code> after editing <code>values.yaml</code> and commit the
 result.</p>
 <h3 id="test"><code>test</code><a class="headerlink" href="#test" title="Permanent link">&para;</a></h3>
 <p>Two scenarios run as a <strong>matrix</strong>, each on its <strong>own ephemeral kind cluster</strong>
-(a separate runner) — fully isolated, with native per-job status, timeout, and
+(a separate runner) - fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
 separately: <code>test (message)</code> and <code>test (existing-claim)</code>. Scenario logic lives
 in <a href="../.github/scripts">.github/scripts</a> (<code>lib.sh</code> + one script per scenario)
 rather than inline in the workflow.</p>
 <p>A <code>changes</code> job skips <code>test</code> entirely for version-bump-only commits (where the
 chart behavior is unchanged).</p>
-<h4 id="message-scenario-scenario-messagesh">message scenario — <a href="../.github/scripts/scenario-message.sh">scenario-message.sh</a><a class="headerlink" href="#message-scenario-scenario-messagesh" title="Permanent link">&para;</a></h4>
+<h4 id="message-scenario-scenario-messagesh">message scenario: <a href="../.github/scripts/scenario-message.sh">scenario-message.sh</a><a class="headerlink" href="#message-scenario-scenario-messagesh" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Install with chart-managed storage.</li>
 <li>Run the chart's <code>hermes doctor</code> test hook (the same Job as <code>helm test</code>, but
@@ -2763,14 +2793,14 @@ chart behavior is unchanged).</p>
 <li><strong>Only on trusted runs</strong> (an <code>NVIDIA_API_KEY</code> secret is present): inject a
    skill onto the PVC, then do one <code>hermes chat</code> round-trip through NVIDIA NIM.</li>
 </ol>
-<p>The <code>CI_MODELS</code> pool is <strong>failover only</strong> — the round-trip passes on the first
+<p>The <code>CI_MODELS</code> pool is <strong>failover only</strong> - the round-trip passes on the first
 model that answers, not every model. The chat invocation mirrors the chart's own
 test hook: <code>hermes chat -m &lt;model&gt; --provider nvidia -q &lt;prompt&gt; --max-turns N</code>.</p>
 <p>The live Discord notification step (workflow-level, after the scenario script)
 only runs for this scenario, since it's the only one with Discord enabled.</p>
-<h4 id="existingclaim-scenario-scenario-existing-claimsh">existingClaim scenario — <a href="../.github/scripts/scenario-existing-claim.sh">scenario-existing-claim.sh</a><a class="headerlink" href="#existingclaim-scenario-scenario-existing-claimsh" title="Permanent link">&para;</a></h4>
+<h4 id="existingclaim-scenario-scenario-existing-claimsh">existingClaim scenario: <a href="../.github/scripts/scenario-existing-claim.sh">scenario-existing-claim.sh</a><a class="headerlink" href="#existingclaim-scenario-scenario-existing-claimsh" title="Permanent link">&para;</a></h4>
 <p>Exercises <code>persistence.existingClaim</code> (the ability to mount a pre-existing PVC
-instead of one the chart creates — <a href="https://github.com/jyje/hermes-agent-helm/pull/37">PR #37</a>):</p>
+instead of one the chart creates - <a href="https://github.com/jyje/hermes-agent-helm/pull/37">PR #37</a>):</p>
 <ol>
 <li>Create a <code>ci-shared-pvc</code> PVC <strong>outside</strong> the chart.</li>
 <li>Install with <code>--set persistence.existingClaim=ci-shared-pvc</code>.</li>
@@ -2801,7 +2831,7 @@ against the artifact users actually pull (namespace <code>verify-hermes-chart</c
 <h2 id="running-the-equivalents-locally">Running the equivalents locally<a class="headerlink" href="#running-the-equivalents-locally" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>make<span class="w"> </span>lint<span class="w">        </span><span class="c1"># helm lint</span>
 make<span class="w"> </span>template<span class="w">    </span><span class="c1"># render manifests</span>
-make<span class="w"> </span>docs<span class="w">        </span><span class="c1"># regenerate the chart README (helm-docs) — commit the result</span>
+make<span class="w"> </span>docs<span class="w">        </span><span class="c1"># regenerate the chart README (helm-docs) - commit the result</span>
 make<span class="w"> </span><span class="nb">test</span><span class="w">        </span><span class="c1"># install + helm test (needs a cluster/kind)</span>
 </code></pre></div>
 <p>See <a href="local-dev.md">docs/reference/local-development.md</a> for setting up a local kind cluster and a

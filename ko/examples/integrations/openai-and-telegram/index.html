@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2635,7 +2665,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-openai-and-telegram.yaml</span><pre><span></span><code><span class="c1"># values-openai-and-telegram.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using OpenAI (api.openai.com) as the model provider AND running</span>
-<span class="c1"># as a Telegram bot — both wired in one file.</span>
+<span class="c1"># as a Telegram bot: both wired in one file.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
 <span class="c1"># them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom</span>
@@ -2650,7 +2680,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># NOTE: the built-in key is `openai-api` (api.openai.com).</span>
-<span class="w">    </span><span class="c1"># `openai` is NOT valid here — it aliases to OpenRouter.</span>
+<span class="w">    </span><span class="c1"># `openai` is NOT valid here: it aliases to OpenRouter.</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai-api</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4o-mini</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
@@ -2661,16 +2691,16 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sk-DUMMY_replace_me_000000000000000000000000&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Telegram bot (secret bits) -----------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Telegram — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Telegram: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># Create the bot via https://t.me/BotFather.</span>
 <span class="w">  </span><span class="nt">TELEGRAM_BOT_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0000000000:DUMMY-replace_me_with_a_real_token&quot;</span>
 
 <span class="c1"># Non-secret Telegram knobs go here (plain env, not the Secret).</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TELEGRAM_HOME_CHANNEL</span><span class="w">       </span><span class="c1"># chat id for cron / notification delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000&quot;</span><span class="w">                </span><span class="c1"># DUMMY — your chat id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000&quot;</span><span class="w">                </span><span class="c1"># DUMMY - your chat id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TELEGRAM_ALLOWED_USERS</span><span class="w">      </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111&quot;</span><span class="w">                </span><span class="c1"># DUMMY — your Telegram user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111&quot;</span><span class="w">                </span><span class="c1"># DUMMY - your Telegram user id</span>
 </code></pre></div>
 
 

@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2635,10 +2665,10 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-litellm.yaml</span><pre><span></span><code><span class="c1"># values-litellm.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent talking to a LiteLLM proxy reachable over the network (outside</span>
-<span class="c1"># the cluster, or via an Ingress/LoadBalancer) — one key, many upstream models.</span>
+<span class="c1"># the cluster, or via an Ingress/LoadBalancer): one key, many upstream models.</span>
 <span class="c1"># For a proxy running inside the same cluster, see values-litellm-k8s.yaml.</span>
 <span class="c1">#</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -2653,7 +2683,7 @@
 <span class="w">      </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://litellm.example.com/v1</span>
 <span class="w">      </span><span class="nt">key_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OPENAI_API_KEY</span><span class="w">      </span><span class="c1"># env var that holds the proxy key</span>
 <span class="w">      </span><span class="nt">discover_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">        </span><span class="c1"># populate the model picker from /v1/models</span>
-<span class="w">      </span><span class="c1"># Optional: extra HTTP headers on every request to this provider — for</span>
+<span class="w">      </span><span class="c1"># Optional: extra HTTP headers on every request to this provider: for</span>
 <span class="w">      </span><span class="c1"># a WAF/Cloudflare Access-gated proxy, a corporate gateway needing a</span>
 <span class="w">      </span><span class="c1"># second auth header, or request tracing. Values may hold secrets</span>
 <span class="w">      </span><span class="c1"># (e.g. CF-Access-Client-Secret); prefer ${ENV_VAR} substitution over</span>

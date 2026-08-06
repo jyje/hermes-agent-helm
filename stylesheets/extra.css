@@ -21,7 +21,7 @@
   --md-code-font: "MesloLGS Nerd Font", "MesloLGS NF", "JetBrainsMono Nerd Font", ui-monospace, monospace;
 }
 
-/* The retired Astro site's header/nav bar was never teal — teal
+/* The retired Astro site's header/nav bar was never teal; teal
    (--sl-color-accent) was an ACCENT for links and active states only.
    The bar itself sat on --sl-color-bg-nav: #f4f4f4. Reproduce that split
    here: --md-primary-fg-color drives the header/tab bar background in
@@ -34,12 +34,12 @@
   --md-primary-bg-color--light: rgba(36, 41, 47, 0.7);
   --md-accent-fg-color: #087f7a;
   /* Body-content link color defaults to --md-primary-fg-color in Material,
-     which is now a near-white gray — decouple it back to the teal accent
+     which is now a near-white gray, so decouple it back to the teal accent
      so links stay legible instead of nearly invisible on a white page. */
   --md-typeset-a-color: #087f7a;
   /* The retired Astro site's page background was also #f4f4f4
      (html, body { background-color: #f4f4f4 }), not Material's default
-     white — match it so the header and page body read as one surface. */
+     white. Match it so the header and page body read as one surface. */
   --md-default-bg-color: #f4f4f4;
 }
 

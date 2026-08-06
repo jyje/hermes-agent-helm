@@ -2093,6 +2093,8 @@
       
         
       
+        
+      
     
     
     
@@ -2218,6 +2220,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -3001,7 +3031,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-anthropic-and-discord.yaml</span><pre><span></span><code><span class="c1"># values-anthropic-and-discord.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Anthropic (Claude) as the model provider AND running as a</span>
-<span class="c1"># Discord bot — both wired in one file.</span>
+<span class="c1"># Discord bot: both wired in one file.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
 <span class="c1"># them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom</span>
@@ -3016,7 +3046,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anthropic</span>
-<span class="w">    </span><span class="c1"># A current Claude model id — see https://docs.anthropic.com for the list</span>
+<span class="w">    </span><span class="c1"># A current Claude model id: see https://docs.anthropic.com for the list</span>
 <span class="w">    </span><span class="c1"># (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">claude-sonnet-4-6</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
@@ -3029,7 +3059,7 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Discord bot (secret bits) ------------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># Create the bot at https://discord.com/developers/applications, enable the</span>
 <span class="w">  </span><span class="c1"># &quot;Message Content Intent&quot;, and invite it to your server.</span>
 <span class="w">  </span><span class="nt">DISCORD_BOT_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token&quot;</span>
@@ -3037,9 +3067,9 @@
 <span class="c1"># Non-secret Discord knobs go here (plain env, not the Secret).</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">        </span><span class="c1"># channel id for cron / notification delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">       </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your Discord user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your Discord user id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_ALL_USERS</span><span class="w">     </span><span class="c1"># true only for throwaway/dev bots</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 </code></pre></div>
@@ -3048,7 +3078,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-anthropic.yaml</span><pre><span></span><code><span class="c1"># values-anthropic.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Anthropic (Claude) as the model provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3058,7 +3088,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anthropic</span>
-<span class="w">    </span><span class="c1"># A current Claude model id — see https://docs.anthropic.com for the list</span>
+<span class="w">    </span><span class="c1"># A current Claude model id: see https://docs.anthropic.com for the list</span>
 <span class="w">    </span><span class="c1"># (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">claude-sonnet-4-6</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
@@ -3126,7 +3156,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-deepinfra.yaml</span><pre><span></span><code><span class="c1"># values-deepinfra.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using DeepInfra&#39;s built-in OpenAI-compatible provider.</span>
-<span class="c1"># Dummy key — override at install time. Use a model currently listed by</span>
+<span class="c1"># Dummy key: override at install time. Use a model currently listed by</span>
 <span class="c1"># DeepInfra&#39;s /v1/openai/models endpoint for config.model.default.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
@@ -3153,7 +3183,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-fireworks.yaml</span><pre><span></span><code><span class="c1"># values-fireworks.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Fireworks AI&#39;s built-in OpenAI-compatible provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3178,7 +3208,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-gemini.yaml</span><pre><span></span><code><span class="c1"># values-gemini.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Google Gemini as the model provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3202,14 +3232,14 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-github-copilot.yaml</span><pre><span></span><code><span class="c1"># values-github-copilot.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent backed by GitHub Copilot, authenticated at startup via the OAuth</span>
-<span class="c1"># 2.0 Device Authorization Grant (RFC 8628) — no API key to paste. The</span>
+<span class="c1"># 2.0 Device Authorization Grant (RFC 8628): no API key to paste. The</span>
 <span class="c1"># &quot;auth-device-login&quot; init container surfaces a verification link + code to your</span>
 <span class="c1"># Discord home channel, waits for you to approve it on github.com (phone is</span>
 <span class="c1"># fine), then persists the resulting token to HERMES_HOME/.env where Hermes</span>
 <span class="c1"># reads it natively. The token lives on the persistent volume, so restarts are</span>
 <span class="c1"># fast; re-login only happens when it is missing or revoked.</span>
 <span class="c1">#</span>
-<span class="c1"># Copilot&#39;s token API rejects PATs — a device-flow `gho_`/`ghu_` token is</span>
+<span class="c1"># Copilot&#39;s token API rejects PATs: a device-flow `gho_`/`ghu_` token is</span>
 <span class="c1"># required, which is exactly what this flow produces.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
@@ -3251,7 +3281,7 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Discord bot (secret bits) ------------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># The login init container reuses this same bot to post the verification link.</span>
 <span class="w">  </span><span class="c1"># Create the bot at https://discord.com/developers/applications, enable the</span>
 <span class="w">  </span><span class="c1"># &quot;Message Content Intent&quot;, and invite it to your server.</span>
@@ -3261,16 +3291,16 @@
 <span class="c1"># container also reads DISCORD_HOME_CHANNEL from here to know where to post.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">        </span><span class="c1"># channel id for cron / notification / login delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">       </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your Discord user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your Discord user id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_ALL_USERS</span><span class="w">     </span><span class="c1"># true only for throwaway/dev bots</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 
 <span class="c1"># Persistence is required for device-flow login: the token is written here so it</span>
 <span class="c1"># survives restarts (otherwise you would re-approve on every restart). Empty</span>
 <span class="c1"># storageClass = cluster default; on a Raspberry Pi cluster that is typically</span>
-<span class="c1"># local-path (k3s) or microk8s-hostpath — both ReadWriteOnce, which is exactly</span>
+<span class="c1"># local-path (k3s) or microk8s-hostpath: both ReadWriteOnce, which is exactly</span>
 <span class="c1"># what this single-writer workload wants.</span>
 <span class="nt">persistence</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -3327,7 +3357,7 @@
 <span class="w">    </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
 
 <span class="nt">env</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># No Vertex API key exists — tokens are minted from the mounted SA JSON.</span>
+<span class="w">  </span><span class="c1"># No Vertex API key exists: tokens are minted from the mounted SA JSON.</span>
 <span class="w">  </span><span class="c1"># This only overrides the chart&#39;s OpenAI placeholder.</span>
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
@@ -3338,7 +3368,7 @@
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VERTEX_CREDENTIALS_PATH</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/secrets/vertex/sa.json</span>
 <span class="w">  </span><span class="c1"># The vertex provider needs `google-auth`, which upstream ships as an opt-in</span>
-<span class="w">  </span><span class="c1"># extra handled by its lazy-install mechanism — it is NOT baked into the</span>
+<span class="w">  </span><span class="c1"># extra handled by its lazy-install mechanism: it is NOT baked into the</span>
 <span class="w">  </span><span class="c1"># image, and the image disables lazy installs by default. Re-enable them so</span>
 <span class="w">  </span><span class="c1"># the first Vertex call can install it into HERMES_LAZY_INSTALL_TARGET on</span>
 <span class="w">  </span><span class="c1"># the persistent volume (one-time, needs network egress; survives restarts).</span>
@@ -3358,7 +3388,7 @@
 <span class="c1"># NOTE: as of a recent Hermes security hardening, VERTEX_CREDENTIALS_PATH and</span>
 <span class="c1"># GOOGLE_APPLICATION_CREDENTIALS are stripped from the environment of</span>
 <span class="c1"># subprocesses the agent spawns (terminal, execute_code, browser,</span>
-<span class="c1"># computer_use) — they still work for the model&#39;s own API calls above. If a</span>
+<span class="c1"># computer_use): they still work for the model&#39;s own API calls above. If a</span>
 <span class="c1"># tool call in your session needs Vertex credentials too (e.g. shelling out to</span>
 <span class="c1"># `gcloud`), re-allow it explicitly:</span>
 <span class="c1">#</span>
@@ -3372,11 +3402,11 @@
 <span class="c1">#</span>
 <span class="c1"># Exposes the Hermes management dashboard (service.port, default 9119) via an</span>
 <span class="c1"># Ingress. The upstream warns this dashboard EXPOSES API KEYS on the network,</span>
-<span class="c1"># so it MUST sit behind authentication — this example uses nginx&#39;s basic-auth</span>
+<span class="c1"># so it MUST sit behind authentication: this example uses nginx&#39;s basic-auth</span>
 <span class="c1"># annotations. Adjust `ingressClassName` / annotations for your controller</span>
 <span class="c1"># (Traefik, HAProxy, ...).</span>
 <span class="c1">#</span>
-<span class="c1"># Dummy key — override at install time. The basic-auth Secret referenced by</span>
+<span class="c1"># Dummy key: override at install time. The basic-auth Secret referenced by</span>
 <span class="c1"># the annotation below must be created separately:</span>
 <span class="c1">#</span>
 <span class="c1">#   htpasswd -cb /tmp/auth admin &#39;&lt;your-password&gt;&#39;</span>
@@ -3426,13 +3456,13 @@
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent talking to a LiteLLM proxy deployed in the SAME Kubernetes</span>
 <span class="c1"># cluster (e.g. via the upstream berriai/litellm-helm chart), reached over</span>
-<span class="c1"># in-cluster Service DNS — no Ingress/TLS needed. For a proxy reachable over</span>
+<span class="c1"># in-cluster Service DNS: no Ingress/TLS needed. For a proxy reachable over</span>
 <span class="c1"># the network instead, see values-litellm.yaml.</span>
 <span class="c1">#</span>
 <span class="c1"># Adjust `base_url` to match your LiteLLM Service name/namespace:</span>
 <span class="c1">#   http://&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local:&lt;port&gt;/v1</span>
 <span class="c1">#</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3444,7 +3474,7 @@
 <span class="w">  </span><span class="c1"># key (&quot;litellm&quot;) is the provider id referenced by model.provider below.</span>
 <span class="w">  </span><span class="nt">providers</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">litellm</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># DUMMY — service &quot;litellm&quot; in namespace &quot;litellm&quot;, default chart port.</span>
+<span class="w">      </span><span class="c1"># DUMMY: service &quot;litellm&quot; in namespace &quot;litellm&quot;, default chart port.</span>
 <span class="w">      </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://litellm.litellm.svc.cluster.local:4000/v1</span>
 <span class="w">      </span><span class="nt">key_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OPENAI_API_KEY</span><span class="w">      </span><span class="c1"># env var that holds the proxy key</span>
 <span class="w">      </span><span class="nt">discover_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">        </span><span class="c1"># populate the model picker from /v1/models</span>
@@ -3463,10 +3493,10 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-litellm.yaml</span><pre><span></span><code><span class="c1"># values-litellm.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent talking to a LiteLLM proxy reachable over the network (outside</span>
-<span class="c1"># the cluster, or via an Ingress/LoadBalancer) — one key, many upstream models.</span>
+<span class="c1"># the cluster, or via an Ingress/LoadBalancer): one key, many upstream models.</span>
 <span class="c1"># For a proxy running inside the same cluster, see values-litellm-k8s.yaml.</span>
 <span class="c1">#</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3481,7 +3511,7 @@
 <span class="w">      </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://litellm.example.com/v1</span>
 <span class="w">      </span><span class="nt">key_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OPENAI_API_KEY</span><span class="w">      </span><span class="c1"># env var that holds the proxy key</span>
 <span class="w">      </span><span class="nt">discover_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">        </span><span class="c1"># populate the model picker from /v1/models</span>
-<span class="w">      </span><span class="c1"># Optional: extra HTTP headers on every request to this provider — for</span>
+<span class="w">      </span><span class="c1"># Optional: extra HTTP headers on every request to this provider: for</span>
 <span class="w">      </span><span class="c1"># a WAF/Cloudflare Access-gated proxy, a corporate gateway needing a</span>
 <span class="w">      </span><span class="c1"># second auth header, or request tracing. Values may hold secrets</span>
 <span class="w">      </span><span class="c1"># (e.g. CF-Access-Client-Secret); prefer ${ENV_VAR} substitution over</span>
@@ -3506,11 +3536,11 @@
 <span class="c1"># Hermes Agent using Mixture-of-Agents (MoA): reference models run in</span>
 <span class="c1"># parallel and an aggregator model synthesizes their output, instead of a</span>
 <span class="c1"># single model answering directly. MoA is a virtual provider (image</span>
-<span class="c1"># v2026.7.1+) — `config.model.provider: moa` + `config.model.default: &lt;preset</span>
+<span class="c1"># v2026.7.1+): `config.model.provider: moa` + `config.model.default: &lt;preset</span>
 <span class="c1"># name&gt;` selects a named preset defined under `config.moa.presets`.</span>
 <span class="c1">#</span>
 <span class="c1"># The example preset below fans out to two OpenRouter reference models and</span>
-<span class="c1"># aggregates with a third — swap provider/model ids for whichever you use,</span>
+<span class="c1"># aggregates with a third: swap provider/model ids for whichever you use,</span>
 <span class="c1"># and supply each provider&#39;s own API key under `env` (a preset can mix</span>
 <span class="c1"># providers freely).</span>
 <span class="c1">#</span>
@@ -3556,8 +3586,8 @@
 <span class="c1"># &quot;planner&quot; role; copy it to a &quot;builder&quot; (swap the role text and the partner&#39;s</span>
 <span class="c1"># user ID) and deploy both as separate releases into the same channel.</span>
 <span class="c1">#</span>
-<span class="c1"># Full walkthrough — handoff protocol, the loop brake, mixed backends, and an</span>
-<span class="c1"># ApplicationSet that templates a whole roster — is in docs/reference/collaboration.md.</span>
+<span class="c1"># Full walkthrough: handoff protocol, the loop brake, mixed backends, and an</span>
+<span class="c1"># ApplicationSet that templates a whole roster: is in docs/reference/collaboration.md.</span>
 <span class="c1">#</span>
 <span class="c1"># Two instances collaborate when:</span>
 <span class="c1">#   1. they share ONE channel (same DISCORD_HOME_CHANNEL + DISCORD_ALLOWED_USERS),</span>
@@ -3601,7 +3631,7 @@
 <span class="w">    </span><span class="nt">history_backfill_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
 <span class="w">  </span><span class="nt">agent</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># The handoff protocol. Names the PARTNER&#39;s Discord user ID and tells this</span>
-<span class="w">    </span><span class="c1"># agent how to hand over (explicit &lt;@id&gt; in the BODY) and — critically — how</span>
+<span class="w">    </span><span class="c1"># agent how to hand over (explicit &lt;@id&gt; in the BODY) and: critically - how</span>
 <span class="w">    </span><span class="c1"># to STOP (address the human, drop the mention) when a topic is done. The</span>
 <span class="w">    </span><span class="c1"># closing sentences are the prompt half of the loop brake; without them the</span>
 <span class="w">    </span><span class="c1"># two bots ping-pong forever.</span>
@@ -3612,7 +3642,7 @@
 <span class="w">      </span><span class="no">put an explicit &lt;@BUILDER_BOT_USER_ID&gt; mention in the BODY of your message.</span>
 <span class="w">      </span><span class="no">Only mention builder when you have something substantive to say or genuinely</span>
 <span class="w">      </span><span class="no">need their input. When a topic reaches a natural conclusion, do NOT mention</span>
-<span class="w">      </span><span class="no">builder — address the human instead and end your turn, so the exchange</span>
+<span class="w">      </span><span class="no">builder - address the human instead and end your turn, so the exchange</span>
 <span class="w">      </span><span class="no">stops. Never send a filler or &quot;let me know if you need anything&quot; message</span>
 <span class="w">      </span><span class="no">that mentions builder; that only restarts the loop.</span>
 
@@ -3628,9 +3658,9 @@
 <span class="c1"># full rationale of each loop-brake var.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">              </span><span class="c1"># the ONE shared channel (context bus)</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">             </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">             </span><span class="c1"># shared — who may talk to the team</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">             </span><span class="c1"># DUMMY — comma-separated user ids</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">             </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">             </span><span class="c1"># shared - who may talk to the team</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">             </span><span class="c1"># DUMMY - comma-separated user ids</span>
 <span class="w">  </span><span class="c1"># --- loop brake: a partner fires ONLY on an explicit &lt;@id&gt; in the body -------</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_BOTS</span><span class="w">                 </span><span class="c1"># respond to a bot only when it @mentions us</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mentions&quot;</span>
@@ -3642,7 +3672,7 @@
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 
 <span class="c1"># Persistence: empty storageClass = cluster default. On a Raspberry Pi cluster</span>
-<span class="c1"># that is typically local-path (k3s) or microk8s-hostpath — both ReadWriteOnce,</span>
+<span class="c1"># that is typically local-path (k3s) or microk8s-hostpath: both ReadWriteOnce,</span>
 <span class="c1"># which is exactly what this single-writer workload wants.</span>
 <span class="nt">persistence</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -3665,10 +3695,10 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-nvidia-nim-and-buzz.yaml</span><pre><span></span><code><span class="c1"># values-nvidia-nim-and-buzz.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using NVIDIA NIM as the model provider AND running as a Buzz</span>
-<span class="c1"># bot — both wired in one file. Buzz is Block&#39;s open-source human+agent</span>
+<span class="c1"># bot: both wired in one file. Buzz is Block&#39;s open-source human+agent</span>
 <span class="c1"># collaboration platform built on Nostr; the adapter ships bundled with the</span>
 <span class="c1"># image (same category as Telegram/Discord/WhatsApp), so setting the two</span>
-<span class="c1"># required env vars below is enough to enable it — no config.yaml change.</span>
+<span class="c1"># required env vars below is enough to enable it: no config.yaml change.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
 <span class="c1"># them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom</span>
@@ -3684,7 +3714,7 @@
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Built-in provider key for NVIDIA NIM (build.nvidia.com).</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia</span>
-<span class="w">    </span><span class="c1"># NIM model id — pick one your account can reach from build.nvidia.com.</span>
+<span class="w">    </span><span class="c1"># NIM model id: pick one your account can reach from build.nvidia.com.</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
@@ -3697,19 +3727,19 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Buzz bot (secret bits) ----------------------------------------------</span>
-<span class="w">  </span><span class="c1"># The Nostr private key (nsec or hex) for the agent&#39;s Buzz identity — the</span>
+<span class="w">  </span><span class="c1"># The Nostr private key (nsec or hex) for the agent&#39;s Buzz identity: the</span>
 <span class="w">  </span><span class="c1"># only Buzz secret. Create a dedicated identity for the bot; do not reuse a</span>
 <span class="w">  </span><span class="c1"># personal Nostr key.</span>
 <span class="w">  </span><span class="nt">BUZZ_PRIVATE_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;DUMMY_replace_me_with_a_real_nsec_or_hex_key&quot;</span>
 
 <span class="c1"># Non-secret Buzz knobs go here (plain env, not the Secret).</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUZZ_RELAY_URL</span><span class="w">              </span><span class="c1"># required — base URL of your Buzz community relay</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUZZ_RELAY_URL</span><span class="w">              </span><span class="c1"># required - base URL of your Buzz community relay</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://DUMMY.communities.buzz.xyz&quot;</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUZZ_HOME_CHANNEL</span><span class="w">           </span><span class="c1"># channel UUID for cron / notification delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">                         </span><span class="c1"># DUMMY — empty defaults to the first watched channel</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">                         </span><span class="c1"># DUMMY - empty defaults to the first watched channel</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUZZ_ALLOWED_USERS</span><span class="w">          </span><span class="c1"># comma-separated npubs or hex pubkeys allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">                         </span><span class="c1"># DUMMY — your Nostr pubkey</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">                         </span><span class="c1"># DUMMY - your Nostr pubkey</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUZZ_ALLOW_ALL_USERS</span><span class="w">        </span><span class="c1"># true only for throwaway/dev bots</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 </code></pre></div>
@@ -3718,7 +3748,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-nvidia-nim-and-discord.yaml</span><pre><span></span><code><span class="c1"># values-nvidia-nim-and-discord.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent on a Raspberry Pi cluster (arm64), talking to NVIDIA NIM for the</span>
-<span class="c1"># model AND running as a Discord bot — both wired in one file.</span>
+<span class="c1"># model AND running as a Discord bot: both wired in one file.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
 <span class="c1"># them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom</span>
@@ -3734,7 +3764,7 @@
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Built-in provider key for NVIDIA NIM (build.nvidia.com).</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia</span>
-<span class="w">    </span><span class="c1"># NIM model id — pick one your account can reach from build.nvidia.com.</span>
+<span class="w">    </span><span class="c1"># NIM model id: pick one your account can reach from build.nvidia.com.</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
@@ -3747,7 +3777,7 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Discord bot (secret bits) ------------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># Create the bot at https://discord.com/developers/applications, enable the</span>
 <span class="w">  </span><span class="c1"># &quot;Message Content Intent&quot;, and invite it to your server.</span>
 <span class="w">  </span><span class="nt">DISCORD_BOT_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token&quot;</span>
@@ -3755,14 +3785,14 @@
 <span class="c1"># Non-secret Discord knobs go here (plain env, not the Secret).</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">        </span><span class="c1"># channel id for cron / notification delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">       </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your Discord user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your Discord user id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_ALL_USERS</span><span class="w">     </span><span class="c1"># true only for throwaway/dev bots</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 
 <span class="c1"># Persistence: empty storageClass = cluster default. On a Raspberry Pi cluster</span>
-<span class="c1"># that is typically local-path (k3s) or microk8s-hostpath — both ReadWriteOnce,</span>
+<span class="c1"># that is typically local-path (k3s) or microk8s-hostpath: both ReadWriteOnce,</span>
 <span class="c1"># which is exactly what this single-writer workload wants.</span>
 <span class="nt">persistence</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -3785,7 +3815,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-openai-and-telegram.yaml</span><pre><span></span><code><span class="c1"># values-openai-and-telegram.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using OpenAI (api.openai.com) as the model provider AND running</span>
-<span class="c1"># as a Telegram bot — both wired in one file.</span>
+<span class="c1"># as a Telegram bot: both wired in one file.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
 <span class="c1"># them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom</span>
@@ -3800,7 +3830,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># NOTE: the built-in key is `openai-api` (api.openai.com).</span>
-<span class="w">    </span><span class="c1"># `openai` is NOT valid here — it aliases to OpenRouter.</span>
+<span class="w">    </span><span class="c1"># `openai` is NOT valid here: it aliases to OpenRouter.</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai-api</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4o-mini</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
@@ -3811,23 +3841,23 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sk-DUMMY_replace_me_000000000000000000000000&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Telegram bot (secret bits) -----------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Telegram — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Telegram: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># Create the bot via https://t.me/BotFather.</span>
 <span class="w">  </span><span class="nt">TELEGRAM_BOT_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0000000000:DUMMY-replace_me_with_a_real_token&quot;</span>
 
 <span class="c1"># Non-secret Telegram knobs go here (plain env, not the Secret).</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TELEGRAM_HOME_CHANNEL</span><span class="w">       </span><span class="c1"># chat id for cron / notification delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000&quot;</span><span class="w">                </span><span class="c1"># DUMMY — your chat id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000&quot;</span><span class="w">                </span><span class="c1"># DUMMY - your chat id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TELEGRAM_ALLOWED_USERS</span><span class="w">      </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111&quot;</span><span class="w">                </span><span class="c1"># DUMMY — your Telegram user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111&quot;</span><span class="w">                </span><span class="c1"># DUMMY - your Telegram user id</span>
 </code></pre></div>
 <h2 id="values-openaiyaml">values-openai.yaml<a class="headerlink" href="#values-openaiyaml" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-openai.yaml">Open raw YAML</a></p>
 <div class="highlight"><span class="filename">charts/hermes-agent/values-openai.yaml</span><pre><span></span><code><span class="c1"># values-openai.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using OpenAI (api.openai.com) as the model provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3837,7 +3867,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># NOTE: the built-in key is `openai-api` (api.openai.com).</span>
-<span class="w">    </span><span class="c1"># `openai` is NOT valid here — it aliases to OpenRouter.</span>
+<span class="w">    </span><span class="c1"># `openai` is NOT valid here: it aliases to OpenRouter.</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai-api</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4o-mini</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
@@ -3851,7 +3881,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-openrouter.yaml</span><pre><span></span><code><span class="c1"># values-openrouter.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using OpenRouter (one key, many upstream models).</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -3861,7 +3891,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openrouter</span>
-<span class="w">    </span><span class="c1"># OpenRouter model id (vendor/model) — see https://openrouter.ai/models.</span>
+<span class="w">    </span><span class="c1"># OpenRouter model id (vendor/model): see https://openrouter.ai/models.</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai/gpt-4o-mini</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
@@ -3879,7 +3909,7 @@
 <span class="c1"># common knowledge base on one ReadWriteMany (RWX) PVC.</span>
 <span class="c1">#</span>
 <span class="c1"># Use case: A team of Hermes agents (planner, builder, researcher, etc.) that all</span>
-<span class="c1"># read from and write to the same durable knowledge repository — curated notes,</span>
+<span class="c1"># read from and write to the same durable knowledge repository: curated notes,</span>
 <span class="c1"># reference documents, or vector indices. Every agent mounts the SAME knowledge</span>
 <span class="c1"># PVC at /opt/data/shared-knowledge while retaining its own config, memory,</span>
 <span class="c1"># sessions, and identity on a private HERMES_HOME PVC.</span>
@@ -3957,9 +3987,9 @@
 <span class="c1"># allowed users to form a single context bus.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — comma-separated user ids</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - comma-separated user ids</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SHARED_KNOWLEDGE_ROOT</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/data/shared-knowledge&quot;</span>
 
@@ -4151,9 +4181,9 @@
 <span class="c1"># Discord gates make an explicit body &lt;@id&gt; the only bot-to-bot trigger.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — shared parent channel ID</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - shared parent channel ID</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — trusted human user IDs</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - trusted human user IDs</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_BOTS</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mentions&quot;</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_THREAD_REQUIRE_MENTION</span>
@@ -4163,11 +4193,11 @@
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_MENTION_REPLIED_USER</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MAY_BOT_USER_ID</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — may&#39;s Discord user ID</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - may&#39;s Discord user ID</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MARCH_BOT_USER_ID</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — march&#39;s Discord user ID</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - march&#39;s Discord user ID</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AUGUST_BOT_USER_ID</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — leader&#39;s Discord user ID</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - leader&#39;s Discord user ID</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TEAM_KNOWLEDGE_ROOT</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/data/team-knowledge&quot;</span>
 
@@ -4320,9 +4350,9 @@
 
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — same parent channel as leader</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - same parent channel as leader</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — same trusted human IDs</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - same trusted human IDs</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_BOTS</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mentions&quot;</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_THREAD_REQUIRE_MENTION</span>
@@ -4334,7 +4364,7 @@
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TEAM_MEMBER_NAME</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;may&quot;</span><span class="w">                      </span><span class="c1"># per release: may or march</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AUGUST_BOT_USER_ID</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — leader&#39;s Discord user ID</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - leader&#39;s Discord user ID</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TEAM_KNOWLEDGE_ROOT</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/data/team-knowledge&quot;</span>
 
@@ -4378,7 +4408,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-upstage.yaml</span><pre><span></span><code><span class="c1"># values-upstage.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Upstage Solar&#39;s built-in OpenAI-compatible provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -4390,7 +4420,7 @@
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">upstage</span>
 <span class="w">    </span><span class="c1"># Hosted/business-tier model. For Upstage&#39;s open-weight flagship instead</span>
 <span class="w">    </span><span class="c1"># (250B-A15B MoE, https://huggingface.co/upstage/Solar-Open2-250B),</span>
-<span class="w">    </span><span class="c1"># use &quot;solar-open2&quot; — same provider, no other change needed. Verified</span>
+<span class="w">    </span><span class="c1"># use &quot;solar-open2&quot;: same provider, no other change needed. Verified</span>
 <span class="w">    </span><span class="c1"># working end-to-end: https://github.com/jyje/pilot-upstage-solar-open2/tree/main/02-hermes-agent-solar-open2</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">solar-pro3</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>

@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2669,7 +2699,7 @@
 <span class="w">    </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
 
 <span class="nt">env</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># No Vertex API key exists — tokens are minted from the mounted SA JSON.</span>
+<span class="w">  </span><span class="c1"># No Vertex API key exists: tokens are minted from the mounted SA JSON.</span>
 <span class="w">  </span><span class="c1"># This only overrides the chart&#39;s OpenAI placeholder.</span>
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
@@ -2680,7 +2710,7 @@
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VERTEX_CREDENTIALS_PATH</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/secrets/vertex/sa.json</span>
 <span class="w">  </span><span class="c1"># The vertex provider needs `google-auth`, which upstream ships as an opt-in</span>
-<span class="w">  </span><span class="c1"># extra handled by its lazy-install mechanism — it is NOT baked into the</span>
+<span class="w">  </span><span class="c1"># extra handled by its lazy-install mechanism: it is NOT baked into the</span>
 <span class="w">  </span><span class="c1"># image, and the image disables lazy installs by default. Re-enable them so</span>
 <span class="w">  </span><span class="c1"># the first Vertex call can install it into HERMES_LAZY_INSTALL_TARGET on</span>
 <span class="w">  </span><span class="c1"># the persistent volume (one-time, needs network egress; survives restarts).</span>
@@ -2700,7 +2730,7 @@
 <span class="c1"># NOTE: as of a recent Hermes security hardening, VERTEX_CREDENTIALS_PATH and</span>
 <span class="c1"># GOOGLE_APPLICATION_CREDENTIALS are stripped from the environment of</span>
 <span class="c1"># subprocesses the agent spawns (terminal, execute_code, browser,</span>
-<span class="c1"># computer_use) — they still work for the model&#39;s own API calls above. If a</span>
+<span class="c1"># computer_use): they still work for the model&#39;s own API calls above. If a</span>
 <span class="c1"># tool call in your session needs Vertex credentials too (e.g. shelling out to</span>
 <span class="c1"># `gcloud`), re-allow it explicitly:</span>
 <span class="c1">#</span>

@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2636,11 +2666,11 @@
 <span class="c1">#</span>
 <span class="c1"># Exposes the Hermes management dashboard (service.port, default 9119) via an</span>
 <span class="c1"># Ingress. The upstream warns this dashboard EXPOSES API KEYS on the network,</span>
-<span class="c1"># so it MUST sit behind authentication — this example uses nginx&#39;s basic-auth</span>
+<span class="c1"># so it MUST sit behind authentication: this example uses nginx&#39;s basic-auth</span>
 <span class="c1"># annotations. Adjust `ingressClassName` / annotations for your controller</span>
 <span class="c1"># (Traefik, HAProxy, ...).</span>
 <span class="c1">#</span>
-<span class="c1"># Dummy key — override at install time. The basic-auth Secret referenced by</span>
+<span class="c1"># Dummy key: override at install time. The basic-auth Secret referenced by</span>
 <span class="c1"># the annotation below must be created separately:</span>
 <span class="c1">#</span>
 <span class="c1">#   htpasswd -cb /tmp/auth admin &#39;&lt;your-password&gt;&#39;</span>

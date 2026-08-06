@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2655,7 +2685,7 @@
 
 
 <h1 id="deploying-with-argocd">Deploying with ArgoCD<a class="headerlink" href="#deploying-with-argocd" title="Permanent link">&para;</a></h1>
-<p>These Application manifests deploy <code>hermes-agent</code> via ArgoCD safely —
+<p>These Application manifests deploy <code>hermes-agent</code> via ArgoCD safely,
 including <strong>multiple instances in the same namespace without collisions</strong>.</p>
 <p>Each file mirrors the corresponding
 <a href="../../charts/hermes-agent/README.md#more-examples"><code>charts/hermes-agent/values-*.yaml</code></a>
@@ -2737,7 +2767,7 @@ example 1:1, with secrets wired via <code>extraEnvFrom</code> instead of plain <
 <tr>
 <td><a href="hermes-agent-github-copilot.yaml"><code>hermes-agent-github-copilot.yaml</code></a></td>
 <td><code>values-github-copilot.yaml</code> + GitOps</td>
-<td><code>hermes-agent-copilot-secrets</code> via <strong>SealedSecret</strong> (<code>DISCORD_BOT_TOKEN</code> only — Copilot token minted at runtime via <strong>OAuth device flow</strong>)</td>
+<td><code>hermes-agent-copilot-secrets</code> via <strong>SealedSecret</strong> (<code>DISCORD_BOT_TOKEN</code> only: Copilot token minted at runtime via <strong>OAuth device flow</strong>)</td>
 </tr>
 <tr>
 <td><a href="hermes-agent-ingress.yaml"><code>hermes-agent-ingress.yaml</code></a></td>
@@ -2747,16 +2777,16 @@ example 1:1, with secrets wired via <code>extraEnvFrom</code> instead of plain <
 <tr>
 <td><a href="hermes-collab-pair.yaml"><code>hermes-collab-pair.yaml</code></a></td>
 <td><code>values-multi-agent-collab.yaml</code> (×2: planner+builder)</td>
-<td><code>hermes-planner-discord-secrets</code> + <code>hermes-builder-discord-secrets</code> — a <strong>collaborating pair</strong> that hands off by <code>@mention</code>; see <a href="../../docs/reference/collaboration.md">docs/reference/collaboration.md</a></td>
+<td><code>hermes-planner-discord-secrets</code> + <code>hermes-builder-discord-secrets</code>: a <strong>collaborating pair</strong> that hands off by <code>@mention</code>; see <a href="../../docs/reference/collaboration.md">docs/reference/collaboration.md</a></td>
 </tr>
 <tr>
 <td><a href="hermes-team.yaml"><code>hermes-team.yaml</code></a></td>
 <td><code>values-team-leader.yaml</code> + <code>values-team-member.yaml</code></td>
-<td><code>hermes-august-discord-secrets</code> + <code>hermes-may-discord-secrets</code> + <code>hermes-march-discord-secrets</code> + pre-provisioned <code>hermes-team-knowledge</code> RWX PVC — a <strong>leader-orchestrated team</strong> (serialized explicit mentions, leader-writable/member-read-only shared knowledge, no file-based task handoff); see <a href="../../docs/reference/teams.md">docs/reference/teams.md</a></td>
+<td><code>hermes-august-discord-secrets</code> + <code>hermes-may-discord-secrets</code> + <code>hermes-march-discord-secrets</code> + pre-provisioned <code>hermes-team-knowledge</code> RWX PVC: a <strong>leader-orchestrated team</strong> (serialized explicit mentions, leader-writable/member-read-only shared knowledge, no file-based task handoff); see <a href="../../docs/reference/teams.md">docs/reference/teams.md</a></td>
 </tr>
 </tbody>
 </table>
-<p><code>hermes-agent.yaml</code> is the bare-minimum starting point — pure chart defaults
+<p><code>hermes-agent.yaml</code> is the bare-minimum starting point - pure chart defaults
 plus the secret wiring; copy it and add a <code>valuesObject</code> to customize.</p>
 <p><code>hermes-collab-pair.yaml</code> is the first multi-Application example: <strong>two</strong> agents
 (a <code>planner</code> on LiteLLM and a <code>builder</code> on Copilot device-flow) sharing one
@@ -2765,7 +2795,7 @@ Discord channel and handing off by <code>@mention</code>. See
 the four loop-brake env vars.</p>
 <p><code>hermes-team.yaml</code> scales that pattern up: one Application for the team
 <strong>leader</strong> (<code>august</code>) plus an <strong>ApplicationSet</strong> whose member roster (<code>may</code>,
-<code>march</code>) is a list-generator entry — adding a teammate is a one-line diff. The
+<code>march</code>) is a list-generator entry - adding a teammate is a one-line diff. The
 agents share a Discord channel (star topology: mentions flow leader ↔ member
 only). The thread is the coordination bus and audit log. A separate RWX PVC
 stores durable reusable knowledge (leader read-write, members read-only), but
@@ -2774,14 +2804,14 @@ never carries tasks, status, intermediate results, or completion signals. See
 <p>All examples use the <strong>OCI registry</strong> source form (<code>repoURL</code>/<code>chart</code>/
 <code>targetRevision</code> pointing at <code>ghcr.io</code>). A Git source form
 (<code>repoURL</code>/<code>targetRevision</code>/<code>path</code>) works too if you'd rather track a chart
-checked into a Git repo — swap freely between the two.</p>
+checked into a Git repo - swap freely between the two.</p>
 <p><code>hermes-agent-litellm-k8s.yaml</code> is the most complete example: it demonstrates
 the full GitOps pattern (SealedSecret via <code>extraResources</code> + <code>extraEnvFrom</code> +
 non-default <code>persistence.storageClass</code>). The others use a plain Secret created
 out-of-band (see each file's header comment for the exact <code>kubectl create
 secret</code> command).</p>
 <p>All Applications target <code>destination.namespace: hermes-agent</code> and use distinct
-<code>releaseName</code>s — they can be applied together in the same namespace without
+<code>releaseName</code>s - they can be applied together in the same namespace without
 colliding (see below).</p>
 <h2 id="the-one-rule-unique-fullname-per-instance">The one rule: unique <code>fullname</code> per instance<a class="headerlink" href="#the-one-rule-unique-fullname-per-instance" title="Permanent link">&para;</a></h2>
 <p>Every chart resource is named from the Helm <strong>fullname</strong>
@@ -2794,7 +2824,7 @@ collide only if they render the <strong>same fullname</strong> in the <strong>sa
 </blockquote>
 <p>This does two things:
 1. Makes the fullname unique per instance (no name collisions).
-2. Makes the chart's <code>app.kubernetes.io/instance</code> value equal the Application —
+2. Makes the chart's <code>app.kubernetes.io/instance</code> value equal the Application:
    intuitive and consistent.</p>
 <h2 id="why-there-is-no-tracking-label-clash-here">Why there is no tracking-label clash here<a class="headerlink" href="#why-there-is-no-tracking-label-clash-here" title="Permanent link">&para;</a></h2>
 <p>ArgoCD tracks ownership with a label whose key is set by
@@ -2823,7 +2853,7 @@ instead of creating a plain Secret out-of-band, it ships a
 <a href="https://github.com/bitnami-labs/sealed-secrets">bitnami <strong>SealedSecret</strong></a> in
 <code>extraResources</code>. The sealed-secrets controller decrypts it in-cluster into a
 regular Secret (<code>hermes-agent-nim-discord-sealedsecret-secrets</code>), which
-<code>extraEnvFrom</code> then mounts. The encrypted blob is safe to commit to Git — only
+<code>extraEnvFrom</code> then mounts. The encrypted blob is safe to commit to Git - only
 the controller's private key (held by your cluster) can decrypt it.</p>
 <p>This walkthrough seals <strong>two</strong> keys at once (<code>NVIDIA_API_KEY</code> and
 <code>DISCORD_BOT_TOKEN</code>). For a single key, see the simpler <code>kubeseal --raw
@@ -2835,7 +2865,7 @@ the controller's private key (held by your cluster) can decrypt it.</p>
   sealed-secrets/sealed-secrets -n kube-system</code>).
 - The <code>kubeseal</code> CLI is installed locally, matching (or able to fetch) the
   controller's public certificate.</p>
-<p><strong>1. Write a plaintext Secret manifest — do not apply it:</strong></p>
+<p><strong>1. Write a plaintext Secret manifest - do not apply it:</strong></p>
 <div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/tmp/hermes-agent-nim-discord-secret.yaml<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF&#39;</span>
 <span class="s">apiVersion: v1</span>
 <span class="s">kind: Secret</span>
@@ -2859,7 +2889,7 @@ controller's public key (fetched automatically from the cluster, or pass
 <p>This produces a <code>SealedSecret</code> with <code>spec.encryptedData.NVIDIA_API_KEY</code> and
 <code>spec.encryptedData.DISCORD_BOT_TOKEN</code>, each a long <code>AgB...</code> / <code>AgD...</code> base64
 blob. <code>--scope namespace-wide</code> lets the SealedSecret be renamed/moved within
-<code>hermes-agent</code> without re-sealing — matches the convention used by the other
+<code>hermes-agent</code> without re-sealing - matches the convention used by the other
 SealedSecret examples in this directory.</p>
 <p><strong>3. Splice the two <code>encryptedData</code> values</strong> into
 <code>hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml</code>'s
@@ -2888,12 +2918,12 @@ SealedSecret examples in this directory.</p>
 kubectl<span class="w"> </span>get<span class="w"> </span>sealedsecret,secret<span class="w"> </span>-n<span class="w"> </span>hermes-agent<span class="w"> </span>hermes-agent-nim-discord-sealedsecret-secrets
 
 <span class="c1"># and the pod should pick up both keys via extraEnvFrom (fullnameOverride:</span>
-<span class="c1"># hermes-agent keeps resource names short — see the file&#39;s valuesObject):</span>
+<span class="c1"># hermes-agent keeps resource names short: see the file&#39;s valuesObject):</span>
 kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>hermes-agent<span class="w"> </span>deploy/hermes-agent<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>env<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;^(NVIDIA_API_KEY|DISCORD_BOT_TOKEN)=&#39;</span>
 </code></pre></div>
 <p>If <code>kubectl get secret</code> shows no Secret, check the controller's logs
-(<code>kubectl logs -n kube-system -l app.kubernetes.io/name=sealed-secrets</code>) — the
+(<code>kubectl logs -n kube-system -l app.kubernetes.io/name=sealed-secrets</code>) - the
 most common cause is sealing with the wrong cluster's certificate.</p>
 <h2 id="apply">Apply<a class="headerlink" href="#apply" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>examples/argocd/hermes-agent-openai.yaml
@@ -2912,7 +2942,7 @@ second instance alongside the first, both in <code>hermes-agent</code>:</p>
 <span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hermes-agent</span><span class="w">       </span><span class="c1"># SAME namespace is fine</span>
 </code></pre></div>
 <p>Resources render as <code>hermes-agent-staging-*</code> (pod <code>hermes-agent-staging-0</code>,
-<code>hermes-agent-staging-config</code>, <code>data-hermes-agent-staging-0</code>, …) — no
+<code>hermes-agent-staging-config</code>, <code>data-hermes-agent-staging-0</code>, …) - no
 overlap with the <code>hermes-agent-*</code> set. Each gets its own PVC, so the two
 instances do <strong>not</strong> share a knowledge base.</p>
 

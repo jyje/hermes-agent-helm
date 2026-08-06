@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2743,12 +2773,12 @@
 </tr>
 <tr>
 <td><em>tags</em> <code>vX.Y.Z</code></td>
-<td>The release itself — created by CI when the chart version changes.</td>
+<td>The release itself: created by CI when the chart version changes.</td>
 <td>publishes to GitHub Packages (OCI)</td>
 </tr>
 </tbody>
 </table>
-<p>No long-lived <code>rc</code>/<code>release</code> branches — a release is a tag/event.</p>
+<p>No long-lived <code>rc</code>/<code>release</code> branches - a release is a tag/event.</p>
 <h2 id="how-to-cut-a-release">How to cut a release<a class="headerlink" href="#how-to-cut-a-release" title="Permanent link">&para;</a></h2>
 <p>Changesets is the source of the next SemVer decision. Each user-visible chart
 change adds a Markdown entry under <a href=".changeset/"><code>.changeset/</code></a>, naming this
@@ -2756,9 +2786,9 @@ private release manifest and its <code>patch</code>, <code>minor</code>, or <cod
 manifest and <code>charts/hermes-agent/Chart.yaml</code> always receive the same resulting
 version in the generated release PR; the manifest is never published to npm.</p>
 <h3 id="add-a-changeset-required-for-user-visible-changes">Add a Changeset (required for user-visible changes)<a class="headerlink" href="#add-a-changeset-required-for-user-visible-changes" title="Permanent link">&para;</a></h3>
-<p>Every user-visible chart change — a new <code>values-*.yaml</code> example, a new
+<p>Every user-visible chart change - a new <code>values-*.yaml</code> example, a new
 ArgoCD example, a <code>values.yaml</code> default change, template/behavior changes,
-docs the user reads — needs a Changeset. This includes additions that look
+docs the user reads - needs a Changeset. This includes additions that look
 "just" like an example or doc file: if it ships in the chart or its
 documented examples, it's user-visible. Run <code>pnpm changeset</code>, select
 <code>@jyje/hermes-agent-helm</code>, choose the chart's SemVer impact, and write a
@@ -2826,7 +2856,7 @@ and publishes the chart to <strong>both</strong>:</p>
   (published to the <code>gh-pages</code> branch, <code>index.yaml</code> merged with prior releases).</li>
 </ul>
 <p>Commits that touch <code>Chart.yaml</code> for other reasons (e.g. <code>appVersion</code>,
-description) are safe — the tag-existence guard makes them no-ops.</p>
+description) are safe - the tag-existence guard makes them no-ops.</p>
 <blockquote>
 <p><code>appVersion</code> tracks the upstream Hermes image (date-based, e.g. <code>v2026.6.5</code>)
 and is bumped manually; only the chart <code>version</code> drives releases.</p>
@@ -2838,7 +2868,7 @@ Changeset summaries, rather than commit subjects, are the release changelog.</p>
 <h2 id="ci-validation">CI validation<a class="headerlink" href="#ci-validation" title="Permanent link">&para;</a></h2>
 <p>PRs and pushes run lint + an isolated <strong>kind</strong> install/test, and every release
 is re-verified against the published, cosign-signed artifact.</p>
-<p>See <strong><a href="docs/reference/ci.md">docs/reference/ci.md</a></strong> for the full pipeline — the parallel
+<p>See <strong><a href="docs/reference/ci.md">docs/reference/ci.md</a></strong> for the full pipeline - the parallel
 default / existingClaim test scenarios, the failover model pool, fork-PR
 behavior, and the post-release verification.</p>
 <h2 id="local-development-environment">Local development environment<a class="headerlink" href="#local-development-environment" title="Permanent link">&para;</a></h2>
@@ -2851,7 +2881,7 @@ behavior, and the post-release verification.</p>
 <h2 id="local-checks-run-before-pushing">Local checks (run before pushing)<a class="headerlink" href="#local-checks-run-before-pushing" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>make<span class="w"> </span>lint<span class="w">        </span><span class="c1"># helm lint</span>
 make<span class="w"> </span>template<span class="w">    </span><span class="c1"># render manifests</span>
-make<span class="w"> </span>docs<span class="w">        </span><span class="c1"># regenerate the chart README (helm-docs) — commit the result</span>
+make<span class="w"> </span>docs<span class="w">        </span><span class="c1"># regenerate the chart README (helm-docs) - commit the result</span>
 make<span class="w"> </span><span class="nb">test</span><span class="w">        </span><span class="c1"># install + helm test (needs a cluster/kind)</span>
 pnpm<span class="w"> </span>changeset<span class="w">   </span><span class="c1"># add a release intent for a user-visible chart change</span>
 make<span class="w"> </span>propose<span class="w">     </span><span class="c1"># preview the pending calculated version</span>

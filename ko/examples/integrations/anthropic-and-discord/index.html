@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2635,7 +2665,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-anthropic-and-discord.yaml</span><pre><span></span><code><span class="c1"># values-anthropic-and-discord.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using Anthropic (Claude) as the model provider AND running as a</span>
-<span class="c1"># Discord bot — both wired in one file.</span>
+<span class="c1"># Discord bot: both wired in one file.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
 <span class="c1"># them at install time (--set-string) or inject via a SealedSecret + extraEnvFrom</span>
@@ -2650,7 +2680,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anthropic</span>
-<span class="w">    </span><span class="c1"># A current Claude model id — see https://docs.anthropic.com for the list</span>
+<span class="w">    </span><span class="c1"># A current Claude model id: see https://docs.anthropic.com for the list</span>
 <span class="w">    </span><span class="c1"># (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">claude-sonnet-4-6</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>
@@ -2663,7 +2693,7 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Discord bot (secret bits) ------------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># Create the bot at https://discord.com/developers/applications, enable the</span>
 <span class="w">  </span><span class="c1"># &quot;Message Content Intent&quot;, and invite it to your server.</span>
 <span class="w">  </span><span class="nt">DISCORD_BOT_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token&quot;</span>
@@ -2671,9 +2701,9 @@
 <span class="c1"># Non-secret Discord knobs go here (plain env, not the Secret).</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">        </span><span class="c1"># channel id for cron / notification delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">       </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your Discord user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your Discord user id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_ALL_USERS</span><span class="w">     </span><span class="c1"># true only for throwaway/dev bots</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 </code></pre></div>

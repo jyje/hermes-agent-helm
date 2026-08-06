@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2636,13 +2666,13 @@
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent talking to a LiteLLM proxy deployed in the SAME Kubernetes</span>
 <span class="c1"># cluster (e.g. via the upstream berriai/litellm-helm chart), reached over</span>
-<span class="c1"># in-cluster Service DNS — no Ingress/TLS needed. For a proxy reachable over</span>
+<span class="c1"># in-cluster Service DNS: no Ingress/TLS needed. For a proxy reachable over</span>
 <span class="c1"># the network instead, see values-litellm.yaml.</span>
 <span class="c1">#</span>
 <span class="c1"># Adjust `base_url` to match your LiteLLM Service name/namespace:</span>
 <span class="c1">#   http://&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local:&lt;port&gt;/v1</span>
 <span class="c1">#</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -2654,7 +2684,7 @@
 <span class="w">  </span><span class="c1"># key (&quot;litellm&quot;) is the provider id referenced by model.provider below.</span>
 <span class="w">  </span><span class="nt">providers</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">litellm</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># DUMMY — service &quot;litellm&quot; in namespace &quot;litellm&quot;, default chart port.</span>
+<span class="w">      </span><span class="c1"># DUMMY: service &quot;litellm&quot; in namespace &quot;litellm&quot;, default chart port.</span>
 <span class="w">      </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://litellm.litellm.svc.cluster.local:4000/v1</span>
 <span class="w">      </span><span class="nt">key_env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OPENAI_API_KEY</span><span class="w">      </span><span class="c1"># env var that holds the proxy key</span>
 <span class="w">      </span><span class="nt">discover_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">        </span><span class="c1"># populate the model picker from /v1/models</span>

@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2635,7 +2665,7 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-openai.yaml</span><pre><span></span><code><span class="c1"># values-openai.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent using OpenAI (api.openai.com) as the model provider.</span>
-<span class="c1"># Dummy key — override at install time.</span>
+<span class="c1"># Dummy key: override at install time.</span>
 <span class="c1">#</span>
 <span class="c1">#   helm upgrade --install hermes-agent ./charts/hermes-agent \</span>
 <span class="c1">#     --namespace hermes-agent --create-namespace \</span>
@@ -2645,7 +2675,7 @@
 <span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># NOTE: the built-in key is `openai-api` (api.openai.com).</span>
-<span class="w">    </span><span class="c1"># `openai` is NOT valid here — it aliases to OpenRouter.</span>
+<span class="w">    </span><span class="c1"># `openai` is NOT valid here: it aliases to OpenRouter.</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai-api</span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gpt-4o-mini</span>
 <span class="w">  </span><span class="nt">terminal</span><span class="p">:</span>

@@ -1901,6 +1901,8 @@
       
         
       
+        
+      
     
     
     
@@ -2026,6 +2028,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2635,14 +2665,14 @@
 <div class="highlight"><span class="filename">charts/hermes-agent/values-github-copilot.yaml</span><pre><span></span><code><span class="c1"># values-github-copilot.yaml</span>
 <span class="c1">#</span>
 <span class="c1"># Hermes Agent backed by GitHub Copilot, authenticated at startup via the OAuth</span>
-<span class="c1"># 2.0 Device Authorization Grant (RFC 8628) — no API key to paste. The</span>
+<span class="c1"># 2.0 Device Authorization Grant (RFC 8628): no API key to paste. The</span>
 <span class="c1"># &quot;auth-device-login&quot; init container surfaces a verification link + code to your</span>
 <span class="c1"># Discord home channel, waits for you to approve it on github.com (phone is</span>
 <span class="c1"># fine), then persists the resulting token to HERMES_HOME/.env where Hermes</span>
 <span class="c1"># reads it natively. The token lives on the persistent volume, so restarts are</span>
 <span class="c1"># fast; re-login only happens when it is missing or revoked.</span>
 <span class="c1">#</span>
-<span class="c1"># Copilot&#39;s token API rejects PATs — a device-flow `gho_`/`ghu_` token is</span>
+<span class="c1"># Copilot&#39;s token API rejects PATs: a device-flow `gho_`/`ghu_` token is</span>
 <span class="c1"># required, which is exactly what this flow produces.</span>
 <span class="c1">#</span>
 <span class="c1"># All secrets below are DUMMY placeholders. Do NOT commit real keys: override</span>
@@ -2684,7 +2714,7 @@
 <span class="w">  </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unused&quot;</span>
 
 <span class="w">  </span><span class="c1"># --- Discord bot (secret bits) ------------------------------------------</span>
-<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord — no config.yaml change.</span>
+<span class="w">  </span><span class="c1"># Setting the token is enough to auto-enable Discord: no config.yaml change.</span>
 <span class="w">  </span><span class="c1"># The login init container reuses this same bot to post the verification link.</span>
 <span class="w">  </span><span class="c1"># Create the bot at https://discord.com/developers/applications, enable the</span>
 <span class="w">  </span><span class="c1"># &quot;Message Content Intent&quot;, and invite it to your server.</span>
@@ -2694,16 +2724,16 @@
 <span class="c1"># container also reads DISCORD_HOME_CHANNEL from here to know where to post.</span>
 <span class="nt">extraEnv</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_HOME_CHANNEL</span><span class="w">        </span><span class="c1"># channel id for cron / notification / login delivery</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your channel id (18 digits)</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;000000000000000000&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your channel id (18 digits)</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOWED_USERS</span><span class="w">       </span><span class="c1"># comma-separated user ids allowed to talk</span>
-<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY — your Discord user id</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;111111111111111111&quot;</span><span class="w">       </span><span class="c1"># DUMMY - your Discord user id</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DISCORD_ALLOW_ALL_USERS</span><span class="w">     </span><span class="c1"># true only for throwaway/dev bots</span>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
 
 <span class="c1"># Persistence is required for device-flow login: the token is written here so it</span>
 <span class="c1"># survives restarts (otherwise you would re-approve on every restart). Empty</span>
 <span class="c1"># storageClass = cluster default; on a Raspberry Pi cluster that is typically</span>
-<span class="c1"># local-path (k3s) or microk8s-hostpath — both ReadWriteOnce, which is exactly</span>
+<span class="c1"># local-path (k3s) or microk8s-hostpath: both ReadWriteOnce, which is exactly</span>
 <span class="c1"># what this single-writer workload wants.</span>
 <span class="nt">persistence</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>

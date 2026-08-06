@@ -1798,6 +1798,8 @@
       
         
       
+        
+      
     
     
     
@@ -1923,6 +1925,34 @@
     
   
     Operations and testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/team-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setting up a team
   
 
     
@@ -2898,7 +2928,7 @@ Items are derived from a source-control and DevOps review of the current
 <li>[ ] <strong>Split <code>release-chart</code> into independent OCI and gh-pages jobs</strong></li>
 <li>Currently a single job runs OCI push → gh-pages deploy in sequence</li>
 <li>If OCI push succeeds but gh-pages fails, re-running skips everything
-    (tag-existence guard) — partial deployment with no automatic recovery</li>
+    (tag-existence guard) - partial deployment with no automatic recovery</li>
 <li>
 <p>Splitting into two jobs (with a shared <code>needs:</code> on a tagging step) allows
     each to be re-run independently</p>
