@@ -3035,7 +3035,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
   <a href="../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord"><code>examples/argocd/</code> § SealedSecret</a>.</li>
 <li><strong>에이전트 팀</strong>: 여러 인스턴스를 Discord 채널에서 <code>@mention</code>으로 대화를 넘기도록 연결:
   <a href="../../examples/argocd/hermes-collab-pair.yaml"><code>examples/argocd/hermes-collab-pair.yaml</code></a>,
-  <a href="../../docs/ko/reference/teams.md">팀 구성</a> + <a href="../../docs/ko/reference/collaboration.md">협업 가이드</a> 참고.</li>
+  <a href="https://jyje.github.io/hermes-agent-helm/ko/reference/teams/">팀 구성</a> + <a href="https://jyje.github.io/hermes-agent-helm/ko/reference/collaboration/">협업 가이드</a> 참고.</li>
 </ul>
 <h2 id="_1">제공자 설정<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p><code>config.model.provider</code>를 내장 키로 설정하고, 해당 키를 <code>env</code> 아래에 제공하세요:</p>
@@ -3160,7 +3160,7 @@ kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </
 <code>replicaCount: 1</code>을 고정하며 멀티 레플리카 모드가 없습니다(<a href="#values">값 테이블</a>의
 <code>replicaCount</code> 설명 참고). 키우려면 스케일 <em>업</em>(더 큰 <code>resources</code>, 더 큰
 <code>persistence.size</code>)을 하고 - 한 에이전트로 부족해지면 여러 인스턴스를 띄워
-하나의 gateway 채널을 공유하는 <strong>팀</strong>으로 묶으세요. <a href="../../docs/ko/reference/teams.md">Hermes 팀</a>을
+하나의 gateway 채널을 공유하는 <strong>팀</strong>으로 묶으세요. <a href="https://jyje.github.io/hermes-agent-helm/ko/reference/teams/">Hermes 팀</a>을
 참고하세요.</p>
 </blockquote>
 <h2 id="_4">제공자 &amp; 메신저 설정<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
@@ -3340,7 +3340,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <p>에이전트가 3명 이상이거나 GitOps로 관리하려면 <strong>ArgoCD ApplicationSet</strong>을 사용하세요.
 팀원 추가가 한 줄 diff로 해결됩니다.
 <a href="../../examples/argocd/hermes-collab-pair.yaml"><code>examples/argocd/hermes-collab-pair.yaml</code></a>과
-<a href="../../docs/ko/reference/teams.md">팀 구성</a> + <a href="../../docs/ko/reference/collaboration.md">협업 가이드</a>를
+<a href="https://jyje.github.io/hermes-agent-helm/ko/reference/teams/">팀 구성</a> + <a href="https://jyje.github.io/hermes-agent-helm/ko/reference/collaboration/">협업 가이드</a>를
 참고하세요.</p>
 <p>리더와 여러 멤버로 구성하려면
 <a href="values-team-leader.yaml"><code>values-team-leader.yaml</code></a>과
@@ -3357,7 +3357,7 @@ Discord 스레드에 남깁니다. 별도로 미리 준비한 RWX PVC에는 영�
 중지 경로를 준비하고, 고정한 이미지 조합으로 실제 실증한 뒤 사용하세요.</p>
 </blockquote>
 <p>기준 시퀀스는 kind의 <code>v2026.7.20</code>에서 실제로 완주했습니다. 타임스탬프가 있는
-<a href="../../docs/ko/reference/teams.md#리더-주도-팀-leader-orchestrated-teams">팀 증거</a>를 참고하세요.</p>
+<a href="https://jyje.github.io/hermes-agent-helm/ko/reference/teams/#leader-orchestrated-teams">팀 증거</a>를 참고하세요.</p>
 <blockquote>
 <p><strong>대안: 파드 하나, 프로필 여러 개.</strong> 여러 봇이 채널 하나를 공유하는 게 아니라,
 <strong>봇 토큰 하나</strong>로 서로 다른 Discord 길드/채널/스레드를 서로 다른 에이전트
@@ -3736,7 +3736,7 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 <tr>
 <td><a href="values-team-leader.yaml"><code>values-team-leader.yaml</code></a> + <a href="values-team-member.yaml"><code>values-team-member.yaml</code></a></td>
 <td>NVIDIA NIM (무엇이든 가능)</td>
-<td><strong>리더 주도 팀</strong>: 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; <a href="../../docs/ko/reference/teams.md">Teams</a> 참고</td>
+<td><strong>리더 주도 팀</strong>: 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; <a href="https://jyje.github.io/hermes-agent-helm/ko/reference/teams/">Teams</a> 참고</td>
 </tr>
 <tr>
 <td><a href="values-shared-knowledge.yaml"><code>values-shared-knowledge.yaml</code></a></td>

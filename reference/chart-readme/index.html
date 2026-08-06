@@ -3079,7 +3079,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
   walkthrough: <a href="../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord"><code>examples/argocd/</code> § SealedSecret</a>.</li>
 <li><strong>Agent team</strong>: run multiple instances that hand off by <code>@mention</code> over a shared Discord channel:
   <a href="../../examples/argocd/hermes-collab-pair.yaml"><code>examples/argocd/hermes-collab-pair.yaml</code></a>,
-  see <a href="../../docs/reference/teams.md">Teams</a> + <a href="../../docs/reference/collaboration.md">Collaboration guide</a>.</li>
+  see <a href="https://jyje.github.io/hermes-agent-helm/reference/teams/">Teams</a> + <a href="https://jyje.github.io/hermes-agent-helm/reference/collaboration/">Collaboration guide</a>.</li>
 </ul>
 <h2 id="configure-your-provider">Configure your provider<a class="headerlink" href="#configure-your-provider" title="Permanent link">&para;</a></h2>
 <p>Set <code>config.model.provider</code> to a built-in key, supply its key under <code>env</code>:</p>
@@ -3207,7 +3207,7 @@ pins <code>replicaCount: 1</code> and there is no multi-replica mode (see the
 <code>replicaCount</code> note in the <a href="#values">values table</a>). To grow, scale <em>up</em> (more
 <code>resources</code>, larger <code>persistence.size</code>) - and when one agent isn't enough, run
 several instances and group them into a <strong>team</strong> that shares one gateway
-channel. See <a href="../../docs/reference/teams.md">Hermes teams</a>.</p>
+channel. See <a href="https://jyje.github.io/hermes-agent-helm/reference/teams/">Hermes teams</a>.</p>
 </blockquote>
 <h2 id="provider-messenger-setup">Provider &amp; messenger setup<a class="headerlink" href="#provider-messenger-setup" title="Permanent link">&para;</a></h2>
 <p>Installing from a local chart checkout (e.g. to try an unreleased change):</p>
@@ -3418,7 +3418,7 @@ helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class=
 <p>For a declarative roster (3+ agents, GitOps), use an <strong>ArgoCD ApplicationSet</strong>;
 adding a teammate becomes a one-line diff. See
 <a href="../../examples/argocd/hermes-collab-pair.yaml"><code>examples/argocd/hermes-collab-pair.yaml</code></a>
-and the full guide in <a href="../../docs/reference/teams.md">Teams</a> + <a href="../../docs/reference/collaboration.md">Collaboration</a>.</p>
+and the full guide in <a href="https://jyje.github.io/hermes-agent-helm/reference/teams/">Teams</a> + <a href="https://jyje.github.io/hermes-agent-helm/reference/collaboration/">Collaboration</a>.</p>
 <p>For a leader plus several members, use
 <a href="values-team-leader.yaml"><code>values-team-leader.yaml</code></a> and
 <a href="values-team-member.yaml"><code>values-team-member.yaml</code></a>. That reference protocol
@@ -3436,7 +3436,7 @@ experimental: use a dedicated trusted channel, keep a manual stop path, and
 require a live proof with your pinned image before relying on it.</p>
 </blockquote>
 <p>The reference sequence completed live on kind with <code>v2026.7.20</code>; see the
-timestamped <a href="../../docs/reference/teams.md#leader-orchestrated-teams">team evidence</a>.</p>
+timestamped <a href="https://jyje.github.io/hermes-agent-helm/reference/teams/#leader-orchestrated-teams">team evidence</a>.</p>
 <blockquote>
 <p><strong>Alternative: one pod, many profiles.</strong> If what you actually need is
 routing different Discord guilds/channels/threads to different agent
@@ -3851,7 +3851,7 @@ the command in each file's header comment), or via the SealedSecret +
 <tr>
 <td><a href="values-team-leader.yaml"><code>values-team-leader.yaml</code></a> + <a href="values-team-member.yaml"><code>values-team-member.yaml</code></a></td>
 <td>NVIDIA NIM (any works)</td>
-<td><strong>Leader-orchestrated team</strong>: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see <a href="../../docs/reference/teams.md">Teams</a></td>
+<td><strong>Leader-orchestrated team</strong>: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see <a href="https://jyje.github.io/hermes-agent-helm/reference/teams/">Teams</a></td>
 </tr>
 <tr>
 <td><a href="values-shared-knowledge.yaml"><code>values-shared-knowledge.yaml</code></a></td>

@@ -2777,12 +2777,12 @@ example 1:1, with secrets wired via <code>extraEnvFrom</code> instead of plain <
 <tr>
 <td><a href="hermes-collab-pair.yaml"><code>hermes-collab-pair.yaml</code></a></td>
 <td><code>values-multi-agent-collab.yaml</code> (×2: planner+builder)</td>
-<td><code>hermes-planner-discord-secrets</code> + <code>hermes-builder-discord-secrets</code>: a <strong>collaborating pair</strong> that hands off by <code>@mention</code>; see <a href="../../docs/reference/collaboration.md">docs/reference/collaboration.md</a></td>
+<td><code>hermes-planner-discord-secrets</code> + <code>hermes-builder-discord-secrets</code>: a <strong>collaborating pair</strong> that hands off by <code>@mention</code>; see <a href="https://jyje.github.io/hermes-agent-helm/reference/collaboration/">Hermes collaboration</a></td>
 </tr>
 <tr>
 <td><a href="hermes-team.yaml"><code>hermes-team.yaml</code></a></td>
 <td><code>values-team-leader.yaml</code> + <code>values-team-member.yaml</code></td>
-<td><code>hermes-august-discord-secrets</code> + <code>hermes-may-discord-secrets</code> + <code>hermes-march-discord-secrets</code> + pre-provisioned <code>hermes-team-knowledge</code> RWX PVC: a <strong>leader-orchestrated team</strong> (serialized explicit mentions, leader-writable/member-read-only shared knowledge, no file-based task handoff); see <a href="../../docs/reference/teams.md">docs/reference/teams.md</a></td>
+<td><code>hermes-august-discord-secrets</code> + <code>hermes-may-discord-secrets</code> + <code>hermes-march-discord-secrets</code> + pre-provisioned <code>hermes-team-knowledge</code> RWX PVC: a <strong>leader-orchestrated team</strong> (serialized explicit mentions, leader-writable/member-read-only shared knowledge, no file-based task handoff); see <a href="https://jyje.github.io/hermes-agent-helm/reference/teams/">Hermes teams</a></td>
 </tr>
 </tbody>
 </table>
@@ -2791,7 +2791,7 @@ plus the secret wiring; copy it and add a <code>valuesObject</code> to customize
 <p><code>hermes-collab-pair.yaml</code> is the first multi-Application example: <strong>two</strong> agents
 (a <code>planner</code> on LiteLLM and a <code>builder</code> on Copilot device-flow) sharing one
 Discord channel and handing off by <code>@mention</code>. See
-<a href="../../docs/reference/collaboration.md">docs/reference/collaboration.md</a> for the handoff protocol and
+<a href="https://jyje.github.io/hermes-agent-helm/reference/collaboration/">Hermes collaboration</a> for the handoff protocol and
 the four loop-brake env vars.</p>
 <p><code>hermes-team.yaml</code> scales that pattern up: one Application for the team
 <strong>leader</strong> (<code>august</code>) plus an <strong>ApplicationSet</strong> whose member roster (<code>may</code>,
@@ -2800,7 +2800,7 @@ agents share a Discord channel (star topology: mentions flow leader ↔ member
 only). The thread is the coordination bus and audit log. A separate RWX PVC
 stores durable reusable knowledge (leader read-write, members read-only), but
 never carries tasks, status, intermediate results, or completion signals. See
-<a href="../../docs/reference/teams.md">docs/reference/teams.md</a> → "Leader-orchestrated teams".</p>
+<a href="https://jyje.github.io/hermes-agent-helm/reference/teams/#leader-orchestrated-teams">Hermes teams</a> → "Leader-orchestrated teams".</p>
 <p>All examples use the <strong>OCI registry</strong> source form (<code>repoURL</code>/<code>chart</code>/
 <code>targetRevision</code> pointing at <code>ghcr.io</code>). A Git source form
 (<code>repoURL</code>/<code>targetRevision</code>/<code>path</code>) works too if you'd rather track a chart
