@@ -13,6 +13,7 @@ permissions:
   contents: write   # create tag + GitHub Release
   packages: write   # push to ghcr
   id-token: write   # mint a Sigstore OIDC token for keyless cosign signing
+  actions: write    # trigger deploy-docs.yaml after updating the Helm repo data
 
 jobs:
   release-chart:
@@ -144,10 +145,21 @@ jobs:
             helm repo index .deploy --url https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
           fi
 
-      - name: Publish Helm repo to GitHub Pages
+      # gh-pages is a plain data store for the Helm chart repository here, not
+      # the Pages source: Pages itself is deployed by deploy-docs.yaml via
+      # actions/deploy-pages. keep_files preserves every prior release's .tgz
+      # that isn't part of this run's .deploy/ dir.
+      - name: Publish Helm repo data to the gh-pages branch
         if: steps.ver.outputs.exists == 'false'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .deploy
+          publish_branch: gh-pages
           keep_files: true
+
+      - name: Trigger a Pages deployment with the new release
+        if: steps.ver.outputs.exists == 'false'
+        run: gh workflow run deploy-docs.yaml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

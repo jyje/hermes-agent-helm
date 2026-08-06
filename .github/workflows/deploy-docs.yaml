@@ -1,5 +1,17 @@
 name: 📚 deploy-docs
 
+# Publishes to GitHub Pages via the Actions deployment API (build_type:
+# workflow), not the legacy branch-based Pages builder. The legacy builder
+# sporadically failed with an opaque "Page build failed." error and no
+# useful diagnostics, silently leaving the live site stuck on an older
+# build. See #139 for the incident that surfaced this.
+#
+# gh-pages now serves as a plain data store for the Helm chart repository
+# (index.yaml + packaged .tgz) that release-chart.yaml publishes there; it
+# is no longer the Pages source. This workflow is the only thing that
+# actually deploys to Pages, so release-chart.yaml re-triggers it after
+# updating that data (see the trigger step at the end of release-chart.yaml).
+
 on:
   push:
     branches: [main]
@@ -35,9 +47,12 @@ on:
 permissions:
   contents: read
 
+# Pages deployments share one queue and must not be canceled mid-publish by
+# a newer run (that risks a torn/partial deploy); GitHub's own template for
+# actions/deploy-pages uses this exact group name and setting.
 concurrency:
-  group: deploy-docs-${{ github.ref }}
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -61,31 +76,38 @@ jobs:
       - name: Build the documentation site
         run: mkdocs build
 
-      - name: Upload documentation site
-        uses: actions/upload-artifact@v4
+      - name: Fetch the Helm chart repository data
+        uses: actions/checkout@v7
+        continue-on-error: true
         with:
-          name: docs-site
+          ref: gh-pages
+          path: gh-pages-data
+
+      - name: Merge the Helm chart repository into the site output
+        run: |
+          if [ -f gh-pages-data/index.yaml ]; then
+            cp gh-pages-data/index.yaml site/
+            cp gh-pages-data/*.tgz site/ 2>/dev/null || true
+          else
+            echo "::warning::No gh-pages branch data found yet; publishing docs only."
+          fi
+
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@v3
+        with:
           path: site
-          retention-days: 1
 
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-26.04-arm
     permissions:
-      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Download documentation site
-        uses: actions/download-artifact@v4
-        with:
-          name: docs-site
-          path: site
-
-      # Keep the chart repository's index.yaml and packaged .tgz files that
-      # release-chart.yaml publishes to the same gh-pages branch.
-      - name: Publish docs without replacing Helm artifacts
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: site
-          keep_files: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
