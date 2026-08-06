@@ -3,7 +3,7 @@ title: Source documents
 description: The original repository Markdown, available as rendered pages and raw files.
 ---
 
-- [Home](../index.md) — the repository's top-level README
+- [Home](../index.md): the repository's top-level README
 - [Chart README and generated values table](chart-readme.md)
 - [Contributing guide](contributing.md)
 - [Security policy](security.md)
