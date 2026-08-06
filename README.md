@@ -97,7 +97,7 @@ charts/hermes-agent/                     # the Helm chart (see its README for th
 charts/hermes-agent/values-*.yaml        # ready-to-adapt examples: providers, Discord/Telegram, LiteLLM (see chart README "More examples")
 examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
 examples/argocd/                         # ArgoCD Application examples (one per values-*.yaml) + GitOps/SealedSecret pattern
-charts/hermes-operator/                  # ⏸️ long-term, not started: possible install chart for an Agent/AgentTeam-CRD operator — placeholder, TBA (see Roadmap)
+charts/hermes-operator/                  # ⏸️ long-term, not started: possible install chart for an Agent/AgentTeam-CRD operator - placeholder, TBA (see Roadmap)
 docs/                                    # deeper guides: teams.md (group instances into a team), collaboration.md (make them hand off by @mention), roadmap.md
 .github/workflows/                       # ci (lint + docs-drift + real round-trip on kind) and release (version bump -> tag -> ghcr OCI)
 CONTRIBUTING.md                          # branch model (dev/main + tags) + release-on-version-bump

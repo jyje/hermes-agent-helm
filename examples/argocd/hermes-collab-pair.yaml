@@ -4,7 +4,7 @@
 # vars that stop them from ping-ponging forever. Full walkthrough:
 # docs/reference/collaboration.md.
 #
-# Two Applications, one per agent — distinct releaseName/metadata.name keep the
+# Two Applications, one per agent: distinct releaseName/metadata.name keep the
 # fullnames unique so they coexist in one namespace (see README.md → "the one
 # rule"). The pair shares DISCORD_HOME_CHANNEL + DISCORD_ALLOWED_USERS + the four
 # loop-brake knobs; each has its own bot token and its own environment_hint that
@@ -16,7 +16,7 @@
 #     --from-literal=DISCORD_BOT_TOKEN='<planner-bot-token>'
 #   kubectl create secret generic hermes-builder-discord-secrets -n hermes-team \
 #     --from-literal=DISCORD_BOT_TOKEN='<builder-bot-token>'
-# (For GitOps, wire these as SealedSecrets via extraResources instead — see
+# (For GitOps, wire these as SealedSecrets via extraResources instead: see
 #  hermes-agent-litellm-k8s.yaml / hermes-agent-github-copilot.yaml.)
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -60,14 +60,14 @@ spec:
               partner is "builder", Discord user ID <BUILDER_BOT_USER_ID>. To
               hand over, put an explicit <@BUILDER_BOT_USER_ID> mention in the
               BODY of your message. When a topic is done, do NOT mention builder
-              — address the human and end your turn, so the exchange stops.
+              - address the human and end your turn, so the exchange stops.
         env:
           OPENAI_API_KEY: "set-via-extraEnvFrom"
         extraEnvFrom:
           - secretRef:
               name: hermes-planner-discord-secrets   # OPENAI_API_KEY + DISCORD_BOT_TOKEN
         # SHARED across the pair: same channel, same users, same loop brake. The
-        # builder Application below MUST repeat this block verbatim — YAML anchors
+        # builder Application below MUST repeat this block verbatim: YAML anchors
         # do not cross the `---` document boundary, so it cannot be aliased here.
         extraEnv:
           - { name: DISCORD_HOME_CHANNEL, value: "000000000000000000" }
@@ -99,7 +99,7 @@ spec:
       releaseName: hermes-builder
       valuesObject:
         fullnameOverride: hermes-builder
-        # builder uses GitHub Copilot via device-flow — a DIFFERENT backend from
+        # builder uses GitHub Copilot via device-flow: a DIFFERENT backend from
         # planner. Collaboration only requires a shared channel, not a shared
         # model. The gho_ token is minted at startup; nothing to seal but the bot
         # token. See hermes-agent-github-copilot.yaml.
@@ -122,7 +122,7 @@ spec:
               partner is "planner", Discord user ID <PLANNER_BOT_USER_ID>. To
               hand over, put an explicit <@PLANNER_BOT_USER_ID> mention in the
               BODY of your message. When a topic is done, do NOT mention planner
-              — address the human and end your turn, so the exchange stops.
+              - address the human and end your turn, so the exchange stops.
         auth:
           deviceFlow:
             enabled: true
@@ -133,7 +133,7 @@ spec:
         extraEnvFrom:
           - secretRef:
               name: hermes-builder-discord-secrets    # DISCORD_BOT_TOKEN only
-        # IDENTICAL to planner's shared block — same channel + same loop brake.
+        # IDENTICAL to planner's shared block: same channel + same loop brake.
         # Repeated in full because YAML anchors don't cross `---` boundaries.
         extraEnv:
           - { name: DISCORD_HOME_CHANNEL, value: "000000000000000000" }

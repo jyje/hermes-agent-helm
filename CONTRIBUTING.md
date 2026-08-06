@@ -136,7 +136,7 @@ See **[docs/reference/local-development.md](docs/reference/local-development.md)
 ```bash
 make lint        # helm lint
 make template    # render manifests
-make docs        # regenerate the chart README (helm-docs) — commit the result
+make docs        # regenerate the chart README (helm-docs) - commit the result
 make test        # install + helm test (needs a cluster/kind)
 pnpm changeset   # add a release intent for a user-visible chart change
 make propose     # preview the pending calculated version

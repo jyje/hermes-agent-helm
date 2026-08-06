@@ -1,7 +1,7 @@
 # Mirrors charts/hermes-agent/values-litellm-k8s.yaml, PLUS the full GitOps
 # secret-delivery pattern: a SealedSecret (rendered via extraResources) that
 # the sealed-secrets controller decrypts into a Secret, referenced via
-# extraEnvFrom. Nothing here is a real secret — `encryptedData` below is a
+# extraEnvFrom. Nothing here is a real secret: `encryptedData` below is a
 # placeholder; replace it with the output of `kubeseal` for YOUR cluster.
 #
 # Adjust providers.litellm.base_url to your LiteLLM Service name/namespace:
@@ -33,7 +33,7 @@ spec:
           # model.provider below.
           providers:
             litellm:
-              # DUMMY — service "litellm" in namespace "litellm", default chart port.
+              # DUMMY: service "litellm" in namespace "litellm", default chart port.
               base_url: http://litellm.litellm.svc.cluster.local:4000/v1
               key_env: OPENAI_API_KEY      # env var that holds the proxy key
               discover_models: true        # populate the model picker from /v1/models
@@ -64,7 +64,7 @@ spec:
               namespace: "{{ .Release.Namespace }}"
             spec:
               encryptedData:
-                # Replace with `kubeseal` output for YOUR cluster — see header.
+                # Replace with `kubeseal` output for YOUR cluster: see header.
                 OPENAI_API_KEY: AgDUMMY_replace_with_kubeseal_output==
               template:
                 metadata:

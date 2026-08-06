@@ -24,7 +24,7 @@ spec:
         config:
           model:
             provider: openrouter
-            # OpenRouter model id (vendor/model) — see https://openrouter.ai/models.
+            # OpenRouter model id (vendor/model): see https://openrouter.ai/models.
             default: openai/gpt-4o-mini
           terminal:
             backend: local

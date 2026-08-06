@@ -26,7 +26,7 @@ spec:
           model:
             # Built-in provider key for NVIDIA NIM (build.nvidia.com).
             provider: nvidia
-            # NIM model id — pick one your account can reach from build.nvidia.com.
+            # NIM model id: pick one your account can reach from build.nvidia.com.
             default: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning
           terminal:
             backend: local
@@ -36,23 +36,23 @@ spec:
           # The chart's default placeholder is for OpenAI; this deployment
           # doesn't use it. Set to a clear sentinel so no real OpenAI key is implied.
           OPENAI_API_KEY: "unused"
-          # Setting the token is enough to auto-enable Discord — no config.yaml
+          # Setting the token is enough to auto-enable Discord: no config.yaml
           # change. Create the bot at https://discord.com/developers/applications,
           # enable the "Message Content Intent", and invite it to your server.
           DISCORD_BOT_TOKEN: "set-via-extraEnvFrom"
         extraEnvFrom:
           - secretRef:
               name: hermes-agent-nim-discord-secrets
-        # Non-secret Discord knobs — plain env, not the Secret.
+        # Non-secret Discord knobs: plain env, not the Secret.
         extraEnv:
           - name: DISCORD_HOME_CHANNEL        # channel id for cron / notification delivery
-            value: "000000000000000000"       # DUMMY — your channel id (18 digits)
+            value: "000000000000000000"       # DUMMY - your channel id (18 digits)
           - name: DISCORD_ALLOWED_USERS       # comma-separated user ids allowed to talk
-            value: "111111111111111111"       # DUMMY — your Discord user id
+            value: "111111111111111111"       # DUMMY - your Discord user id
           - name: DISCORD_ALLOW_ALL_USERS     # true only for throwaway/dev bots
             value: "false"
         # Persistence: empty storageClass = cluster default. On a Raspberry Pi
-        # cluster that is typically local-path (k3s) or microk8s-hostpath —
+        # cluster that is typically local-path (k3s) or microk8s-hostpath;
         # both ReadWriteOnce, which is exactly what this single-writer
         # workload wants.
         persistence:

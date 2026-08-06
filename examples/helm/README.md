@@ -3,7 +3,7 @@
 Two ways to install `hermes-agent`: **from Git** (this repo) and **from an
 OCI registry** (GitHub Packages / `ghcr.io`, the form indexed by Artifact Hub).
 
-In every case, keep the API key out of the manifests — pass it at install time
+In every case, keep the API key out of the manifests - pass it at install time
 or inject it from a pre-created Secret (see "Secrets").
 
 ---
@@ -77,15 +77,15 @@ echo "$GITHUB_TOKEN" | helm registry login ghcr.io -u jyje --password-stdin
 ## Upgrading across a chart rename
 
 If you ever switch which chart a release is installed from (e.g. moving from a
-fork or a renamed local copy to this chart), a plain `helm upgrade` can fail or
-— worse — create a **second, empty StatefulSet + PVC** alongside your existing
+fork or a renamed local copy to this chart), a plain `helm upgrade` can fail or,
+worse, create a **second, empty StatefulSet + PVC** alongside your existing
 one. This happens because two things derive from the chart name (`Chart.Name`):
 
-1. **`fullname`** — if your release name doesn't already contain the new chart
+1. **`fullname`**: if your release name doesn't already contain the new chart
    name, Helm computes `<release>-<chart>` (e.g. `myrelease-hermes-agent`)
    instead of reusing the existing `<release>` name, so it creates brand-new
    resources (including a fresh, empty PVC) rather than upgrading the old ones.
-2. **`volumeClaimTemplates[].metadata.labels["helm.sh/chart"]`** — this label
+2. **`volumeClaimTemplates[].metadata.labels["helm.sh/chart"]`**: this label
    includes the chart name+version and is part of a StatefulSet's *immutable*
    `volumeClaimTemplates`, so Kubernetes rejects the upgrade outright once the
    chart name changes.
@@ -98,7 +98,7 @@ StatefulSet:
 RELEASE=hermes-agent
 NS=hermes-agent
 
-# 2) drop the StatefulSet object only — Pod and PVC (and your data) are kept
+# 2) drop the StatefulSet object only: Pod and PVC (and your data) are kept
 kubectl delete sts "$RELEASE" -n "$NS" --cascade=orphan
 
 # 3) upgrade to the new chart, pinning nameOverride to the old name
@@ -140,7 +140,7 @@ helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-
 
 > **CI owns the `.tgz` lifecycle.** Bumping `version` in `Chart.yaml` on `main`
 > triggers `.github/workflows/release-chart.yaml`, which tags `vX.Y.Z`, writes release
-> notes (Changesets), and pushes to `oci://ghcr.io/<owner>/hermes-agent-helm` — the package
+> notes (Changesets), and pushes to `oci://ghcr.io/<owner>/hermes-agent-helm` - the package
 > is never committed. The commands below are the equivalent manual/local flow.
 
 ```bash

@@ -1,10 +1,10 @@
 # The simplest starting point: pure chart defaults (OpenAI api.openai.com,
-# gpt-4o-mini — see charts/hermes-agent/values.yaml), only wiring the
+# gpt-4o-mini: see charts/hermes-agent/values.yaml), only wiring the
 # required secret via extraEnvFrom. Copy this file and add a valuesObject
 # (see the other hermes-agent-*.yaml examples) to customize provider,
 # messengers, persistence, etc.
 #
-# Pulls the chart from the OCI registry (ghcr.io) instead of Git — see
+# Pulls the chart from the OCI registry (ghcr.io) instead of Git: see
 # examples/helm/README.md for the equivalent `helm` CLI invocation. ArgoCD
 # must have this OCI registry registered as a repository first
 # (Settings > Repositories, type "helm", enableOCI: true; no credentials

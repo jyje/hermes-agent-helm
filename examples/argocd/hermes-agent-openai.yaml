@@ -25,7 +25,7 @@ spec:
         config:
           model:
             # NOTE: the built-in key is `openai-api` (api.openai.com).
-            # `openai` is NOT valid here — it aliases to OpenRouter.
+            # `openai` is NOT valid here: it aliases to OpenRouter.
             provider: openai-api
             default: gpt-4o-mini
           terminal:

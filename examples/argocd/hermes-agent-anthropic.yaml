@@ -23,7 +23,7 @@ spec:
         config:
           model:
             provider: anthropic
-            # A current Claude model id — see https://docs.anthropic.com for
+            # A current Claude model id: see https://docs.anthropic.com for
             # the list (e.g. claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5).
             default: claude-sonnet-4-6
           terminal:
