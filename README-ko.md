@@ -76,7 +76,7 @@ helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
   완주했습니다. Telegram 팀 오케스트레이션은 별도 실증 대상입니다.
 
 <div align="center">
-  <img src="docs/images/demos/team-k9s-pods.png" alt="kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)"/>
+  <img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/demos/team-k9s-pods.png" alt="kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)"/>
   <p><em>배포 증거: 리더 <code>august</code>와 멤버
   <code>may</code>/<code>march</code>가 kind에서 독립 릴리스로 실행 중.
   이 스크린샷만으로 멀티턴 멘션 루프가 증명되지는 않습니다. 현재 상태는
