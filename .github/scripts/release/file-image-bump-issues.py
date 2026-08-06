@@ -63,7 +63,7 @@ def main() -> int:
         advice = json.load(f)
     items = advice.get("items") or []
     if not items:
-        print("No chart-relevant upstream changes found — nothing to file.")
+        print("No chart-relevant upstream changes found - nothing to file.")
         return 0
 
     for item in items:

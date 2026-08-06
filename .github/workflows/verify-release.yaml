@@ -1,10 +1,10 @@
 name: 🔒 verify-release
 
 # Post-release smoke test that proves the full supply-chain trust chain:
-#   1. cosign verify  — signature is in the Sigstore transparency log and matches
+#   1. cosign verify : signature is in the Sigstore transparency log and matches
 #                       this repo's GitHub Actions OIDC identity
-#   2. helm install   — from the published OCI artifact (not local source files)
-#   3. helm test      — hermes doctor + chat round-trip, same as validate-chart
+#   2. helm install  : from the published OCI artifact (not local source files)
+#   3. helm test     : hermes doctor + chat round-trip, same as validate-chart
 #
 # Runs automatically after every successful release-chart run.
 # Failure here means the published artifact is broken or the signature is invalid.
@@ -115,7 +115,7 @@ jobs:
           [ "$result" = success ]
 
       - name: CI comprehensive tests (skill injection + chat via kubectl exec)
-        # Conditional extension of the basic helm test — only runs when a model
+        # Conditional extension of the basic helm test: only runs when a model
         # key is available. Reuses the same kind cluster.
         if: env.NVIDIA_API_KEY != ''
         timeout-minutes: 8
@@ -144,7 +144,7 @@ jobs:
           for model in $(echo "$CI_MODELS" | tr ',' ' '); do
             echo "--- model: $model ---"
             # Prompt goes via -q (not positional) and --max-turns bounds the
-            # round-trip — same invocation the chart's own test hook uses.
+            # round-trip: same invocation the chart's own test hook uses.
             if kubectl exec -n "$ns" "$pod" -- \
                 hermes chat -m "$model" --provider nvidia \
                   -q "ci-ping" --max-turns 2; then

@@ -4,12 +4,12 @@
 Reads the upstream project's release notes for every version between the
 chart's current and target appVersion, plus a snapshot of what the chart
 already exposes, and asks the model which upstream changes the CHART (not
-the app) should react to — a new env var worth exposing, a new messaging
+the app) should react to - a new env var worth exposing, a new messaging
 platform worth an example, a breaking config rename, a security fix, etc.
 
 Hard requirement: degrade gracefully. If NVIDIA_API_KEY is missing or the
 call fails for any reason, return an empty, clearly-marked result so the PR
-still gets created — this is advisory, not a release gate.
+still gets created - this is advisory, not a release gate.
 
 Usage: advise-image-bump.py <release_notes_file> <chart_context_file> <out_json>
 Stdlib only (urllib) so it needs no pip install in CI.
@@ -41,15 +41,15 @@ chart's current and new tracked appVersion.
 documented in its README).
 
 From the upstream changes, identify ONLY the ones that should change \
-something in the CHART — e.g. a new required/optional env var worth adding \
+something in the CHART - e.g. a new required/optional env var worth adding \
 to values.yaml or the README table, a new messaging platform worth a \
 values-*.yaml example, a new config.yaml key, a breaking config/env rename, \
 a security fix needing urgent action, or a constraint that invalidates a \
 documented assumption (e.g. AGENTS.md/README claims). Ignore anything that \
-doesn't affect how the chart is configured or deployed — most desktop-app- \
+doesn't affect how the chart is configured or deployed - most desktop-app- \
 only UI work, internal refactors, and CLI-only features need no chart change.
 
-List every relevant item you find — do not cap the count, but do not invent \
+List every relevant item you find - do not cap the count, but do not invent \
 busywork either; if truly nothing applies, return an empty list.
 
 Respond with ONLY a JSON object, no prose, no markdown fence:
@@ -92,7 +92,7 @@ def sanitize_items(raw) -> list[dict]:
 
 
 def extract_json(s: str) -> dict:
-    """Reasoning models may wrap JSON in thinking/text — grab the last object."""
+    """Reasoning models may wrap JSON in thinking/text - grab the last object."""
     s = s.strip()
     fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", s, re.DOTALL)
     if fence:
@@ -104,7 +104,7 @@ def extract_json(s: str) -> dict:
 
 
 def call_nim(release_notes: str, chart_context: str) -> dict:
-    """Streamed call — a large model over a large input/output can run long
+    """Streamed call - a large model over a large input/output can run long
     enough that NIM's gateway resets a non-streaming connection before the
     first (and only) response chunk arrives. Streaming keeps the connection
     alive with a steady trickle of chunks instead."""
@@ -167,10 +167,10 @@ def main() -> int:
 
     if not API_KEY:
         result = {"items": [], "source": "skipped", "model": None,
-                  "note": "NVIDIA_API_KEY not set — review the upstream release notes manually."}
+                  "note": "NVIDIA_API_KEY not set - review the upstream release notes manually."}
     elif not release_notes.strip():
         result = {"items": [], "source": "skipped", "model": None,
-                  "note": "No upstream release notes found — review manually."}
+                  "note": "No upstream release notes found - review manually."}
     else:
         result = None
         last_err: Exception | None = None
@@ -178,13 +178,13 @@ def main() -> int:
             try:
                 result = call_nim(release_notes, chart_context)
                 break
-            except Exception as e:  # advisory step — ANY failure must degrade, not crash
+            except Exception as e:  # advisory step - ANY failure must degrade, not crash
                 last_err = e
                 print(f"NIM advice attempt {attempt + 1}/{MAX_RETRIES} failed: "
                       f"{type(e).__name__}: {e}", file=sys.stderr)
         if result is None:
             result = {"items": [], "source": "failed", "model": NIM_MODEL,
-                      "note": f"NIM call failed ({type(last_err).__name__}: {last_err}) — review manually."}
+                      "note": f"NIM call failed ({type(last_err).__name__}: {last_err}) - review manually."}
 
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)

@@ -21,7 +21,7 @@ printf '%s\n' \
   '      storage: 1Gi' \
   | kubectl apply -n "$NS" -f -
 # local-path (kind default) is WaitForFirstConsumer, so the PVC binds only
-# once the pod mounts it — `helm --wait` below covers that.
+# once the pod mounts it: `helm --wait` below covers that.
 echo "[$NS] installing with persistence.existingClaim=ci-shared-pvc"
 install_release --set persistence.existingClaim=ci-shared-pvc
 run_hook_test

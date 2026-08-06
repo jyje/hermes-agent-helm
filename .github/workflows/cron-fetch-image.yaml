@@ -5,14 +5,14 @@ name: ⏰ cron-fetch-image
 # tag newer than the chart's current appVersion appears, two independent jobs
 # run in parallel:
 #   - bump-pr: opens a PR that bumps Chart.yaml's appVersion (the single
-#     source of truth — image.tag falls back to it) and regenerates the chart
-#     README via helm-docs, so validate-chart stays green. Ships immediately —
+#     source of truth: image.tag falls back to it) and regenerates the chart
+#     README via helm-docs, so validate-chart stays green. Ships immediately;
 #     it doesn't wait on the AI review.
 #   - upstream-review: asks NVIDIA NIM which upstream changes (across every
 #     release note between the current and target appVersion) the CHART
 #     itself should react to, and files one GitHub Issue per item, labeled
 #     `upstream-review` + a priority. The maintainer triages each
-#     independently — accept (branch + implement) or reject (close it).
+#     independently: accept (branch + implement) or reject (close it).
 # The bump PR includes a minor Changeset. Once it merges, propose-release.yaml
 # consumes that entry into the reviewed chart version and release PR.
 on:
@@ -236,7 +236,7 @@ jobs:
       - name: Create PR
         run: |
           NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
-          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> An AI-assisted review of upstream changes relevant to this chart is filing separate tracking issues — see issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`. Triage those independently of this PR.\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated — adjust them manually if you know the matching Hermes release." \
+          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> An AI-assisted review of upstream changes relevant to this chart is filing separate tracking issues - see issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`. Triage those independently of this PR.\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated - adjust them manually if you know the matching Hermes release." \
             "$IMAGE" "$IMAGE" "$CURRENT_VERSION" "$TARGET_VERSION" "$NEW_LIST" "$TARGET_VERSION")
           gh pr create \
             --title "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \

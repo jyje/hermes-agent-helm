@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shared helpers for the validate-chart test scenarios. Sourced by
-# scenario-message.sh / scenario-existing-claim.sh — each scenario now runs
+# scenario-message.sh / scenario-existing-claim.sh: each scenario now runs
 # in its OWN ephemeral kind cluster (separate matrix job), so unlike the
 # previous single-cluster setup, these helpers don't need to juggle multiple
 # namespaces or be exported into background subshells.
@@ -26,7 +26,7 @@ install_release() {
       "$@" \
       --wait --timeout 5m
   else
-    echo "[$NS] no NVIDIA_API_KEY — installing placeholder (doctor-only)"
+    echo "[$NS] no NVIDIA_API_KEY - installing placeholder (doctor-only)"
     helm upgrade --install hermes-agent charts/hermes-agent \
       --namespace "$NS" --create-namespace \
       --set-string env.OPENAI_API_KEY=sk-test \
@@ -61,7 +61,7 @@ pod_name() {
     -o jsonpath='{.items[0].metadata.name}'
 }
 
-# chat_round_trip <pod> — passes on the first model that answers; the
+# chat_round_trip <pod>: passes on the first model that answers; the
 # free-tier pool tolerates per-model flakiness (it's a FAILOVER pool, not
 # exhaustive per-model testing). Each model attempt is bounded by
 # CHAT_ROUND_TRIP_TIMEOUT so a single hung model can't burn the whole
@@ -73,7 +73,7 @@ chat_round_trip() {
   for model in $(echo "$CI_MODELS" | tr ',' ' '); do
     echo "[$NS] --- model: $model (timeout ${CHAT_ROUND_TRIP_TIMEOUT}s) ---"
     # Prompt goes via -q (not positional) and --max-turns bounds the
-    # round-trip — same invocation the chart's own test hook uses. Bound each
+    # round-trip: same invocation the chart's own test hook uses. Bound each
     # model attempt with timeout so one stalled model doesn't consume the
     # entire workflow step budget.
     if timeout -k 15 "${chat_timeout_secs}" \
