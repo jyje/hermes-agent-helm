@@ -54,7 +54,7 @@
 
     "config": {
       "type": "object",
-      "description": "Partial override merged into Hermes' own config.yaml schema — left open-ended on purpose so future upstream keys aren't rejected.",
+      "description": "Partial override merged into Hermes' own config.yaml schema - left open-ended on purpose so future upstream keys aren't rejected.",
       "additionalProperties": true,
       "properties": {
         "model": {

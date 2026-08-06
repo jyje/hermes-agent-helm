@@ -36,7 +36,7 @@ Copilot device-flow login. The shared channel is the context bus; an explicit
 ```mermaid
 graph TB
     Human((Human)) -->|"@mentions either bot"| Channel
-    subgraph Channel["#team — one shared Discord channel (context bus)"]
+    subgraph Channel["#team - one shared Discord channel (context bus)"]
         direction LR
         Planner["planner<br/>role: scope &amp; plan<br/>backend: LiteLLM proxy"]
         Builder["builder<br/>role: implement<br/>backend: Copilot device-flow"]
@@ -76,7 +76,7 @@ config:
       To hand the conversation to builder, put an explicit
       <@BUILDER_BOT_USER_ID> mention in the BODY of your message. Only mention
       builder when you have something substantive to say or genuinely need their
-      input. When a topic reaches a natural conclusion, do NOT mention builder —
+      input. When a topic reaches a natural conclusion, do NOT mention builder -
       address the human instead and end your turn, so the exchange stops. Never
       send a filler or "let me know if you need anything" message that mentions
       builder; that only restarts the loop.
@@ -114,11 +114,11 @@ uses both. This is observable on a running pair - each agent persists its state
 under `HERMES_HOME` (here `/opt/data`) on its PVC:
 
 ```bash
-# the declarative layer — injected from the chart, re-seeded every deploy
+# the declarative layer: injected from the chart, re-seeded every deploy
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'sed -n "/agent:/,/gateway_timeout/p" $HERMES_HOME/config.yaml'
 
-# the runtime layer — what the agent learned from conversation, persisted
+# the runtime layer: what the agent learned from conversation, persisted
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'cat $HERMES_HOME/memories/USER.md'
 ```
@@ -164,9 +164,9 @@ To seed an ID conversationally instead of (or in addition to) the chart, just
 **tell the agent in the channel** and ask it to remember:
 
 ```text
-You: @july remember this: my Discord user ID is <@YOUR_USER_ID> — mention me
+You: @july remember this: my Discord user ID is <@YOUR_USER_ID> - mention me
      with it when you need a human. Also, your partner june is <@JUNE_BOT_USER_ID>.
-july: Got it — saved. I'll @mention you for human input and hand off to june
+july: Got it - saved. I'll @mention you for human input and hand off to june
       with <@JUNE_BOT_USER_ID>.
 ```
 
@@ -281,11 +281,11 @@ config:
       You are "planner", one of two collaborating Hermes agents in this
       Telegram group. Your partner is "builder", Telegram username
       @hermes_builder_bot. To hand the conversation to builder, put an
-      explicit @hermes_builder_bot mention in the BODY of your message —
+      explicit @hermes_builder_bot mention in the BODY of your message -
       never rely on Telegram's native "reply" feature to address them, since
       a reply does not carry the same explicit-mention guarantee this recipe
       depends on. When a topic reaches a natural conclusion, do NOT mention
-      builder — address the human instead and end your turn.
+      builder - address the human instead and end your turn.
   group_sessions_per_user: false
 ```
 
@@ -323,7 +323,7 @@ config:
       Slack channel. Your partner is "builder", Slack user <@U0BUILDERID>.
       To hand the conversation to builder, put an explicit <@U0BUILDERID>
       mention in the BODY of your message. When a topic reaches a natural
-      conclusion, do NOT mention builder — address the human instead and end
+      conclusion, do NOT mention builder - address the human instead and end
       your turn.
   group_sessions_per_user: false
 ```
@@ -396,7 +396,7 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   -f charts/hermes-agent/values-multi-agent-collab.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' --wait
 
-# builder — same channel, different bot, partner id swapped in its own file
+# builder: same channel, different bot, partner id swapped in its own file
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-builder.yaml \

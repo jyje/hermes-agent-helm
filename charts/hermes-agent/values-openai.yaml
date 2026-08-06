@@ -1,7 +1,7 @@
 # values-openai.yaml
 #
 # Hermes Agent using OpenAI (api.openai.com) as the model provider.
-# Dummy key — override at install time.
+# Dummy key: override at install time.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
@@ -11,7 +11,7 @@
 config:
   model:
     # NOTE: the built-in key is `openai-api` (api.openai.com).
-    # `openai` is NOT valid here — it aliases to OpenRouter.
+    # `openai` is NOT valid here: it aliases to OpenRouter.
     provider: openai-api
     default: gpt-4o-mini
   terminal:

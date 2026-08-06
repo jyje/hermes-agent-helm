@@ -158,7 +158,7 @@ def write_env_token(token: str) -> None:
         pass
     # When the init container runs as root (the robust default that can write
     # to any storage class), hand the file to the agent's runtime uid/gid so the
-    # agent — which runs as that non-root uid — can read it.
+    # agent: which runs as that non-root uid - can read it.
     if CHOWN_UID >= 0 or CHOWN_GID >= 0:
         try:
             os.chown(env_path, CHOWN_UID, CHOWN_GID)

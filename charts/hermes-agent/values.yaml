@@ -35,7 +35,7 @@ args: ["gateway", "run"]
 #   single standalone PVC (named <fullname>) is created and the rollout
 #   strategy is forced to Recreate (so the new Pod doesn't race the old one
 #   for the ReadWriteOnce volume). More resource-flexible (no StatefulSet
-#   ordering/identity overhead) — the right choice for a single replica.
+#   ordering/identity overhead): the right choice for a single replica.
 # "statefulset": stable identity, a dedicated PVC via volumeClaimTemplates
 #   (data-<fullname>-0), and a headless Service for governance/DNS. Pick this
 #   if you need StatefulSet semantics (ordered rollout, stable network
@@ -47,7 +47,7 @@ controller:
   type: deployment
 
 # -- DO NOT change this. Hermes Agent is a single-writer workload bound to one
-# HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out —
+# HERMES_HOME (ReadWriteOnce PVC). Raising replicaCount does NOT scale it out;
 # with controller.type=deployment extra replicas just hang Pending (can't mount
 # the same RWO volume); with statefulset they become separate, disconnected
 # agent instances with their own PVC/identity. There is no supported
@@ -71,14 +71,14 @@ serviceAccount:
 # by an init container (see `bootstrap`). Keys below use the real v2026.6.5 schema.
 #
 # Hermes supports many providers (openai, anthropic, google, openrouter, and any
-# OpenAI-compatible endpoint). Defaults use the provider's public endpoint —
+# OpenAI-compatible endpoint). Defaults use the provider's public endpoint;
 # override to point anywhere (see values-litellm.yaml / values-litellm-k8s.yaml).
 # ---------------------------------------------------------------------------
 config:
   model:
     # Model id for the chosen provider (no vendor prefix for built-ins).
     default: gpt-4o-mini
-    # Hermes provider key. Use a BUILT-IN key — common ones:
+    # Hermes provider key. Use a BUILT-IN key: common ones:
     #   openai-api (api.openai.com) | anthropic | gemini | openrouter |
     #   nvidia | deepseek | lmstudio | ...
     # NOTE: `openai` is NOT valid (it aliases to openrouter).
@@ -137,7 +137,7 @@ extraEnvFrom: []
 #      name: some-existing-secret
 
 # -- Extra volumes on the pod, for anything the agent needs as a FILE rather
-#    than an env var — e.g. a Secret holding a service-account JSON
+#    than an env var: e.g. a Secret holding a service-account JSON
 #    (see values-google-vertex.yaml).
 extraVolumes: []
 #  - name: vertex-sa
@@ -179,7 +179,7 @@ extraResources: []
 # it performs the **OAuth 2.0 Device Authorization Grant (RFC 8628)** at pod
 # startup, surfaces the verification URL + user code to a human (e.g. via the
 # agent's Discord bot, mobile-friendly), waits for approval, and persists the
-# resulting token to `HERMES_HOME/.env` — exactly where Hermes natively reads
+# resulting token to `HERMES_HOME/.env`: exactly where Hermes natively reads
 # it. The token survives restarts on the persistent volume; re-login only
 # happens when it is missing or revoked.
 #
@@ -206,8 +206,8 @@ auth:
     forceRelogin: false
     # -- uid/gid that should own the written token file. The login init
     #    container runs as root so it can write to any storage class reliably,
-    #    then chowns the token to this owner. Set it to the Hermes runtime uid —
-    #    the upstream image's s6-overlay runs the agent as uid/gid 10000 — so the
+    #    then chowns the token to this owner. Set it to the Hermes runtime uid;
+    #    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the
     #    non-root agent can read the credential.
     tokenOwner:
       uid: 10000
@@ -259,7 +259,7 @@ persistence:
 #
 # The only inbound HTTP surface is the management `dashboard` (default port
 # 9119, binds to 127.0.0.1). Exposing it cluster-wide requires `--insecure`,
-# which the upstream warns EXPOSES API KEYS on the network — so it is opt-in.
+# which the upstream warns EXPOSES API KEYS on the network: so it is opt-in.
 # ---------------------------------------------------------------------------
 service:
   # -- Create a ClusterIP Service (only useful if you expose the dashboard).
@@ -273,7 +273,7 @@ service:
 
 # Ingress for the management dashboard. Requires `service.enabled: true` AND
 # the dashboard running with --insecure (see the `service` comment above for
-# the API-key exposure warning) — only enable this behind authentication
+# the API-key exposure warning): only enable this behind authentication
 # (e.g. an ingress-level oauth2-proxy/basic-auth annotation) or on a private
 # network.
 ingress:
@@ -333,10 +333,10 @@ probes:
 # -- Pod termination grace period in seconds. Empty = Kubernetes default (30s).
 # The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0:
 # on stop it interrupts in-flight runs immediately, persists the transcript,
-# and exits fast — the default grace period is plenty. If you opt into a drain
+# and exits fast: the default grace period is plenty. If you opt into a drain
 # window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL
 # ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock +
-# crash loop — the same race upstream warns about with systemd's
+# crash loop: the same race upstream warns about with systemd's
 # TimeoutStopSec). See "Gateway lifecycle" in the README.
 terminationGracePeriodSeconds: ""
 
@@ -364,7 +364,7 @@ tests:
   # configured provider. The full conversation (prompt + response) is printed
   # to the test Job's logs. Requires a working provider key in `env`/`config`
   # (e.g. config.model.provider=gemini + env.GOOGLE_API_KEY, or a LiteLLM-style
-  # custom provider — see values-litellm.yaml). Off by default since the
+  # custom provider: see values-litellm.yaml). Off by default since the
   # placeholder key cannot reach a real provider.
   # ---------------------------------------------------------------------------
   chat:
@@ -380,7 +380,7 @@ tests:
     failOnError: false
     # -- Optional pool of `provider/model` ids to try in order (via `hermes chat
     #    -m <id> --provider config.model.provider`), each with its own `timeout`.
-    #    Passes as soon as one succeeds — useful for free-tier models that are
+    #    Passes as soon as one succeeds: useful for free-tier models that are
     #    sometimes overloaded. Leave empty to use `config.model.default` as-is
     #    (single attempt, no `-m`/`--provider` override).
     models: []

@@ -3,11 +3,11 @@
 # Hermes Agent using Mixture-of-Agents (MoA): reference models run in
 # parallel and an aggregator model synthesizes their output, instead of a
 # single model answering directly. MoA is a virtual provider (image
-# v2026.7.1+) — `config.model.provider: moa` + `config.model.default: <preset
+# v2026.7.1+): `config.model.provider: moa` + `config.model.default: <preset
 # name>` selects a named preset defined under `config.moa.presets`.
 #
 # The example preset below fans out to two OpenRouter reference models and
-# aggregates with a third — swap provider/model ids for whichever you use,
+# aggregates with a third: swap provider/model ids for whichever you use,
 # and supply each provider's own API key under `env` (a preset can mix
 # providers freely).
 #

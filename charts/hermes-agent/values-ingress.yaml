@@ -2,11 +2,11 @@
 #
 # Exposes the Hermes management dashboard (service.port, default 9119) via an
 # Ingress. The upstream warns this dashboard EXPOSES API KEYS on the network,
-# so it MUST sit behind authentication — this example uses nginx's basic-auth
+# so it MUST sit behind authentication: this example uses nginx's basic-auth
 # annotations. Adjust `ingressClassName` / annotations for your controller
 # (Traefik, HAProxy, ...).
 #
-# Dummy key — override at install time. The basic-auth Secret referenced by
+# Dummy key: override at install time. The basic-auth Secret referenced by
 # the annotation below must be created separately:
 #
 #   htpasswd -cb /tmp/auth admin '<your-password>'

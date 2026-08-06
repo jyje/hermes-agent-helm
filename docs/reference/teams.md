@@ -102,7 +102,7 @@ Deploy each agent as its **own release**, each with its **own
 `DISCORD_ALLOWED_USERS`**. With plain Helm, run two installs side by side:
 
 ```bash
-# Agent A — "planner"
+# Agent A: "planner"
 helm upgrade --install hermes-planner ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-anthropic-and-discord.yaml \
@@ -111,7 +111,7 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   --set-string extraEnv[0].name=DISCORD_HOME_CHANNEL \
   --set-string extraEnv[0].value='<shared-channel-id>' --wait
 
-# Agent B — "builder" (same channel, different bot token)
+# Agent B: "builder" (same channel, different bot token)
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-anthropic-and-discord.yaml \

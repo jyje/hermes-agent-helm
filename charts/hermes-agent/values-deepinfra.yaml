@@ -1,7 +1,7 @@
 # values-deepinfra.yaml
 #
 # Hermes Agent using DeepInfra's built-in OpenAI-compatible provider.
-# Dummy key — override at install time. Use a model currently listed by
+# Dummy key: override at install time. Use a model currently listed by
 # DeepInfra's /v1/openai/models endpoint for config.model.default.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \

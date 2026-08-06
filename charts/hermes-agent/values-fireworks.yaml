@@ -1,7 +1,7 @@
 # values-fireworks.yaml
 #
 # Hermes Agent using Fireworks AI's built-in OpenAI-compatible provider.
-# Dummy key — override at install time.
+# Dummy key: override at install time.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \

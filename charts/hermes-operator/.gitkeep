@@ -1,8 +1,8 @@
-# hermes-operator chart — exploratory placeholder (TBA)
+# hermes-operator chart: exploratory placeholder (TBA)
 #
 # Not committed to yet. The recommended way to run a Hermes "team" today is
 # an ArgoCD ApplicationSet over ../hermes-agent/ (roster as data, this chart
-# as the template) — see ../../docs/teams.md.
+# as the template): see ../../docs/teams.md.
 #
 # A dedicated operator (Agent / AgentTeam CRDs, developed in a separate,
 # external repo) would only be worth building if that ApplicationSet's
@@ -15,7 +15,7 @@
 #     member failure)
 #
 # If/when that happens, this directory would host the chart that installs
-# the operator (CRDs + controller + RBAC) — the controller itself would live
+# the operator (CRDs + controller + RBAC): the controller itself would live
 # in its own repo.
 #
 # See ../../README.md#roadmap. Nothing here yet.

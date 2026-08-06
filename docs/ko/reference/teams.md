@@ -98,7 +98,7 @@ Discord 사용자 ID를 모아 `DISCORD_ALLOWED_USERS`로 씁니다.
 두 설치를 나란히 실행합니다:
 
 ```bash
-# 에이전트 A — "planner"
+# 에이전트 A: "planner"
 helm upgrade --install hermes-planner ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-anthropic-and-discord.yaml \
@@ -107,7 +107,7 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   --set-string extraEnv[0].name=DISCORD_HOME_CHANNEL \
   --set-string extraEnv[0].value='<shared-channel-id>' --wait
 
-# 에이전트 B — "builder" (같은 채널, 다른 봇 토큰)
+# 에이전트 B: "builder" (같은 채널, 다른 봇 토큰)
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-anthropic-and-discord.yaml \

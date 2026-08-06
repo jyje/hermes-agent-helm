@@ -1,7 +1,7 @@
 # values-gemini.yaml
 #
 # Hermes Agent using Google Gemini as the model provider.
-# Dummy key — override at install time.
+# Dummy key: override at install time.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \

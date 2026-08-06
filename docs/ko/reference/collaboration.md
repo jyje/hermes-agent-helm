@@ -35,7 +35,7 @@ circuit breaker가 없는 미지원 토폴로지로 문서화합니다. 실험�
 ```mermaid
 graph TB
     Human((Human)) -->|"@mentions either bot"| Channel
-    subgraph Channel["#team — one shared Discord channel (context bus)"]
+    subgraph Channel["#team - one shared Discord channel (context bus)"]
         direction LR
         Planner["planner<br/>role: scope &amp; plan<br/>backend: LiteLLM proxy"]
         Builder["builder<br/>role: implement<br/>backend: Copilot device-flow"]
@@ -75,7 +75,7 @@ config:
       To hand the conversation to builder, put an explicit
       <@BUILDER_BOT_USER_ID> mention in the BODY of your message. Only mention
       builder when you have something substantive to say or genuinely need their
-      input. When a topic reaches a natural conclusion, do NOT mention builder —
+      input. When a topic reaches a natural conclusion, do NOT mention builder -
       address the human instead and end your turn, so the exchange stops. Never
       send a filler or "let me know if you need anything" message that mentions
       builder; that only restarts the loop.
@@ -112,11 +112,11 @@ config:
 (여기서는 `/opt/data`) 아래에 상태를 영속합니다:
 
 ```bash
-# 선언적 레이어 — 차트에서 주입, 배포할 때마다 다시 시드됨
+# 선언적 레이어: 차트에서 주입, 배포할 때마다 다시 시드됨
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'sed -n "/agent:/,/gateway_timeout/p" $HERMES_HOME/config.yaml'
 
-# 런타임 레이어 — 대화에서 학습해 영속된 것
+# 런타임 레이어: 대화에서 학습해 영속된 것
 kubectl exec -n hermes-july deploy/hermes-july -- \
   sh -c 'cat $HERMES_HOME/memories/USER.md'
 ```
@@ -160,9 +160,9 @@ User '<name>' has the Discord user ID '<YOUR_USER_ID>' for mentions.
 기억하라고 요청하면 됩니다:
 
 ```text
-나: @july 기억해둬: 내 Discord 사용자 ID는 <@YOUR_USER_ID>야 — 사람이 필요하면
+나: @july 기억해둬: 내 Discord 사용자 ID는 <@YOUR_USER_ID>야 - 사람이 필요하면
     이걸로 멘션해. 그리고 네 파트너 june은 <@JUNE_BOT_USER_ID>이고.
-july: 알겠어 — 저장했어. 사람 입력이 필요하면 너를 @멘션하고, june에게는
+july: 알겠어 - 저장했어. 사람 입력이 필요하면 너를 @멘션하고, june에게는
       <@JUNE_BOT_USER_ID>로 넘길게.
 ```
 
@@ -271,11 +271,11 @@ config:
       You are "planner", one of two collaborating Hermes agents in this
       Telegram group. Your partner is "builder", Telegram username
       @hermes_builder_bot. To hand the conversation to builder, put an
-      explicit @hermes_builder_bot mention in the BODY of your message —
+      explicit @hermes_builder_bot mention in the BODY of your message -
       never rely on Telegram's native "reply" feature to address them, since
       a reply does not carry the same explicit-mention guarantee this recipe
       depends on. When a topic reaches a natural conclusion, do NOT mention
-      builder — address the human instead and end your turn.
+      builder - address the human instead and end your turn.
   group_sessions_per_user: false
 ```
 
@@ -312,7 +312,7 @@ config:
       Slack channel. Your partner is "builder", Slack user <@U0BUILDERID>.
       To hand the conversation to builder, put an explicit <@U0BUILDERID>
       mention in the BODY of your message. When a topic reaches a natural
-      conclusion, do NOT mention builder — address the human instead and end
+      conclusion, do NOT mention builder - address the human instead and end
       your turn.
   group_sessions_per_user: false
 ```
@@ -386,7 +386,7 @@ helm upgrade --install hermes-planner ./charts/hermes-agent \
   -f charts/hermes-agent/values-multi-agent-collab.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<planner-bot-token>' --wait
 
-# builder — 같은 채널, 다른 봇, 자체 파일에서 파트너 id 교체
+# builder: 같은 채널, 다른 봇, 자체 파일에서 파트너 id 교체
 helm upgrade --install hermes-builder ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
   -f charts/hermes-agent/values-builder.yaml \
