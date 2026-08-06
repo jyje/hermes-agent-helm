@@ -5,6 +5,9 @@ repo_url: https://github.com/jyje/hermes-agent-helm
 repo_name: jyje/hermes-agent-helm
 docs_dir: docs
 
+hooks:
+  - hooks.py
+
 theme:
   name: material
   logo: images/hermes-agent-helm.png
