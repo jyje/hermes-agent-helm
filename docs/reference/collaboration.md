@@ -379,6 +379,8 @@ if you'd rather see both releases spelled out.
 
 ## See also
 
+- [Setting up a team](../guides/team-setup.md) — a friendlier, from-scratch
+  walkthrough if this is your first team; start there.
 - [teams.md](teams.md) — group single instances into a team (the prerequisite to this page).
 - [roadmap.md](roadmap.md) — the ApplicationSet team pattern and the `hermes-operator` candidacy.
 - [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)

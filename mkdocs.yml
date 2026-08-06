@@ -125,6 +125,7 @@ nav:
       - Configuration model: guides/configuration.md
       - Secrets and persistence: guides/secrets-and-storage.md
       - Operations and testing: guides/operations.md
+      - Setting up a team: guides/team-setup.md
   - Reference:
       - reference/index.md
       - Contributing: reference/contributing.md

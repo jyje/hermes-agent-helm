@@ -404,6 +404,8 @@ without turning it into a hidden coordination plane.
 
 ## See also
 
+- [Setting up a team](../guides/team-setup.md) — a friendlier, from-scratch
+  walkthrough if this is your first team; start there.
 - [collaboration.md](collaboration.md) — the next step: make the grouped agents
   hand off by `@mention` and stop them looping (the bot-to-bot recipe).
 - [Chart README](../charts/hermes-agent/README.md) — full values table, the
