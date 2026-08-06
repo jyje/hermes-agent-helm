@@ -6,9 +6,9 @@
 |---|---|---|
 | `dev` | Maintainer experimental / integration. | lint + docs-drift + template + kind `helm test` |
 | `main` | Default branch & PR target; stable. Releases cut from here. | same as dev |
-| _tags_ `vX.Y.Z` | The release itself — created by CI when the chart version changes. | publishes to GitHub Packages (OCI) |
+| _tags_ `vX.Y.Z` | The release itself: created by CI when the chart version changes. | publishes to GitHub Packages (OCI) |
 
-No long-lived `rc`/`release` branches — a release is a tag/event.
+No long-lived `rc`/`release` branches - a release is a tag/event.
 
 ## How to cut a release
 
@@ -20,9 +20,9 @@ version in the generated release PR; the manifest is never published to npm.
 
 ### Add a Changeset (required for user-visible changes)
 
-Every user-visible chart change — a new `values-*.yaml` example, a new
+Every user-visible chart change - a new `values-*.yaml` example, a new
 ArgoCD example, a `values.yaml` default change, template/behavior changes,
-docs the user reads — needs a Changeset. This includes additions that look
+docs the user reads - needs a Changeset. This includes additions that look
 "just" like an example or doc file: if it ships in the chart or its
 documented examples, it's user-visible. Run `pnpm changeset`, select
 `@jyje/hermes-agent-helm`, choose the chart's SemVer impact, and write a
@@ -103,7 +103,7 @@ and publishes the chart to **both**:
   (published to the `gh-pages` branch, `index.yaml` merged with prior releases).
 
 Commits that touch `Chart.yaml` for other reasons (e.g. `appVersion`,
-description) are safe — the tag-existence guard makes them no-ops.
+description) are safe - the tag-existence guard makes them no-ops.
 
 > `appVersion` tracks the upstream Hermes image (date-based, e.g. `v2026.6.5`)
 > and is bumped manually; only the chart `version` drives releases.
@@ -119,7 +119,7 @@ Changeset summaries, rather than commit subjects, are the release changelog.
 PRs and pushes run lint + an isolated **kind** install/test, and every release
 is re-verified against the published, cosign-signed artifact.
 
-See **[docs/reference/ci.md](docs/reference/ci.md)** for the full pipeline — the parallel
+See **[docs/reference/ci.md](docs/reference/ci.md)** for the full pipeline - the parallel
 default / existingClaim test scenarios, the failover model pool, fork-PR
 behavior, and the post-release verification.
 

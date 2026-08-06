@@ -22,7 +22,7 @@ as a **Secret**.
 - **Provider-agnostic.** Hermes supports many providers (openai, anthropic,
   google, openrouter, and any OpenAI-compatible endpoint). Chart defaults use a
   provider's **public** endpoint (e.g. `https://api.openai.com/v1`,
-  `https://api.anthropic.com/v1`) — never a specific in-cluster proxy.
+  `https://api.anthropic.com/v1`) - never a specific in-cluster proxy.
 - **Connecting to LiteLLM (or any proxy) is a usage choice, not a chart fact.**
   Configure it via values overrides; don't bake it into the chart or docs.
 - **Don't frame docs by what the chart is *not*.** State what it does; omit the
@@ -30,32 +30,32 @@ as a **Secret**.
 - **No Namespace resource.** The chart never renders a `Namespace`; the target
   namespace is selected only via the CLI (`kubectl`, `helm --namespace` /
   `--create-namespace`). Don't reintroduce a `namespace.*` value.
-- **local terminal backend only.** `config.terminal.backend: local` — the agent
+- **local terminal backend only.** `config.terminal.backend: local` - the agent
   runs commands inside the pod (pod = sandbox). Never default to / wire up the
   `docker` backend in-cluster (needs a Docker daemon/socket; absent on
   containerd, security risk). Document it as unsupported, don't add socket mounts.
 - **Image tags are date-based** (`vYYYY.M.D`, e.g. `v2026.6.5` == Hermes v0.16.0)
-  — there is no semver tag. Image is multi-arch (amd64 + arm64). Don't invent
+  - there is no semver tag. Image is multi-arch (amd64 + arm64). Don't invent
   semver tags like `0.8.0`.
 - **No inbound API.** `hermes gateway run` is outbound (messaging platforms) and
-  the image is s6-supervised — so don't set `command`/`args` (use the image
+  the image is s6-supervised - so don't set `command`/`args` (use the image
   entrypoint), don't add liveness/readiness tied to a listening port by default,
   and don't create an access Service by default. The only HTTP surface is the
-  optional management `dashboard` (port 9119, sensitive — exposes API keys).
+  optional management `dashboard` (port 9119, sensitive - exposes API keys).
 - **Ship a Helm test.** `templates/tests/` Job with `helm.sh/hook: test`,
   gated by `tests.enabled` (default true), runs a `hermes doctor` style check
   (hermes CLI + docker availability). Run via `helm test`.
 - **config/.env are partial overrides, never full replacements.** Hermes reads
   `$HERMES_HOME/config.yaml` + env as overrides on top of its version-specific
   built-in defaults (precedence: CLI > config.yaml > .env > defaults). `config`
-  is seeded into `HERMES_HOME` (the PVC) by an init container — NOT mounted
-  read-only — because Hermes writes to its home at runtime. `bootstrap.overwrite`
+  is seeded into `HERMES_HOME` (the PVC) by an init container - NOT mounted
+  read-only - because Hermes writes to its home at runtime. `bootstrap.overwrite`
   controls re-seed (true) vs seed-if-absent (false). Secrets go in via `envFrom`
   (env wins over config.yaml), not a `.env` file. Never try to reproduce the
   full upstream config in the chart.
 - **Environment-specific config lives in `charts/hermes-agent/values-*.yaml`**
   (ready-to-adapt examples: every built-in provider, Discord/Telegram combos,
-  and a custom OpenAI-compatible provider such as LiteLLM in/out of cluster —
+  and a custom OpenAI-compatible provider such as LiteLLM in/out of cluster;
   see the chart README's "More examples" table) and in `examples/argocd/`
   (the GitOps/SealedSecret + `extraEnvFrom` + persistence pattern). Per-environment
   values do not belong in the chart defaults.
@@ -63,18 +63,18 @@ as a **Secret**.
 ## Workflow
 
 - **Multi-language docs stay in sync.** Every `README.md` (English) has a
-  `README-ko.md` (Korean) twin — at the repo root, under `charts/hermes-agent/`,
+  `README-ko.md` (Korean) twin - at the repo root, under `charts/hermes-agent/`,
   and under `docs/` (`reference/teams.md`/`ko/reference/teams.md`,
   `reference/roadmap.md`/`ko/reference/roadmap.md`).
   Each pair must describe the same thing. When you edit one, apply the
-  equivalent edit to its twin in the same change — don't leave them
+  equivalent edit to its twin in the same change - don't leave them
   diverging. If another language edition is added later, the same rule
   applies to it too. Exception: the chart README's auto-generated `## Values`
   table (see below) stays English-only in both files to avoid a second
   hand-translated copy drifting from `values.yaml`.
 - **Changeset release items are a contributor contract.** For every
-  user-visible chart change — including a new `values-*.yaml` example, a new
-  ArgoCD example, or docs a user reads, not just template/default changes —
+  user-visible chart change - including a new `values-*.yaml` example, a new
+  ArgoCD example, or docs a user reads, not just template/default changes -
   add one `.changeset/*.md` item before opening the PR. Its frontmatter
   contains only the package and `major`/`minor`/`patch`; its first summary line
   follows `Category(scope): Title` using the approved categories in

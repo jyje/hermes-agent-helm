@@ -16,14 +16,14 @@
 
 ---
 
-**Found this useful? Please give it a ⭐ — it helps others find it.**
+**Found this useful? Please give it a ⭐ - it helps others find it.**
 
 </div>
 
 ## Summary
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
-with one `helm install` — works with any LLM provider Hermes supports, scales
+with one `helm install` - works with any LLM provider Hermes supports, scales
 down to a single small node, and is verified to actually run, not just render.
 A **community-powered** chart, not an official Nous Research release.
 
@@ -61,12 +61,12 @@ change), see [Quick start](#quick-start) below.
   already supports `openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`,
   `deepseek`, and any OpenAI-compatible endpoint (e.g.
   [LiteLLM](https://github.com/BerriAI/litellm)) through environment
-  variables — this chart just exposes that config through `values.yaml` and
+  variables - this chart just exposes that config through `values.yaml` and
   ships ready-to-adapt examples per provider, with no provider baked into the
   templates.
 - **Lightweight → production.** Sized for homelab / single-node / edge clusters
   out of the box (one replica, modest requests, a small PVC), and ready for
-  production by scaling *up* — not *out*. Hermes is a single-instance personal
+  production by scaling *up* - not *out*. Hermes is a single-instance personal
   agent (one `HERMES_HOME`, one gateway, one memory), so you don't replicate a
   pod; you run several well-managed instances and group them into a **team**
   that shares context over a common gateway channel. See
@@ -74,7 +74,7 @@ change), see [Quick start](#quick-start) below.
 - **Verified end-to-end.** CI installs the chart on an ephemeral **kind**
   cluster and runs the bundled test Job (`hermes doctor`). When the
   `NVIDIA_API_KEY` repository secret is available, it also runs a **live
-  `hermes chat` round-trip** against NVIDIA NIM — not a mock.
+  `hermes chat` round-trip** against NVIDIA NIM - not a mock.
   The Discord-thread leader team has also completed a live human → leader →
   two members → leader round-trip; Telegram team orchestration remains separate.
 
@@ -158,7 +158,7 @@ principles are in [AGENTS.md](AGENTS.md).
   Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`.
 
 So: lint + test gate every change; the *release* itself is just a normal
-reviewed PR (the version bump) — the pending Changesets decide its SemVer,
+reviewed PR (the version bump) - the pending Changesets decide its SemVer,
 merging is what ships. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the full release playbook.
 
@@ -170,7 +170,7 @@ long-term, not-started candidate. See [docs/reference/roadmap.md](docs/reference
 
 ## Contributing
 
-Issues, PRs, and ideas are all welcome — start with
+Issues, PRs, and ideas are all welcome - start with
 [CONTRIBUTING.md](CONTRIBUTING.md) (branch model, local checks, release flow).
 Every merged contribution is credited in the changelog and release notes.
 
