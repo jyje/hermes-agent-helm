@@ -35,7 +35,7 @@ them to the same group chat.
 | Shape | Flat — two (or a few) peers | Star — one leader, N members |
 | Best for | A quick two-role pairing (e.g. planner + builder) that you'll watch closely | A repeatable, larger roster where you want one predictable point of contact |
 | Where it's documented | [collaboration.md](../reference/collaboration.md) | [teams.md](../reference/teams.md#leader-orchestrated-teams) |
-| Values files | [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml) | [`values-team-leader.yaml`](../charts/hermes-agent/values-team-leader.yaml) / [`values-team-member.yaml`](../charts/hermes-agent/values-team-member.yaml) |
+| Values files | [`values-multi-agent-collab.yaml`](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-multi-agent-collab.yaml) | [`values-team-leader.yaml`](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-team-leader.yaml) / [`values-team-member.yaml`](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-team-member.yaml) |
 
 Neither is "more advanced" than the other — pick the shape that matches how you
 want the conversation to flow. A flat pair is simpler to reason about with two
@@ -51,7 +51,7 @@ Two independent releases, one shared Discord channel, and an explicit
    enable the Message Content Intent on both, and invite both to the same
    channel. Note each bot's Discord **user ID** — each agent needs to know its
    partner's ID to mention them.
-2. **Install both**, pointing each at [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml)
+2. **Install both**, pointing each at [`values-multi-agent-collab.yaml`](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-multi-agent-collab.yaml)
    with its own bot token and its partner's ID filled into `environment_hint`:
 
    ```bash
@@ -138,10 +138,33 @@ actually happen:
   way Discord replies otherwise auto-ping the previous sender and restart the
   loop by accident.
 
-Because this leans on Discord-specific mention and thread semantics, it's
-called out everywhere as **experimental and not an upstream-supported
+This is called out everywhere as **experimental and not an upstream-supported
 topology** — treat it as a recipe with mitigations, not a guarantee, and keep
 these bots in a channel you can watch.
+
+## Other platforms: Telegram and Slack
+
+Everything above uses Discord, which is the only platform with a live-proven
+multi-bot run behind it. The protocol itself is platform-independent, though —
+what changes is how you write a mention and which environment variables close
+the loop:
+
+| | Discord | Telegram | Slack |
+| --- | --- | --- | --- |
+| Mention format | `<@USER_ID>` | `@username` (must end in `bot`) | `<@USER_ID>` — identical to Discord |
+| Loop-brake knobs | 4 | 3 | 2 |
+| The one to not miss | `DISCORD_REPLY_TO_MODE=off` | `TELEGRAM_REPLY_TO_MODE=off` | `SLACK_STRICT_MENTION=true` |
+| Live-proven | ✅ | ⚠️ config-verified only | ⚠️ config-verified only |
+
+Slack is the easiest port (same mention markup, so `environment_hint` text
+carries over unchanged); Telegram needs `@username` tokens instead of numeric
+IDs plus one extra instruction telling agents never to use Telegram's native
+"reply" to address a teammate.
+
+Full knob-by-knob mapping and worked config for both is in
+[collaboration.md § Beyond Discord](../reference/collaboration.md#beyond-discord-telegram-and-slack)
+(pair) and [teams.md § Telegram and Slack](../reference/teams.md#telegram-and-slack)
+(leader team).
 
 ## What's actually been proven, not just documented
 

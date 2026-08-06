@@ -239,6 +239,117 @@ sequenceDiagram
 
 ---
 
+## Beyond Discord: Telegram and Slack
+
+Everything above uses Discord, the only platform with a **live-proven**
+collaborating pair (and the only one behind the leader-team live evidence in
+[teams.md](teams.md#live-evidence)). The same `@mention` handoff and the same
+four-knob loop brake exist for Telegram and Slack too — Hermes routes bot
+gating for all three through one shared authorization path
+(`{PLATFORM}_ALLOW_BOTS`), and each platform adapter has its own equivalent of
+"don't let a reply silently re-trigger the partner." The sections below give
+the verified equivalent knobs and a worked example for each. Neither has been
+run through a live multi-bot proof the way the Discord recipe has — treat them
+as a well-grounded starting recipe, not a guarantee, and validate in a channel
+you can watch before trusting it unattended.
+
+### Knob mapping
+
+| Purpose | Discord | Telegram | Slack |
+| --- | --- | --- | --- |
+| Only respond to another bot on an explicit mention | `DISCORD_ALLOW_BOTS=mentions` | `TELEGRAM_ALLOW_BOTS=mentions` | `SLACK_ALLOW_BOTS=mentions` |
+| Require an explicit mention at all (vs. free-response) | `DISCORD_REQUIRE_MENTION=true` | `TELEGRAM_REQUIRE_MENTION=true` | `SLACK_REQUIRE_MENTION=true` |
+| Stop a thread/topic from auto-triggering once mentioned, without a fresh mention | `DISCORD_THREAD_REQUIRE_MENTION=true` | not needed — Telegram groups gate every message on `TELEGRAM_REQUIRE_MENTION`; there is no separate "sticky thread" memory to close | `SLACK_STRICT_MENTION=true` — off by default; Slack otherwise remembers a mentioned thread and keeps auto-responding in it |
+| Stop *sending* a native reply-reference that would silently mention the partner back | `DISCORD_REPLY_TO_MODE=off` | `TELEGRAM_REPLY_TO_MODE=off` | not applicable — Slack has no separate reply-reference mention; `SLACK_STRICT_MENTION=true` already closes the "reply in a bot's thread" auto-trigger |
+| Never treat an inbound reply-reference as an implicit mention | `DISCORD_ALLOW_MENTION_REPLIED_USER=false` | covered by `TELEGRAM_REPLY_TO_MODE=off` on the sending side — there is no separate inbound flag | covered by `SLACK_STRICT_MENTION=true` |
+
+Telegram and Slack each fold what takes four knobs on Discord into three (Telegram)
+or two (Slack) — the platforms have less surface area for an implicit mention
+to sneak in, not less protection.
+
+### Telegram
+
+Telegram mentions a bot by its `@username` (bots must have one, and it must
+end in `bot`, e.g. `@hermes_builder_bot`) — there is no numeric `<@id>` token
+to look up. Put the **exact `@username`** in `environment_hint`, matching the
+Discord pattern:
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Telegram group. Your partner is "builder", Telegram username
+      @hermes_builder_bot. To hand the conversation to builder, put an
+      explicit @hermes_builder_bot mention in the BODY of your message —
+      never rely on Telegram's native "reply" feature to address them, since
+      a reply does not carry the same explicit-mention guarantee this recipe
+      depends on. When a topic reaches a natural conclusion, do NOT mention
+      builder — address the human instead and end your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: TELEGRAM_HOME_CHANNEL      # shared group chat id
+    value: "<shared-chat-id>"
+  - name: TELEGRAM_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: TELEGRAM_ALLOW_BOTS
+    value: "mentions"
+  - name: TELEGRAM_REQUIRE_MENTION
+    value: "true"
+  - name: TELEGRAM_REPLY_TO_MODE
+    value: "off"
+```
+
+`TELEGRAM_EXCLUSIVE_BOT_MENTIONS` defaults to `true` and is worth leaving
+alone: when a message explicitly `@mentions` one bot username ending in
+`bot`, every *other* bot in the group ignores that message outright, even if
+it's also present. That is an extra layer this recipe gets for free on
+Telegram with no Discord equivalent.
+
+### Slack
+
+Slack mentions use the exact same `<@USER_ID>` markup as Discord — copy the
+Discord `environment_hint` pattern verbatim, just swap in the partner's Slack
+member ID (find it via *View profile → More → Copy member ID*):
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Slack channel. Your partner is "builder", Slack user <@U0BUILDERID>.
+      To hand the conversation to builder, put an explicit <@U0BUILDERID>
+      mention in the BODY of your message. When a topic reaches a natural
+      conclusion, do NOT mention builder — address the human instead and end
+      your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: SLACK_HOME_CHANNEL         # shared channel id
+    value: "<shared-channel-id>"
+  - name: SLACK_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: SLACK_ALLOW_BOTS
+    value: "mentions"
+  - name: SLACK_REQUIRE_MENTION
+    value: "true"
+  - name: SLACK_STRICT_MENTION
+    value: "true"
+```
+
+`SLACK_STRICT_MENTION` is the one knob to get right: Slack's default behavior
+remembers a thread once a bot is `@mentioned` in it and keeps that bot
+listening for the rest of the thread with no further mention required — the
+same "sticky thread" shape as Discord, and just as capable of quietly turning
+into a bot-to-bot loop if the partner is also in that thread. Setting it to
+`true` forces a fresh `<@id>` on every single turn, which is what this
+recipe's "stop when done" instruction actually depends on to work.
+
 ## Mixed backends in one pair
 
 Collaborating agents need **not** share a model backend — the channel is the only

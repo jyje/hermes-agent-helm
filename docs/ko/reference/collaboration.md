@@ -231,6 +231,114 @@ sequenceDiagram
 
 ---
 
+## Discord 너머: Telegram과 Slack
+
+위 내용은 모두 Discord 기준입니다. Discord는 협업 쌍이 **라이브로 검증된 유일한
+플랫폼**이며, [teams-ko.md](teams-ko.md#라이브-증거)의 리더 팀 라이브 증거도
+Discord에서 나온 것입니다. 하지만 동일한 `@mention` 핸드오프와 동일한 루프
+브레이크는 Telegram과 Slack에도 존재합니다. Hermes는 세 플랫폼의 봇 게이팅을
+하나의 공유 authorization 경로(`{PLATFORM}_ALLOW_BOTS`)로 처리하고, 각 어댑터는
+"reply가 파트너를 조용히 다시 깨우지 못하게 하는" 자체 수단을 갖고 있습니다.
+아래는 각 플랫폼에서 검증된 대응 노브와 실제 예시입니다. 다만 두 플랫폼 모두
+Discord처럼 멀티 봇 라이브 증명을 거치지는 않았습니다. 근거 있는 출발 레시피로
+보시되 보장으로 받아들이지는 마시고, 무인 운영에 맡기기 전에 지켜볼 수 있는
+채널에서 먼저 검증하세요.
+
+### 노브 대응표
+
+| 목적 | Discord | Telegram | Slack |
+| --- | --- | --- | --- |
+| 다른 봇에는 명시적 멘션이 있을 때만 반응 | `DISCORD_ALLOW_BOTS=mentions` | `TELEGRAM_ALLOW_BOTS=mentions` | `SLACK_ALLOW_BOTS=mentions` |
+| 애초에 명시적 멘션을 요구(자유 응답 금지) | `DISCORD_REQUIRE_MENTION=true` | `TELEGRAM_REQUIRE_MENTION=true` | `SLACK_REQUIRE_MENTION=true` |
+| 한 번 멘션된 스레드/토픽이 이후 멘션 없이 계속 자동 반응하지 않게 | `DISCORD_THREAD_REQUIRE_MENTION=true` | 불필요 — Telegram 그룹은 매 메시지를 `TELEGRAM_REQUIRE_MENTION`으로 게이팅하며, 따로 닫아야 할 "sticky 스레드" 기억이 없음 | `SLACK_STRICT_MENTION=true` — 기본값 off. 그대로 두면 Slack은 멘션된 스레드를 기억해 계속 자동 응답함 |
+| 파트너를 암묵적으로 다시 멘션하는 native reply 참조를 **보내지** 않기 | `DISCORD_REPLY_TO_MODE=off` | `TELEGRAM_REPLY_TO_MODE=off` | 해당 없음 — Slack에는 별도 reply 참조 멘션이 없고, `SLACK_STRICT_MENTION=true`가 "봇 스레드에 답글" 자동 트리거를 이미 차단 |
+| 수신한 reply 참조를 암묵적 멘션으로 취급하지 않기 | `DISCORD_ALLOW_MENTION_REPLIED_USER=false` | 발신 측 `TELEGRAM_REPLY_TO_MODE=off`로 커버됨 — 별도 수신 플래그 없음 | `SLACK_STRICT_MENTION=true`로 커버됨 |
+
+Discord에서 4개 노브가 필요한 것을 Telegram은 3개, Slack은 2개로 처리합니다.
+보호가 약해서가 아니라, 암묵적 멘션이 끼어들 표면 자체가 더 좁기 때문입니다.
+
+### Telegram
+
+Telegram은 봇을 `@username`으로 멘션합니다(봇은 username이 반드시 있어야 하고
+`bot`으로 끝나야 합니다. 예: `@hermes_builder_bot`). 찾아 쓸 숫자 `<@id>` 토큰이
+없습니다. Discord 패턴 그대로, `environment_hint`에 **정확한 `@username`**을
+넣으세요:
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Telegram group. Your partner is "builder", Telegram username
+      @hermes_builder_bot. To hand the conversation to builder, put an
+      explicit @hermes_builder_bot mention in the BODY of your message —
+      never rely on Telegram's native "reply" feature to address them, since
+      a reply does not carry the same explicit-mention guarantee this recipe
+      depends on. When a topic reaches a natural conclusion, do NOT mention
+      builder — address the human instead and end your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: TELEGRAM_HOME_CHANNEL      # 공유 그룹 채팅 id
+    value: "<shared-chat-id>"
+  - name: TELEGRAM_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: TELEGRAM_ALLOW_BOTS
+    value: "mentions"
+  - name: TELEGRAM_REQUIRE_MENTION
+    value: "true"
+  - name: TELEGRAM_REPLY_TO_MODE
+    value: "off"
+```
+
+`TELEGRAM_EXCLUSIVE_BOT_MENTIONS`는 기본값이 `true`이며 그대로 두는 편이 좋습니다.
+`bot`으로 끝나는 봇 username 하나를 명시적으로 멘션한 메시지는, 같은 그룹에 있는
+**다른** 모든 봇이 아예 무시합니다. Discord에는 대응물이 없는, 공짜로 얻는 추가
+방어층입니다.
+
+### Slack
+
+Slack 멘션은 Discord와 완전히 같은 `<@USER_ID>` 마크업을 씁니다. 따라서 Discord용
+`environment_hint` 패턴을 그대로 복사하고 파트너의 Slack member ID만 바꿔 넣으면
+됩니다(*프로필 보기 → 더 보기 → 멤버 ID 복사*로 확인):
+
+```yaml
+config:
+  agent:
+    environment_hint: |
+      You are "planner", one of two collaborating Hermes agents in this
+      Slack channel. Your partner is "builder", Slack user <@U0BUILDERID>.
+      To hand the conversation to builder, put an explicit <@U0BUILDERID>
+      mention in the BODY of your message. When a topic reaches a natural
+      conclusion, do NOT mention builder — address the human instead and end
+      your turn.
+  group_sessions_per_user: false
+```
+
+```yaml
+extraEnv:
+  - name: SLACK_HOME_CHANNEL         # 공유 채널 id
+    value: "<shared-channel-id>"
+  - name: SLACK_ALLOWED_USERS
+    value: "<comma-separated-human-ids>"
+  - name: SLACK_ALLOW_BOTS
+    value: "mentions"
+  - name: SLACK_REQUIRE_MENTION
+    value: "true"
+  - name: SLACK_STRICT_MENTION
+    value: "true"
+```
+
+가장 중요한 노브는 `SLACK_STRICT_MENTION`입니다. Slack의 기본 동작은 봇이 한 번
+멘션된 스레드를 기억해서, 이후에는 멘션 없이도 그 스레드 내내 계속 반응하게
+둡니다. Discord의 "sticky 스레드"와 같은 모양이고, 파트너도 그 스레드에 있다면
+조용히 봇 대 봇 루프로 번질 수 있습니다. `true`로 두면 매 턴마다 새 `<@id>`를
+강제하므로, 이 레시피의 "끝나면 멈춘다" 지시가 실제로 작동하게 됩니다.
+
+---
+
 ## 한 쌍에 서로 다른 백엔드 섞기
 
 협업하는 에이전트가 모델 백엔드를 **공유할 필요는 없습니다** — 공유하는 것은 채널뿐.

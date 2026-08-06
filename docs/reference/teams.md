@@ -385,11 +385,77 @@ knowledge PVC, a member can read the same content, and the member mount rejects
 writes. The existing kind screenshot separately proves the independent releases
 and private homes.
 
-This recipe is **Discord-specific** because its safety depends on Discord thread,
-mention, reply-reference, and session semantics. Telegram remains a supported
-v1 messenger for human-to-agent use, but a Telegram bot-to-bot leader team needs
-a separate platform-level proof; changing only credential environment variables
-is not presented as sufficient.
+The live evidence above is **Discord-specific** — it depends on Discord's
+thread, mention, reply-reference, and session semantics, and only Discord has
+been run through an actual multi-bot proof. Telegram and Slack both have real,
+config-verified equivalents of every loop-brake knob (see below), but neither
+has a live leader-team run behind it yet; treat the recipes that follow as a
+grounded starting point that still needs its own platform-level proof before
+you'd trust it unattended.
+
+### Telegram and Slack
+
+The star-topology protocol itself — one leader talking to the human, members
+answering only on an explicit mention, the `[TEAM run=<id> step=<n>
+TASK|RESULT]` metadata contract, the serialized one-member-at-a-time handoff —
+is entirely platform-independent; none of it is Discord API surface. What
+changes per platform is **how a mention is written** and **which env vars
+close the loop**. See [collaboration.md § Knob
+mapping](collaboration.md#knob-mapping) for the full Discord/Telegram/Slack
+comparison; the leader-team essentials are below.
+
+**Telegram.** Bots are addressed by `@username` (must end in `bot`), not a
+numeric ID — put every member's exact `@username` in the leader's
+`environment_hint`, and the leader's `@username` in every member's. Reuse the
+`values-team-leader.yaml` / `values-team-member.yaml` `environment_hint` text
+verbatim, but replace every `<@ID>` token with `@bot_username` and add one
+instruction Discord doesn't need: tell every agent to never use Telegram's
+native "reply" feature to address a teammate, since a reply is not the
+explicit-mention signal this protocol depends on. The delegation contract
+becomes:
+
+```text
+@may_bot
+
+Context: <everything needed, including accepted earlier results>
+Task: <one concrete task>
+Done when: <observable acceptance criteria>
+Reply contract: mention @august_bot and include the complete result here.
+
+[TEAM run=<short-id> step=<n> TASK]
+```
+
+Swap the leader's `extraEnv` loop-brake block for the Telegram knobs
+(`TELEGRAM_ALLOW_BOTS=mentions`, `TELEGRAM_REQUIRE_MENTION=true`,
+`TELEGRAM_REPLY_TO_MODE=off`), and set `TELEGRAM_HOME_CHANNEL` /
+`TELEGRAM_ALLOWED_USERS` to the shared group chat and trusted human IDs, same
+shape as `values-openai-and-telegram.yaml`. `TELEGRAM_EXCLUSIVE_BOT_MENTIONS`
+defaults to `true` and is worth keeping: a message that explicitly names one
+bot username is ignored by every other bot in the group outright, which adds
+a second independent guard against a member acting on a delegation meant for
+a sibling.
+
+**Slack.** Mentions use the identical `<@USER_ID>` markup Discord uses, so the
+delegation contract and every `environment_hint` carry over unchanged — just
+replace Discord user IDs with Slack member IDs. The one knob that matters most
+is `SLACK_STRICT_MENTION=true`: Slack's default behavior remembers a thread
+once a bot is mentioned in it and keeps that bot listening for the rest of the
+thread with no further mention required (the upstream source comments call
+this out directly as re-enabling "agent-to-agent ack loops" when left off).
+Set the leader and every member's loop-brake block to `SLACK_ALLOW_BOTS=mentions`,
+`SLACK_REQUIRE_MENTION=true`, `SLACK_STRICT_MENTION=true`, and point
+`SLACK_HOME_CHANNEL` / `SLACK_ALLOWED_USERS` at the shared channel and trusted
+humans.
+
+Both platforms need the same `group_sessions_per_user: false` and
+`discord.history_backfill`-equivalent care as the Discord recipe: Telegram and
+Slack sessions are keyed the same way per sender by default, so the shared
+transcript setting stays `config.group_sessions_per_user: false` regardless of
+platform. Everything about the shared-knowledge PVC, `disabled_toolsets`, the
+six-handoff ceiling, and the "never use a hook/file/memory to hand off work"
+rule in `values-team-leader.yaml` / `values-team-member.yaml` applies
+unchanged — only the platform block (`env`/`extraEnv`) and the mention token
+format in `environment_hint` differ.
 
 ### Shared knowledge is separate from coordination
 
