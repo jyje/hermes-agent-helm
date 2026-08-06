@@ -233,16 +233,16 @@ sequenceDiagram
 
 ## Discord 너머: Telegram과 Slack
 
-위 내용은 모두 Discord 기준입니다. Discord는 협업 쌍이 **라이브로 검증된 유일한
-플랫폼**이며, [teams-ko.md](teams-ko.md#라이브-증거)의 리더 팀 라이브 증거도
-Discord에서 나온 것입니다. 하지만 동일한 `@mention` 핸드오프와 동일한 루프
-브레이크는 Telegram과 Slack에도 존재합니다. Hermes는 세 플랫폼의 봇 게이팅을
-하나의 공유 authorization 경로(`{PLATFORM}_ALLOW_BOTS`)로 처리하고, 각 어댑터는
-"reply가 파트너를 조용히 다시 깨우지 못하게 하는" 자체 수단을 갖고 있습니다.
-아래는 각 플랫폼에서 검증된 대응 노브와 실제 예시입니다. 다만 두 플랫폼 모두
-Discord처럼 멀티 봇 라이브 증명을 거치지는 않았습니다. 근거 있는 출발 레시피로
-보시되 보장으로 받아들이지는 마시고, 무인 운영에 맡기기 전에 지켜볼 수 있는
-채널에서 먼저 검증하세요.
+여기까지는 모두 Discord 기준입니다. Discord는 협업 쌍이 **라이브로 검증된
+유일한 플랫폼**이고, [teams-ko.md](teams-ko.md#라이브-증거)에 실린 리더 팀
+라이브 증거도 Discord에서 나왔습니다. 하지만 같은 `@mention` 핸드오프와 같은
+루프 브레이크가 Telegram과 Slack에도 있습니다. Hermes는 세 플랫폼의 봇
+게이팅을 `{PLATFORM}_ALLOW_BOTS`라는 하나의 공유 authorization 경로로
+처리하고, 어댑터마다 "reply가 파트너를 조용히 다시 깨우지 못하게" 막는 수단을
+따로 둡니다. 아래에 플랫폼별로 검증된 대응 노브와 실제 예시를 정리했습니다.
+다만 Telegram과 Slack은 Discord처럼 멀티 봇 라이브 증명을 거치지 않았습니다.
+근거 있는 출발 레시피로 보시되 보장으로 받아들이지는 마세요. 무인 운영에
+맡기기 전에, 지켜볼 수 있는 채널에서 먼저 검증하시기 바랍니다.
 
 ### 노브 대응표
 
@@ -254,15 +254,15 @@ Discord처럼 멀티 봇 라이브 증명을 거치지는 않았습니다. 근�
 | 파트너를 암묵적으로 다시 멘션하는 native reply 참조를 **보내지** 않기 | `DISCORD_REPLY_TO_MODE=off` | `TELEGRAM_REPLY_TO_MODE=off` | 해당 없음 — Slack에는 별도 reply 참조 멘션이 없고, `SLACK_STRICT_MENTION=true`가 "봇 스레드에 답글" 자동 트리거를 이미 차단 |
 | 수신한 reply 참조를 암묵적 멘션으로 취급하지 않기 | `DISCORD_ALLOW_MENTION_REPLIED_USER=false` | 발신 측 `TELEGRAM_REPLY_TO_MODE=off`로 커버됨 — 별도 수신 플래그 없음 | `SLACK_STRICT_MENTION=true`로 커버됨 |
 
-Discord에서 4개 노브가 필요한 것을 Telegram은 3개, Slack은 2개로 처리합니다.
-보호가 약해서가 아니라, 암묵적 멘션이 끼어들 표면 자체가 더 좁기 때문입니다.
+Discord에서 노브 4개가 필요한 일을 Telegram은 3개, Slack은 2개로 해냅니다.
+보호가 약해서가 아닙니다. 암묵적 멘션이 끼어들 표면 자체가 더 좁기 때문입니다.
 
 ### Telegram
 
-Telegram은 봇을 `@username`으로 멘션합니다(봇은 username이 반드시 있어야 하고
-`bot`으로 끝나야 합니다. 예: `@hermes_builder_bot`). 찾아 쓸 숫자 `<@id>` 토큰이
-없습니다. Discord 패턴 그대로, `environment_hint`에 **정확한 `@username`**을
-넣으세요:
+Telegram에서는 봇을 `@username`으로 멘션합니다(봇에게는 username이 반드시
+있어야 하고, 그 username은 `bot`으로 끝나야 합니다. 예:
+`@hermes_builder_bot`). 찾아 쓸 숫자 `<@id>` 토큰은 없습니다. Discord 패턴
+그대로, `environment_hint`에 **정확한 `@username`**을 적으세요:
 
 ```yaml
 config:
@@ -293,16 +293,16 @@ extraEnv:
     value: "off"
 ```
 
-`TELEGRAM_EXCLUSIVE_BOT_MENTIONS`는 기본값이 `true`이며 그대로 두는 편이 좋습니다.
-`bot`으로 끝나는 봇 username 하나를 명시적으로 멘션한 메시지는, 같은 그룹에 있는
-**다른** 모든 봇이 아예 무시합니다. Discord에는 대응물이 없는, 공짜로 얻는 추가
-방어층입니다.
+`TELEGRAM_EXCLUSIVE_BOT_MENTIONS`는 기본값이 `true`인데, 그대로 두시길
+권합니다. `bot`으로 끝나는 봇 username 하나를 콕 집어 멘션한 메시지는 같은
+그룹에 있는 **다른** 모든 봇이 아예 무시합니다. Discord에는 대응물이 없는,
+공짜로 얻는 방어층 하나입니다.
 
 ### Slack
 
-Slack 멘션은 Discord와 완전히 같은 `<@USER_ID>` 마크업을 씁니다. 따라서 Discord용
-`environment_hint` 패턴을 그대로 복사하고 파트너의 Slack member ID만 바꿔 넣으면
-됩니다(*프로필 보기 → 더 보기 → 멤버 ID 복사*로 확인):
+Slack 멘션은 Discord와 똑같은 `<@USER_ID>` 마크업을 씁니다. 그래서 Discord용
+`environment_hint` 패턴을 그대로 복사한 뒤 파트너의 Slack member ID만 바꿔
+넣으면 됩니다(*프로필 보기 → 더 보기 → 멤버 ID 복사*로 확인하세요):
 
 ```yaml
 config:
@@ -331,11 +331,12 @@ extraEnv:
     value: "true"
 ```
 
-가장 중요한 노브는 `SLACK_STRICT_MENTION`입니다. Slack의 기본 동작은 봇이 한 번
-멘션된 스레드를 기억해서, 이후에는 멘션 없이도 그 스레드 내내 계속 반응하게
-둡니다. Discord의 "sticky 스레드"와 같은 모양이고, 파트너도 그 스레드에 있다면
-조용히 봇 대 봇 루프로 번질 수 있습니다. `true`로 두면 매 턴마다 새 `<@id>`를
-강제하므로, 이 레시피의 "끝나면 멈춘다" 지시가 실제로 작동하게 됩니다.
+가장 중요한 노브는 `SLACK_STRICT_MENTION`입니다. Slack은 기본적으로 봇이 한 번
+멘션된 스레드를 기억합니다. 그래서 그다음부터는 멘션이 없어도 그 스레드 내내
+계속 반응합니다. Discord의 "sticky 스레드"와 같은 모양이라, 파트너까지 그
+스레드에 있으면 조용히 봇 대 봇 루프로 번질 수 있습니다. `true`로 두면 매 턴
+새 `<@id>`를 요구하므로, 이 레시피의 "끝나면 멈춘다" 지시가 비로소 제대로
+먹힙니다.
 
 ---
 

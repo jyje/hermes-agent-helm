@@ -379,22 +379,22 @@ Discord뿐입니다. Telegram과 Slack에도 모든 루프 브레이크 노브�
 
 ### Telegram과 Slack
 
-스타 토폴로지 프로토콜 자체 — 리더만 사람과 대화하고, 멤버는 명시적 멘션에만
-응답하며, `[TEAM run=<id> step=<n> TASK|RESULT]` 메타데이터 계약과 한 번에 한
-명씩 직렬 핸드오프하는 방식 — 는 완전히 플랫폼 독립적입니다. Discord API
-표면에 의존하는 부분이 전혀 없습니다. 플랫폼마다 달라지는 것은 **멘션을 쓰는
-방법**과 **루프를 닫는 환경변수**뿐입니다. Discord/Telegram/Slack 전체 비교는
-[collaboration-ko.md § 노브 대응표](collaboration-ko.md#노브-대응표)를 보시고,
-리더 팀에 필요한 핵심만 아래에 정리합니다.
+스타 토폴로지 프로토콜 자체는 플랫폼을 가리지 않습니다. 리더만 사람과 대화하고,
+멤버는 명시적 멘션에만 응답하고, `[TEAM run=<id> step=<n> TASK|RESULT]` 메타데이터
+계약 아래 한 번에 한 명씩 직렬로 핸드오프합니다. 여기에 Discord API 표면을 타는
+부분은 하나도 없습니다. 플랫폼마다 달라지는 건 **멘션을 쓰는 방법**과 **루프를
+닫는 환경변수**뿐입니다. Discord/Telegram/Slack 전체 비교는
+[collaboration-ko.md § 노브 대응표](collaboration-ko.md#노브-대응표)에 있으니,
+여기서는 리더 팀에 필요한 핵심만 정리합니다.
 
-**Telegram.** 봇은 숫자 ID가 아니라 `@username`으로 주소를 지정합니다(`bot`으로
-끝나야 함). 리더의 `environment_hint`에는 모든 멤버의 정확한 `@username`을,
-각 멤버의 hint에는 리더의 `@username`을 넣으세요. `values-team-leader.yaml` /
-`values-team-member.yaml`의 `environment_hint` 문안을 그대로 재사용하되, 모든
-`<@ID>` 토큰을 `@bot_username`으로 바꾸고 Discord에는 필요 없던 지시 한 줄을
-추가하세요. 팀원을 부를 때 Telegram의 native "reply" 기능을 절대 쓰지 말라는
-것입니다. reply는 이 프로토콜이 의존하는 명시적 멘션 신호가 아니기 때문입니다.
-위임 계약은 다음 형태가 됩니다:
+**Telegram.** 봇은 숫자 ID가 아니라 `@username`으로 부릅니다(`bot`으로 끝나야
+합니다). 리더의 `environment_hint`에는 멤버 전원의 정확한 `@username`을, 각
+멤버의 hint에는 리더의 `@username`을 넣으세요. `values-team-leader.yaml` /
+`values-team-member.yaml`의 `environment_hint` 문안은 그대로 재사용하되,
+`<@ID>` 토큰을 모두 `@bot_username`으로 바꾸고 Discord에는 없던 지시를 한 줄
+덧붙이세요. 팀원을 부를 때 Telegram의 native "reply" 기능을 절대 쓰지 말라는
+지시입니다. reply는 이 프로토콜이 기대는 명시적 멘션 신호가 아니기 때문입니다.
+그래서 위임 계약은 이런 형태가 됩니다:
 
 ```text
 @may_bot
@@ -407,32 +407,34 @@ Reply contract: mention @august_bot and include the complete result here.
 [TEAM run=<short-id> step=<n> TASK]
 ```
 
-리더의 `extraEnv` 루프 브레이크 블록을 Telegram 노브로 교체하고
+리더의 `extraEnv` 루프 브레이크 블록은 Telegram 노브로 갈아 끼우세요
 (`TELEGRAM_ALLOW_BOTS=mentions`, `TELEGRAM_REQUIRE_MENTION=true`,
-`TELEGRAM_REPLY_TO_MODE=off`), `TELEGRAM_HOME_CHANNEL` /
-`TELEGRAM_ALLOWED_USERS`를 공유 그룹 채팅과 신뢰하는 사람 ID로 설정하세요.
+`TELEGRAM_REPLY_TO_MODE=off`). `TELEGRAM_HOME_CHANNEL` /
+`TELEGRAM_ALLOWED_USERS`에는 공유 그룹 채팅과 신뢰하는 사람 ID를 넣습니다.
 `values-openai-and-telegram.yaml`과 같은 모양입니다.
-`TELEGRAM_EXCLUSIVE_BOT_MENTIONS`는 기본값 `true`를 유지할 만합니다. 봇 username
-하나를 명시적으로 지목한 메시지는 그룹의 다른 모든 봇이 아예 무시하므로, 형제
-멤버에게 간 위임을 다른 멤버가 실행하는 사고를 막는 독립적인 2차 방어가 됩니다.
+`TELEGRAM_EXCLUSIVE_BOT_MENTIONS`는 기본값 `true`로 두실 만합니다. 봇 username
+하나를 콕 집어 지목한 메시지는 그룹의 다른 봇들이 통째로 무시하므로, 형제 멤버에게
+간 위임을 엉뚱한 멤버가 집어 드는 사고를 막아 주는 독립적인 2차 방어가 됩니다.
 
-**Slack.** 멘션이 Discord와 완전히 같은 `<@USER_ID>` 마크업이라, 위임 계약과 모든
-`environment_hint`를 그대로 옮길 수 있습니다. Discord user ID를 Slack member ID로
-바꾸기만 하면 됩니다. 가장 중요한 노브는 `SLACK_STRICT_MENTION=true`입니다.
-Slack의 기본 동작은 봇이 한 번 멘션된 스레드를 기억해 이후 멘션 없이도 그 스레드
-내내 계속 반응하게 둡니다(업스트림 소스 주석은 이 설정을 끄면 "agent-to-agent ack
-loop"가 다시 열린다고 직접 언급합니다). 리더와 모든 멤버의 루프 브레이크 블록을
+**Slack.** 멘션이 Discord와 똑같은 `<@USER_ID>` 마크업이라, 위임 계약도
+`environment_hint`도 그대로 옮겨 쓸 수 있습니다. Discord user ID를 Slack
+member ID로 바꾸기만 하면 됩니다. 가장 중요한 노브는
+`SLACK_STRICT_MENTION=true`입니다. Slack은 기본적으로 봇이 한 번 멘션된
+스레드를 기억해서, 그다음부터는 멘션이 없어도 그 스레드 내내 계속
+반응합니다(업스트림 소스 주석도 이 설정을 끄면 "agent-to-agent ack loop"가
+다시 열린다고 직접 밝힙니다). 리더와 멤버 전원의 루프 브레이크 블록을
 `SLACK_ALLOW_BOTS=mentions`, `SLACK_REQUIRE_MENTION=true`,
-`SLACK_STRICT_MENTION=true`로 두고, `SLACK_HOME_CHANNEL` / `SLACK_ALLOWED_USERS`를
-공유 채널과 신뢰하는 사람으로 지정하세요.
+`SLACK_STRICT_MENTION=true`로 두고, `SLACK_HOME_CHANNEL` /
+`SLACK_ALLOWED_USERS`에는 공유 채널과 신뢰하는 사람을 지정하세요.
 
-두 플랫폼 모두 Discord 레시피와 똑같이 `group_sessions_per_user: false` 관리가
-필요합니다. Telegram과 Slack도 기본적으로는 발신자별로 세션을 나누므로, 공유
-트랜스크립트 설정은 플랫폼과 무관하게 `config.group_sessions_per_user: false`로
-유지합니다. 공유 지식 PVC, `disabled_toolsets`, 6단계 핸드오프 상한, 그리고
-`values-team-leader.yaml` / `values-team-member.yaml`의 "hook·파일·메모리로
-핸드오프하지 말 것" 규칙은 전부 그대로 적용됩니다. 달라지는 것은 플랫폼 블록
-(`env`/`extraEnv`)과 `environment_hint`의 멘션 토큰 형식뿐입니다.
+`group_sessions_per_user: false` 관리는 두 플랫폼에서도 Discord 레시피와
+똑같습니다. Telegram과 Slack 역시 기본값으로는 발신자별로 세션을 나누기 때문에,
+공유 트랜스크립트 설정은 플랫폼을 가리지 않고
+`config.group_sessions_per_user: false`로 유지합니다. 공유 지식 PVC,
+`disabled_toolsets`, 6단계 핸드오프 상한, `values-team-leader.yaml` /
+`values-team-member.yaml`의 "hook·파일·메모리로 핸드오프하지 말 것" 규칙도 전부
+그대로 적용됩니다. 달라지는 건 플랫폼 블록(`env`/`extraEnv`)과
+`environment_hint`의 멘션 토큰 형식뿐입니다.
 
 ### 공유 지식과 조정은 분리합니다
 
