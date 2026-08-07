@@ -68,13 +68,17 @@ jobs:
       - name: Install site dependencies
         run: pip install -r requirements.txt
 
-      # Not --strict yet: migrating off the retired Astro site surfaced a
-      # backlog of pre-existing broken relative links inside mirrored
-      # upstream content (chart README values-*.yaml links, etc.) that were
-      # never validated before. Tracked as follow-up; build must still
-      # succeed and every page must still render.
       - name: Build the documentation site
-        run: mkdocs build
+        env:
+          # Suppresses mkdocs-material's own "MkDocs 2.0 is coming" notice,
+          # a project announcement unrelated to this build (see
+          # material/templates/__init__.py in the installed package) —
+          # not one of mkdocs's own WARNING-level diagnostics.
+          NO_MKDOCS_2_WARNING: "true"
+        # --strict: every link across the site resolves (down from ~250
+        # warnings pre-migration to 0, see hooks.py); a future broken link
+        # now fails this build instead of silently shipping.
+        run: mkdocs build --strict
 
       - name: Fetch the Helm chart repository data
         uses: actions/checkout@v7
