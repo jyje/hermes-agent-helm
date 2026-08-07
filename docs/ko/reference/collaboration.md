@@ -347,8 +347,8 @@ extraEnv:
 
 | 에이전트 | Provider | 인증 | 비고 |
 | --- | --- | --- | --- |
-| `planner` | `litellm` | 프록시 키(`OPENAI_API_KEY`, 봉인) | 공유 LiteLLM 프록시에 OpenAI 호환 커스텀 provider로 연결; [`values-litellm.yaml`](../charts/hermes-agent/values-litellm.yaml) |
-| `builder` | `copilot` | **device-flow**(봉인 토큰 없음) | 시작 시 `auth.deviceFlow`로 `gho_` 토큰 발급; [`values-github-copilot.yaml`](../charts/hermes-agent/values-github-copilot.yaml) |
+| `planner` | `litellm` | 프록시 키(`OPENAI_API_KEY`, 봉인) | 공유 LiteLLM 프록시에 OpenAI 호환 커스텀 provider로 연결; [`values-litellm.yaml`](../../../charts/hermes-agent/values-litellm.yaml) |
+| `builder` | `copilot` | **device-flow**(봉인 토큰 없음) | 시작 시 `auth.deviceFlow`로 `gho_` 토큰 발급; [`values-github-copilot.yaml`](../../../charts/hermes-agent/values-github-copilot.yaml) |
 
 덕분에 트래픽이 많은 역할에는 저렴/로컬 모델을, 필요한 역할에는 프리미엄 모델을
 협업 배선을 바꾸지 않고 배치할 수 있습니다.
@@ -369,14 +369,14 @@ extraEnv:
 
 **에이전트별**(고유):
 - `releaseName` / `metadata.name`: 고유해야 함
-  ([유일 규칙](../examples/argocd/README.md#the-one-rule-unique-fullname-per-instance))
+  ([유일 규칙](../../../examples/argocd/README.md#the-one-rule-unique-fullname-per-instance))
 - `DISCORD_BOT_TOKEN`: 에이전트당 봇 하나
 - `config.agent.environment_hint`: 역할 + **파트너의** 사용자 ID
 - 모델 백엔드와 그 인증
 
 ### 방법 A: 에이전트당 values 파일 하나 (여기서 시작)
 
-[`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml)을
+[`values-multi-agent-collab.yaml`](../../../charts/hermes-agent/values-multi-agent-collab.yaml)을
 에이전트마다 복사해 역할/파트너-id와 봇 토큰만 바꾸고 나란히 설치합니다:
 
 ```bash
@@ -461,7 +461,7 @@ spec:
 ```
 
 ApplicationSet 없이 두 릴리스를 손으로 펼친 버전은
-[`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)에
+[`examples/argocd/hermes-collab-pair.yaml`](../../../examples/argocd/hermes-collab-pair.yaml)에
 있습니다.
 
 ---
@@ -481,5 +481,5 @@ ApplicationSet 없이 두 릴리스를 손으로 펼친 버전은
 
 - [teams-ko.md](teams-ko.md): 단일 인스턴스를 팀으로 묶기(이 문서의 전제).
 - [roadmap-ko.md](roadmap-ko.md): ApplicationSet 팀 패턴과 `hermes-operator` 후보 조건.
-- [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)
+- [`values-multi-agent-collab.yaml`](../../../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../../../examples/argocd/hermes-collab-pair.yaml)
 - Hermes [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/) 문서.

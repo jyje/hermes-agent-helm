@@ -20,7 +20,7 @@ Hermes Agent는 **개인용 에이전트**입니다: 하나의 `HERMES_HOME`, �
 허브죠.
 
 그래서 단일 인스턴스는 **단일 writer 워크로드**가 되고, 이 차트가 `replicaCount: 1`을
-고정하며 스케일 아웃을 지양하는 이유입니다([차트 README](../charts/hermes-agent/README.md)의
+고정하며 스케일 아웃을 지양하는 이유입니다([차트 README](../../../charts/hermes-agent/README.md)의
 `replicaCount` 설명 참고):
 
 - `controller.type=deployment` → 추가 레플리카는 `Pending`에 걸립니다
@@ -66,7 +66,7 @@ Hermes Agent는 **개인용 에이전트**입니다: 하나의 `HERMES_HOME`, �
   **같은 ReadWriteMany(RWX) PVC**를 마운트할 수 있습니다. 이렇게 하면 config,
   메모리, 정체성, gateway 세션을 공유하지 않고 공통 지식 베이스를 읽고 쓸 수
   있습니다. 완전한 예는
-  [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)을
+  [`values-shared-knowledge.yaml`](../../../charts/hermes-agent/values-shared-knowledge.yaml)을
   참조하세요. **주의:** PVC는 `ReadWriteMany` 액세스 모드를 지원하는 StorageClass를
   사용해야 합니다(예: NFS, CephFS, Longhorn); 대부분의 클라우드 제공자의 기본
   StorageClass는 `ReadWriteOnce`이므로 다중 작성자는 동작하지 않습니다.
@@ -173,8 +173,8 @@ spec:
           - CreateNamespace=true
 ```
 
-이렇게 하면 [examples/argocd/](../examples/argocd/)와
-["Multiple instances in the same namespace"](../examples/argocd/README.md#multiple-instances-in-the-same-namespace)
+이렇게 하면 [examples/argocd/](../../../examples/argocd/)와
+["Multiple instances in the same namespace"](../../../examples/argocd/README.md#multiple-instances-in-the-same-namespace)
 섹션의 `fullname` 유일성 규칙을 그대로 따르면서, 다음을 거의 공짜로 얻습니다:
 
 - **명부가 한 곳**(`generators[0].list.elements`)**에 존재**: N개의 Application
@@ -187,7 +187,7 @@ spec:
   나옵니다.
 
 렌더링된 형태를 명시적으로 보고 싶다면(예: 리뷰용, 또는 ApplicationSet 없이),
-[examples/argocd/](../examples/argocd/)에 제공자/예제별로 손으로 작성한 Application이
+[examples/argocd/](../../../examples/argocd/)에 제공자/예제별로 손으로 작성한 Application이
 하나씩 있습니다 - 팀원마다 복사해서 쓸 수 있고, 위 ApplicationSet은 같은 모양을
 생성하는 것뿐입니다.
 
@@ -213,7 +213,7 @@ spec:
 >
 > 이 중 하나가 실제로, 관찰된 필요가 되기 전까지는 위 ApplicationSet 패턴이
 > 권장 접근입니다. [로드맵](roadmap-ko.md)과
-> [`charts/hermes-operator/`](../charts/hermes-operator/) 플레이스홀더를
+> [`charts/hermes-operator/`](../../../charts/hermes-operator/) 플레이스홀더를
 > 참고하세요.
 
 ## 리더 주도 팀 (Leader-orchestrated teams)
@@ -345,7 +345,7 @@ helm upgrade --install hermes-march ./charts/hermes-agent \
 ```
 
 values 파일의 채널 ID, 허용할 사람 ID, 봇 ID도 교체해야 합니다. 선언형 사용자는
-[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml)을
+[`examples/argocd/hermes-team.yaml`](../../../examples/argocd/hermes-team.yaml)을
 사용할 수 있습니다. 리더 Application 하나와 멤버 ApplicationSet으로 구성됩니다.
 이 Application들이 sync되기 전에 대상 네임스페이스에 공유 claim을 준비하세요.
 
@@ -449,11 +449,11 @@ queue, 상태, 중간 결과, 완료 마커, 다음 단계 지시를 두면 안 
 
 - [collaboration-ko.md](collaboration-ko.md) - 다음 단계: 묶인 에이전트들이
   `@mention`으로 핸드오프하고 무한루프를 멈추게 하기(봇 대 봇 레시피).
-- [차트 README](../charts/hermes-agent/README.md): 전체 값 테이블,
+- [차트 README](../../../charts/hermes-agent/README.md): 전체 값 테이블,
   `replicaCount` 단일 writer 근거, Discord/Telegram 환경변수.
 - [로드맵](roadmap-ko.md): ApplicationSet 기반 팀 패턴, 그리고
   `hermes-operator`(`Agent` / `AgentTeam` CRD)가 정당화되는 조건.
-- [examples/argocd/](../examples/argocd/): 에이전트당 Application 1개, 네임스페이스당
+- [examples/argocd/](../../../examples/argocd/): 에이전트당 Application 1개, 네임스페이스당
   다중 인스턴스, SealedSecret 시크릿 연결.
 - Hermes 공식 문서:
   [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/)

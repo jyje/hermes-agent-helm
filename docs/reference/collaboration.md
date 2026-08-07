@@ -357,8 +357,8 @@ thing they share. The reference pair runs asymmetrically:
 
 | Agent | Provider | Auth | Notes |
 | --- | --- | --- | --- |
-| `planner` | `litellm` | proxy key (`OPENAI_API_KEY`, sealed) | talks to a shared LiteLLM proxy as an OpenAI-compatible custom provider; see [`values-litellm.yaml`](../charts/hermes-agent/values-litellm.yaml) |
-| `builder` | `copilot` | **device-flow** (no token sealed) | mints a `gho_` token at startup via `auth.deviceFlow`; see [`values-github-copilot.yaml`](../charts/hermes-agent/values-github-copilot.yaml) |
+| `planner` | `litellm` | proxy key (`OPENAI_API_KEY`, sealed) | talks to a shared LiteLLM proxy as an OpenAI-compatible custom provider; see [`values-litellm.yaml`](../../charts/hermes-agent/values-litellm.yaml) |
+| `builder` | `copilot` | **device-flow** (no token sealed) | mints a `gho_` token at startup via `auth.deviceFlow`; see [`values-github-copilot.yaml`](../../charts/hermes-agent/values-github-copilot.yaml) |
 
 This lets you put a cheap/local model on the high-traffic role and a premium
 model on the role that needs it, without changing the collaboration wiring.
@@ -379,14 +379,14 @@ the roster stays easy to edit.
 
 **Per agent** (unique):
 - `releaseName` / `metadata.name`: must be unique (the
-  [one rule](../examples/argocd/README.md#the-one-rule-unique-fullname-per-instance))
+  [one rule](../../examples/argocd/README.md#the-one-rule-unique-fullname-per-instance))
 - `DISCORD_BOT_TOKEN`: one bot per agent
 - `config.agent.environment_hint`: role + the **partner's** user ID
 - model backend + its auth
 
 ### Option A: one values file per agent (start here)
 
-Copy [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml)
+Copy [`values-multi-agent-collab.yaml`](../../charts/hermes-agent/values-multi-agent-collab.yaml)
 once per agent, change the role/partner-id and bot token, and install side by side:
 
 ```bash
@@ -472,7 +472,7 @@ spec:
 ```
 
 A hand-written two-Application version (no ApplicationSet) is in
-[`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)
+[`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
 if you'd rather see both releases spelled out.
 
 ---
@@ -494,5 +494,5 @@ if you'd rather see both releases spelled out.
   walkthrough if this is your first team; start there.
 - [teams.md](teams.md): group single instances into a team (the prerequisite to this page).
 - [roadmap.md](roadmap.md): the ApplicationSet team pattern and the `hermes-operator` candidacy.
-- [`values-multi-agent-collab.yaml`](../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../examples/argocd/hermes-collab-pair.yaml)
+- [`values-multi-agent-collab.yaml`](../../charts/hermes-agent/values-multi-agent-collab.yaml) · [`examples/argocd/hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)
 - Hermes [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/) docs.
