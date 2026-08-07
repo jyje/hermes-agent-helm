@@ -10,9 +10,9 @@ from pull request to published, signed artifact.
 
 | Workflow | Trigger | Role |
 |---|---|---|
-| [validate-chart.yaml](../.github/workflows/validate-chart.yaml) | PRs and pushes to `dev`/`main` touching `charts/hermes-agent/**` | Lint + an isolated **kind** install/test before anything merges. |
-| [release-chart.yaml](../.github/workflows/release-chart.yaml) | Push to `main` that changes `charts/hermes-agent/Chart.yaml` | Tags `vX.Y.Z`, publishes the OCI artifact + Helm repo, and cosign-signs it. See [CONTRIBUTING.md](../CONTRIBUTING.md#how-to-cut-a-release). |
-| [verify-release.yaml](../.github/workflows/verify-release.yaml) | After a successful `release-chart` run | Re-verifies the **published, signed** artifact end to end. |
+| [validate-chart.yaml](../../.github/workflows/validate-chart.yaml) | PRs and pushes to `dev`/`main` touching `charts/hermes-agent/**` | Lint + an isolated **kind** install/test before anything merges. |
+| [release-chart.yaml](../../.github/workflows/release-chart.yaml) | Push to `main` that changes `charts/hermes-agent/Chart.yaml` | Tags `vX.Y.Z`, publishes the OCI artifact + Helm repo, and cosign-signs it. See [CONTRIBUTING.md](../../CONTRIBUTING.md#how-to-cut-a-release). |
+| [verify-release.yaml](../../.github/workflows/verify-release.yaml) | After a successful `release-chart` run | Re-verifies the **published, signed** artifact end to end. |
 
 ## validate-chart
 
@@ -31,13 +31,13 @@ Two scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
 (a separate runner) - fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
 separately: `test (message)` and `test (existing-claim)`. Scenario logic lives
-in [.github/scripts](../.github/scripts) (`lib.sh` + one script per scenario)
+in [.github/scripts](../../.github/scripts) (`lib.sh` + one script per scenario)
 rather than inline in the workflow.
 
 A `changes` job skips `test` entirely for version-bump-only commits (where the
 chart behavior is unchanged).
 
-#### message scenario: [scenario-message.sh](../.github/scripts/scenario-message.sh)
+#### message scenario: [scenario-message.sh](../../.github/scripts/scenario-message.sh)
 
 1. Install with chart-managed storage.
 2. Run the chart's `hermes doctor` test hook (the same Job as `helm test`, but
@@ -52,7 +52,7 @@ test hook: `hermes chat -m <model> --provider nvidia -q <prompt> --max-turns N`.
 The live Discord notification step (workflow-level, after the scenario script)
 only runs for this scenario, since it's the only one with Discord enabled.
 
-#### existingClaim scenario: [scenario-existing-claim.sh](../.github/scripts/scenario-existing-claim.sh)
+#### existingClaim scenario: [scenario-existing-claim.sh](../../.github/scripts/scenario-existing-claim.sh)
 
 Exercises `persistence.existingClaim` (the ability to mount a pre-existing PVC
 instead of one the chart creates - [PR #37](https://github.com/jyje/hermes-agent-helm/pull/37)):
@@ -98,5 +98,5 @@ make docs        # regenerate the chart README (helm-docs) - commit the result
 make test        # install + helm test (needs a cluster/kind)
 ```
 
-See [docs/reference/local-development.md](local-dev.md) for setting up a local kind cluster and a
+See [Local development guide](local-development.md) for setting up a local kind cluster and a
 Discord + NVIDIA dev loop.

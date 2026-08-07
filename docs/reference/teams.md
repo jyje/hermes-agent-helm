@@ -21,7 +21,7 @@ messages" - it is the *one* hub a single agent talks through.
 
 That makes a single instance a **single-writer workload**, which is why this
 chart pins `replicaCount: 1` and refuses to scale out (see the `replicaCount`
-note in the [chart README](../charts/hermes-agent/README.md)):
+note in the [chart README](../../charts/hermes-agent/README.md)):
 
 - `controller.type=deployment` → extra replicas hang `Pending` (they can't mount
   the same `ReadWriteOnce` PVC).
@@ -66,7 +66,7 @@ bus:
   ReadWriteMany (RWX) PVC** at a separate path using `extraVolumes` and
   `extraVolumeMounts`. This lets agents read and write a common knowledge base
   without sharing config, memory, identity, or gateway sessions. See
-  [`values-shared-knowledge.yaml`](../charts/hermes-agent/values-shared-knowledge.yaml)
+  [`values-shared-knowledge.yaml`](../../charts/hermes-agent/values-shared-knowledge.yaml)
   for a complete example. **Note:** The PVC must use a StorageClass that supports
   `ReadWriteMany` access mode (e.g., NFS, CephFS, Longhorn); most cloud providers'
   default StorageClass is `ReadWriteOnce` and will not work for multiple writers.
@@ -179,8 +179,8 @@ spec:
 ```
 
 This gives you, for the unique-`fullname` rule from
-[examples/argocd/](../examples/argocd/) and its
-["Multiple instances in the same namespace"](../examples/argocd/README.md#multiple-instances-in-the-same-namespace)
+[examples/argocd/](../../examples/argocd/) and its
+["Multiple instances in the same namespace"](../../examples/argocd/README.md#multiple-instances-in-the-same-namespace)
 section, for free:
 
 - **The roster lives in one place** - `generators[0].list.elements` - instead of
@@ -193,7 +193,7 @@ section, for free:
   in `releaseName`.
 
 If you'd rather see the rendered form explicitly (e.g. for review, or without
-ApplicationSet), [examples/argocd/](../examples/argocd/) has one hand-written
+ApplicationSet), [examples/argocd/](../../examples/argocd/) has one hand-written
 Application per provider/example that you can copy per teammate - the
 ApplicationSet above is the same shape, generated.
 
@@ -220,7 +220,7 @@ Per-team knowledge that everyone should share goes in context files
 >
 > Until one of these becomes a real, observed need, the ApplicationSet pattern
 > above is the recommended approach. See the [Roadmap](roadmap.md)
-> and the [`charts/hermes-operator/`](../charts/hermes-operator/) placeholder.
+> and the [`charts/hermes-operator/`](../../charts/hermes-operator/) placeholder.
 
 ## Leader-orchestrated teams
 
@@ -358,7 +358,7 @@ helm upgrade --install hermes-march ./charts/hermes-agent \
 
 Replace the channel, allowed-human, and bot IDs in the values files as well.
 Declarative users can use
-[`examples/argocd/hermes-team.yaml`](../examples/argocd/hermes-team.yaml): one
+[`examples/argocd/hermes-team.yaml`](../../examples/argocd/hermes-team.yaml): one
 leader Application plus a member ApplicationSet. Provision the shared claim in
 the destination namespace before those Applications sync.
 
@@ -474,12 +474,12 @@ without turning it into a hidden coordination plane.
   walkthrough if this is your first team; start there.
 - [collaboration.md](collaboration.md) - the next step: make the grouped agents
   hand off by `@mention` and stop them looping (the bot-to-bot recipe).
-- [Chart README](../charts/hermes-agent/README.md): full values table, the
+- [Chart README](../../charts/hermes-agent/README.md): full values table, the
   `replicaCount` single-writer rationale, and Discord/Telegram env vars.
 - [Roadmap](roadmap.md): the ApplicationSet-based team pattern, and
   the conditions under which a `hermes-operator` (`Agent` / `AgentTeam` CRDs)
   would become worth building.
-- [examples/argocd/](../examples/argocd/): one Application per agent, multiple
+- [examples/argocd/](../../examples/argocd/): one Application per agent, multiple
   instances per namespace, SealedSecret secret wiring.
 - Hermes official docs:
   [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/)

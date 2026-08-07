@@ -84,10 +84,10 @@ make docs
 
 ## Running the CI test scenarios locally
 
-[validate-chart.yaml](../.github/workflows/validate-chart.yaml)'s `test` job
+[validate-chart.yaml](../../.github/workflows/validate-chart.yaml)'s `test` job
 runs two scenarios as a **matrix** - each on its own ephemeral kind cluster.
 The scenario logic itself lives in
-[.github/scripts](../.github/scripts) (`lib.sh` + one script per scenario), so
+[.github/scripts](../../.github/scripts) (`lib.sh` + one script per scenario), so
 you can reproduce exactly what CI does, scenario by scenario, against a local
 kind cluster:
 
@@ -127,7 +127,7 @@ but `lib.sh`'s `install_release` is a thin wrapper around `helm upgrade`, so
 nothing stops you from copying a scenario script and pointing
 `config.model.provider` elsewhere for a quick local check - e.g. a local LM
 Studio server as a custom OpenAI-compatible provider (see
-[Configure your provider](../charts/hermes-agent/README.md#configure-your-provider)
+[Configure your provider](../../charts/hermes-agent/README.md#configure-your-provider)
 in the chart README). Note this isn't validated end-to-end here: the agent pod
 runs inside the kind node's network namespace, so reaching an LM Studio
 instance on the host requires the pod to resolve the host (e.g.
