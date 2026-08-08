@@ -68,6 +68,15 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+      # Python-Markdown's default slugify strips non-ASCII characters, so a
+      # Korean-only heading (e.g. "라이브 증거") loses its whole slug and
+      # falls back to an unstable, content-blind "_3"-style numeric id, and
+      # a mixed heading silently drops just its Korean words. Unicode-aware
+      # slugify keeps Korean characters, giving every KO heading a real,
+      # stable anchor.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
