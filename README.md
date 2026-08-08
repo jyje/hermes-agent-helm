@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes Team](https://jyje.github.io/hermes-agent-helm/guides/team-setup/)** · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes Team](docs/guides/team-setup.md)** · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -25,7 +25,7 @@
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
 with one `helm install` - works with any LLM provider Hermes supports, scales
 down to a single small node, and is verified to actually run, not just render.
-Just as easily, group several instances into a full [**Hermes Team**](https://jyje.github.io/hermes-agent-helm/guides/team-setup/)
+Just as easily, group several instances into a full [**Hermes Team**](docs/guides/team-setup.md)
 on the same cluster. A **community-powered** chart, not an official Nous
 Research release.
 

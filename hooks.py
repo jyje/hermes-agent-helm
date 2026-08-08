@@ -61,12 +61,14 @@ _INCLUDES = {
     "reference/helm-installation.md": "examples/helm/README.md",
 }
 
-# The dynamic docs/(ko/)?reference/*.md pattern (a link written relative to
-# the repo root, targeting a page that *does* live under docs/), kept
-# separate from the general repo-file resolution below because its repo
-# path and its docs_dir-relative path differ only by the literal "docs/"
-# prefix.
-_DOCS_LINK_RE = re.compile(r'(?:\.\./)*docs/((?:ko/)?reference/[\w-]+\.md)')
+# Any docs/(ko/)?**/*.md path (a link written relative to the repo root,
+# targeting a page that *does* live under docs/), kept separate from the
+# general repo-file resolution below because its repo path and its
+# docs_dir-relative path differ only by the literal "docs/" prefix. Was
+# scoped to just reference/*.md (the only subdirectory linked this way when
+# this was written); broadened to any subdirectory since README links into
+# guides/ too now, and the same gap would recur for every new section.
+_DOCS_LINK_RE = re.compile(r'(?:\.\./)*docs/((?:ko/)?[\w/-]+\.md)')
 
 # Stale "X-ko.md" sibling-file naming from the pre-MkDocs Astro/Starlight
 # site, where locales were separate sibling files instead of today's
