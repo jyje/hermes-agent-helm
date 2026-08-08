@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes Team](https://jyje.github.io/hermes-agent-helm/guides/team-setup/)** · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -25,9 +25,11 @@
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
 with one `helm install` - works with any LLM provider Hermes supports, scales
 down to a single small node, and is verified to actually run, not just render.
-A **community-powered** chart, not an official Nous Research release.
+Just as easily, group several instances into a full [**Hermes Team**](https://jyje.github.io/hermes-agent-helm/guides/team-setup/)
+on the same cluster. A **community-powered** chart, not an official Nous
+Research release.
 
-## Getting started
+## Quick Start
 
 1. **OCI (recommended)** — install directly from the registry, no `helm repo add` needed:
 
@@ -52,7 +54,7 @@ A **community-powered** chart, not an official Nous Research release.
 Optionally pin `--version` to a specific [released chart version](https://github.com/jyje/hermes-agent-helm/releases) instead of latest.
 
 To install from this repo's source instead (e.g. to try an unreleased
-change), see [Quick start](#quick-start) below.
+change), see [Development](#development) below.
 
 ## Why this chart
 
@@ -104,15 +106,47 @@ AGENTS.md                                # design principles & workflow for cont
 Makefile                                 # docs / lint / template / install / test / package / push
 ```
 
-## Quick start
+## Full Installation
 
 ```bash
+# add the Helm repository and fetch the latest chart index
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+
+# render the chart and check its templates before installing
+helm template hermes-agent hermes-agent/hermes-agent \
+  --set-string env.OPENAI_API_KEY='sk-...'
+
+# install with the generic defaults (set your provider key)
+# release name == chart name keeps resources clean (hermes-agent-0, not hermes-agent-hermes-agent-0)
+helm upgrade --install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+
+# run the install test (doctor-style Job)
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+See [charts/hermes-agent/README.md](charts/hermes-agent/README.md) for the full
+values table, the "More examples" table (`values-*.yaml` for every supported
+provider plus Discord/Telegram and LiteLLM - copy the raw YAML and pass it with
+`-f`), and an [ArgoCD example](examples/argocd/).
+
+## Development
+
+Clone the repo and install from the local chart path (a relative path, not
+the published registry) to check a change before opening a PR:
+
+```bash
+git clone https://github.com/jyje/hermes-agent-helm.git
+cd hermes-agent-helm
+
 # render & lint
 make template
 make lint
 
-# install with the generic defaults (set your provider key)
-# release name == chart name keeps resources clean (hermes-agent-0, not hermes-agent-hermes-agent-0)
+# install from the local chart source
 helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
@@ -129,14 +163,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   --set-string env.DISCORD_BOT_TOKEN='...' --wait
 ```
 
-See [charts/hermes-agent/README.md](charts/hermes-agent/README.md) for the full
-values table, the "More examples" table (`values-*.yaml` for every supported
-provider plus Discord/Telegram and LiteLLM), and an
-[ArgoCD example](examples/argocd/).
-
-## Development
-
-Branch model, release process, and local checks (`make lint` / `make docs` /
+Branch model, release process, and further local checks (`make docs` /
 `make test`) are covered in [CONTRIBUTING.md](CONTRIBUTING.md); chart design
 principles are in [AGENTS.md](AGENTS.md).
 

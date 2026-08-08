@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes 팀](https://jyje.github.io/hermes-agent-helm/guides/team-setup/)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -24,10 +24,12 @@
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 Kubernetes에서
 `helm install` 한 번으로 실행하세요 - Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
-단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님)
-**커뮤니티 기반** 차트입니다. Nous Research 공식 릴리즈가 아닙니다.
+단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님) 차트입니다.
+같은 클러스터 위에서 여러 인스턴스를 묶어 완전한 [**Hermes 팀**](https://jyje.github.io/hermes-agent-helm/guides/team-setup/)을
+만드는 것도 그만큼 쉽습니다. **커뮤니티 기반** 차트이며, Nous Research 공식
+릴리즈가 아닙니다.
 
-## 시작하기
+## 빠른 시작
 
 1. **OCI (권장)** — `helm repo add` 없이 레지스트리에서 바로 설치합니다:
 
@@ -52,7 +54,7 @@
 필요하면 latest 대신 특정 [릴리즈된 차트 버전](https://github.com/jyje/hermes-agent-helm/releases)으로 `--version`을 고정할 수 있습니다.
 
 이 리포지토리 소스에서 설치하려면(예: 미릴리즈 변경사항 시도),
-아래 [빠른 시작](#빠른-시작)을 참고하세요.
+아래 [개발](#개발)을 참고하세요.
 
 ## 이 차트의 장점
 
@@ -100,15 +102,47 @@ AGENTS.md                                # 기여자용 설계 원칙 & 워크�
 Makefile                                 # docs / lint / template / install / test / package / push
 ```
 
-## 빠른 시작
+## 전체 설치
 
 ```bash
+# Helm 저장소를 추가하고 최신 차트 인덱스를 가져옵니다
+helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+helm repo update
+
+# 설치 전에 차트를 렌더링해 템플릿을 확인합니다
+helm template hermes-agent hermes-agent/hermes-agent \
+  --set-string env.OPENAI_API_KEY='sk-...'
+
+# 제네릭 기본값으로 설치 (제공자 키 설정)
+# 릴리즈 이름 == 차트 이름으로 리소스명이 깔끔함 (hermes-agent-hermes-agent-0 아니라 hermes-agent-0)
+helm upgrade --install hermes-agent hermes-agent/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+
+# 설치 테스트 실행 (doctor 스타일 Job)
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+전체 값 테이블, "More examples" 표(모든 지원 제공자 + Discord/Telegram + LiteLLM용
+`values-*.yaml` - raw YAML을 복사해 `-f`로 넘기세요), 그리고
+[ArgoCD 예제](examples/argocd/)는
+[charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
+
+## 개발
+
+레포지토리를 클론하고, 게시된 레지스트리가 아니라 로컬 차트 경로(상대경로)로
+설치해서 PR을 올리기 전에 변경사항을 확인하세요:
+
+```bash
+git clone https://github.com/jyje/hermes-agent-helm.git
+cd hermes-agent-helm
+
 # 렌더링 & 린트
 make template
 make lint
 
-# 제네릭 기본값으로 설치 (제공자 키 설정)
-# 릴리즈 이름 == 차트 이름으로 리소스명이 깔끔함 (hermes-agent-hermes-agent-0 아니라 hermes-agent-0)
+# 로컬 차트 소스로 설치
 helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
@@ -125,13 +159,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   --set-string env.DISCORD_BOT_TOKEN='...' --wait
 ```
 
-전체 값 테이블, "More examples" 표(모든 지원 제공자 + Discord/Telegram + LiteLLM용
-`values-*.yaml`), 그리고 [ArgoCD 예제](examples/argocd/)는
-[charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
-
-## 개발
-
-브랜치 모델, 릴리즈 프로세스, 로컬 체크(`make lint` / `make docs` / `make test`)는
+브랜치 모델, 릴리즈 프로세스, 추가 로컬 체크(`make docs` / `make test`)는
 [CONTRIBUTING.md](CONTRIBUTING.md)에 설명되어 있고,
 차트 설계 원칙은 [AGENTS.md](AGENTS.md)를 참고하세요.
 
