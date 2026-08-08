@@ -41,6 +41,10 @@
      (html, body { background-color: #f4f4f4 }), not Material's default
      white. Match it so the header and page body read as one surface. */
   --md-default-bg-color: #f4f4f4;
+  /* Code blocks default to a pale gray derived from the page background,
+     which barely stands out against the #f4f4f4 page. Pure white gives
+     them clear contrast as distinct panels. */
+  --md-code-bg-color: #fff;
 }
 
 /* Crop the logo artwork's vertical whitespace instead of showing it letterboxed.

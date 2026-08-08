@@ -17,6 +17,7 @@ theme:
     primary: custom
   features:
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.indexes
     - navigation.top
