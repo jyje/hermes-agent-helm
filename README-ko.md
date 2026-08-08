@@ -29,26 +29,25 @@
 
 ## 시작하기
 
-Helm 레포지토리(GitHub Pages에 배포됨)를 추가하고 설치하세요:
+1. **OCI (권장)** — `helm repo add` 없이 레지스트리에서 바로 설치합니다:
 
-```bash
-helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
-helm repo update
-helm install hermes-agent hermes-agent/hermes-agent \
-  --namespace hermes-agent --create-namespace \
-  --set-string env.OPENAI_API_KEY='sk-...' \
-  --wait
-```
+    ```bash
+    helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+      --namespace hermes-agent --create-namespace \
+      --set-string env.OPENAI_API_KEY='sk-...' \
+      --wait
+    ```
 
-각 릴리즈는 OCI 아티팩트로도 배포되므로, `helm repo add` 없이
-레지스트리에서 바로 설치할 수도 있습니다:
+2. **클래식 Helm 저장소** — 한 번 추가해두고 이름으로 설치하는 방식을 원하면, GitHub Pages에 배포된 Helm 저장소도 있습니다:
 
-```bash
-helm install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
-  --namespace hermes-agent --create-namespace \
-  --set-string env.OPENAI_API_KEY='sk-...' \
-  --wait
-```
+    ```bash
+    helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
+    helm repo update
+    helm install hermes-agent hermes-agent/hermes-agent \
+      --namespace hermes-agent --create-namespace \
+      --set-string env.OPENAI_API_KEY='sk-...' \
+      --wait
+    ```
 
 필요하면 latest 대신 특정 [릴리즈된 차트 버전](https://github.com/jyje/hermes-agent-helm/releases)으로 `--version`을 고정할 수 있습니다.
 
