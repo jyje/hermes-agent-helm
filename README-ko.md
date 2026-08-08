@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes 팀](docs/guides/team-setup.md)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes 팀](docs/ko/guides/team-setup.md)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -25,7 +25,7 @@
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 Kubernetes에서
 `helm install` 한 번으로 실행하세요 - Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
 단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님) 차트입니다.
-같은 클러스터 위에서 여러 인스턴스를 묶어 완전한 [**Hermes 팀**](docs/guides/team-setup.md)을
+같은 클러스터 위에서 여러 인스턴스를 묶어 완전한 [**Hermes 팀**](docs/ko/guides/team-setup.md)을
 만드는 것도 그만큼 쉽습니다. **커뮤니티 기반** 차트이며, Nous Research 공식
 릴리즈가 아닙니다.
 
