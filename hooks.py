@@ -31,35 +31,31 @@ REPO_ROOT = Path(__file__).parent
 _GITHUB_BLOB = "https://github.com/jyje/hermes-agent-helm/blob/main/"
 _GITHUB_TREE = "https://github.com/jyje/hermes-agent-helm/tree/main/"
 
-# Repo-relative file -> the docs-site page (docs_dir-relative .md path) it
-# corresponds to. Applies globally: these are facts about the repo, not
-# about which page happens to link to them.
-_SIBLING_PAGES = {
-    "README.md": "index.md",
-    "README-ko.md": "ko/index.md",
-    "CONTRIBUTING.md": "reference/contributing.md",
-    "SECURITY.md": "reference/security.md",
-    "SECURITY-ko.md": "ko/reference/security.md",
-    "charts/hermes-agent/README.md": "reference/chart-readme.md",
-    "charts/hermes-agent/README-ko.md": "ko/reference/chart-readme.md",
-}
+# page.file.src_uri -> repo-relative source file it whole-file-includes,
+# and the reverse mapping for `_resolve`'s use when some OTHER page links
+# directly to one of these repo files. Both populated by `on_files` below
+# from the pages' own `--8<-- "path.md"` directives, rather than hand-kept
+# here - the directive is already the fact; a second, separately-maintained
+# list of the same facts is just a place for them to drift apart. Every
+# `.md`-target directive site-wide qualifies (`.yaml`-target snippets, e.g.
+# a values file embedded in a fenced code block, need no link-fixing and
+# are left to pymdownx.snippets alone); every target is a distinct file, so
+# the reverse mapping is unambiguous.
+_INCLUDE_RE = re.compile(r'--8<--\s+"([^"]+\.md)"')
+_INCLUDES: dict[str, str] = {}
+_SIBLING_PAGES: dict[str, str] = {}
 
-# page.file.src_uri -> repo-relative source file it whole-file-includes via
-# a single `--8<-- "path"` line. Keep in sync with the snippet directives
-# in docs/index.md, docs/ko/index.md, docs/reference/contributing.md,
-# docs/reference/argocd.md, docs/reference/security.md, and
-# docs/**/reference/chart-readme.md.
-_INCLUDES = {
-    "index.md": "README.md",
-    "ko/index.md": "README-ko.md",
-    "reference/contributing.md": "CONTRIBUTING.md",
-    "reference/argocd.md": "examples/argocd/README.md",
-    "reference/security.md": "SECURITY.md",
-    "ko/reference/security.md": "SECURITY-ko.md",
-    "reference/chart-readme.md": "charts/hermes-agent/README.md",
-    "ko/reference/chart-readme.md": "charts/hermes-agent/README-ko.md",
-    "reference/helm-installation.md": "examples/helm/README.md",
-}
+
+def on_files(files, config):
+    _INCLUDES.clear()
+    for file in files.documentation_pages():
+        text = Path(file.abs_src_path).read_text(encoding="utf-8")
+        match = _INCLUDE_RE.search(text)
+        if match:
+            _INCLUDES[file.src_uri] = match.group(1)
+    _SIBLING_PAGES.clear()
+    _SIBLING_PAGES.update({source: page for page, source in _INCLUDES.items()})
+    return files
 
 # Any docs/(ko/)?**/*.md path (a link written relative to the repo root,
 # targeting a page that *does* live under docs/), kept separate from the
