@@ -54,14 +54,37 @@ plugins:
           nav_translations:
             Home: 홈
             Charts: 차트
+            Hermes Agent: Hermes Agent
+            Values overlays: Values 오버레이
+            Chart values: 차트 values
             Getting started: 시작하기
             Install: 설치
             Examples: 예제
-            Providers: 공급자
+            # Was "공급자", inconsistent with "제공자" used everywhere in
+            # the actual page bodies (READMEs, chart README, every example
+            # page) - matched to the term readers actually see.
+            Providers: 제공자
             Integrations: 통합
             Advanced: 고급
             Guides: 가이드
+            Configuration model: 설정 모델
+            Secrets and persistence: Secret과 영속성
+            Operations and testing: 운영과 테스트
+            Setting up a team: Hermes 팀 구성하기
             Reference: 참고 자료
+            Contributing: 기여하기
+            CI guide: CI 가이드
+            Hermes teams: Hermes 팀
+            Hermes collaboration: Hermes 협업
+            Roadmap: 로드맵
+            DevOps roadmap: DevOps 로드맵
+            Local development guide: 로컬 개발 가이드
+            Helm installation guide: Helm 설치 가이드
+            ArgoCD guide: ArgoCD 가이드
+            Helm repository index: Helm 저장소 인덱스
+            Chart README: 차트 README
+            Security policy: 보안 정책
+            Source documents: 소스 문서
 
 markdown_extensions:
   - admonition
