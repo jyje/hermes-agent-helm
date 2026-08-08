@@ -33,6 +33,7 @@ extra_javascript:
 
 plugins:
   - search
+  - glightbox
   - macros:
       # This repo's docs document GitHub Actions (${{ }}) and Helm template
       # ({{ .Values.x }}) syntax verbatim in many pages: macros' Jinja
