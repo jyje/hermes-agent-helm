@@ -22,6 +22,8 @@
 
 ## 요약
 
+![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
+
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 Kubernetes에서
 `helm install` 한 번으로 실행하세요 - Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
 단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님) 차트입니다.

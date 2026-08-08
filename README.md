@@ -22,6 +22,8 @@
 
 ## Summary
 
+![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
+
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
 with one `helm install` - works with any LLM provider Hermes supports, scales
 down to a single small node, and is verified to actually run, not just render.
