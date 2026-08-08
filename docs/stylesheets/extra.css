@@ -21,22 +21,25 @@
   --md-code-font: "MesloLGS Nerd Font", "MesloLGS NF", "JetBrainsMono Nerd Font", ui-monospace, monospace;
 }
 
-/* The retired Astro site's header/nav bar was never teal; teal
-   (--sl-color-accent) was an ACCENT for links and active states only.
-   The bar itself sat on --sl-color-bg-nav: #f4f4f4. Reproduce that split
-   here: --md-primary-fg-color drives the header/tab bar background in
-   Material, so it gets the light gray; --md-accent-fg-color keeps teal. */
+/* The retired Astro site's header/nav bar was never colored; its accent
+   (--sl-color-accent) was for links and active states only. The bar itself
+   sat on --sl-color-bg-nav: #f4f4f4. Reproduce that split here:
+   --md-primary-fg-color drives the header/tab bar background in Material,
+   so it gets the light gray; --md-accent-fg-color carries the accent.
+   #326ce5 is Kubernetes' own brand blue - sampled directly from the wheel
+   in docs/images/hermes-agent-helm.png (also the shields.io Kubernetes
+   badge color already used in the README), not picked freehand. */
 [data-md-color-primary="custom"] {
   --md-primary-fg-color: #f4f4f4;
   --md-primary-fg-color--light: #f4f4f4;
   --md-primary-fg-color--dark: #e2e2e2;
   --md-primary-bg-color: #24292f;
   --md-primary-bg-color--light: rgba(36, 41, 47, 0.7);
-  --md-accent-fg-color: #087f7a;
+  --md-accent-fg-color: #326ce5;
   /* Body-content link color defaults to --md-primary-fg-color in Material,
-     which is now a near-white gray, so decouple it back to the teal accent
-     so links stay legible instead of nearly invisible on a white page. */
-  --md-typeset-a-color: #087f7a;
+     which is now a near-white gray, so decouple it back to the accent
+     color so links stay legible instead of nearly invisible on a white page. */
+  --md-typeset-a-color: #326ce5;
   /* The retired Astro site's page background was also #f4f4f4
      (html, body { background-color: #f4f4f4 }), not Material's default
      white. Match it so the header and page body read as one surface. */
@@ -49,29 +52,27 @@
 
 /* The primary navigation uses the same light surface as the header, so
    Material's default active state is too subtle. Keep the tab bar quiet,
-   but give the current top-level section a readable teal label and a stable
-   underline. The rule is based on Material's generated active class, so it
-   follows the nav hierarchy rather than a hand-maintained URL list. */
+   but give the current top-level section a readable accent-colored label
+   and an underline. `.md-tabs__link` has no wrapping span around its text
+   (see material/templates/partials/tabs-item.html) and is `display: flex`,
+   so a background/pseudo-element bar sized off the link box tracks the
+   tab's clickable padding, not the glyphs - it always overshoots
+   left/right and sits flush under the text. Native text-decoration is
+   drawn against the actual text run instead, so it hugs the rendered
+   width automatically (no per-label width math, no markup change) and
+   gets a real gap via text-underline-offset instead of manual inset math. */
 .md-tabs__item--active .md-tabs__link {
-  color: #087f7a;
+  color: #326ce5;
   font-weight: 700;
   opacity: 1;
-  position: relative;
-}
-
-.md-tabs__item--active .md-tabs__link::after {
-  background-color: #087f7a;
-  border-radius: 999px 999px 0 0;
-  bottom: 0;
-  content: "";
-  height: 0.14rem;
-  left: 0.5rem;
-  position: absolute;
-  right: 0.5rem;
+  text-decoration-line: underline;
+  text-decoration-color: #326ce5;
+  text-decoration-thickness: 0.125rem;
+  text-underline-offset: 0.3rem;
 }
 
 .md-tabs__link:hover {
-  color: #087f7a;
+  color: #326ce5;
   opacity: 1;
 }
 
