@@ -1,5 +1,44 @@
 # Contributing
 
+## Repository layout
+
+```text
+.
+├── charts/
+│   ├── hermes-agent/          # the Helm chart (see its README)
+│   │   └── values-*.yaml      # ready-to-adapt provider/messenger examples
+│   └── hermes-operator/       # ⏸️ not started: Agent/AgentTeam CRD operator
+├── examples/
+│   ├── helm/                  # install via Git or OCI + publish guide
+│   └── argocd/                # ArgoCD Application examples + GitOps pattern
+├── docs/                      # deeper guides (teams, collaboration, roadmap)
+├── .github/workflows/         # CI checks + tag-driven release to ghcr OCI
+├── .changeset/                # entries queued for the next release version
+├── CONTRIBUTING.md            # branch model + release-on-version-bump
+├── AGENTS.md                  # design principles & workflow for contributors
+└── Makefile                   # docs / lint / template / install / test
+```
+
+## CI/CD
+
+- **Every PR and every push to `dev`/`main`** runs [validate-chart.yaml](.github/workflows/validate-chart.yaml):
+  `helm lint`, `helm template`, a chart-docs drift check, and a full install +
+  test on an ephemeral **kind** cluster (real `hermes chat` round-trip when an
+  `NVIDIA_API_KEY` secret is available).
+- **Releases are Changesets-driven, not tag-push-driven.** A user-visible chart
+  change adds a `patch`, `minor`, or `major` entry under [`.changeset/`](.changeset/).
+  When you are ready to release, manually run
+  [propose-release.yaml](.github/workflows/propose-release.yaml) to combine pending
+  entries into one reviewable release PR, write its `CHANGELOG.md` notes,
+  and synchronize the private release manifest with `Chart.yaml`, Artifact Hub
+  metadata, chart docs, and versioned examples. Review and merge that PR; then
+  [release-chart.yaml](.github/workflows/release-chart.yaml) tags `vX.Y.Z`, writes the GitHub
+  Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`.
+
+So: lint + test gate every change; the *release* itself is just a normal
+reviewed PR (the version bump) - the pending Changesets decide its SemVer,
+merging is what ships.
+
 ## Branch model
 
 | Branch | Purpose | CI |
@@ -119,13 +158,13 @@ Changeset summaries, rather than commit subjects, are the release changelog.
 PRs and pushes run lint + an isolated **kind** install/test, and every release
 is re-verified against the published, cosign-signed artifact.
 
-See **[docs/reference/ci.md](docs/reference/ci.md)** for the full pipeline - the parallel
+See **[docs/contributing/ci.md](docs/contributing/ci.md)** for the full pipeline - the parallel
 default / existingClaim test scenarios, the failover model pool, fork-PR
 behavior, and the post-release verification.
 
 ## Local development environment
 
-See **[docs/reference/local-development.md](docs/reference/local-development.md)** for:
+See **[docs/contributing/local-development.md](docs/contributing/local-development.md)** for:
 
 - Setting up a local Kubernetes cluster (kind recommended; minikube and MicroK8s also covered)
 - Port-forwarding a remote cluster agent for dev testing

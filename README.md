@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes Team](docs/guides/team-setup.md)** · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes Team](docs/advanced/teams/index.md)** · [Chart docs](charts/hermes-agent/README.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -25,7 +25,7 @@
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
 with one `helm install` - works with any LLM provider Hermes supports, scales
 down to a single small node, and is verified to actually run, not just render.
-Just as easily, group several instances into a full [**Hermes Team**](docs/guides/team-setup.md)
+Just as easily, group several instances into a full [**Hermes Team**](docs/advanced/teams/index.md)
 on the same cluster. A **community-powered** chart, not an official Nous
 Research release.
 
@@ -71,7 +71,7 @@ change), see [Development](#development) below.
   agent (one `HERMES_HOME`, one gateway, one memory), so you don't replicate a
   pod; you run several well-managed instances and group them into a **team**
   that shares context over a common gateway channel. See
-  [Hermes teams](docs/reference/teams.md).
+  [Hermes teams](docs/advanced/teams/reference.md).
 - **Verified End-to-End.** CI installs the chart on an ephemeral **kind**
   cluster and runs the bundled test Job (`hermes doctor`). When the
   `NVIDIA_API_KEY` repository secret is available, it also runs a **live
@@ -84,31 +84,12 @@ change), see [Development](#development) below.
   <p><em>Deployment evidence: leader <code>august</code> and members
   <code>may</code>/<code>march</code> running as independent releases on kind.
   This screenshot does not by itself prove the multi-turn mention loop; see
-  <a href="docs/reference/teams.md">Hermes teams</a> for the current status.</em></p>
+  <a href="docs/advanced/teams/reference.md">Hermes teams</a> for the current status.</em></p>
 </div>
 
 For the full resource breakdown, configuration model, and provider-by-provider
 install examples (including messenger integrations), see
 [charts/hermes-agent/README.md](charts/hermes-agent/README.md).
-
-## Repository layout
-
-```text
-.
-├── charts/
-│   ├── hermes-agent/          # the Helm chart (see its README)
-│   │   └── values-*.yaml      # ready-to-adapt provider/messenger examples
-│   └── hermes-operator/       # ⏸️ not started: Agent/AgentTeam CRD operator
-├── examples/
-│   ├── helm/                  # install via Git or OCI + publish guide
-│   └── argocd/                # ArgoCD Application examples + GitOps pattern
-├── docs/                      # deeper guides (teams, collaboration, roadmap)
-├── .github/workflows/         # ci checks + tag-driven release to ghcr OCI
-├── .changeset/                # entries queued for the next release version
-├── CONTRIBUTING.md            # branch model + release-on-version-bump
-├── AGENTS.md                  # design principles & workflow for contributors
-└── Makefile                   # docs / lint / template / install / test
-```
 
 ## Full Installation
 
@@ -171,32 +152,11 @@ Branch model, release process, and further local checks (`make docs` /
 `make test`) are covered in [CONTRIBUTING.md](CONTRIBUTING.md); chart design
 principles are in [AGENTS.md](AGENTS.md).
 
-## CI/CD
-
-- **Every PR and every push to `dev`/`main`** runs [validate-chart.yaml](.github/workflows/validate-chart.yaml):
-  `helm lint`, `helm template`, a chart-docs drift check, and a full install +
-  test on an ephemeral **kind** cluster (real `hermes chat` round-trip when an
-  `NVIDIA_API_KEY` secret is available).
-- **Releases are Changesets-driven, not tag-push-driven.** A user-visible chart
-  change adds a `patch`, `minor`, or `major` entry under [`.changeset/`](.changeset/).
-  When you are ready to release, manually run
-  [propose-release.yaml](.github/workflows/propose-release.yaml) to combine pending
-  entries into one reviewable release PR, write its `CHANGELOG.md` notes,
-  and synchronizes the private release manifest with `Chart.yaml`, Artifact Hub
-  metadata, chart docs, and versioned examples. Review and merge that PR; then
-  [release-chart.yaml](.github/workflows/release-chart.yaml) tags `vX.Y.Z`, writes the GitHub
-  Release, and publishes the chart to `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`.
-
-So: lint + test gate every change; the *release* itself is just a normal
-reviewed PR (the version bump) - the pending Changesets decide its SemVer,
-merging is what ships. See
-[CONTRIBUTING.md](CONTRIBUTING.md) for the full release playbook.
-
 ## Roadmap
 
 This chart deploys and manages **one** agent well; teams via an ArgoCD
 ApplicationSet are how you scale today, and a CRD-based operator is a
-long-term, not-started candidate. See [docs/reference/roadmap.md](docs/reference/roadmap.md).
+long-term, not-started candidate. See [docs/about/roadmap.md](docs/about/roadmap.md).
 
 ## Contributing
 

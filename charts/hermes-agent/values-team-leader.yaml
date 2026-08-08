@@ -10,7 +10,7 @@
 # The reference protocol intentionally serializes the team: august mentions one
 # member, that member mentions august back, and august either requests a revision
 # or mentions the next member. This avoids concurrent messages interrupting the
-# one shared thread session. See docs/reference/teams.md and docs/reference/collaboration.md.
+# one shared thread session. See docs/advanced/teams/reference.md and docs/advanced/teams/collaboration.md.
 #
 # Before installing any team release, create one RWX claim named
 # hermes-team-knowledge in the target namespace. The leader mounts it read-write

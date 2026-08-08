@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes 팀](docs/ko/guides/team-setup.md)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes 팀](docs/ko/advanced/teams/index.md)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
 
 ---
 
@@ -25,7 +25,7 @@
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 Kubernetes에서
 `helm install` 한 번으로 실행하세요 - Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
 단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님) 차트입니다.
-같은 클러스터 위에서 여러 인스턴스를 묶어 완전한 [**Hermes 팀**](docs/ko/guides/team-setup.md)을
+같은 클러스터 위에서 여러 인스턴스를 묶어 완전한 [**Hermes 팀**](docs/ko/advanced/teams/index.md)을
 만드는 것도 그만큼 쉽습니다. **커뮤니티 기반** 차트이며, Nous Research 공식
 릴리즈가 아닙니다.
 
@@ -68,7 +68,7 @@
   요청, 작은 PVC)이면서, 스케일 아웃이 아니라 스케일 업으로 키워 프로덕션까지 갑니다. Hermes는
   단일 인스턴스 개인용 에이전트(하나의 `HERMES_HOME`·gateway·메모리)이므로 파드를
   복제하지 않고, 잘 관리된 인스턴스를 여러 개 띄워 공통 gateway 채널로 컨텍스트를
-  공유하는 **팀**으로 묶습니다. [Hermes 팀](docs/ko/reference/teams.md)을 참고하세요.
+  공유하는 **팀**으로 묶습니다. [Hermes 팀](docs/ko/advanced/teams/reference.md)을 참고하세요.
 - **엔드-투-엔드 검증.** CI가 임시 **kind** 클러스터에 차트를 설치하고
   번들된 테스트 Job(`hermes doctor`)을 실행합니다. `NVIDIA_API_KEY` 리포지토리
   시크릿이 있으면 NVIDIA NIM에 대한 **live `hermes chat` 라운드트립**도 실행합니다
@@ -81,30 +81,11 @@
   <p><em>배포 증거: 리더 <code>august</code>와 멤버
   <code>may</code>/<code>march</code>가 kind에서 독립 릴리스로 실행 중.
   이 스크린샷만으로 멀티턴 멘션 루프가 증명되지는 않습니다. 현재 상태는
-  <a href="docs/ko/reference/teams.md">Hermes 팀</a> 참고.</em></p>
+  <a href="docs/ko/advanced/teams/reference.md">Hermes 팀</a> 참고.</em></p>
 </div>
 
 자세한 리소스 구조, 설정 모델, 제공자별 설치 예제(메신저 통합 포함)는
 [charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
-
-## 리포지토리 구조
-
-```text
-.
-├── charts/
-│   ├── hermes-agent/          # Helm 차트 (README 참고)
-│   │   └── values-*.yaml      # 제공자·메신저별 즉시 사용 예제
-│   └── hermes-operator/       # ⏸️ 미착수: Agent/AgentTeam CRD 오퍼레이터
-├── examples/
-│   ├── helm/                  # Git 또는 OCI로 설치 + 배포 가이드
-│   └── argocd/                # ArgoCD Application 예제 + GitOps 패턴
-├── docs/                      # 심화 가이드 (teams, collaboration, roadmap)
-├── .github/workflows/         # CI 체크 + 태그 기반 ghcr OCI 릴리즈
-├── .changeset/                # 다음 릴리즈 버전을 결정할 대기 항목
-├── CONTRIBUTING.md            # 브랜치 모델 + 버전 범프 기반 릴리즈
-├── AGENTS.md                  # 기여자용 설계 원칙 & 워크플로우
-└── Makefile                   # docs / lint / template / install / test
-```
 
 ## 전체 설치
 
@@ -167,28 +148,11 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 [CONTRIBUTING.md](CONTRIBUTING.md)에 설명되어 있고,
 차트 설계 원칙은 [AGENTS.md](AGENTS.md)를 참고하세요.
 
-## CI/CD
-
-- **모든 PR과 `dev`/`main`로의 push**는 [validate-chart.yaml](.github/workflows/validate-chart.yaml)을 실행합니다:
-  `helm lint`, `helm template`, 차트-docs 드리프트 체크, 그리고 임시 **kind** 클러스터에서의
-  완전한 설치 + 테스트 (NVIDIA_API_KEY 시크릿이 있을 때는 실제 `hermes chat` 라운드트립).
-- **릴리즈는 Changesets 기반**이며, 태그 푸시 기반이 아닙니다. 사용자에게 보이는 차트 변경은
-  [`.changeset/`](.changeset/)에 `patch`·`minor`·`major` 항목을 추가합니다. 릴리즈할 준비가 되면
-  [propose-release.yaml](.github/workflows/propose-release.yaml)을 수동 실행하여 대기 중인 항목을 하나의
-  검토용 릴리즈 PR로 합치고, `CHANGELOG.md`와 비공개 릴리즈 manifest·`Chart.yaml`·Artifact Hub
-  메타데이터·차트 문서·버전별 예제를 함께 동기화합니다. PR을 검토·머지하면
-  [release-chart.yaml](.github/workflows/release-chart.yaml)이 `vX.Y.Z` 태그와 GitHub Release를
-  만들고 차트를 `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`에 배포합니다.
-
-즉: lint + test가 모든 변경사항을 게이트합니다; *릴리즈* 자체는 단순한
-리뷰된 PR (버전 범프) - 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
-전체 릴리즈 플레이북은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
-
 ## 로드맵
 
 이 차트는 **하나**의 에이전트를 잘 배포·관리하며, 오늘은 ArgoCD ApplicationSet
 기반 팀으로 확장하고, CRD 기반 오퍼레이터는 일정 없는 장기 후보입니다. 자세한
-내용은 [docs/ko/reference/roadmap.md](docs/ko/reference/roadmap.md)를 참고하세요.
+내용은 [docs/ko/about/roadmap.md](docs/ko/about/roadmap.md)를 참고하세요.
 
 ## 기여하기
 

@@ -6,7 +6,7 @@
 # user ID) and deploy both as separate releases into the same channel.
 #
 # Full walkthrough: handoff protocol, the loop brake, mixed backends, and an
-# ApplicationSet that templates a whole roster: is in docs/reference/collaboration.md.
+# ApplicationSet that templates a whole roster: is in docs/advanced/teams/collaboration.md.
 #
 # Two instances collaborate when:
 #   1. they share ONE channel (same DISCORD_HOME_CHANNEL + DISCORD_ALLOWED_USERS),
@@ -27,7 +27,7 @@ fullnameOverride: hermes-planner
 
 config:
   # This pair uses the shared LiteLLM proxy for the planner; the builder could
-  # just as well use Copilot device-flow (see docs/reference/collaboration.md → mixed
+  # just as well use Copilot device-flow (see docs/advanced/teams/collaboration.md → mixed
   # backends). Collaboration does NOT require a shared backend.
   providers:
     litellm:
@@ -73,7 +73,7 @@ env:
 
 # Non-secret Discord knobs. The first two are SHARED by every agent in the team
 # (same channel, same allowed users); the four loop-brake knobs are also shared
-# and MUST be set on every collaborating agent. See docs/reference/collaboration.md for the
+# and MUST be set on every collaborating agent. See docs/advanced/teams/collaboration.md for the
 # full rationale of each loop-brake var.
 extraEnv:
   - name: DISCORD_HOME_CHANNEL              # the ONE shared channel (context bus)

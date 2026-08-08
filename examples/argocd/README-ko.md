@@ -25,8 +25,8 @@
 | [`hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml`](hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml) | `values-nvidia-nim-and-discord.yaml` + GitOps | **SealedSecret**을 통한 `hermes-agent-nim-discord-sealedsecret-secrets` (`extraResources`, `NVIDIA_API_KEY` + `DISCORD_BOT_TOKEN`) |
 | [`hermes-agent-github-copilot.yaml`](hermes-agent-github-copilot.yaml) | `values-github-copilot.yaml` + GitOps | **SealedSecret**을 통한 `hermes-agent-copilot-secrets`(`DISCORD_BOT_TOKEN`만: Copilot 토큰은 **OAuth 기기 흐름**으로 런타임에 발급) |
 | [`hermes-agent-ingress.yaml`](hermes-agent-ingress.yaml) | `values-ingress.yaml` | `hermes-agent-ingress-secrets` (`OPENAI_API_KEY`) + `hermes-agent-dashboard-auth`(nginx basic-auth) |
-| [`hermes-collab-pair.yaml`](hermes-collab-pair.yaml) | `values-multi-agent-collab.yaml`(×2: planner+builder) | `hermes-planner-discord-secrets` + `hermes-builder-discord-secrets`: `@멘션`으로 핸드오프하는 **협업 페어**. [docs/reference/collaboration.md](../../docs/ko/reference/collaboration.md) 참고 |
-| [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-august-discord-secrets` + `hermes-may-discord-secrets` + `hermes-march-discord-secrets` + 미리 준비된 `hermes-team-knowledge` RWX PVC: **리더 주도 팀**(직렬화된 명시적 멘션, 리더 쓰기/멤버 읽기 전용 공유 지식, 파일 기반 작업 핸드오프 없음). [docs/reference/teams.md](../../docs/ko/reference/teams.md) 참고 |
+| [`hermes-collab-pair.yaml`](hermes-collab-pair.yaml) | `values-multi-agent-collab.yaml`(×2: planner+builder) | `hermes-planner-discord-secrets` + `hermes-builder-discord-secrets`: `@멘션`으로 핸드오프하는 **협업 페어**. [Hermes 협업](../../docs/ko/advanced/teams/collaboration.md) 참고 |
+| [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-august-discord-secrets` + `hermes-may-discord-secrets` + `hermes-march-discord-secrets` + 미리 준비된 `hermes-team-knowledge` RWX PVC: **리더 주도 팀**(직렬화된 명시적 멘션, 리더 쓰기/멤버 읽기 전용 공유 지식, 파일 기반 작업 핸드오프 없음). [Hermes 팀](../../docs/ko/advanced/teams/reference.md) 참고 |
 
 `hermes-agent.yaml`은 최소한의 시작점입니다 - 순수 차트 기본값과 시크릿
 연결뿐입니다. 이걸 복사하고 `valuesObject`를 추가해 커스터마이즈하세요.
@@ -35,7 +35,7 @@
 에이전트(LiteLLM 위의 `planner`와 Copilot 기기 흐름 위의 `builder`)가 하나의
 Discord 채널을 공유하며 `@멘션`으로 핸드오프합니다. 핸드오프 프로토콜과 4개의
 루프 브레이크 환경 변수는
-[docs/reference/collaboration.md](../../docs/ko/reference/collaboration.md)를
+[Hermes 협업](../../docs/ko/advanced/teams/collaboration.md)를
 참고하세요.
 
 `hermes-team.yaml`은 그 패턴을 확장합니다: 팀 **리더**(`august`)용
@@ -45,7 +45,7 @@ Application 하나와, 멤버 명부(`may`, `march`)가 list-generator 항목인
 멤버 사이로만 흐릅니다). 스레드가 조정 버스이자 감사 로그입니다. 별도의 RWX
 PVC가 지속적인 재사용 지식을 저장하지만(리더 읽기/쓰기, 멤버 읽기 전용), 작업,
 상태, 중간 결과, 완료 신호는 절대 담지 않습니다.
-[docs/reference/teams.md](../../docs/ko/reference/teams.md) → "리더 주도 팀"
+[Hermes 팀](../../docs/ko/advanced/teams/reference.md) → "리더 주도 팀"
 참고.
 
 모든 예제는 **OCI 레지스트리** 소스 형식(`ghcr.io`를 가리키는

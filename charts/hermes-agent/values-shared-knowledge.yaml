@@ -53,7 +53,7 @@
 #     --set-string env.DISCORD_BOT_TOKEN='<builder-bot-token>' \
 #     --set-string fullnameOverride=hermes-builder --wait
 #
-# See docs/reference/teams.md for the full team pattern and collaboration details.
+# See docs/advanced/teams/reference.md for the full team pattern and collaboration details.
 
 config:
   model:

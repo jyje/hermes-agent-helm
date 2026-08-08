@@ -44,6 +44,7 @@ _GITHUB_TREE = "https://github.com/jyje/hermes-agent-helm/tree/main/"
 _INCLUDE_RE = re.compile(r'--8<--\s+"([^"]+\.md)"')
 _INCLUDES: dict[str, str] = {}
 _SIBLING_PAGES: dict[str, str] = {}
+_KO_SUFFIX_PAGES: dict[str, str] = {}
 
 
 def on_files(files, config):
@@ -55,6 +56,18 @@ def on_files(files, config):
             _INCLUDES[file.src_uri] = match.group(1)
     _SIBLING_PAGES.clear()
     _SIBLING_PAGES.update({source: page for page, source in _INCLUDES.items()})
+    # Older source documents sometimes link to a sibling named
+    # ``foo-ko.md``. The localized docs now live in a parallel ``ko/`` tree,
+    # so discover the actual target from the page tree instead of assuming a
+    # particular section such as ``ko/reference``.
+    _KO_SUFFIX_PAGES.clear()
+    _KO_SUFFIX_PAGES.update(
+        {
+            f"{Path(file.src_uri).stem}-ko.md": file.src_uri
+            for file in files.documentation_pages()
+            if file.src_uri.startswith("ko/")
+        }
+    )
     return files
 
 # Any docs/(ko/)?**/*.md path (a link written relative to the repo root,
@@ -68,7 +81,7 @@ _DOCS_LINK_RE = re.compile(r'(?:\.\./)*docs/((?:ko/)?[\w/-]+\.md)')
 
 # Stale "X-ko.md" sibling-file naming from the pre-MkDocs Astro/Starlight
 # site, where locales were separate sibling files instead of today's
-# parallel docs/ko/ tree. Only ever used for docs/reference/*.md pages.
+# parallel docs/ko/ tree. Resolve these dynamically from the docs tree.
 _KO_SUFFIX_RE = re.compile(r'([\w-]+)-ko\.md')
 
 # Any relative link: `[text](target)` (not an image `![...]`, though that
@@ -116,7 +129,7 @@ def _resolve(target: str, anchor: str, page, source_dir: str) -> str | None:
     # for filenames that were never real files even in the pre-MkDocs site.
     # Both checks run before the docs/-tree guard: the repo path of a stale
     # "X-ko.md" reference or a genuinely known sibling file can themselves
-    # land inside "docs/..." text (e.g. "docs/reference/roadmap-ko.md"),
+    # land inside "docs/..." text (e.g. "docs/about/roadmap-ko.md"),
     # which is not an in-tree page either and must not be left untouched.
     docs_page = _SIBLING_PAGES.get(repo_path)
     if docs_page:
@@ -124,7 +137,9 @@ def _resolve(target: str, anchor: str, page, source_dir: str) -> str | None:
 
     ko_match = _KO_SUFFIX_RE.fullmatch(target)
     if ko_match:
-        return _relative_url(f"ko/reference/{ko_match.group(1)}.md", page) + anchor
+        ko_page = _KO_SUFFIX_PAGES.get(target)
+        if ko_page:
+            return _relative_url(ko_page, page) + anchor
 
     if repo_path == "docs" or repo_path.startswith("docs/"):
         return None  # inside the docs tree: a normal, already-working link

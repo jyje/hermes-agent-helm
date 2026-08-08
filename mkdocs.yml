@@ -37,7 +37,7 @@ plugins:
       # This repo's docs document GitHub Actions (${{ }}) and Helm template
       # ({{ .Values.x }}) syntax verbatim in many pages: macros' Jinja
       # processing would mangle that literal text. Opt in per-page instead
-      # of processing the whole site (see docs/charts/hermes-agent/overlays
+      # of processing the whole site (see docs/chart/hermes-agent/examples
       # /index.md's `render_macros: true` frontmatter for the one page that
       # needs it).
       render_by_default: false
@@ -53,25 +53,26 @@ plugins:
           build: true
           nav_translations:
             Home: 홈
-            Charts: 차트
+            Chart: 차트
             Hermes Agent: Hermes Agent
-            Values overlays: Values 오버레이
+            Examples: 예제
+            Chart reference: 차트 참고 자료
             Chart values: 차트 values
             Getting started: 시작하기
             Install: 설치
-            Examples: 예제
+            Advanced: 고급 사용법
             # Was "공급자", inconsistent with "제공자" used everywhere in
             # the actual page bodies (READMEs, chart README, every example
             # page) - matched to the term readers actually see.
             Providers: 제공자
             Integrations: 통합
-            Advanced: 고급
-            Guides: 가이드
             Configuration model: 설정 모델
             Secrets and persistence: Secret과 영속성
             Operations and testing: 운영과 테스트
+            Helm installation guide: Helm 설치 가이드
+            Patterns: 실전 패턴
+            Teams: Hermes 팀
             Setting up a team: Hermes 팀 구성하기
-            Reference: 참고 자료
             Contributing: 기여하기
             CI guide: CI 가이드
             Hermes teams: Hermes 팀
@@ -85,6 +86,7 @@ plugins:
             Chart README: 차트 README
             Security policy: 보안 정책
             Source documents: 소스 문서
+            About: 정보
 
 markdown_extensions:
   - admonition
@@ -117,65 +119,64 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Charts:
-      - charts/index.md
+  - Chart:
+      - chart/index.md
       - Hermes Agent:
-          - charts/hermes-agent/index.md
-          - Install: charts/hermes-agent/install.md
-          - Values overlays: charts/hermes-agent/overlays/index.md
-          - Reference:
-              - charts/hermes-agent/reference/index.md
-              - Chart values: charts/hermes-agent/reference/values.md
+          - chart/hermes-agent/index.md
+          - Examples: chart/hermes-agent/examples/index.md
+          - Chart reference:
+              - chart/hermes-agent/reference/index.md
+              - Chart values: chart/hermes-agent/reference/values.md
+              - Chart README: chart/hermes-agent/reference/readme.md
   - Getting started:
       - getting-started/index.md
       - Install: getting-started/install.md
-  - Examples:
-      - examples/index.md
+  - Advanced:
+      - advanced/index.md
+      - Configuration model: advanced/configuration.md
+      - Secrets and persistence: advanced/secrets-and-storage.md
+      - Operations and testing: advanced/operations.md
+      - Helm installation guide: advanced/helm-installation.md
       - Providers:
-          - examples/providers/index.md
-          - Anthropic: examples/providers/anthropic.md
-          - DeepInfra: examples/providers/deepinfra.md
-          - Fireworks: examples/providers/fireworks.md
-          - Gemini: examples/providers/gemini.md
-          - GitHub Copilot: examples/providers/github-copilot.md
-          - Google Vertex: examples/providers/google-vertex.md
-          - NVIDIA NIM + Discord: examples/providers/nvidia-nim-and-discord.md
-          - OpenAI: examples/providers/openai.md
-          - OpenRouter: examples/providers/openrouter.md
-          - Upstage: examples/providers/upstage.md
+          - advanced/providers/index.md
+          - Anthropic: advanced/providers/anthropic.md
+          - DeepInfra: advanced/providers/deepinfra.md
+          - Fireworks: advanced/providers/fireworks.md
+          - Gemini: advanced/providers/gemini.md
+          - GitHub Copilot: advanced/providers/github-copilot.md
+          - Google Vertex: advanced/providers/google-vertex.md
+          - NVIDIA NIM + Discord: advanced/providers/nvidia-nim-and-discord.md
+          - OpenAI: advanced/providers/openai.md
+          - OpenRouter: advanced/providers/openrouter.md
+          - Upstage: advanced/providers/upstage.md
       - Integrations:
-          - examples/integrations/index.md
-          - Anthropic + Discord: examples/integrations/anthropic-and-discord.md
-          - Ingress: examples/integrations/ingress.md
-          - LiteLLM: examples/integrations/litellm.md
-          - LiteLLM (in-cluster): examples/integrations/litellm-k8s.md
-          - OpenAI + Telegram: examples/integrations/openai-and-telegram.md
-      - Advanced:
-          - examples/advanced/index.md
-          - Bitwarden Secrets Manager: examples/advanced/bitwarden.md
-          - Mixture-of-Agents: examples/advanced/moa.md
-          - Multi-agent collaboration: examples/advanced/multi-agent-collab.md
-          - Shared knowledge base: examples/advanced/shared-knowledge.md
-          - Team leader: examples/advanced/team-leader.md
-          - Team member: examples/advanced/team-member.md
-  - Guides:
-      - guides/index.md
-      - Configuration model: guides/configuration.md
-      - Secrets and persistence: guides/secrets-and-storage.md
-      - Operations and testing: guides/operations.md
-      - Setting up a team: guides/team-setup.md
-  - Reference:
-      - reference/index.md
-      - Contributing: reference/contributing.md
-      - CI guide: reference/ci.md
-      - Hermes teams: reference/teams.md
-      - Hermes collaboration: reference/collaboration.md
-      - Roadmap: reference/roadmap.md
-      - DevOps roadmap: reference/devops-roadmap.md
-      - Local development guide: reference/local-development.md
-      - Helm installation guide: reference/helm-installation.md
-      - ArgoCD guide: reference/argocd.md
-      - Helm repository index: reference/helm-repository.md
-      - Chart README: reference/chart-readme.md
-      - Security policy: reference/security.md
-      - Source documents: reference/source-documents.md
+          - advanced/integrations/index.md
+          - Anthropic + Discord: advanced/integrations/anthropic-and-discord.md
+          - Ingress: advanced/integrations/ingress.md
+          - LiteLLM: advanced/integrations/litellm.md
+          - LiteLLM (in-cluster): advanced/integrations/litellm-k8s.md
+          - OpenAI + Telegram: advanced/integrations/openai-and-telegram.md
+      - Patterns:
+          - advanced/patterns/index.md
+          - Bitwarden Secrets Manager: advanced/patterns/bitwarden.md
+          - Mixture-of-Agents: advanced/patterns/moa.md
+          - Multi-agent collaboration: advanced/patterns/multi-agent-collab.md
+          - Shared knowledge base: advanced/patterns/shared-knowledge.md
+          - Team leader: advanced/patterns/team-leader.md
+          - Team member: advanced/patterns/team-member.md
+      - Teams:
+          - Setting up a team: advanced/teams/index.md
+          - Hermes teams: advanced/teams/reference.md
+          - Hermes collaboration: advanced/teams/collaboration.md
+      - ArgoCD guide: advanced/argocd.md
+  - Contributing:
+      - contributing/index.md
+      - Local development guide: contributing/local-development.md
+      - CI guide: contributing/ci.md
+      - DevOps roadmap: contributing/devops-roadmap.md
+  - About:
+      - about/index.md
+      - Helm repository index: about/helm-repository.md
+      - Roadmap: about/roadmap.md
+      - Security policy: about/security.md
+      - Source documents: about/source-documents.md

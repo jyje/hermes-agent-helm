@@ -64,8 +64,8 @@ as a **Secret**.
 
 - **Multi-language docs stay in sync.** Every `README.md` (English) has a
   `README-ko.md` (Korean) twin - at the repo root, under `charts/hermes-agent/`,
-  and under `docs/` (`reference/teams.md`/`ko/reference/teams.md`,
-  `reference/roadmap.md`/`ko/reference/roadmap.md`).
+  and under `docs/` (`advanced/teams/reference.md`/`ko/advanced/teams/reference.md`,
+  `about/roadmap.md`/`ko/about/roadmap.md`).
   Each pair must describe the same thing. When you edit one, apply the
   equivalent edit to its twin in the same change - don't leave them
   diverging. If another language edition is added later, the same rule

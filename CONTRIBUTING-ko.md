@@ -1,5 +1,40 @@
 # 기여하기
 
+## 리포지토리 구조
+
+```text
+.
+├── charts/
+│   ├── hermes-agent/          # Helm 차트 (README 참고)
+│   │   └── values-*.yaml      # 제공자·메신저별 즉시 사용 예제
+│   └── hermes-operator/       # ⏸️ 미착수: Agent/AgentTeam CRD 오퍼레이터
+├── examples/
+│   ├── helm/                  # Git 또는 OCI로 설치 + 배포 가이드
+│   └── argocd/                # ArgoCD Application 예제 + GitOps 패턴
+├── docs/                      # 심화 가이드 (teams, collaboration, roadmap)
+├── .github/workflows/         # CI 체크 + 태그 기반 ghcr OCI 릴리즈
+├── .changeset/                # 다음 릴리즈 버전을 결정할 대기 항목
+├── CONTRIBUTING.md            # 브랜치 모델 + 버전 범프 기반 릴리즈
+├── AGENTS.md                  # 기여자용 설계 원칙 & 워크플로우
+└── Makefile                   # docs / lint / template / install / test
+```
+
+## CI/CD
+
+- **모든 PR과 `dev`/`main`로의 push**는 [validate-chart.yaml](.github/workflows/validate-chart.yaml)을 실행합니다:
+  `helm lint`, `helm template`, 차트-docs 드리프트 체크, 그리고 임시 **kind** 클러스터에서의
+  완전한 설치 + 테스트 (NVIDIA_API_KEY 시크릿이 있을 때는 실제 `hermes chat` 라운드트립).
+- **릴리즈는 Changesets 기반**이며, 태그 푸시 기반이 아닙니다. 사용자에게 보이는 차트 변경은
+  [`.changeset/`](.changeset/)에 `patch`·`minor`·`major` 항목을 추가합니다. 릴리즈할 준비가 되면
+  [propose-release.yaml](.github/workflows/propose-release.yaml)을 수동 실행하여 대기 중인 항목을 하나의
+  검토용 릴리즈 PR로 합치고, `CHANGELOG.md`와 비공개 릴리즈 manifest·`Chart.yaml`·Artifact Hub
+  메타데이터·차트 문서·버전별 예제를 함께 동기화합니다. PR을 검토·머지하면
+  [release-chart.yaml](.github/workflows/release-chart.yaml)이 `vX.Y.Z` 태그와 GitHub Release를
+  만들고 차트를 `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`에 배포합니다.
+
+즉: lint + test가 모든 변경사항을 게이트합니다; *릴리즈* 자체는 단순한
+리뷰된 PR (버전 범프) - 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
+
 ## 브랜치 모델
 
 | 브랜치 | 목적 | CI |
@@ -117,11 +152,11 @@ PR과 push는 lint + 격리된 **kind** 설치/테스트를 실행하고, 모든
 
 전체 파이프라인 - 병렬로 도는 default/existingClaim 테스트 시나리오, failover
 모델 풀, fork PR 동작, 릴리즈 이후 검증 - 은
-**[docs/reference/ci.md](docs/reference/ci.md)**를 참고하세요.
+**[docs/ko/contributing/ci.md](docs/ko/contributing/ci.md)**를 참고하세요.
 
 ## 로컬 개발 환경
 
-다음 내용은 **[docs/reference/local-development.md](docs/reference/local-development.md)**를
+다음 내용은 **[docs/ko/contributing/local-development.md](docs/ko/contributing/local-development.md)**를
 참고하세요:
 
 - 로컬 Kubernetes 클러스터 준비(kind 권장, minikube와 MicroK8s도 다룸)
