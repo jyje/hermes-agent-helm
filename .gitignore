@@ -7,6 +7,12 @@ dist/
 .idea/
 .vscode/
 
+# pnpm dependency store, for the Changesets release tooling (package.json,
+# pnpm-lock.yaml, .changeset/) - unrelated to the retired Starlight site,
+# still active for `pnpm changeset` / `pnpm release:version`.
+.pnpm-store/
+node_modules/
+
 # Retired Astro/Starlight docs site: kept on disk for reference, no longer
 # tracked. MkDocs Material (mkdocs.yml, docs/) is the maintained docs site.
 /pages/
