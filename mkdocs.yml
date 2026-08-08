@@ -28,6 +28,9 @@ edit_uri: edit/main/docs/
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/header-title.js
+
 plugins:
   - search
   - macros:
