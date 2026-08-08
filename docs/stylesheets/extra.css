@@ -70,3 +70,15 @@
   object-fit: cover;
   object-position: center;
 }
+
+/* The custom copyright line (hooks.py's on_config) renders as a <div>,
+   which forces it onto its own line above "Made with Material for
+   MkDocs" below it. Flow it inline instead so the whole footer reads as
+   a single line: attribution, then the generator credit, side by side. */
+.md-copyright__highlight {
+  display: inline;
+}
+
+.md-copyright__highlight::after {
+  content: " \00b7 ";
+}

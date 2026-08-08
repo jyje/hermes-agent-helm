@@ -13,11 +13,19 @@ every fork back at the upstream site) or leaving them broken, rewrite each
 to whatever is actually correct for the page it lands on: a relative link
 to the corresponding docs page where one exists, or an absolute GitHub URL
 where it doesn't.
+
+Also sets the footer's copyright line (on_config) to the current git
+commit, license, and upstream-attribution facts, computed at build time
+rather than hardcoded, since they'd otherwise drift out of sync with
+whichever commit actually built the page.
 """
 
 import posixpath
 import re
+import subprocess
 from pathlib import Path
+
+from markupsafe import Markup
 
 REPO_ROOT = Path(__file__).parent
 _GITHUB_BLOB = "https://github.com/jyje/hermes-agent-helm/blob/main/"
@@ -159,3 +167,40 @@ def on_page_markdown(markdown, page, config, files):
     # ever touched; the `docs/`-tree guard in `_resolve` leaves ordinary
     # same-tree page links (the vast majority) alone.
     return _fix_links(markdown, page, posixpath.dirname("docs/" + page.file.src_uri))
+
+
+def _git_head() -> tuple[str, str]:
+    """(full sha, short sha) of the commit currently checked out, or
+    ("unknown", "unknown") outside a git checkout (e.g. a source tarball)."""
+    try:
+        full = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+        short = subprocess.run(
+            ["git", "rev-parse", "--short=8", "HEAD"], cwd=REPO_ROOT, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+        return full, short
+    except Exception:
+        return "unknown", "unknown"
+
+
+def on_config(config):
+    # The footer's copyright line, not the release version: this repo
+    # deploys docs on every push to main, far more often than it cuts a
+    # chart release, so "which commit is this page from" is the fact
+    # worth surfacing here, not Chart.yaml's version.
+    full_sha, short_sha = _git_head()
+    commit_link = (
+        f'<a href="https://github.com/jyje/hermes-agent-helm/commit/{full_sha}">{short_sha}</a>'
+        if full_sha != "unknown"
+        else "unknown commit"
+    )
+    config["copyright"] = Markup(
+        '<a href="https://github.com/jyje/hermes-agent-helm">jyje/hermes-agent-helm</a> (MIT) &middot; '
+        "unofficial, unaffiliated with Nous Research &middot; "
+        'based on <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a> (MIT) &middot; '
+        f"{commit_link}"
+    )
+    return config
