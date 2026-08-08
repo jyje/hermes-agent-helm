@@ -76,6 +76,16 @@
   opacity: 1;
 }
 
+/* Give content images (the header artwork, demo screenshots, the flow
+   diagram, ...) rounded corners by default, matching the rest of the
+   theme's soft edges (nav-item radius, code-block radius). Exclude
+   shields.io badges: they're tiny (~20px tall) inline images, and the
+   same radius that reads as a subtle rounded card on a full-width
+   screenshot would clip a badge into an odd pill/blob shape. */
+.md-typeset img:not([src*="shields.io"]) {
+  border-radius: 0.75rem;
+}
+
 /* Crop the logo artwork's vertical whitespace instead of showing it letterboxed.
    The PNG is fully opaque (no alpha channel) with its own light canvas baked
    around the icons; now that the header itself is also #f4f4f4, the crop sits
