@@ -89,17 +89,21 @@
 
 ## 리포지토리 구조
 
-```
-charts/hermes-agent/                     # Helm 차트 (전체 값 테이블은 README 참고)
-charts/hermes-agent/values-*.yaml        # 즉시 사용 가능한 예제: 제공자별, Discord/Telegram, LiteLLM (차트 README "More examples" 참고)
-examples/helm/                           # Git 및 OCI(ghcr.io)에서 설치 + 배포 가이드
-examples/argocd/                         # ArgoCD Application 예제 (values-*.yaml별 1개) + GitOps/SealedSecret 패턴
-charts/hermes-operator/                  # ⏸️ 장기·미착수: Agent/AgentTeam CRD 오퍼레이터의 가능한 설치용 차트 - 플레이스홀더, TBA (로드맵 참고)
-docs/                                    # 심화 가이드: teams-ko.md (인스턴스를 팀으로 묶기), collaboration-ko.md (@mention으로 핸드오프시키기), roadmap-ko.md
-.github/workflows/                       # ci (lint + docs-drift + kind에서 실제 라운드트립) 및 release (버전 범프 -> 태그 -> ghcr OCI)
-CONTRIBUTING.md                          # 브랜치 모델 (dev/main + tags) + 버전 범프 기반 릴리즈
-AGENTS.md                                # 기여자용 설계 원칙 & 워크플로우
-Makefile                                 # docs / lint / template / install / test / package / push
+```text
+.
+├── charts/
+│   ├── hermes-agent/          # Helm 차트 (README 참고)
+│   │   └── values-*.yaml      # 제공자·메신저별 즉시 사용 예제
+│   └── hermes-operator/       # ⏸️ 미착수: Agent/AgentTeam CRD 오퍼레이터
+├── examples/
+│   ├── helm/                  # Git 또는 OCI로 설치 + 배포 가이드
+│   └── argocd/                # ArgoCD Application 예제 + GitOps 패턴
+├── docs/                      # 심화 가이드 (teams, collaboration, roadmap)
+├── .github/workflows/         # CI 체크 + 태그 기반 ghcr OCI 릴리즈
+├── .changeset/                # 다음 릴리즈 버전을 결정할 대기 항목
+├── CONTRIBUTING.md            # 브랜치 모델 + 버전 범프 기반 릴리즈
+├── AGENTS.md                  # 기여자용 설계 원칙 & 워크플로우
+└── Makefile                   # docs / lint / template / install / test
 ```
 
 ## 전체 설치

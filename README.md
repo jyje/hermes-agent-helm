@@ -58,21 +58,21 @@ change), see [Development](#development) below.
 
 ## Why this chart
 
-- **All of Hermes's provider support, via `values.yaml`.** Hermes itself
+- **All of Hermes's Provider Support, via `values.yaml`.** Hermes itself
   already supports `openai-api`, `anthropic`, `gemini`, `openrouter`, `nvidia`,
   `deepseek`, and any OpenAI-compatible endpoint (e.g.
   [LiteLLM](https://github.com/BerriAI/litellm)) through environment
   variables - this chart just exposes that config through `values.yaml` and
   ships ready-to-adapt examples per provider, with no provider baked into the
   templates.
-- **Lightweight → production.** Sized for homelab / single-node / edge clusters
+- **Lightweight → Production.** Sized for homelab / single-node / edge clusters
   out of the box (one replica, modest requests, a small PVC), and ready for
   production by scaling *up* - not *out*. Hermes is a single-instance personal
   agent (one `HERMES_HOME`, one gateway, one memory), so you don't replicate a
   pod; you run several well-managed instances and group them into a **team**
   that shares context over a common gateway channel. See
   [Hermes teams](docs/reference/teams.md).
-- **Verified end-to-end.** CI installs the chart on an ephemeral **kind**
+- **Verified End-to-End.** CI installs the chart on an ephemeral **kind**
   cluster and runs the bundled test Job (`hermes doctor`). When the
   `NVIDIA_API_KEY` repository secret is available, it also runs a **live
   `hermes chat` round-trip** against NVIDIA NIM - not a mock.
@@ -93,17 +93,21 @@ install examples (including messenger integrations), see
 
 ## Repository layout
 
-```
-charts/hermes-agent/                     # the Helm chart (see its README for the full values table)
-charts/hermes-agent/values-*.yaml        # ready-to-adapt examples: providers, Discord/Telegram, LiteLLM (see chart README "More examples")
-examples/helm/                           # install from Git and from OCI (ghcr.io) + publish guide
-examples/argocd/                         # ArgoCD Application examples (one per values-*.yaml) + GitOps/SealedSecret pattern
-charts/hermes-operator/                  # ⏸️ long-term, not started: possible install chart for an Agent/AgentTeam-CRD operator - placeholder, TBA (see Roadmap)
-docs/                                    # deeper guides: teams.md (group instances into a team), collaboration.md (make them hand off by @mention), roadmap.md
-.github/workflows/                       # ci (lint + docs-drift + real round-trip on kind) and release (version bump -> tag -> ghcr OCI)
-CONTRIBUTING.md                          # branch model (dev/main + tags) + release-on-version-bump
-AGENTS.md                                # design principles & workflow for contributors
-Makefile                                 # docs / lint / template / install / test / package / push
+```text
+.
+├── charts/
+│   ├── hermes-agent/          # the Helm chart (see its README)
+│   │   └── values-*.yaml      # ready-to-adapt provider/messenger examples
+│   └── hermes-operator/       # ⏸️ not started: Agent/AgentTeam CRD operator
+├── examples/
+│   ├── helm/                  # install via Git or OCI + publish guide
+│   └── argocd/                # ArgoCD Application examples + GitOps pattern
+├── docs/                      # deeper guides (teams, collaboration, roadmap)
+├── .github/workflows/         # ci checks + tag-driven release to ghcr OCI
+├── .changeset/                # entries queued for the next release version
+├── CONTRIBUTING.md            # branch model + release-on-version-bump
+├── AGENTS.md                  # design principles & workflow for contributors
+└── Makefile                   # docs / lint / template / install / test
 ```
 
 ## Full Installation
