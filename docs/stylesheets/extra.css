@@ -47,6 +47,34 @@
   --md-code-bg-color: #fff;
 }
 
+/* The primary navigation uses the same light surface as the header, so
+   Material's default active state is too subtle. Keep the tab bar quiet,
+   but give the current top-level section a readable teal label and a stable
+   underline. The rule is based on Material's generated active class, so it
+   follows the nav hierarchy rather than a hand-maintained URL list. */
+.md-tabs__item--active .md-tabs__link {
+  color: #087f7a;
+  font-weight: 700;
+  opacity: 1;
+  position: relative;
+}
+
+.md-tabs__item--active .md-tabs__link::after {
+  background-color: #087f7a;
+  border-radius: 999px 999px 0 0;
+  bottom: 0;
+  content: "";
+  height: 0.14rem;
+  left: 0.5rem;
+  position: absolute;
+  right: 0.5rem;
+}
+
+.md-tabs__link:hover {
+  color: #087f7a;
+  opacity: 1;
+}
+
 /* Crop the logo artwork's vertical whitespace instead of showing it letterboxed.
    The PNG is fully opaque (no alpha channel) with its own light canvas baked
    around the icons; now that the header itself is also #f4f4f4, the crop sits
