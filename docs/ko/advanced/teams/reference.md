@@ -258,11 +258,12 @@ spec:
 전달하거나 트리거해서도 안 됩니다. 정확한 봇 멘션과 완전한 과제 또는 결과 계약을
 포함한 공개 Discord 메시지만 핸드오프입니다.
 
-별도로 미리 준비한 `hermes-team-knowledge` RWX PVC를
-`/opt/data/team-knowledge`에 마운트합니다. 리더는 읽기/쓰기로 마운트하며 유일한
-큐레이터이고, 멤버는 읽기 전용으로 마운트합니다. 여기에는 영속적이고 재사용 가능한
-지식만 두며 실시간 조정 상태는 두지 않습니다. 권한 경계가 프롬프트 계약을 보강하고
-다중 writer 경합을 피합니다.
+리더 릴리스가 팀 공용 스킬 ConfigMap 하나와 `hermes-team-knowledge` RWX PVC
+하나를 생성합니다. 모든 멤버 릴리스는 개별 스킬 사본을 만들지 않고 같은 리소스를
+참조합니다. 스킬은 모든 Pod에서 읽기 전용입니다. 리더는 지식 볼륨을 읽기/쓰기로
+마운트하며 유일한 큐레이터이고, 멤버는 읽기 전용으로 마운트합니다. 여기에는
+영속적이고 재사용 가능한 지식만 두며 실시간 조정 상태는 두지 않습니다. 권한 경계가
+프롬프트 계약을 보강하고 다중 writer 경합을 피합니다.
 
 기준 프로토콜은 의도적으로 직렬입니다. 리더가 멤버 한 명을 멘션하고, 그 멤버가
 리더를 다시 멘션할 때까지 기다린 뒤 결과를 검토하고 다음 멤버를 멘션합니다.
@@ -301,25 +302,11 @@ Reply contract: <@LEADER_ID>를 멘션하고 완전한 결과를 여기에 포�
 의도한 봇이 분명히 호출되도록 멘션은 첫 줄에 두고, TEAM 메타데이터는 과제 본문을
 방해하지 않도록 마지막 독립 줄에 둡니다.
 
-먼저 RWX를 지원하는 StorageClass로 공유 지식 claim을 만듭니다. 루트는 uid/gid
-10000이 읽을 수 있어야 하고 리더의 uid/gid 10000이 쓸 수 있어야 합니다:
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: hermes-team-knowledge
-  namespace: hermes-team
-spec:
-  accessModes: [ReadWriteMany]
-  storageClassName: nfs-client # 사용하는 RWX 지원 클래스로 교체
-  resources:
-    requests:
-      storage: 10Gi
-```
-
-그다음 리더와 멤버별 릴리스를 배포합니다. values 파일은 각 에이전트의 사설 홈과
-별개로 동일한 claim을 마운트합니다:
+리더를 먼저 배포한 뒤 멤버별 릴리스를 배포합니다. 리더 values가 공유 스킬과
+claim을 만들고, 멤버 values는 이를 참조합니다. 클러스터 기본 StorageClass가 RWX를
+지원해야 하며, 그렇지 않으면 리더의 `team.sharedVolume.storageClass`를 RWX 지원
+클래스로 지정합니다. 선택적 권한 init container는 스토리지 백엔드가 `chown`을
+허용할 때 uid/gid 10000이 볼륨에 쓸 수 있도록 준비합니다:
 
 ```bash
 helm upgrade --install hermes-august ./charts/hermes-agent \
@@ -334,20 +321,21 @@ helm upgrade --install hermes-may ./charts/hermes-agent \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
 
-# march도 반복합니다. 이 인덱스는 멤버 예시의 TEAM_MEMBER_NAME입니다.
+# march도 다른 릴리스 정체성으로 반복합니다.
 helm upgrade --install hermes-march ./charts/hermes-agent \
   --namespace hermes-team \
   -f charts/hermes-agent/values-team-member.yaml \
   --set-string fullnameOverride=hermes-march \
-  --set-string 'extraEnv[6].value=march' \
+  --set-string team.identity=march \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<march-bot-token>' --wait
 ```
 
 values 파일의 채널 ID, 허용할 사람 ID, 봇 ID도 교체해야 합니다. 선언형 사용자는
 [`examples/argocd/hermes-team.yaml`](https://github.com/jyje/hermes-agent-helm/blob/main/examples/argocd/hermes-team.yaml)을
-사용할 수 있습니다. 리더 Application 하나와 멤버 ApplicationSet으로 구성됩니다.
-이 Application들이 sync되기 전에 대상 네임스페이스에 공유 claim을 준비하세요.
+사용할 수 있습니다. ApplicationSet 하나가 리더와 모든 멤버를 생성합니다. 공통 템플릿에 명단과 공유
+스킬을 한 번 선언하고, 리더 목록 항목이 공유 ConfigMap/PVC를 소유하며 멤버 항목은
+이를 참조합니다.
 
 ### 라이브 증거
 
@@ -387,11 +375,15 @@ Discord뿐입니다. Telegram과 Slack에도 모든 루프 브레이크 노브�
 [collaboration-ko.md § 노브 대응표](collaboration-ko.md#노브-대응표)에 있으니,
 여기서는 리더 팀에 필요한 핵심만 정리합니다.
 
+차트의 `team` 블록은 현재 Discord 전용 라우팅과 루프 브레이크를 구성합니다.
+아래 플랫폼 설명은 `team.enabled=true`에 그대로 넣는 값이 아니라 생성된 팀 스킬을
+수동으로 이식하는 참고사항입니다.
+
 **Telegram.** 봇은 숫자 ID가 아니라 `@username`으로 부릅니다(`bot`으로 끝나야
 합니다). 리더의 `environment_hint`에는 멤버 전원의 정확한 `@username`을, 각
-멤버의 hint에는 리더의 `@username`을 넣으세요. `values-team-leader.yaml` /
-`values-team-member.yaml`의 `environment_hint` 문안은 그대로 재사용하되,
-`<@ID>` 토큰을 모두 `@bot_username`으로 바꾸고 Discord에는 없던 지시를 한 줄
+멤버의 hint에는 리더의 `@username`을 넣으세요. 생성된 팀 스킬 프로토콜을
+재사용하되 `<@ID>` 토큰을 모두 `@bot_username`으로 바꾸고 Discord에는 없던
+지시를 한 줄
 덧붙이세요. 팀원을 부를 때 Telegram의 native "reply" 기능을 절대 쓰지 말라는
 지시입니다. reply는 이 프로토콜이 기대는 명시적 멘션 신호가 아니기 때문입니다.
 그래서 위임 계약은 이런 형태가 됩니다:
@@ -430,11 +422,10 @@ member ID로 바꾸기만 하면 됩니다. 가장 중요한 노브는
 `group_sessions_per_user: false` 관리는 두 플랫폼에서도 Discord 레시피와
 똑같습니다. Telegram과 Slack 역시 기본값으로는 발신자별로 세션을 나누기 때문에,
 공유 트랜스크립트 설정은 플랫폼을 가리지 않고
-`config.group_sessions_per_user: false`로 유지합니다. 공유 지식 PVC,
-`disabled_toolsets`, 6단계 핸드오프 상한, `values-team-leader.yaml` /
-`values-team-member.yaml`의 "hook·파일·메모리로 핸드오프하지 말 것" 규칙도 전부
-그대로 적용됩니다. 달라지는 건 플랫폼 블록(`env`/`extraEnv`)과
-`environment_hint`의 멘션 토큰 형식뿐입니다.
+`config.group_sessions_per_user: false`로 유지합니다. 공유 지식 PVC, 활성화된
+skills toolset, 6단계 핸드오프 상한, 생성된 팀 스킬의 "hook·파일·메모리로
+핸드오프하지 말 것" 규칙도 그대로 적용됩니다. 플랫폼 라우팅 블록과 멘션 토큰
+형식은 수동으로 바꿔야 합니다.
 
 ### 공유 지식과 조정은 분리합니다
 

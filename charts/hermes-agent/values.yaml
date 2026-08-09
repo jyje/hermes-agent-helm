@@ -115,6 +115,82 @@ bootstrap:
   overwrite: true
 
 # ---------------------------------------------------------------------------
+# Team mode -> one chart release still runs one independent Hermes identity,
+# while several releases share a Discord thread and one RWX knowledge volume.
+# The chart mounts one shared, read-only roster skill and appends a small
+# role-specific environment hint so the agent knows when to load it. Cross-agent
+# task handoffs stay visible in Discord; the shared volume stores only durable,
+# accepted knowledge.
+# ---------------------------------------------------------------------------
+team:
+  # -- Enable the chart-native leader/member team protocol, roster skill, and
+  # shared knowledge volume mount for this release.
+  enabled: false
+  # -- Stable team identifier used in the generated skill and default names.
+  name: ""
+  # -- This release's team role.
+  role: member
+  # -- This release's identity. For a leader it must equal `leader.name`; for a
+  # member it must match one entry under `members`.
+  identity: ""
+  leader:
+    # -- Leader identity shared by every release in the team.
+    name: ""
+    # -- Environment variable containing the leader's Discord user ID. Supply
+    # it through a Secret/SealedSecret; the ID is expanded by Hermes at runtime.
+    mentionEnv: ""
+  # -- Configured members. ApplicationSet users define this once in the common
+  # template so every generated release receives the same complete roster.
+  members: []
+  #  - name: researcher
+  #    role: Research and evidence gathering
+  #    mentionEnv: TEAM_RESEARCHER_DISCORD_ID
+  #    capabilities: [research, source-review]
+  protocol:
+    # -- Maximum serial leader-to-member handoffs before escalating to a human.
+    maxHandoffs: 6
+  skill:
+    # -- Mount the shared team roster and protocol as a read-only skill.
+    enabled: true
+    # -- Create the shared skill ConfigMap from this release. Set true on
+    # exactly one leader release; every member references the same ConfigMap.
+    create: false
+    # -- Skill name. Empty defaults to `<team.name>-roster`.
+    name: ""
+    # -- Shared ConfigMap name. Empty defaults to `<team.name>-skill`.
+    configMapName: ""
+    # -- Optional deployment-specific policy appended to the generated skill.
+    # Used only by the release with `skill.create=true`.
+    extraInstructions: ""
+  sharedVolume:
+    # -- Mount a required RWX knowledge volume when team mode is enabled.
+    enabled: true
+    # -- Create the shared PVC from this release. Set true on exactly one leader
+    # release; all members set false and reference the same `claimName`.
+    create: false
+    # -- Shared PVC name. Empty defaults to `<team.name>-knowledge`.
+    claimName: ""
+    # -- Mount path for durable accepted team knowledge.
+    mountPath: /opt/data/team-knowledge
+    # -- StorageClass used only when `create=true`; empty uses cluster default.
+    storageClass: ""
+    # -- RWX access modes used only when `create=true`.
+    accessModes: [ReadWriteMany]
+    # -- Requested shared storage size used only when `create=true`.
+    size: 10Gi
+    # -- Keep a chart-created shared claim when the owning release is removed.
+    retain: true
+    permissions:
+      # -- On the leader, chown the shared volume before Hermes starts. Enable
+      # only when the storage backend permits ownership changes.
+      enabled: false
+      # -- Init image used for shared-volume ownership preparation.
+      image: busybox:1.37
+      # -- Runtime owner for the shared knowledge directory.
+      uid: 10000
+      gid: 10000
+
+# ---------------------------------------------------------------------------
 # .env / secrets -> Hermes reads API keys from the environment, which take
 # precedence over config.yaml. Keys are rendered into a Secret and injected via
 # envFrom (not written as a .env file). Override at deploy time, e.g.

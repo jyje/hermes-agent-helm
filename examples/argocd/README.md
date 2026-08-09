@@ -25,7 +25,7 @@ example 1:1, with secrets wired via `extraEnvFrom` instead of plain `--set`:
 | [`hermes-agent-github-copilot.yaml`](hermes-agent-github-copilot.yaml) | `values-github-copilot.yaml` + GitOps | `hermes-agent-copilot-secrets` via **SealedSecret** (`DISCORD_BOT_TOKEN` only: Copilot token minted at runtime via **OAuth device flow**) |
 | [`hermes-agent-ingress.yaml`](hermes-agent-ingress.yaml) | `values-ingress.yaml` | `hermes-agent-ingress-secrets` (`OPENAI_API_KEY`) + `hermes-agent-dashboard-auth` (nginx basic-auth) |
 | [`hermes-collab-pair.yaml`](hermes-collab-pair.yaml) | `values-multi-agent-collab.yaml` (×2: planner+builder) | `hermes-planner-discord-secrets` + `hermes-builder-discord-secrets`: a **collaborating pair** that hands off by `@mention`; see [Hermes collaboration](../../docs/advanced/teams/collaboration.md) |
-| [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-august-discord-secrets` + `hermes-may-discord-secrets` + `hermes-march-discord-secrets` + pre-provisioned `hermes-team-knowledge` RWX PVC: a **leader-orchestrated team** (serialized explicit mentions, leader-writable/member-read-only shared knowledge, no file-based task handoff); see [Hermes teams](../../docs/advanced/teams/reference.md) |
+| [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-team-routing` + one private Secret per bot: one **ApplicationSet** generates the leader and members; its leader creates the shared skill ConfigMap and RWX knowledge PVC exactly once; see [Hermes teams](../../docs/advanced/teams/reference.md) |
 
 `hermes-agent.yaml` is the bare-minimum starting point - pure chart defaults
 plus the secret wiring; copy it and add a `valuesObject` to customize.
@@ -36,13 +36,15 @@ Discord channel and handing off by `@mention`. See
 [Hermes collaboration](../../docs/advanced/teams/collaboration.md) for the handoff protocol and
 the four loop-brake env vars.
 
-`hermes-team.yaml` scales that pattern up: one Application for the team
-**leader** (`august`) plus an **ApplicationSet** whose member roster (`may`,
-`march`) is a list-generator entry - adding a teammate is a one-line diff. The
-agents share a Discord channel (star topology: mentions flow leader ↔ member
-only). The thread is the coordination bus and audit log. A separate RWX PVC
-stores durable reusable knowledge (leader read-write, members read-only), but
-never carries tasks, status, intermediate results, or completion signals. See
+`hermes-team.yaml` scales that pattern up with one **ApplicationSet** for the
+team leader (`august`) and members (`may`, `march`). The roster and shared skill
+are declared once in the common template; list entries carry only per-agent
+identity, role, and Secret name. The leader-generated release creates the
+shared skill ConfigMap and RWX PVC exactly once, while members reference both
+read-only. The agents share a Discord channel (star topology: mentions flow
+leader ↔ member only). The thread is the coordination bus and audit log. The
+PVC stores durable reusable knowledge but never tasks, status, intermediate
+results, or completion signals. See
 [Hermes teams](../../docs/advanced/teams/reference.md) → "Leader-orchestrated teams".
 
 All examples use the **OCI registry** source form (`repoURL`/`chart`/

@@ -87,11 +87,15 @@ Pod template (metadata + spec), shared by the StatefulSet and Deployment
 controllers. Caller is expected to nest this under `template:` with `nindent 4`.
 */}}
 {{- define "hermes-agent.podTemplate" -}}
+{{- include "hermes-agent.team.validate" . -}}
 metadata:
   annotations:
     # Roll pods when config/secret content changes.
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    {{- if and .Values.team.enabled .Values.team.skill.enabled .Values.team.skill.create }}
+    checksum/team-skill: {{ include (print $.Template.BasePath "/team-skill-configmap.yaml") . | sha256sum }}
+    {{- end }}
     {{- with .Values.podAnnotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -111,7 +115,7 @@ spec:
   {{- end }}
   securityContext:
     {{- toYaml .Values.podSecurityContext | nindent 4 }}
-  {{- if or .Values.bootstrap.enabled .Values.auth.deviceFlow.enabled .Values.extraInitContainers }}
+  {{- if or .Values.bootstrap.enabled .Values.auth.deviceFlow.enabled .Values.extraInitContainers (and .Values.team.enabled .Values.team.sharedVolume.permissions.enabled) }}
   initContainers:
     {{- if .Values.bootstrap.enabled }}
     # Seed the partial config.yaml into HERMES_HOME (the writable volume) so
@@ -205,6 +209,22 @@ spec:
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
     {{- end }}
+    {{- if and .Values.team.enabled .Values.team.sharedVolume.permissions.enabled }}
+    # Optional ownership preparation for a chart-managed RWX knowledge volume.
+    - name: init-team-shared
+      image: {{ .Values.team.sharedVolume.permissions.image | quote }}
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      command:
+        - sh
+        - -c
+        - chown -R {{ .Values.team.sharedVolume.permissions.uid }}:{{ .Values.team.sharedVolume.permissions.gid }} /team-shared
+      volumeMounts:
+        - name: team-shared
+          mountPath: /team-shared
+    {{- end }}
     {{- with .Values.extraInitContainers }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -226,6 +246,17 @@ spec:
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
+        {{- if .Values.team.enabled }}
+        # Team mode makes explicit body mentions the only bot-to-bot trigger.
+        - name: DISCORD_ALLOW_BOTS
+          value: "mentions"
+        - name: DISCORD_THREAD_REQUIRE_MENTION
+          value: "true"
+        - name: DISCORD_REPLY_TO_MODE
+          value: "off"
+        - name: DISCORD_ALLOW_MENTION_REPLIED_USER
+          value: "false"
+        {{- end }}
         {{- with .Values.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -248,6 +279,16 @@ spec:
       volumeMounts:
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
+        {{- if and .Values.team.enabled .Values.team.skill.enabled }}
+        - name: team-skill
+          mountPath: {{ include "hermes-agent.team.skillMountPath" . }}
+          readOnly: true
+        {{- end }}
+        {{- if and .Values.team.enabled .Values.team.sharedVolume.enabled }}
+        - name: team-shared
+          mountPath: {{ .Values.team.sharedVolume.mountPath }}
+          readOnly: {{ ne .Values.team.role "leader" }}
+        {{- end }}
         {{- with .Values.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -276,6 +317,16 @@ spec:
     {{- else }}
     - name: data
       emptyDir: {}
+    {{- end }}
+    {{- if and .Values.team.enabled .Values.team.skill.enabled }}
+    - name: team-skill
+      configMap:
+        name: {{ include "hermes-agent.team.skillConfigMapName" . }}
+    {{- end }}
+    {{- if and .Values.team.enabled .Values.team.sharedVolume.enabled }}
+    - name: team-shared
+      persistentVolumeClaim:
+        claimName: {{ include "hermes-agent.team.sharedClaimName" . }}
     {{- end }}
     {{- with .Values.extraVolumes }}
     {{- toYaml . | nindent 4 }}

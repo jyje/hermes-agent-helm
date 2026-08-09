@@ -268,8 +268,10 @@ memory update, or tool/API call may deliver or trigger a team assignment. Only
 the visible Discord message containing the exact bot mention and complete task
 or result contract is a handoff.
 
-A second, pre-provisioned `hermes-team-knowledge` RWX PVC is mounted at
-`/opt/data/team-knowledge`. The leader mounts it read-write and is the sole
+The leader release creates one shared team-skill ConfigMap and one
+`hermes-team-knowledge` RWX PVC. Every member release references those same
+objects instead of generating a private skill copy. The skill is read-only in
+all Pods. The leader mounts the knowledge volume read-write and is its sole
 curator; members mount it read-only. It contains durable reusable knowledge,
 not live coordination state. The permission boundary reinforces the prompt
 contract and avoids multi-writer races.
@@ -312,26 +314,11 @@ Reply contract: mention <@LEADER_ID> and include the complete result here.
 The mention stays first so the intended bot is obvious and triggered; the TEAM
 metadata stays on the final independent line so it does not interrupt the task.
 
-First create the shared knowledge claim with an RWX-capable StorageClass. Its
-root must be readable by uid/gid 10000 and writable by uid/gid 10000 for the
-leader:
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: hermes-team-knowledge
-  namespace: hermes-team
-spec:
-  accessModes: [ReadWriteMany]
-  storageClassName: nfs-client # replace with your RWX-capable class
-  resources:
-    requests:
-      storage: 10Gi
-```
-
-Then deploy the leader and one release per member. The values files mount the
-same claim separately from every agent's private home:
+Deploy the leader first, then one release per member. The leader values create
+the shared skill and claim; member values reference them. The cluster default
+StorageClass must support RWX, or set `team.sharedVolume.storageClass` on the
+leader to an RWX-capable class. The optional permissions init container makes
+the volume writable by uid/gid 10000 when the backend permits `chown`:
 
 ```bash
 helm upgrade --install hermes-august ./charts/hermes-agent \
@@ -346,12 +333,12 @@ helm upgrade --install hermes-may ./charts/hermes-agent \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<may-bot-token>' --wait
 
-# Repeat for march; this index is TEAM_MEMBER_NAME in the member example.
+# Repeat for march with a different release identity.
 helm upgrade --install hermes-march ./charts/hermes-agent \
   --namespace hermes-team \
   -f charts/hermes-agent/values-team-member.yaml \
   --set-string fullnameOverride=hermes-march \
-  --set-string 'extraEnv[6].value=march' \
+  --set-string team.identity=march \
   --set-string env.NVIDIA_API_KEY='nvapi-<real>' \
   --set-string env.DISCORD_BOT_TOKEN='<march-bot-token>' --wait
 ```
@@ -359,8 +346,9 @@ helm upgrade --install hermes-march ./charts/hermes-agent \
 Replace the channel, allowed-human, and bot IDs in the values files as well.
 Declarative users can use
 [`examples/argocd/hermes-team.yaml`](https://github.com/jyje/hermes-agent-helm/blob/main/examples/argocd/hermes-team.yaml): one
-leader Application plus a member ApplicationSet. Provision the shared claim in
-the destination namespace before those Applications sync.
+ApplicationSet generates the leader and all members. The common template
+declares the roster and shared skill once; the leader list element owns the
+shared ConfigMap and PVC, while member elements reference them.
 
 ### Live evidence
 
@@ -404,11 +392,14 @@ close the loop**. See [collaboration.md § Knob
 mapping](collaboration.md#knob-mapping) for the full Discord/Telegram/Slack
 comparison; the leader-team essentials are below.
 
+The chart-native `team` block currently configures Discord-specific routing and
+loop brakes. Treat the following platform notes as manual adaptations of the
+generated team skill, not as drop-in values for `team.enabled=true`.
+
 **Telegram.** Bots are addressed by `@username` (must end in `bot`), not a
-numeric ID - put every member's exact `@username` in the leader's
-`environment_hint`, and the leader's `@username` in every member's. Reuse the
-`values-team-leader.yaml` / `values-team-member.yaml` `environment_hint` text
-verbatim, but replace every `<@ID>` token with `@bot_username` and add one
+numeric ID - put every member's exact `@username` in the leader's environment
+hint, and the leader's `@username` in every member's. Reuse the generated team
+skill protocol, replace every `<@ID>` token with `@bot_username`, and add one
 instruction Discord doesn't need: tell every agent to never use Telegram's
 native "reply" feature to address a teammate, since a reply is not the
 explicit-mention signal this protocol depends on. The delegation contract
@@ -451,11 +442,10 @@ Both platforms need the same `group_sessions_per_user: false` and
 `discord.history_backfill`-equivalent care as the Discord recipe: Telegram and
 Slack sessions are keyed the same way per sender by default, so the shared
 transcript setting stays `config.group_sessions_per_user: false` regardless of
-platform. Everything about the shared-knowledge PVC, `disabled_toolsets`, the
+platform. Everything about the shared-knowledge PVC, enabled skills toolset,
 six-handoff ceiling, and the "never use a hook/file/memory to hand off work"
-rule in `values-team-leader.yaml` / `values-team-member.yaml` applies
-unchanged - only the platform block (`env`/`extraEnv`) and the mention token
-format in `environment_hint` differ.
+rule in the generated team skill applies unchanged. The platform routing block
+and mention token format must be adapted manually.
 
 ### Shared knowledge is separate from coordination
 

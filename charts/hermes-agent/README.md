@@ -303,9 +303,13 @@ For a leader plus several members, use
 [`values-team-leader.yaml`](values-team-leader.yaml) and
 [`values-team-member.yaml`](values-team-member.yaml). That reference protocol
 serializes one explicit bot mention at a time and keeps every task, result, and
-review in the Discord thread. A separate pre-provisioned RWX PVC carries
-durable shared knowledge, but never tasks, status, or result handoffs. The team
-recipe requires that claim: leader read-write, members read-only.
+review in the Discord thread. Team mode mounts one shared roster/protocol skill
+ConfigMap in every Pod. The leader release creates that ConfigMap and the RWX
+knowledge PVC exactly once; members reference both by name and mount them
+read-only. The PVC carries durable shared knowledge, but never tasks, status,
+or result handoffs. In the ApplicationSet example, the roster and shared policy
+are declared once while each list item supplies only identity, role, and its
+private Secret name.
 The `file` and `memory` toolsets remain available for each agent's own work;
 only cross-agent handoffs through files, memory, hooks, or background work are
 prohibited.
@@ -676,6 +680,31 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
+| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":""},"members":[],"name":"","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.37","uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
+| team.enabled | bool | Enable the chart-native leader/member team protocol, roster skill, and shared knowledge volume mount for this release. | `false` |
+| team.identity | string | This release's identity. For a leader it must equal `leader.name`; for a member it must match one entry under `members`. | `""` |
+| team.leader.mentionEnv | string | Environment variable containing the leader's Discord user ID. Supply it through a Secret/SealedSecret; the ID is expanded by Hermes at runtime. | `""` |
+| team.leader.name | string | Leader identity shared by every release in the team. | `""` |
+| team.members | list | Configured members. ApplicationSet users define this once in the common template so every generated release receives the same complete roster. | `[]` |
+| team.name | string | Stable team identifier used in the generated skill and default names. | `""` |
+| team.protocol.maxHandoffs | int | Maximum serial leader-to-member handoffs before escalating to a human. | `6` |
+| team.role | string | This release's team role. | `"member"` |
+| team.sharedVolume.accessModes | list | RWX access modes used only when `create=true`. | `["ReadWriteMany"]` |
+| team.sharedVolume.claimName | string | Shared PVC name. Empty defaults to `<team.name>-knowledge`. | `""` |
+| team.sharedVolume.create | bool | Create the shared PVC from this release. Set true on exactly one leader release; all members set false and reference the same `claimName`. | `false` |
+| team.sharedVolume.enabled | bool | Mount a required RWX knowledge volume when team mode is enabled. | `true` |
+| team.sharedVolume.mountPath | string | Mount path for durable accepted team knowledge. | `"/opt/data/team-knowledge"` |
+| team.sharedVolume.permissions.enabled | bool | On the leader, chown the shared volume before Hermes starts. Enable only when the storage backend permits ownership changes. | `false` |
+| team.sharedVolume.permissions.image | string | Init image used for shared-volume ownership preparation. | `"busybox:1.37"` |
+| team.sharedVolume.permissions.uid | int | Runtime owner for the shared knowledge directory. | `10000` |
+| team.sharedVolume.retain | bool | Keep a chart-created shared claim when the owning release is removed. | `true` |
+| team.sharedVolume.size | string | Requested shared storage size used only when `create=true`. | `"10Gi"` |
+| team.sharedVolume.storageClass | string | StorageClass used only when `create=true`; empty uses cluster default. | `""` |
+| team.skill.configMapName | string | Shared ConfigMap name. Empty defaults to `<team.name>-skill`. | `""` |
+| team.skill.create | bool | Create the shared skill ConfigMap from this release. Set true on exactly one leader release; every member references the same ConfigMap. | `false` |
+| team.skill.enabled | bool | Mount the shared team roster and protocol as a read-only skill. | `true` |
+| team.skill.extraInstructions | string | Optional deployment-specific policy appended to the generated skill. Used only by the release with `skill.create=true`. | `""` |
+| team.skill.name | string | Skill name. Empty defaults to `<team.name>-roster`. | `""` |
 | terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast: the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop: the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
 | tests | object | ------------------------------------------------------------------------- | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
