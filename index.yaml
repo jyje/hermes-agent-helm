@@ -4,6 +4,44 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "fixed"
+          description: "Documentation(docs): Replace em-dashes with colons or plain dashes Convert every em-dash in the chart README, the values examples, the JSON schema descriptio..."
+        - kind: "added"
+          description: "Feature(auth): Add OpenAI Codex device login Authenticate the built-in `openai-codex` provider through a Discord- or log-delivered device code and persist it..."
+        - kind: "fixed"
+          description: "Fix(runtime): Preserve the Hermes image entrypoint Keep the pinned image's s6 startup and volume ownership preparation while passing `gateway run` through th..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.3
+    created: "2026-08-09T04:01:00.896341746Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 31e33a92c731a430bed1334b833400e6eab0e1b37d77a0cc57ca8d223740b30a
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.3.0.tgz
+    version: 1.3.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "added"
           description: "Feature(chart): Buzz platform example Add values-nvidia-nim-and-buzz.yaml demonstrating the bundled Buzz (Nostr) platform adapter."
         - kind: "added"
@@ -975,4 +1013,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-03T23:38:00.47493365Z"
+generated: "2026-08-09T04:01:00.893196749Z"
