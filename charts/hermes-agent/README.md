@@ -57,6 +57,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | DeepInfra | `deepinfra` | `DEEPINFRA_API_KEY` | [`values-deepinfra.yaml`](values-deepinfra.yaml) |
 | Upstage Solar | `upstage` | `UPSTAGE_API_KEY` | [`values-upstage.yaml`](values-upstage.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow: no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
+| OpenAI Codex | `openai-codex` | ChatGPT/Codex device login (no API key) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
 
@@ -212,25 +213,26 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ["More examples"](#more-examples) for copy-pasteable messenger blocks.
 
-## Login via OAuth device flow (GitHub Copilot)
+## Login via device flow (GitHub Copilot and OpenAI Codex)
 
-Some providers issue short-lived OAuth tokens you cannot paste ahead of time.
-**GitHub Copilot** is the headline case: its token API rejects PATs and wants a
-`gho_`/`ghu_` device-flow token. Set `auth.deviceFlow.enabled=true` and the
-chart adds an **`auth-device-login` init container** that performs the
-[OAuth 2.0 Device Authorization Grant (RFC 8628)](https://datatracker.ietf.org/doc/html/rfc8628)
-at pod startup, surfaces the verification URL + user code for a human to
-approve (your Discord home channel by default - phone-friendly), waits, then
-persists the resulting token to `HERMES_HOME/.env` exactly where Hermes reads
-it. The token lives on the persistent volume, so it is reused across restarts;
-re-login only happens when it is missing or revoked (skip-if-valid).
+Set `auth.deviceFlow.enabled=true` to add an **`auth-device-login` init
+container**. It sends the verification URL + one-time code to the Discord home
+channel (or logs), waits for human approval, and persists the resulting
+credential on the `HERMES_HOME` volume.
+
+- `github-copilot` performs GitHub's OAuth 2.0 device grant and writes
+  `COPILOT_GITHUB_TOKEN` to `.env`.
+- `openai-codex` follows the device-code flow from the Hermes version pinned by
+  this chart and uses Hermes' native helper to atomically update `auth.json`,
+  including the refresh-token chain. It authenticates a ChatGPT/Codex account;
+  it is distinct from API-key-based `openai-api`.
 
 ```bash
 helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
-  -f charts/hermes-agent/values-github-copilot.yaml \
+  -f charts/hermes-agent/values-openai-codex.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<bot-token>' --wait
 # then approve the prompt posted to Discord (or read it from the logs):
-kubectl logs sts/hermes-agent -n hermes-agent -c auth-device-login -f
+kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 ```
 
 Notes:
@@ -242,11 +244,10 @@ Notes:
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.
-- **Catalog model:** `auth.deviceFlow.providers` is a map keyed by provider id
-  (each with its own `clientId`/`authHost`/`tokenEnv`/…); `auth.deviceFlow.provider`
-  selects which one runs. Only `github-copilot` ships today - add a map entry to
-  support another device-flow provider. The Copilot `clientId` default is the
-  shared client Hermes upstream itself uses.
+- **Profile selection:** choose `github-copilot` or `openai-codex` with
+  `auth.deviceFlow.provider`. The Copilot client id is the same shared client
+  Hermes upstream uses. OpenAI protocol constants and persistence come from the
+  pinned Hermes image rather than chart-owned credentials.
 
 ## Agent team
 
@@ -583,6 +584,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
 | [`values-nvidia-nim-and-buzz.yaml`](values-nvidia-nim-and-buzz.yaml) | NVIDIA NIM | **Buzz bot** wired in (Block's Nostr-based human+agent platform) |
 | [`values-github-copilot.yaml`](values-github-copilot.yaml) | GitHub Copilot (`copilot`) | **OAuth device-flow login** + Discord bot |
+| [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
@@ -611,24 +613,27 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
 | affinity | object | Affinity rules for Pod scheduling. | `{}` |
-| args | list | Arguments appended to `command`. | `["gateway","run"]` |
-| auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"}},"resources":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
+| args | list | Arguments passed through the image entrypoint. `gateway run` selects the    non-interactive outbound messaging service instead of the default TUI. | `["gateway","run"]` |
+| auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
 | auth.deviceFlow.enabled | bool | Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from `env`/`extraEnvFrom`. | `false` |
 | auth.deviceFlow.forceRelogin | bool | Force a fresh login even if a token already exists on the volume. | `false` |
-| auth.deviceFlow.image | object | Login image. stdlib-only Python; no extra dependencies are installed. | `{"repository":"python","tag":"3.13-slim"}` |
+| auth.deviceFlow.image | object | Login image for GitHub-style profiles. OpenAI Codex uses the pinned    Hermes image so auth.json persistence and refresh stay version-aligned. | `{"repository":"python","tag":"3.13-slim"}` |
 | auth.deviceFlow.notify | string | Where to deliver the verification URL + user code for human approval.    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`). The code is always    also printed to the init container logs as a fallback. | `"discord"` |
 | auth.deviceFlow.provider | string | Which provider profile to authenticate. Must be a key under    `providers` below. Only one device-flow login runs at a time. | `"github-copilot"` |
 | auth.deviceFlow.providers.github-copilot.authHost | string | Host serving the device-code + token endpoints (GitHub-style paths). | `"github.com"` |
 | auth.deviceFlow.providers.github-copilot.clientId | string | OAuth client id for the device grant. The shared opencode/Copilot-CLI    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py). | `"Ov23li8tweQw6odWQebz"` |
+| auth.deviceFlow.providers.github-copilot.flow | string | Login protocol handler. | `"github"` |
 | auth.deviceFlow.providers.github-copilot.scope | string | OAuth scope requested in the device grant. | `"read:user"` |
 | auth.deviceFlow.providers.github-copilot.tokenEnv | string | .env key Hermes reads this provider's token from (resolution order    COPILOT_GITHUB_TOKEN > GH_TOKEN > GITHUB_TOKEN). | `"COPILOT_GITHUB_TOKEN"` |
 | auth.deviceFlow.providers.github-copilot.validateUrl | string | Optional endpoint to verify an existing token is still live; on    401/403 the init container re-runs the login. Empty = skip the check. | `"https://api.github.com/copilot_internal/v2/token"` |
+| auth.deviceFlow.providers.openai-codex.flow | string | Use the OpenAI Codex device-code flow bundled with the pinned    Hermes version and persist refreshable credentials in auth.json. | `"openai-codex"` |
+| auth.deviceFlow.providers.openai-codex.issuer | string | OpenAI account issuer. Override only for a compatible test server. | `"https://auth.openai.com"` |
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
 | auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid;    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed the rendered config.yaml into HERMES_HOME via an init container. | `true` |
 | bootstrap.overwrite | bool | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). | `true` |
-| command | list | Container entrypoint. The image's DEFAULT CMD is the interactive `hermes` chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing a restart loop. So run the long-lived gateway explicitly; inside the s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6 service (auto-restart on crash). Append `--no-supervise` only if you want to bypass s6. | `["hermes"]` |
+| command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |

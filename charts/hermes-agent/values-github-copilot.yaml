@@ -21,7 +21,7 @@
 #     --set-string env.DISCORD_BOT_TOKEN='<real-bot-token>' --wait
 #
 #   # then watch the login init container for the verification prompt:
-#   kubectl logs sts/hermes-agent -n hermes-agent -c auth-device-login -f
+#   kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 
 config:
   model:

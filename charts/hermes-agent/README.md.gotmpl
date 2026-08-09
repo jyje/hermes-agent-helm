@@ -57,6 +57,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | DeepInfra | `deepinfra` | `DEEPINFRA_API_KEY` | [`values-deepinfra.yaml`](values-deepinfra.yaml) |
 | Upstage Solar | `upstage` | `UPSTAGE_API_KEY` | [`values-upstage.yaml`](values-upstage.yaml) |
 | GitHub Copilot | `copilot` | `COPILOT_GITHUB_TOKEN` (OAuth device-flow: no API key needed) | [`values-github-copilot.yaml`](values-github-copilot.yaml) |
+| OpenAI Codex | `openai-codex` | ChatGPT/Codex device login (no API key) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
 
@@ -212,25 +213,26 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
 See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ["More examples"](#more-examples) for copy-pasteable messenger blocks.
 
-## Login via OAuth device flow (GitHub Copilot)
+## Login via device flow (GitHub Copilot and OpenAI Codex)
 
-Some providers issue short-lived OAuth tokens you cannot paste ahead of time.
-**GitHub Copilot** is the headline case: its token API rejects PATs and wants a
-`gho_`/`ghu_` device-flow token. Set `auth.deviceFlow.enabled=true` and the
-chart adds an **`auth-device-login` init container** that performs the
-[OAuth 2.0 Device Authorization Grant (RFC 8628)](https://datatracker.ietf.org/doc/html/rfc8628)
-at pod startup, surfaces the verification URL + user code for a human to
-approve (your Discord home channel by default - phone-friendly), waits, then
-persists the resulting token to `HERMES_HOME/.env` exactly where Hermes reads
-it. The token lives on the persistent volume, so it is reused across restarts;
-re-login only happens when it is missing or revoked (skip-if-valid).
+Set `auth.deviceFlow.enabled=true` to add an **`auth-device-login` init
+container**. It sends the verification URL + one-time code to the Discord home
+channel (or logs), waits for human approval, and persists the resulting
+credential on the `HERMES_HOME` volume.
+
+- `github-copilot` performs GitHub's OAuth 2.0 device grant and writes
+  `COPILOT_GITHUB_TOKEN` to `.env`.
+- `openai-codex` follows the device-code flow from the Hermes version pinned by
+  this chart and uses Hermes' native helper to atomically update `auth.json`,
+  including the refresh-token chain. It authenticates a ChatGPT/Codex account;
+  it is distinct from API-key-based `openai-api`.
 
 ```bash
 helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
-  -f charts/hermes-agent/values-github-copilot.yaml \
+  -f charts/hermes-agent/values-openai-codex.yaml \
   --set-string env.DISCORD_BOT_TOKEN='<bot-token>' --wait
 # then approve the prompt posted to Discord (or read it from the logs):
-kubectl logs sts/hermes-agent -n hermes-agent -c auth-device-login -f
+kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 ```
 
 Notes:
@@ -242,11 +244,10 @@ Notes:
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.
-- **Catalog model:** `auth.deviceFlow.providers` is a map keyed by provider id
-  (each with its own `clientId`/`authHost`/`tokenEnv`/…); `auth.deviceFlow.provider`
-  selects which one runs. Only `github-copilot` ships today - add a map entry to
-  support another device-flow provider. The Copilot `clientId` default is the
-  shared client Hermes upstream itself uses.
+- **Profile selection:** choose `github-copilot` or `openai-codex` with
+  `auth.deviceFlow.provider`. The Copilot client id is the same shared client
+  Hermes upstream uses. OpenAI protocol constants and persistence come from the
+  pinned Hermes image rather than chart-owned credentials.
 
 ## Agent team
 
@@ -583,6 +584,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-nvidia-nim-and-discord.yaml`](values-nvidia-nim-and-discord.yaml) | NVIDIA NIM | **Discord bot** wired in |
 | [`values-nvidia-nim-and-buzz.yaml`](values-nvidia-nim-and-buzz.yaml) | NVIDIA NIM | **Buzz bot** wired in (Block's Nostr-based human+agent platform) |
 | [`values-github-copilot.yaml`](values-github-copilot.yaml) | GitHub Copilot (`copilot`) | **OAuth device-flow login** + Discord bot |
+| [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
