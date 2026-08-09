@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- 3acce56: Feature(auth): Add OpenAI Codex device login
+
+  Authenticate the built-in `openai-codex` provider through a Discord- or log-delivered device code and persist its refreshable credentials across restarts.
+
+### Patch Changes
+
+- e8a49c7: Documentation(docs): Replace em-dashes with colons or plain dashes
+
+  Convert every em-dash in the chart README, the values examples, the JSON
+  schema description, and the Helm and ArgoCD example manifests to a colon
+  or a plain dash, so the documentation stays easy to type, grep, and read
+  in a terminal. Wording and every configuration key are unchanged.
+
+- 3acce56: Fix(runtime): Preserve the Hermes image entrypoint
+
+  Keep the pinned image's s6 startup and volume ownership preparation while passing `gateway run` through the image entrypoint.
+
+- 050b421: Documentation(docs): Reorganize documentation navigation
+
+  Group chart, getting-started, advanced usage, contribution, and project information into a clearer documentation structure.
+
+- 3acce56: Documentation(chart): Sync the Korean values reference
+
+  Keep the English-only generated values table in the Korean chart README aligned with the complete current `values.yaml` reference.
+
 ## 1.2.0
 
 ### Minor Changes
