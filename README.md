@@ -67,6 +67,12 @@ change), see [Development](#development) below.
   variables - this chart just exposes that config through `values.yaml` and
   ships ready-to-adapt examples per provider, with no provider baked into the
   templates.
+- **Chat-first gateway and account login.** Supply a Discord or Telegram bot
+  token and the chart runs Hermes's outbound gateway with a Kubernetes-managed
+  lifecycle. For **GitHub Copilot** and **OpenAI Codex**, its optional
+  device-login bootstrap sends the one-time link and code to the Discord home
+  channel (or logs), then persists refreshable credentials in `HERMES_HOME`.
+  Approve once; normal Pod restarts reuse the stored login.
 - **Lightweight → Production.** Sized for homelab / single-node / edge clusters
   out of the box (one replica, modest requests, a small PVC), and ready for
   production by scaling *up* - not *out*. Hermes is a single-instance personal

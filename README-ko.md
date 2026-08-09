@@ -66,6 +66,12 @@
   이미 Hermes 자체가 환경변수로 지원하는 기능입니다 - 이 차트는 그 설정을
   `values.yaml`로 편하게 노출하고, 제공자별 즉시 사용 가능한 예제를 제공할 뿐,
   템플릿에 특정 제공자를 하드코딩하지 않습니다.
+- **채팅 우선 gateway와 계정 로그인.** Discord 또는 Telegram 봇 토큰을 넣으면
+  차트가 Kubernetes 수명주기 안에서 Hermes의 outbound gateway를 실행합니다.
+  **GitHub Copilot**과 **OpenAI Codex**는 선택 가능한 device-login bootstrap이
+  Discord 홈 채널(또는 로그)로 일회용 링크와 코드를 전달하고, 갱신 가능한
+  자격증명을 `HERMES_HOME`에 보존합니다. 한 번 승인하면 일반적인 Pod 재시작에는
+  저장된 로그인을 재사용합니다.
 - **경량 → 프로덕션.** 기본값은 홈랩/싱글노드/엣지 클러스터용(단일 레플리카, 적당한
   요청, 작은 PVC)이면서, 스케일 아웃이 아니라 스케일 업으로 키워 프로덕션까지 갑니다. Hermes는
   단일 인스턴스 개인용 에이전트(하나의 `HERMES_HOME`·gateway·메모리)이므로 파드를
