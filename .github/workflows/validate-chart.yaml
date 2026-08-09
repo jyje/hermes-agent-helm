@@ -67,6 +67,21 @@ jobs:
           helm template hermes-agent charts/hermes-agent \
             --set-string env.OPENAI_API_KEY=sk-test > /dev/null
 
+      - name: validate paused replica count
+        run: |
+          for controller in deployment statefulset; do
+            helm template paused charts/hermes-agent \
+              --set controller.type="$controller" --set replicaCount=0 \
+              --set-string env.OPENAI_API_KEY=sk-test > rendered.yaml
+            grep -q '^  replicas: 0$' rendered.yaml
+          done
+          if helm template invalid charts/hermes-agent \
+            --set replicaCount=2 --set-string env.OPENAI_API_KEY=sk-test \
+            > /dev/null 2>&1; then
+            echo "::error::replicaCount greater than 1 must fail schema validation"
+            exit 1
+          fi
+
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
