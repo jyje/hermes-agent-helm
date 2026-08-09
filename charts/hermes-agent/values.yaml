@@ -19,14 +19,12 @@ image:
 # -- Image pull secrets for private registries.
 imagePullSecrets: []
 
-# -- Container entrypoint. The image's DEFAULT CMD is the interactive `hermes`
-# chat, which exits immediately in a pod (no TTY -> EOF -> "Goodbye"), causing
-# a restart loop. So run the long-lived gateway explicitly; inside the
-# s6-overlay image `gateway run` is auto-redirected to the SUPERVISED s6
-# service (auto-restart on crash). Append `--no-supervise` only if you want to
-# bypass s6.
-command: ["hermes"]
-# -- Arguments appended to `command`.
+# -- Container command override. Empty keeps the Hermes image entrypoint, which
+#    starts the s6-supervised outbound messaging gateway and prepares volume
+#    ownership before dropping privileges. Set only for explicit debugging.
+command: []
+# -- Arguments passed through the image entrypoint. `gateway run` selects the
+#    non-interactive outbound messaging service instead of the default TUI.
 args: ["gateway", "run"]
 
 # ---------------------------------------------------------------------------
