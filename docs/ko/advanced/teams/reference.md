@@ -308,6 +308,11 @@ claim을 만들고, 멤버 values는 이를 참조합니다. 클러스터 기본
 클래스로 지정합니다. 선택적 권한 init container는 스토리지 백엔드가 `chown`을
 허용할 때 uid/gid 10000이 볼륨에 쓸 수 있도록 준비합니다:
 
+프로토콜 원본은 차트의 독립 에셋
+`files/skills/hermes-team-roster/SKILL.md`로 패키징됩니다. Helm은 선언된 명단을
+이 에셋에 렌더링하여 리더가 소유한 ConfigMap을 만들므로, 릴리스 values마다 내용을
+복제하지 않고도 검토 가능한 스킬 원형을 유지합니다.
+
 ```bash
 helm upgrade --install hermes-august ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \

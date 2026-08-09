@@ -8,5 +8,5 @@ metadata:
     {{- include "hermes-agent.labels" . | nindent 4 }}
 data:
   SKILL.md: |
-    {{- include "hermes-agent.team.skillContent" . | nindent 4 }}
+    {{- tpl (.Files.Get "files/skills/hermes-team-roster/SKILL.md") . | nindent 4 }}
 {{- end }}

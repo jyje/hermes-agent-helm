@@ -320,6 +320,11 @@ StorageClass must support RWX, or set `team.sharedVolume.storageClass` on the
 leader to an RWX-capable class. The optional permissions init container makes
 the volume writable by uid/gid 10000 when the backend permits `chown`:
 
+The protocol is packaged as the chart asset
+`files/skills/hermes-team-roster/SKILL.md`. Helm renders that asset with the
+declared roster into the leader-owned ConfigMap, so the protocol remains a
+standalone, reviewable skill instead of being duplicated in release values.
+
 ```bash
 helm upgrade --install hermes-august ./charts/hermes-agent \
   --namespace hermes-team --create-namespace \
