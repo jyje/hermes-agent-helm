@@ -1,0 +1,12 @@
+{{- if and .Values.team.enabled .Values.team.skill.enabled .Values.team.skill.create }}
+{{- include "hermes-agent.team.validate" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hermes-agent.team.skillConfigMapName" . }}
+  labels:
+    {{- include "hermes-agent.labels" . | nindent 4 }}
+data:
+  SKILL.md: |
+    {{- include "hermes-agent.team.skillContent" . | nindent 4 }}
+{{- end }}

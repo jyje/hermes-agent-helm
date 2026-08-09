@@ -1,140 +1,128 @@
-# Discord-thread-native leader team.
+# One ApplicationSet generates the leader and every member of a Discord team.
+# The roster, shared skill, and shared-volume policy are declared once in the
+# template below. Per-agent list entries contain only identity, role, and the
+# Secret holding that bot's private credentials.
 #
-# The chart-packaged values-team-leader.yaml and values-team-member.yaml hold
-# the complete protocol. This Argo CD example supplies the roster, non-secret
-# Discord IDs, and per-agent Secret references. All work handoffs are explicit
-# bot @mentions in one visible Discord thread. A separately provisioned RWX PVC
-# named hermes-team-knowledge carries durable knowledge only: leader read-write,
-# members read-only. It is not a task queue or hidden handoff path.
+# The leader entry is the sole owner of two shared resources:
+#   - hermes-team-skill: one generated team roster/protocol ConfigMap
+#   - hermes-team-knowledge: one RWX durable-knowledge PVC
+# Members mount both by name and never create private copies. The skill and PVC
+# are read-only in member Pods; only the leader can curate shared knowledge.
+# Discord remains the visible task/result coordination plane.
 #
 # Before applying:
-#   1. Provision the hermes-team namespace and an RWX PVC named
-#      hermes-team-knowledge. Use an RWX-capable StorageClass and make its root
-#      readable by uid/gid 10000 and writable by uid/gid 10000 for the leader.
-#      The example manifest is in values-team-leader.yaml's header.
-#   2. Create one Secret per agent. Each must contain NVIDIA_API_KEY (or the
-#      credential for your chosen provider) and its own DISCORD_BOT_TOKEN:
-#        kubectl create secret generic hermes-august-discord-secrets -n hermes-team \
-#          --from-literal=NVIDIA_API_KEY='nvapi-<real>' \
-#          --from-literal=DISCORD_BOT_TOKEN='<august-bot-token>'
-#      Repeat for hermes-may-discord-secrets and hermes-march-discord-secrets.
-#   3. Replace every DUMMY channel/user/bot ID below.
-#   4. Invite all three bots to the same Discord channel and enable Message
-#      Content Intent for every bot.
+#   1. Ensure the cluster default StorageClass supports ReadWriteMany, or set
+#      team.sharedVolume.storageClass below to an RWX-capable class.
+#   2. Create a common Secret containing public routing identifiers as env vars:
+#        DISCORD_HOME_CHANNEL, DISCORD_ALLOWED_USERS,
+#        AUGUST_BOT_USER_ID, MAY_BOT_USER_ID, MARCH_BOT_USER_ID
+#      The values are deployment data even when not API credentials; do not put
+#      real cluster-specific identifiers in this public example.
+#   3. Create one private Secret per agent. Each contains its provider key and
+#      its own DISCORD_BOT_TOKEN. The names are listed under botSecret below.
+#   4. Invite all bots to the same Discord channel and enable Message Content
+#      Intent for every bot.
 #
-# The values files set group_sessions_per_user=false so human and bot senders in
-# one thread share one transcript, history_backfill=true so mentioned bots see
-# the visible thread context, and mention-only loop brakes so no body mention
-# means no next bot turn.
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: hermes-august
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: ghcr.io/jyje/hermes-agent-helm
-    chart: hermes-agent
-    targetRevision: "*"              # pin an exact chart version in production
-    helm:
-      releaseName: hermes-august
-      valueFiles:
-        - values-team-leader.yaml
-      parameters:
-        # Helm list overrides are positional. Keep these indices synchronized
-        # with values-team-leader.yaml; scenario-team.sh renders and verifies
-        # this exact mapping so index drift fails CI instead of silently
-        # overriding another variable.
-        - name: extraEnv[0].value     # DISCORD_HOME_CHANNEL
-          value: "000000000000000000"
-          forceString: true
-        - name: extraEnv[1].value     # DISCORD_ALLOWED_USERS
-          value: "111111111111111111"
-          forceString: true
-        - name: extraEnv[6].value     # MAY_BOT_USER_ID
-          value: "000000000000000000"
-          forceString: true
-        - name: extraEnv[7].value     # MARCH_BOT_USER_ID
-          value: "000000000000000000"
-          forceString: true
-        - name: extraEnv[8].value     # AUGUST_BOT_USER_ID
-          value: "000000000000000000"
-          forceString: true
-      valuesObject:
-        env:
-          NVIDIA_API_KEY: set-via-extraEnvFrom
-          DISCORD_BOT_TOKEN: set-via-extraEnvFrom
-        extraEnvFrom:
-          - secretRef:
-              name: hermes-august-discord-secrets
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: hermes-team
-  syncPolicy:
-    automated: {}
-    syncOptions:
-      - CreateNamespace=true
----
+# Pin targetRevision to an exact chart version in production.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: hermes-team-members
+  name: hermes-team
   namespace: argocd
 spec:
-  goTemplate: false
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
   generators:
     - list:
         elements:
+          - name: august
+            teamRole: leader
+            valuesProfile: leader
+            ownsSharedResources: "true"
+            botSecret: hermes-august-discord-secrets
           - name: may
+            teamRole: member
+            valuesProfile: member
+            ownsSharedResources: "false"
             botSecret: hermes-may-discord-secrets
           - name: march
+            teamRole: member
+            valuesProfile: member
+            ownsSharedResources: "false"
             botSecret: hermes-march-discord-secrets
   template:
     metadata:
-      name: 'hermes-{{name}}'
+      name: 'hermes-{{ .name }}'
     spec:
       project: default
       source:
         repoURL: ghcr.io/jyje/hermes-agent-helm
         chart: hermes-agent
-        targetRevision: "*"          # pin an exact chart version in production
+        targetRevision: "*"
         helm:
-          releaseName: 'hermes-{{name}}'
+          releaseName: 'hermes-{{ .name }}'
           valueFiles:
-            - values-team-member.yaml
-          parameters:
-            - name: fullnameOverride
-              value: 'hermes-{{name}}'
-              forceString: true
-            # Helm list overrides are positional. Keep these indices synchronized
-            # with values-team-member.yaml; scenario-team.sh renders and verifies
-            # this exact mapping so index drift fails CI instead of silently
-            # overriding another variable.
-            - name: extraEnv[0].value # DISCORD_HOME_CHANNEL
-              value: "000000000000000000"
-              forceString: true
-            - name: extraEnv[1].value # DISCORD_ALLOWED_USERS
-              value: "111111111111111111"
-              forceString: true
-            - name: extraEnv[6].value # TEAM_MEMBER_NAME
-              value: '{{name}}'
-              forceString: true
-            - name: extraEnv[7].value # AUGUST_BOT_USER_ID
-              value: "000000000000000000"
-              forceString: true
-          valuesObject:
-            env:
-              NVIDIA_API_KEY: set-via-extraEnvFrom
-              DISCORD_BOT_TOKEN: set-via-extraEnvFrom
+            - 'values-team-{{ .valuesProfile }}.yaml'
+          # Keep this as a string rather than valuesObject: ApplicationSet's
+          # Go template can safely render per-agent scalar fields inside it.
+          # The roster and shared policy are written once for the entire set.
+          values: |
+            fullnameOverride: 'hermes-{{ .name }}'
+
+            team:
+              enabled: true
+              name: hermes-team
+              role: '{{ .teamRole }}'
+              identity: '{{ .name }}'
+              leader:
+                name: august
+                mentionEnv: AUGUST_BOT_USER_ID
+              members:
+                - name: may
+                  role: Research and evidence gathering
+                  mentionEnv: MAY_BOT_USER_ID
+                  capabilities: [research, source-review]
+                - name: march
+                  role: Implementation and verification
+                  mentionEnv: MARCH_BOT_USER_ID
+                  capabilities: [implementation, testing]
+              protocol:
+                maxHandoffs: 6
+              skill:
+                enabled: true
+                create: {{ .ownsSharedResources }}
+                name: hermes-team-roster
+                configMapName: hermes-team-skill
+                extraInstructions: ""
+              sharedVolume:
+                enabled: true
+                create: {{ .ownsSharedResources }}
+                claimName: hermes-team-knowledge
+                mountPath: /opt/data/team-knowledge
+                storageClass: ""
+                accessModes: [ReadWriteMany]
+                size: 10Gi
+                retain: true
+                permissions:
+                  enabled: {{ .ownsSharedResources }}
+                  image: busybox:1.37
+                  uid: 10000
+                  gid: 10000
+
+            # Remove the dummy IDs from the packaged examples. The common
+            # Secret supplies the complete roster to every generated release.
+            extraEnv: []
             extraEnvFrom:
               - secretRef:
-                  name: '{{botSecret}}'
+                  name: hermes-team-routing
+              - secretRef:
+                  name: '{{ .botSecret }}'
       destination:
         server: https://kubernetes.default.svc
         namespace: hermes-team
       syncPolicy:
-        automated: {}
+        automated:
+          selfHeal: true
         syncOptions:
           - CreateNamespace=true

@@ -8,5 +8,5 @@ metadata:
 data:
   # Partial config.yaml: only keys that override Hermes' built-in defaults.
   config.yaml: |
-    {{- toYaml .Values.config | nindent 4 }}
+    {{- include "hermes-agent.effectiveConfig" . | nindent 4 }}
 {{- end }}

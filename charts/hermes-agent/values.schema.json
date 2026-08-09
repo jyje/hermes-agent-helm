@@ -104,6 +104,122 @@
       }
     },
 
+    "team": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "role", "leader", "members", "protocol", "skill", "sharedVolume"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$|^$"
+        },
+        "role": { "type": "string", "enum": ["leader", "member"] },
+        "identity": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$|^$"
+        },
+        "leader": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "mentionEnv"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$|^$"
+            },
+            "mentionEnv": {
+              "type": "string",
+              "pattern": "^[A-Z_][A-Z0-9_]*$|^$"
+            }
+          }
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "role", "mentionEnv"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+              },
+              "role": { "type": "string", "minLength": 1 },
+              "mentionEnv": {
+                "type": "string",
+                "pattern": "^[A-Z_][A-Z0-9_]*$"
+              },
+              "capabilities": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxHandoffs"],
+          "properties": {
+            "maxHandoffs": { "type": "integer", "minimum": 1, "maximum": 20 }
+          }
+        },
+        "skill": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "create", "name", "configMapName", "extraInstructions"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "create": { "type": "boolean" },
+            "name": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$|^$"
+            },
+            "configMapName": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$|^$"
+            },
+            "extraInstructions": { "type": "string" }
+          }
+        },
+        "sharedVolume": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "create", "claimName", "mountPath", "storageClass", "accessModes", "size", "retain", "permissions"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "create": { "type": "boolean" },
+            "claimName": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$|^$"
+            },
+            "mountPath": { "type": "string", "pattern": "^/" },
+            "storageClass": { "type": "string" },
+            "accessModes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            },
+            "size": { "type": "string", "minLength": 1 },
+            "retain": { "type": "boolean" },
+            "permissions": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "image", "uid", "gid"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "image": { "type": "string", "minLength": 1 },
+                "uid": { "type": "integer", "minimum": 0 },
+                "gid": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "env": {
       "type": "object",
       "description": "Rendered into a Secret; keys are provider/platform env var names (OPENAI_API_KEY, DISCORD_BOT_TOKEN, ...), so left free-form.",

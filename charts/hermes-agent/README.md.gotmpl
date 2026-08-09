@@ -303,9 +303,13 @@ For a leader plus several members, use
 [`values-team-leader.yaml`](values-team-leader.yaml) and
 [`values-team-member.yaml`](values-team-member.yaml). That reference protocol
 serializes one explicit bot mention at a time and keeps every task, result, and
-review in the Discord thread. A separate pre-provisioned RWX PVC carries
-durable shared knowledge, but never tasks, status, or result handoffs. The team
-recipe requires that claim: leader read-write, members read-only.
+review in the Discord thread. Team mode mounts one shared roster/protocol skill
+ConfigMap in every Pod. The leader release creates that ConfigMap and the RWX
+knowledge PVC exactly once; members reference both by name and mount them
+read-only. The PVC carries durable shared knowledge, but never tasks, status,
+or result handoffs. In the ApplicationSet example, the roster and shared policy
+are declared once while each list item supplies only identity, role, and its
+private Secret name.
 The `file` and `memory` toolsets remain available for each agent's own work;
 only cross-agent handoffs through files, memory, hooks, or background work are
 prohibited.
