@@ -3,20 +3,18 @@ Hermes Agent ({{ .Chart.AppVersion }}) deployed as a {{ if eq .Values.controller
 Release:   {{ .Release.Name }}
 Namespace: {{ .Release.Namespace }}
 Model:     {{ .Values.config.model.default }}
-Provider:  {{ .Values.config.model.provider }} ({{ .Values.config.model.base_url }})
+Provider:  {{ .Values.config.model.provider }}{{ with .Values.config.model.base_url }} ({{ . }}){{ end }}
 Backend:   terminal.backend={{ .Values.config.terminal.backend }} (commands run in-pod)
 
 1. Watch rollout:
    kubectl rollout status {{ .Values.controller.type }}/{{ include "hermes-agent.fullname" . }} -n {{ .Release.Namespace }}
 
-2. Set the provider API key if you used the placeholder:
-   helm upgrade {{ .Release.Name }} . -n {{ .Release.Namespace }} \
-     --set-string env.OPENAI_API_KEY='sk-...'
 {{- if .Values.auth.deviceFlow.enabled }}
+2. Complete the interactive provider login.
 
    Device-flow login is ENABLED (provider: {{ .Values.auth.deviceFlow.provider }}).
-   On first start the "auth-device-login" init container performs the OAuth
-   device grant and waits (up to {{ .Values.auth.deviceFlow.timeoutSeconds }}s) for you to approve it.
+   On first start the "auth-device-login" init container performs the selected
+   provider's interactive login and waits (up to {{ .Values.auth.deviceFlow.timeoutSeconds }}s) for approval.
    {{- if eq .Values.auth.deviceFlow.notify "discord" }}
    Check the agent's Discord home channel for the verification link + code.
    {{- else }}
@@ -24,6 +22,10 @@ Backend:   terminal.backend={{ .Values.config.terminal.backend }} (commands run 
    {{- end }}
    Follow along with:
    kubectl logs {{ if eq .Values.controller.type "deployment" }}deploy{{ else }}sts{{ end }}/{{ include "hermes-agent.fullname" . }} -n {{ .Release.Namespace }} -c auth-device-login -f
+{{- else }}
+2. Set the provider API key if you used the placeholder:
+   helm upgrade {{ .Release.Name }} . -n {{ .Release.Namespace }} \
+     --set-string env.OPENAI_API_KEY='sk-...'
 {{- end }}
 {{- if .Values.tests.enabled }}
 

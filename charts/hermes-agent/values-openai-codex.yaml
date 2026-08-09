@@ -1,0 +1,63 @@
+# values-openai-codex.yaml
+#
+# Hermes Agent backed by the account-authenticated OpenAI Codex provider. The
+# auth init container sends a verification URL + one-time code to Discord,
+# waits for approval, and stores the refreshable credential in
+# HERMES_HOME/auth.json through Hermes' native auth-store helper.
+#
+# This is distinct from the `openai-api` provider and does not use an OpenAI API
+# key. Your ChatGPT plan and the live Codex catalog determine model access.
+#
+# All secrets below are DUMMY placeholders. Do not commit real tokens.
+#
+#   helm upgrade --install hermes-codex ./charts/hermes-agent \
+#     --namespace hermes-codex --create-namespace \
+#     -f charts/hermes-agent/values-openai-codex.yaml \
+#     --set-string env.DISCORD_BOT_TOKEN='<real-bot-token>' --wait
+#
+#   kubectl logs deploy/hermes-codex-hermes-agent -n hermes-codex \
+#     -c auth-device-login -f
+
+config:
+  model:
+    provider: openai-codex
+    # Available in the pinned Hermes Codex catalog and verified by this chart.
+    # Use /model in Discord to select another model available to your account.
+    default: gpt-5.6-terra
+  terminal:
+    backend: local
+
+auth:
+  deviceFlow:
+    enabled: true
+    provider: openai-codex
+    notify: discord
+
+env:
+  # Unused by openai-codex; overrides the chart's OpenAI placeholder.
+  OPENAI_API_KEY: "unused"
+  DISCORD_BOT_TOKEN: "MTA0DUMMYtoken000000000000.DUMMY.replace_me_with_a_real_token"
+
+extraEnv:
+  - name: DISCORD_HOME_CHANNEL
+    value: "000000000000000000" # DUMMY - channel id for login delivery
+  - name: DISCORD_ALLOWED_USERS
+    value: "111111111111111111" # DUMMY - allowed Discord user id
+  - name: DISCORD_ALLOW_ALL_USERS
+    value: "false"
+
+# Required so auth.json and its refresh token survive Pod replacement.
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi

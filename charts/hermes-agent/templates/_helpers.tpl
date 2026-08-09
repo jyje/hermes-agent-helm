@@ -145,27 +145,34 @@ spec:
     {{- $df := .Values.auth.deviceFlow }}
     {{- $p := index $df.providers $df.provider }}
     {{- if not $p }}{{ fail (printf "auth.deviceFlow.provider %q has no matching entry under auth.deviceFlow.providers" $df.provider) }}{{- end }}
-    # Bootstrap the selected provider's credential via the OAuth device flow
-    # before the agent starts. Idempotent: skips if a valid token already
-    # exists on the volume. Runs as the Hermes runtime uid so the token file it
-    # writes to $HERMES_HOME/.env is readable by the agent.
+    {{- $flow := $p.flow | default "github" }}
+    # Bootstrap the selected provider credential before the agent starts.
+    # GitHub writes .env; OpenAI Codex uses Hermes' native auth.json store.
     - name: auth-device-login
+      {{- if eq $flow "openai-codex" }}
+      image: "{{ include "hermes-agent.image" . }}"
+      {{- else }}
       image: "{{ $df.image.repository }}:{{ $df.image.tag }}"
+      {{- end }}
       imagePullPolicy: {{ .Values.image.pullPolicy }}
       command: ["python3", "/login/device_login.py"]
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
+        - name: DEVICE_FLOW_KIND
+          value: {{ $flow | quote }}
         - name: OAUTH_CLIENT_ID
-          value: {{ $p.clientId | quote }}
+          value: {{ $p.clientId | default "" | quote }}
         - name: OAUTH_SCOPE
           value: {{ $p.scope | default "read:user" | quote }}
         - name: AUTH_HOST
           value: {{ $p.authHost | default "github.com" | quote }}
         - name: TOKEN_ENV
-          value: {{ $p.tokenEnv | quote }}
+          value: {{ $p.tokenEnv | default "" | quote }}
         - name: VALIDATE_URL
           value: {{ $p.validateUrl | default "" | quote }}
+        - name: OPENAI_CODEX_ISSUER
+          value: {{ $p.issuer | default "https://auth.openai.com" | quote }}
         - name: NOTIFY
           value: {{ $df.notify | quote }}
         - name: LOGIN_TIMEOUT_SECONDS

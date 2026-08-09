@@ -12,6 +12,7 @@ on:
   pull_request:
     paths:
       - "charts/hermes-agent/**"
+      - "tests/**"
       - ".github/scripts/**"
       - ".github/workflows/validate-chart.yaml"
 
@@ -65,6 +66,9 @@ jobs:
         run: |
           helm template hermes-agent charts/hermes-agent \
             --set-string env.OPENAI_API_KEY=sk-test > /dev/null
+
+      - name: device login unit tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: install helm-docs
         env:

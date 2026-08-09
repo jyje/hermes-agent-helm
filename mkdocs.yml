@@ -80,6 +80,7 @@ plugins:
             Hermes collaboration: Hermes 협업
             Roadmap: 로드맵
             DevOps roadmap: DevOps 로드맵
+            OpenAI Codex: OpenAI Codex
             Local development guide: 로컬 개발 가이드
             Helm installation guide: Helm 설치 가이드
             ArgoCD guide: ArgoCD 가이드
@@ -145,6 +146,7 @@ nav:
           - Fireworks: advanced/providers/fireworks.md
           - Gemini: advanced/providers/gemini.md
           - GitHub Copilot: advanced/providers/github-copilot.md
+          - OpenAI Codex: advanced/providers/openai-codex.md
           - Google Vertex: advanced/providers/google-vertex.md
           - NVIDIA NIM + Discord: advanced/providers/nvidia-nim-and-discord.md
           - OpenAI: advanced/providers/openai.md
