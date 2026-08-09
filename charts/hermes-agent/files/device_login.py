@@ -1,32 +1,18 @@
 #!/usr/bin/env python3
-"""OAuth device-flow login for a Hermes agent (chart init container).
+"""Interactive provider login for a Hermes Agent chart init container.
 
-Provider-generic. Runs before the agent container. It:
-  1. Skips immediately if a usable token already exists on the persistent
-     volume (unless FORCE_RELOGIN=true), so restarts are fast.
-  2. Otherwise runs the OAuth 2.0 Device Authorization Grant (RFC 8628) against
-     the selected provider's authorization server.
-  3. Delivers the verification URL + user code to the operator (Discord by
-     default; always also printed to these init-container logs).
-  4. Polls until authorized, then writes the token into $HERMES_HOME/.env under
-     the provider's token env key, where Hermes reads it natively. Must run as
-     the Hermes runtime uid so the agent can read the file.
+Two flow kinds are supported:
 
-Pure Python stdlib. Configured entirely via env vars (the chart fills these
-from the selected `auth.deviceFlow.providers[<provider>]` profile):
-  OAUTH_CLIENT_ID          OAuth client id for the device grant   (required)
-  OAUTH_SCOPE              OAuth scope                            (default read:user)
-  AUTH_HOST                device/token server host               (default github.com)
-  TOKEN_ENV                .env key to store the token under      (required)
-  VALIDATE_URL             optional GET endpoint to verify a token is still live
-  NOTIFY                   discord | logs                         (default discord)
-  DISCORD_BOT_TOKEN        required when NOTIFY=discord
-  DISCORD_HOME_CHANNEL     required when NOTIFY=discord
-  HERMES_HOME              default /opt/data
-  LOGIN_TIMEOUT_SECONDS    default 870
-  FORCE_RELOGIN            true to re-login even if a token exists
-  CHOWN_UID / CHOWN_GID    chown the written .env to this uid/gid (the agent's
-                           runtime uid) when running as root; -1 disables
+* ``github`` performs GitHub's RFC 8628 device grant and stores one token in
+  ``$HERMES_HOME/.env`` (the existing GitHub Copilot behavior).
+* ``openai-codex`` follows Hermes' version-pinned OpenAI Codex device-code
+  exchange and delegates persistence to ``hermes_cli.auth._save_codex_tokens``.
+  That upstream helper preserves and atomically updates ``auth.json``, including
+  the credential pool and refresh-token chain.
+
+Both flows print the verification URL and user code to the init-container logs
+and can additionally deliver them to Discord. Authorization codes, PKCE
+verifiers, access tokens, refresh tokens, and API keys are never printed.
 """
 
 from __future__ import annotations
@@ -38,8 +24,11 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
+FLOW_KIND = os.getenv("DEVICE_FLOW_KIND", "github").strip().lower()
 CLIENT_ID = os.getenv("OAUTH_CLIENT_ID", "").strip()
 SCOPE = os.getenv("OAUTH_SCOPE", "read:user").strip()
 AUTH_HOST = os.getenv("AUTH_HOST", "github.com").strip().rstrip("/")
@@ -57,9 +46,19 @@ CHOWN_GID = int(os.getenv("CHOWN_GID", "-1"))
 DEVICE_CODE_URL = f"https://{AUTH_HOST}/login/device/code"
 ACCESS_TOKEN_URL = f"https://{AUTH_HOST}/login/oauth/access_token"
 DISCORD_API = "https://discord.com/api/v10"
+OPENAI_CODEX_ISSUER = os.getenv(
+    "OPENAI_CODEX_ISSUER", "https://auth.openai.com"
+).strip().rstrip("/")
 
 
-def _post_form(url: str, fields: dict) -> dict:
+def _decode_json(raw: bytes) -> dict[str, Any]:
+    value = json.loads(raw.decode())
+    if not isinstance(value, dict):
+        raise ValueError("response was not a JSON object")
+    return value
+
+
+def _post_form(url: str, fields: dict[str, Any]) -> dict[str, Any]:
     data = urllib.parse.urlencode(fields).encode()
     req = urllib.request.Request(
         url,
@@ -67,28 +66,75 @@ def _post_form(url: str, fields: dict) -> dict:
         headers={
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "hermes-device-login/1.0",
+            "User-Agent": "hermes-device-login/2.0",
         },
     )
     with urllib.request.urlopen(req, timeout=20) as resp:
-        return json.loads(resp.read().decode())
+        return _decode_json(resp.read())
+
+
+def _post_json_status(
+    url: str, payload: dict[str, Any]
+) -> tuple[int, dict[str, Any], dict[str, str]]:
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode(),
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "hermes-device-login/2.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            return resp.status, _decode_json(resp.read()), dict(resp.headers.items())
+    except urllib.error.HTTPError as exc:
+        try:
+            body = _decode_json(exc.read())
+        except Exception:  # noqa: BLE001 - the status remains actionable
+            body = {}
+        return exc.code, body, dict(exc.headers.items())
+
+
+def _post_form_status(
+    url: str, fields: dict[str, Any]
+) -> tuple[int, dict[str, Any], dict[str, str]]:
+    req = urllib.request.Request(
+        url,
+        data=urllib.parse.urlencode(fields).encode(),
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "hermes-device-login/2.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            return resp.status, _decode_json(resp.read()), dict(resp.headers.items())
+    except urllib.error.HTTPError as exc:
+        try:
+            body = _decode_json(exc.read())
+        except Exception:  # noqa: BLE001 - the status remains actionable
+            body = {}
+        return exc.code, body, dict(exc.headers.items())
 
 
 def discord_post(content: str) -> None:
-    """Best-effort delivery of a message to the configured Discord channel."""
+    """Best-effort delivery of a verification message to Discord."""
     if NOTIFY != "discord":
         return
     if not (BOT_TOKEN and CHANNEL_ID):
         print("  [discord] bot token / channel not set - skipping post")
         return
-    body = json.dumps({"content": content}).encode()
     req = urllib.request.Request(
         f"{DISCORD_API}/channels/{CHANNEL_ID}/messages",
-        data=body,
+        data=json.dumps({"content": content}).encode(),
         headers={
             "Authorization": f"Bot {BOT_TOKEN}",
             "Content-Type": "application/json",
-            "User-Agent": "hermes-device-login/1.0",
+            "User-Agent": "hermes-device-login/2.0",
         },
         method="POST",
     )
@@ -96,10 +142,26 @@ def discord_post(content: str) -> None:
         with urllib.request.urlopen(req, timeout=20) as resp:
             print(f"  [discord] posted message (HTTP {resp.status})")
     except urllib.error.HTTPError as exc:
-        detail = exc.read().decode(errors="replace")[:300]
-        print(f"  [discord] post FAILED HTTP {exc.code}: {detail}")
+        print(f"  [discord] post FAILED HTTP {exc.code}")
     except Exception as exc:  # noqa: BLE001
         print(f"  [discord] post FAILED: {exc}")
+
+
+def _notification_ready() -> bool:
+    if NOTIFY == "discord" and not (BOT_TOKEN and CHANNEL_ID):
+        print("ERROR: NOTIFY=discord requires DISCORD_BOT_TOKEN and DISCORD_HOME_CHANNEL.")
+        return False
+    return True
+
+
+def _chown(path: Path) -> None:
+    if CHOWN_UID < 0 and CHOWN_GID < 0:
+        return
+    try:
+        os.chown(path, CHOWN_UID, CHOWN_GID)
+        print(f"  chowned {path} to {CHOWN_UID}:{CHOWN_GID}")
+    except OSError as exc:
+        print(f"  WARNING: could not chown {path}: {exc}")
 
 
 def read_env_token() -> str:
@@ -113,12 +175,7 @@ def read_env_token() -> str:
 
 
 def token_is_valid(token: str) -> bool:
-    """Best-effort check that a token is still usable.
-
-    With no VALIDATE_URL, a present token is assumed valid. Otherwise treats
-    network/unknown errors as 'valid' so transient failures never block
-    startup; only an explicit 401/403 forces a re-login.
-    """
+    """Treat only an explicit 401/403 validation response as invalid."""
     if not token:
         return False
     if not VALIDATE_URL:
@@ -128,17 +185,15 @@ def token_is_valid(token: str) -> bool:
         headers={
             "Authorization": f"token {token}",
             "Accept": "application/json",
-            "User-Agent": "hermes-device-login/1.0",
+            "User-Agent": "hermes-device-login/2.0",
         },
     )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             return resp.status == 200
     except urllib.error.HTTPError as exc:
-        if exc.code in (401, 403):
-            return False
-        return True
-    except Exception:  # noqa: BLE001
+        return exc.code not in (401, 403)
+    except Exception:  # noqa: BLE001 - transient network errors must not block startup
         return True
 
 
@@ -156,24 +211,15 @@ def write_env_token(token: str) -> None:
         os.chmod(env_path, 0o600)
     except OSError:
         pass
-    # When the init container runs as root (the robust default that can write
-    # to any storage class), hand the file to the agent's runtime uid/gid so the
-    # agent: which runs as that non-root uid - can read it.
-    if CHOWN_UID >= 0 or CHOWN_GID >= 0:
-        try:
-            os.chown(env_path, CHOWN_UID, CHOWN_GID)
-            print(f"  chowned {env_path} to {CHOWN_UID}:{CHOWN_GID}")
-        except OSError as exc:
-            print(f"  WARNING: could not chown {env_path}: {exc}")
-    print(f"  wrote {TOKEN_ENV} to {env_path} (len={len(token)})")
+    _chown(env_path)
+    print(f"  wrote {TOKEN_ENV} to {env_path}")
 
 
-def run_device_flow() -> int:
-    if NOTIFY == "discord" and not (BOT_TOKEN and CHANNEL_ID):
-        print("ERROR: NOTIFY=discord requires DISCORD_BOT_TOKEN and DISCORD_HOME_CHANNEL.")
+def run_github_device_flow() -> int:
+    if not _notification_ready():
         return 2
 
-    print(f"Starting device flow (client={CLIENT_ID}, host={AUTH_HOST}) ...")
+    print(f"Starting GitHub device flow (client={CLIENT_ID}, host={AUTH_HOST}) ...")
     dev = _post_form(DEVICE_CODE_URL, {"client_id": CLIENT_ID, "scope": SCOPE})
     device_code = dev.get("device_code")
     user_code = dev.get("user_code")
@@ -181,7 +227,7 @@ def run_device_flow() -> int:
     interval = max(int(dev.get("interval", 5)), 1)
     expires_in = int(dev.get("expires_in", 900))
     if not device_code or not user_code:
-        print(f"ERROR: device flow did not return a code: {dev}")
+        print("ERROR: GitHub device flow did not return a code.")
         return 1
 
     print(f"  user_code={user_code}  verify={verification_uri}  expires_in={expires_in}s")
@@ -211,15 +257,8 @@ def run_device_flow() -> int:
             continue
 
         if res.get("access_token"):
-            token = res["access_token"]
-            print(
-                "  AUTHORIZED. token_prefix={} expires_in={} refresh_token={} scope={}".format(
-                    token[:4],
-                    res.get("expires_in", "(none -> long-lived)"),
-                    "present" if res.get("refresh_token") else "absent",
-                    res.get("scope", ""),
-                )
-            )
+            token = str(res["access_token"])
+            print("  AUTHORIZED. Access token received.")
             break
 
         err = res.get("error", "")
@@ -232,7 +271,7 @@ def run_device_flow() -> int:
             print(f"  ERROR: {err}")
             discord_post(f"Login failed: {err}. The pod will retry.")
             return 1
-        print(f"  poll returned error: {err or res}")
+        print(f"  poll returned error: {err or 'unknown response'}")
 
     if not token:
         print("  ERROR: timed out waiting for authorization")
@@ -244,9 +283,193 @@ def run_device_flow() -> int:
     return 0
 
 
+def _codex_native() -> tuple[str, str, Any, Any]:
+    """Load the version-pinned Hermes Codex constants and persistence helpers."""
+    from hermes_cli.auth import (  # type: ignore[import-not-found]
+        CODEX_OAUTH_CLIENT_ID,
+        CODEX_OAUTH_TOKEN_URL,
+        _save_codex_tokens,
+        resolve_codex_runtime_credentials,
+    )
+
+    return (
+        str(CODEX_OAUTH_CLIENT_ID),
+        str(CODEX_OAUTH_TOKEN_URL),
+        _save_codex_tokens,
+        resolve_codex_runtime_credentials,
+    )
+
+
+def _existing_codex_state(resolve_credentials: Any) -> str:
+    try:
+        resolved = resolve_credentials(refresh_if_expiring=True)
+    except Exception as exc:  # noqa: BLE001 - Hermes raises its version-specific AuthError
+        code = str(getattr(exc, "code", "") or "")
+        if bool(getattr(exc, "relogin_required", False)):
+            print(
+                "Existing OpenAI Codex credentials require login "
+                f"({code or 'not logged in'})."
+            )
+            return "login"
+        print(
+            "ERROR: existing OpenAI Codex credentials could not be refreshed "
+            f"({code or 'temporary auth error'}); refusing to replace them."
+        )
+        return "error"
+    return "usable" if str(resolved.get("api_key", "") or "").strip() else "login"
+
+
+def _retry_after(headers: dict[str, str]) -> int | None:
+    raw = headers.get("Retry-After") or headers.get("retry-after")
+    try:
+        return max(1, min(int(raw), 60)) if raw is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def run_openai_codex_flow() -> int:
+    try:
+        client_id, token_url, save_tokens, resolve_credentials = _codex_native()
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR: pinned Hermes image does not expose OpenAI Codex auth support: {exc}")
+        return 2
+
+    if not FORCE_RELOGIN:
+        existing_state = _existing_codex_state(resolve_credentials)
+        if existing_state == "usable":
+            print("Existing OpenAI Codex credentials are usable - skipping device flow.")
+            return 0
+        if existing_state == "error":
+            return 1
+    if FORCE_RELOGIN:
+        print("FORCE_RELOGIN=true - starting a fresh OpenAI Codex login.")
+    if not _notification_ready():
+        return 2
+
+    usercode_url = f"{OPENAI_CODEX_ISSUER}/api/accounts/deviceauth/usercode"
+    poll_url = f"{OPENAI_CODEX_ISSUER}/api/accounts/deviceauth/token"
+    verification_url = f"{OPENAI_CODEX_ISSUER}/codex/device"
+
+    print("Starting OpenAI Codex device flow ...")
+    device_data: dict[str, Any] = {}
+    for attempt in range(1, 5):
+        try:
+            status, device_data, headers = _post_json_status(
+                usercode_url, {"client_id": client_id}
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"ERROR: failed to request OpenAI Codex device code: {exc}")
+            return 1
+        if status != 429:
+            break
+        if attempt == 4:
+            print("ERROR: OpenAI rate-limited the device-code request (HTTP 429).")
+            return 1
+        delay = _retry_after(headers) or min(2**attempt, 60)
+        print(f"  OpenAI rate-limited login; retrying in {delay}s ...")
+        time.sleep(delay)
+
+    if status != 200:
+        print(f"ERROR: OpenAI device-code request returned HTTP {status}.")
+        return 1
+
+    user_code = str(device_data.get("user_code", "") or "")
+    device_auth_id = str(device_data.get("device_auth_id", "") or "")
+    interval = max(3, int(device_data.get("interval", 5)))
+    if not user_code or not device_auth_id:
+        print("ERROR: OpenAI device-code response was incomplete.")
+        return 1
+
+    print(f"  user_code={user_code}  verify={verification_url}")
+    discord_post(
+        "OpenAI Codex login required:\n"
+        f"1. Open: {verification_url}\n"
+        f"2. Enter code: {user_code}\n"
+        "(valid for about 15 minutes; phone-friendly)"
+    )
+    print("  waiting for authorization ...")
+
+    deadline = time.monotonic() + min(TIMEOUT, 15 * 60)
+    exchange: dict[str, Any] | None = None
+    while time.monotonic() < deadline:
+        time.sleep(interval)
+        try:
+            poll_status, poll_data, _ = _post_json_status(
+                poll_url,
+                {"device_auth_id": device_auth_id, "user_code": user_code},
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"  poll error (will retry): {exc}")
+            continue
+        if poll_status == 200:
+            exchange = poll_data
+            break
+        if poll_status in (403, 404):
+            continue
+        print(f"ERROR: OpenAI device auth polling returned HTTP {poll_status}.")
+        return 1
+
+    if exchange is None:
+        print("ERROR: OpenAI Codex login timed out.")
+        discord_post("OpenAI Codex login timed out. The pod will retry.")
+        return 1
+
+    authorization_code = str(exchange.get("authorization_code", "") or "")
+    code_verifier = str(exchange.get("code_verifier", "") or "")
+    if not authorization_code or not code_verifier:
+        print("ERROR: OpenAI authorization response was incomplete.")
+        return 1
+
+    try:
+        token_status, tokens, _ = _post_form_status(
+            os.getenv("OPENAI_CODEX_TOKEN_URL", "").strip() or token_url,
+            {
+                "grant_type": "authorization_code",
+                "code": authorization_code,
+                "redirect_uri": f"{OPENAI_CODEX_ISSUER}/deviceauth/callback",
+                "client_id": client_id,
+                "code_verifier": code_verifier,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR: OpenAI Codex token exchange failed: {exc}")
+        return 1
+    if token_status != 200:
+        print(f"ERROR: OpenAI Codex token exchange returned HTTP {token_status}.")
+        return 1
+
+    access_token = str(tokens.get("access_token", "") or "")
+    refresh_token = str(tokens.get("refresh_token", "") or "")
+    if not access_token or not refresh_token:
+        print("ERROR: OpenAI Codex token exchange did not return both token types.")
+        return 1
+
+    last_refresh = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    try:
+        save_tokens(
+            {"access_token": access_token, "refresh_token": refresh_token},
+            last_refresh,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"ERROR: Hermes could not persist OpenAI Codex credentials: {exc}")
+        return 1
+
+    auth_path = HERMES_HOME / "auth.json"
+    if auth_path.exists():
+        _chown(auth_path)
+    print(f"  wrote OpenAI Codex credentials to {auth_path}")
+    discord_post("OpenAI Codex login complete. The agent is starting.")
+    return 0
+
+
 def main() -> int:
+    if FLOW_KIND == "openai-codex":
+        return run_openai_codex_flow()
+    if FLOW_KIND not in ("github", "github-copilot"):
+        print(f"ERROR: unsupported DEVICE_FLOW_KIND={FLOW_KIND!r}")
+        return 2
     if not CLIENT_ID or not TOKEN_ENV:
-        print("ERROR: OAUTH_CLIENT_ID and TOKEN_ENV are required.")
+        print("ERROR: OAUTH_CLIENT_ID and TOKEN_ENV are required for GitHub device flow.")
         return 2
 
     existing = read_env_token()
@@ -256,8 +479,8 @@ def main() -> int:
     if existing and FORCE_RELOGIN:
         print("FORCE_RELOGIN=true - ignoring existing token.")
     elif existing:
-        print("Existing token is missing/invalid - re-running device flow.")
-    return run_device_flow()
+        print("Existing token is invalid - re-running device flow.")
+    return run_github_device_flow()
 
 
 if __name__ == "__main__":

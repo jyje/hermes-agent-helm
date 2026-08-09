@@ -173,16 +173,13 @@ extraResources: []
 #
 # By default the agent authenticates with the static provider key from `env`
 # (rendered into the `-env` Secret). `auth.deviceFlow` is an alternative for
-# providers that issue short-lived/OAuth tokens you cannot paste ahead of time:
-# it performs the **OAuth 2.0 Device Authorization Grant (RFC 8628)** at pod
-# startup, surfaces the verification URL + user code to a human (e.g. via the
-# agent's Discord bot, mobile-friendly), waits for approval, and persists the
-# resulting token to `HERMES_HOME/.env`: exactly where Hermes natively reads
-# it. The token survives restarts on the persistent volume; re-login only
-# happens when it is missing or revoked.
+# providers that support interactive device login. At pod startup it surfaces
+# a verification URL + user code to a human (e.g. via the agent's Discord bot),
+# waits for approval, and persists credentials where Hermes natively reads
+# them. Credentials survive restarts on the persistent volume.
 #
-# Currently supports **github-copilot** (Hermes provider id `copilot`), whose
-# API rejects PATs and requires a `gho_`/`ghu_` device-flow token.
+# Supported profiles are **github-copilot** (Hermes provider id `copilot`) and
+# **openai-codex** (ChatGPT/Codex account login, distinct from `openai-api`).
 # ---------------------------------------------------------------------------
 auth:
   deviceFlow:
@@ -210,17 +207,19 @@ auth:
     tokenOwner:
       uid: 10000
       gid: 10000
-    # -- Login image. stdlib-only Python; no extra dependencies are installed.
+    # -- Login image for GitHub-style profiles. OpenAI Codex uses the pinned
+    #    Hermes image so auth.json persistence and refresh stay version-aligned.
     image:
       repository: python
       tag: "3.13-slim"
     # -- Resources for the login init container.
     resources: {}
-    # Catalog of device-flow-capable providers. The chart ships sane defaults;
-    # the selected one (`provider` above) is what runs. Add an entry to support
-    # another provider (each provider uses its own OAuth authorization server).
+    # Catalog of interactive-login profiles. `flow` selects the handler;
+    # profiles without it retain the legacy GitHub handler for compatibility.
     providers:
       github-copilot:
+        # -- Login protocol handler.
+        flow: github
         # -- OAuth client id for the device grant. The shared opencode/Copilot-CLI
         #    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py).
         clientId: "Ov23li8tweQw6odWQebz"
@@ -234,6 +233,12 @@ auth:
         # -- Optional endpoint to verify an existing token is still live; on
         #    401/403 the init container re-runs the login. Empty = skip the check.
         validateUrl: https://api.github.com/copilot_internal/v2/token
+      openai-codex:
+        # -- Use the OpenAI Codex device-code flow bundled with the pinned
+        #    Hermes version and persist refreshable credentials in auth.json.
+        flow: openai-codex
+        # -- OpenAI account issuer. Override only for a compatible test server.
+        issuer: https://auth.openai.com
 
 # ---------------------------------------------------------------------------
 # Persistence: HERMES_HOME state lives here.

@@ -204,13 +204,21 @@
               "additionalProperties": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["clientId", "tokenEnv"],
+                "anyOf": [
+                  { "required": ["clientId", "tokenEnv"] },
+                  {
+                    "required": ["flow"],
+                    "properties": { "flow": { "const": "openai-codex" } }
+                  }
+                ],
                 "properties": {
+                  "flow": { "type": "string", "enum": ["github", "openai-codex"] },
                   "clientId": { "type": "string" },
                   "scope": { "type": "string" },
                   "authHost": { "type": "string" },
                   "tokenEnv": { "type": "string" },
-                  "validateUrl": { "type": "string" }
+                  "validateUrl": { "type": "string" },
+                  "issuer": { "type": "string", "format": "uri" }
                 }
               }
             }
