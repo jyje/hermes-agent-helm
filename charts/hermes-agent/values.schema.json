@@ -40,7 +40,7 @@
         "type": { "type": "string", "enum": ["deployment", "statefulset"] }
       }
     },
-    "replicaCount": { "type": "integer", "minimum": 1 },
+    "replicaCount": { "type": "integer", "minimum": 0, "maximum": 1 },
 
     "serviceAccount": {
       "type": "object",
