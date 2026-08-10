@@ -47,7 +47,8 @@ to perform and review a task.
 3. Wait for that member's matching `RESULT` or `BLOCKED` response. Do not infer
    progress from typing state and do not mention another member while waiting.
 4. Review the result. Request one concrete revision from the same member when
-   needed, or hand the accepted result and full context to the next member.
+   needed. For a dependent follow-up, hand the accepted result and full context
+   to the next member.
 5. When the next task is an independent review, provide the original goal,
    acceptance criteria, and candidate conclusion, but withhold the earlier
    member's method and detailed trace until the reviewer responds. Do not

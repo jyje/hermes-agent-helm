@@ -422,7 +422,7 @@ becomes:
 ```text
 @may_bot
 
-Context: <everything needed, including accepted earlier results>
+Context: <everything needed; omit prior method/trace for independent review>
 Task: <one concrete task>
 Done when: <observable acceptance criteria>
 Reply contract: mention @august_bot and include the complete result here.

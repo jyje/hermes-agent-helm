@@ -403,7 +403,7 @@ Discord뿐입니다. Telegram과 Slack에도 모든 루프 브레이크 노브�
 ```text
 @may_bot
 
-Context: <everything needed, including accepted earlier results>
+Context: <필요한 모든 문맥; 독립 검증이면 이전 방법/과정은 제외>
 Task: <one concrete task>
 Done when: <observable acceptance criteria>
 Reply contract: mention @august_bot and include the complete result here.
