@@ -94,6 +94,14 @@ if kubectl get configmap hermes-may-team-skill -n "$NS" >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "[$NS] verifying every team Pod rolls when the shared skill changes"
+leader_skill_checksum=$(kubectl get deployment hermes-august -n "$NS" \
+  -o 'jsonpath={.spec.template.metadata.annotations.checksum\/team-skill}')
+member_skill_checksum=$(kubectl get deployment hermes-may -n "$NS" \
+  -o 'jsonpath={.spec.template.metadata.annotations.checksum\/team-skill}')
+[ -n "$leader_skill_checksum" ]
+[ "$leader_skill_checksum" = "$member_skill_checksum" ]
+
 echo "[$NS] verifying the injected skill toolset remains enabled"
 for config in "$leader_config" "$member_config"; do
   if grep -Eq '^[[:space:]]+- skills$' <<<"$config"; then
