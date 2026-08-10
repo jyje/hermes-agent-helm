@@ -68,8 +68,7 @@ if (!release) throw new Error(`No pending release for ${packageName}`);
 
 const entries = status.changesets
   .map(({ id }) => readChangeset(id))
-  .filter(Boolean)
-  .slice(0, 3);
+  .filter(Boolean);
 if (!entries.length) throw new Error(`No pending Changeset entries for ${packageName}`);
 
 run('pnpm', ['exec', 'changeset', 'version']);
