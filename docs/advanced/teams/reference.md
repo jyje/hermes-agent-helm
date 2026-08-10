@@ -290,7 +290,7 @@ sequenceDiagram
     participant R as march
 
     H->>A: @august goal (starts one thread)
-    A->>M: <@may> [TEAM ... TASK] + full context and criteria
+    A->>M: human-facing acknowledgment + <@may> [TEAM ... TASK]
     M->>A: <@august> [TEAM ... RESULT] + complete result
     A->>R: <@march> [TEAM ... TASK] + goal + accepted may result
     R->>A: <@august> [TEAM ... RESULT] + review/synthesis
@@ -311,8 +311,17 @@ Reply contract: mention <@LEADER_ID> and include the complete result here.
 [TEAM run=<short-id> step=<n> TASK]
 ```
 
-The mention stays first so the intended bot is obvious and triggered; the TEAM
-metadata stays on the final independent line so it does not interrupt the task.
+The mention starts the member block so the intended bot is obvious and
+triggered; the TEAM metadata stays on the final independent line so it does not
+interrupt the task.
+
+For the first TASK only, put a brief human-facing acknowledgment and plan before
+the member block in the same message. A standalone no-mention acknowledgment
+would terminate the automatic handoff. When the next member must independently
+verify a conclusion, pass the original goal, acceptance criteria, and candidate
+conclusion, but do not pass the first member's method or detailed trace and do
+not prescribe a verification method. This preserves genuine independence while
+keeping all required task context visible in Discord.
 
 Deploy the leader first, then one release per member. The leader values create
 the shared skill and claim; member values reference them. The cluster default
