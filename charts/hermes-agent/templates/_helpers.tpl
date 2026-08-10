@@ -93,8 +93,11 @@ metadata:
     # Roll pods when config/secret content changes.
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
-    {{- if and .Values.team.enabled .Values.team.skill.enabled .Values.team.skill.create }}
-    checksum/team-skill: {{ include (print $.Template.BasePath "/team-skill-configmap.yaml") . | sha256sum }}
+    {{- if and .Values.team.enabled .Values.team.skill.enabled }}
+    # Roll leaders and members when the rendered shared skill changes. Members
+    # reference the leader-owned ConfigMap, so hashing only the created resource
+    # would leave their existing Pods on the previous in-memory protocol.
+    checksum/team-skill: {{ tpl (.Files.Get "files/skills/hermes-team-roster/SKILL.md") . | sha256sum }}
     {{- end }}
     {{- with .Values.podAnnotations }}
     {{- toYaml . | nindent 4 }}
