@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.4.0
+
+### Minor Changes
+
+- 4e3ccfa: Feature(values): Allow paused GitOps bootstrap
+
+  Allow `replicaCount: 0` to prepare chart resources before scaling the single-agent workload to one replica.
+
+- efe35c8: Feature(team): Add chart-managed leader teams with a packaged shared roster skill
+
+  Let one leader release render the packaged `SKILL.md` asset into a shared team skill ConfigMap and create an RWX knowledge PVC while ApplicationSet-managed members mount both read-only. Add role-aware validation, Discord loop brakes, same-message human acknowledgements, independent-review context isolation, concise team values, and structural CI coverage.
+
+### Patch Changes
+
+- c514528: Documentation(docs): Highlight chat-first credential bootstrap
+
+  Explain the chart-managed gateway lifecycle and optional Discord-delivered device login for GitHub Copilot and OpenAI Codex.
+
+- db90bf2: Fix(team): Restart every team Pod when the shared skill changes
+
+  Roll leader and member workloads when the packaged roster skill changes so existing team releases load the updated handoff protocol after an upgrade.
+
 ## 1.3.0
 
 ### Minor Changes
