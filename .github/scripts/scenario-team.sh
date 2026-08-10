@@ -83,6 +83,9 @@ team_skill=$(kubectl get configmap hermes-team-skill -n "$NS" \
   -o jsonpath='{.data.SKILL\.md}')
 grep -Fq '[TEAM run=<short-id> step=<n> TASK]' <<<"$team_skill"
 grep -Fq '[TEAM run=<same-id> step=<same-n> RESULT]' <<<"$team_skill"
+grep -Fq 'start the same outbound message with one brief' <<<"$team_skill"
+grep -Fq 'withhold the earlier' <<<"$team_skill"
+grep -Fq 'choose your own method' <<<"$team_skill"
 grep -Fq "Discord's typing indicator is display state" <<<"$leader_config"
 grep -Fq 'Never infer that a member is online' <<<"$team_skill"
 [ "$(kubectl get configmap -n "$NS" -o name | grep -c '/hermes-team-skill$')" = "1" ]

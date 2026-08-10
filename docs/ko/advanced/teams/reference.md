@@ -278,9 +278,9 @@ sequenceDiagram
     participant R as march
 
     H->>A: @august 목표 (스레드 하나 시작)
-    A->>M: <@may> [TEAM ... TASK] + 전체 문맥과 완료 기준
+    A->>M: 사람 대상 수락 문장 + <@may> [TEAM ... TASK]
     M->>A: <@august> [TEAM ... RESULT] + 완전한 결과
-    A->>R: <@march> [TEAM ... TASK] + 목표 + 승인된 may 결과
+    A->>R: <@march> [TEAM ... TASK] + 목표 + 후보 결론
     R->>A: <@august> [TEAM ... RESULT] + 리뷰/종합
     A-->>H: 최종 종합, 멤버 멘션 없음
     Note over A,R: 멤버 멘션이 없으면 다음 봇 턴도 없습니다.
@@ -291,7 +291,7 @@ sequenceDiagram
 ```text
 <@MEMBER_ID>
 
-Context: <승인된 이전 결과를 포함해 필요한 모든 문맥>
+Context: <필요한 모든 문맥; 독립 검증이면 이전 방법/과정은 제외>
 Task: <구체적인 과제 하나>
 Done when: <관찰 가능한 완료 기준>
 Reply contract: <@LEADER_ID>를 멘션하고 완전한 결과를 여기에 포함.
@@ -299,8 +299,15 @@ Reply contract: <@LEADER_ID>를 멘션하고 완전한 결과를 여기에 포�
 [TEAM run=<short-id> step=<n> TASK]
 ```
 
-의도한 봇이 분명히 호출되도록 멘션은 첫 줄에 두고, TEAM 메타데이터는 과제 본문을
-방해하지 않도록 마지막 독립 줄에 둡니다.
+의도한 봇이 분명히 호출되도록 멘션은 멤버 블록의 첫 줄에 두고, TEAM 메타데이터는
+과제 본문을 방해하지 않도록 마지막 독립 줄에 둡니다.
+
+첫 TASK에 한해서는 같은 메시지의 멤버 블록 앞에 사람을 위한 짧은 수락 문장과
+계획을 둡니다. 멤버 멘션이 없는 별도 수락 메시지는 자동 핸드오프를 종료시킬 수
+있습니다. 다음 멤버가 결론을 독립 검증해야 한다면 원래 목표, 완료 기준, 후보 결론만
+전달하고 첫 멤버의 방법과 상세 계산 과정은 검산 응답 전까지 전달하지 않으며 검산
+방법도 지정하지 않습니다. 이렇게 해야 필요한 문맥은 Discord에 완전하게 남기면서도
+실제 독립성을 보존할 수 있습니다.
 
 리더를 먼저 배포한 뒤 멤버별 릴리스를 배포합니다. 리더 values가 공유 스킬과
 claim을 만들고, 멤버 values는 이를 참조합니다. 클러스터 기본 StorageClass가 RWX를
@@ -396,7 +403,7 @@ Discord뿐입니다. Telegram과 Slack에도 모든 루프 브레이크 노브�
 ```text
 @may_bot
 
-Context: <everything needed, including accepted earlier results>
+Context: <필요한 모든 문맥; 독립 검증이면 이전 방법/과정은 제외>
 Task: <one concrete task>
 Done when: <observable acceptance criteria>
 Reply contract: mention @august_bot and include the complete result here.
