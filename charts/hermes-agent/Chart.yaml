@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.3.0
+version: 1.4.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -35,8 +35,10 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: "fixed"
-      description: "Documentation(docs): Replace em-dashes with colons or plain dashes Convert every em-dash in the chart README, the values examples, the JSON schema descriptio..."
+      description: "Documentation(docs): Highlight chat-first credential bootstrap Explain the chart-managed gateway lifecycle and optional Discord-delivered device login for Gi..."
     - kind: "added"
-      description: "Feature(auth): Add OpenAI Codex device login Authenticate the built-in `openai-codex` provider through a Discord- or log-delivered device code and persist it..."
+      description: "Feature(values): Allow paused GitOps bootstrap Allow `replicaCount: 0` to prepare chart resources before scaling the single-agent workload to one replica."
+    - kind: "added"
+      description: "Feature(team): Add chart-managed leader teams with a packaged shared roster skill Let one leader release render the packaged `SKILL.md` asset into a shared t..."
     - kind: "fixed"
-      description: "Fix(runtime): Preserve the Hermes image entrypoint Keep the pinned image's s6 startup and volume ownership preparation while passing `gateway run` through th..."
+      description: "Fix(team): Restart every team Pod when the shared skill changes Roll leader and member workloads when the packaged roster skill changes so existing team rele..."
