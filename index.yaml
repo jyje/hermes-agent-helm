@@ -5,6 +5,46 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "fixed"
+          description: "Documentation(docs): Highlight chat-first credential bootstrap Explain the chart-managed gateway lifecycle and optional Discord-delivered device login for Gi..."
+        - kind: "added"
+          description: "Feature(values): Allow paused GitOps bootstrap Allow `replicaCount: 0` to prepare chart resources before scaling the single-agent workload to one replica."
+        - kind: "added"
+          description: "Feature(team): Add chart-managed leader teams with a packaged shared roster skill Let one leader release render the packaged `SKILL.md` asset into a shared t..."
+        - kind: "fixed"
+          description: "Fix(team): Restart every team Pod when the shared skill changes Roll leader and member workloads when the packaged roster skill changes so existing team rele..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.3
+    created: "2026-08-10T03:35:30.980852626Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: b2a771868d5699ee64945f772a9bc57435faafc35c2af34cc2fda80217be7161
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.4.0.tgz
+    version: 1.4.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "fixed"
           description: "Documentation(docs): Replace em-dashes with colons or plain dashes Convert every em-dash in the chart README, the values examples, the JSON schema descriptio..."
         - kind: "added"
           description: "Feature(auth): Add OpenAI Codex device login Authenticate the built-in `openai-codex` provider through a Discord- or log-delivered device code and persist it..."
@@ -1013,4 +1053,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-09T04:01:00.893196749Z"
+generated: "2026-08-10T03:35:30.978357254Z"
