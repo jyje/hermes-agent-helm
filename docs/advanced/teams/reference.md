@@ -292,7 +292,7 @@ sequenceDiagram
     H->>A: @august goal (starts one thread)
     A->>M: human-facing acknowledgment + <@may> [TEAM ... TASK]
     M->>A: <@august> [TEAM ... RESULT] + complete result
-    A->>R: <@march> [TEAM ... TASK] + goal + accepted may result
+    A->>R: <@march> [TEAM ... TASK] + goal + candidate conclusion
     R->>A: <@august> [TEAM ... RESULT] + review/synthesis
     A-->>H: final synthesis, no member mention
     Note over A,R: No member mention means no next bot turn.
@@ -303,7 +303,7 @@ Every delegation carries a small visible contract:
 ```text
 <@MEMBER_ID>
 
-Context: <everything needed, including accepted earlier results>
+Context: <everything needed; omit prior method/trace for independent review>
 Task: <one concrete task>
 Done when: <observable acceptance criteria>
 Reply contract: mention <@LEADER_ID> and include the complete result here.

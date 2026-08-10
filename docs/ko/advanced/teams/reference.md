@@ -280,7 +280,7 @@ sequenceDiagram
     H->>A: @august 목표 (스레드 하나 시작)
     A->>M: 사람 대상 수락 문장 + <@may> [TEAM ... TASK]
     M->>A: <@august> [TEAM ... RESULT] + 완전한 결과
-    A->>R: <@march> [TEAM ... TASK] + 목표 + 승인된 may 결과
+    A->>R: <@march> [TEAM ... TASK] + 목표 + 후보 결론
     R->>A: <@august> [TEAM ... RESULT] + 리뷰/종합
     A-->>H: 최종 종합, 멤버 멘션 없음
     Note over A,R: 멤버 멘션이 없으면 다음 봇 턴도 없습니다.
@@ -291,7 +291,7 @@ sequenceDiagram
 ```text
 <@MEMBER_ID>
 
-Context: <승인된 이전 결과를 포함해 필요한 모든 문맥>
+Context: <필요한 모든 문맥; 독립 검증이면 이전 방법/과정은 제외>
 Task: <구체적인 과제 하나>
 Done when: <관찰 가능한 완료 기준>
 Reply contract: <@LEADER_ID>를 멘션하고 완전한 결과를 여기에 포함.
