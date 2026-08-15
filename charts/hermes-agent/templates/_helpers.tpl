@@ -121,9 +121,9 @@ spec:
   {{- if or .Values.bootstrap.enabled .Values.auth.deviceFlow.enabled .Values.extraInitContainers (and .Values.team.enabled .Values.team.sharedVolume.permissions.enabled) }}
   initContainers:
     {{- if .Values.bootstrap.enabled }}
-    # Seed the partial config.yaml into HERMES_HOME (the writable volume) so
-    # Hermes merges it over its built-in defaults. Hermes also writes to its
-    # home at runtime, so config is not mounted read-only.
+    # Seed chart-managed files into HERMES_HOME (the writable volume). Hermes
+    # merges config.yaml over its built-in defaults and also writes to its home
+    # at runtime, so the ConfigMap is not mounted there read-only.
     - name: seed-config
       image: "{{ include "hermes-agent.image" . }}"
       imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -134,12 +134,19 @@ spec:
         - -c
         - |
           set -eu
-          dest="{{ .Values.persistence.mountPath }}/config.yaml"
-          if [ "{{ .Values.bootstrap.overwrite }}" = "true" ] || [ ! -f "$dest" ]; then
-            echo "Seeding $dest (overwrite={{ .Values.bootstrap.overwrite }})"
-            cp /seed/config.yaml "$dest"
-          else
-            echo "Keeping existing $dest (overwrite=false)"
+          seed() {
+            dest="$1"
+            source="$2"
+            if [ "{{ .Values.bootstrap.overwrite }}" = "true" ] || [ ! -f "$dest" ]; then
+              echo "Seeding $dest (overwrite={{ .Values.bootstrap.overwrite }})"
+              cp "$source" "$dest"
+            else
+              echo "Keeping existing $dest (overwrite=false)"
+            fi
+          }
+          seed "{{ .Values.persistence.mountPath }}/config.yaml" /seed/config.yaml
+          if [ -f /seed/SOUL.md ]; then
+            seed "{{ .Values.persistence.mountPath }}/SOUL.md" /seed/SOUL.md
           fi
       volumeMounts:
         - name: config

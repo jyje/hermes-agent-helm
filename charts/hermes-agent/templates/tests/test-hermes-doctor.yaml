@@ -33,8 +33,8 @@ spec:
       {{- end }}
       {{- if .Values.bootstrap.enabled }}
       initContainers:
-        # Seed the same chart config into a private HERMES_HOME so `hermes doctor`
-        # evaluates what the workload runs with.
+        # Seed the same chart-managed files into a private HERMES_HOME so
+        # `hermes doctor` evaluates what the workload runs with.
         - name: seed-config
           image: "{{ include "hermes-agent.image" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -42,7 +42,15 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          command: ["sh", "-c", "cp /seed/config.yaml {{ .Values.persistence.mountPath }}/config.yaml"]
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              cp /seed/config.yaml {{ .Values.persistence.mountPath }}/config.yaml
+              if [ -f /seed/SOUL.md ]; then
+                cp /seed/SOUL.md {{ .Values.persistence.mountPath }}/SOUL.md
+              fi
           volumeMounts:
             - name: config
               mountPath: /seed
@@ -85,6 +93,15 @@ spec:
               else
                 echo "  FAIL: $HERMES_HOME/config.yaml missing"; exit 1
               fi
+
+              {{- with .Values.soul.text }}
+              echo "[2a/4] configured SOUL.md present and unchanged"
+              if [ -f "$HERMES_HOME/SOUL.md" ] && cmp -s "$HERMES_HOME/SOUL.md" /seed/SOUL.md; then
+                echo "  OK: $HERMES_HOME/SOUL.md"
+              else
+                echo "  FAIL: configured SOUL.md missing or changed"; exit 1
+              fi
+              {{- end }}
 
               echo "[3/4] docker availability (local backend -> informational)"
               if command -v docker >/dev/null 2>&1; then
@@ -149,6 +166,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+            {{- with .Values.soul.text }}
+            - name: config
+              mountPath: /seed
+              readOnly: true
+            {{- end }}
       volumes:
         {{- if .Values.bootstrap.enabled }}
         - name: config

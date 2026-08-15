@@ -103,15 +103,21 @@ config:
     max_turns: 90
     gateway_timeout: 1800
 
+# -- Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It
+#    defines the agent's persistent identity. Empty means the chart seeds
+#    nothing, so Hermes writes its own starter file on first run.
+soul:
+  text: ""
+
 # Seeding of config.yaml into HERMES_HOME (the persistent volume). Hermes writes
 # to its home at runtime (skills, auth.json, self-improvement), so config lives
 # in the writable volume rather than a read-only mount.
 bootstrap:
-  # -- Seed the rendered config.yaml into HERMES_HOME via an init container.
+  # -- Seed chart-managed files into HERMES_HOME via an init container.
   enabled: true
-  # -- true: overwrite HERMES_HOME/config.yaml with chart content on every
-  #    deploy (declarative). false: seed only if it does not already exist
-  #    (preserve runtime edits).
+  # -- true: overwrite config.yaml and configured SOUL.md with chart content on
+  #    every deploy (declarative). false: seed each file only if it does not
+  #    already exist (preserve runtime edits).
   overwrite: true
 
 # ---------------------------------------------------------------------------
