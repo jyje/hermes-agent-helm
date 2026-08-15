@@ -23,17 +23,20 @@ documentation site, track upstream images, and release signed chart artifacts.
 flowchart LR
     C["cron-fetch-image<br/>every 6 hours"] --> U["appVersion update PR"]
     C --> I["upstream-review issues"]
-    P["Contributor PR"] --> V["validate-chart"]
+    P["Chart-related PR"] --> V["validate-chart"]
+    S["Site-related PR"] --> B["deploy-docs<br/>build only"]
     U --> V
-    V --> M["Merge to main"]
+    V --> M["Merge chart change"]
+    B --> SM["Merge site change"]
     M --> R["propose-release<br/>manual"]
     R --> RP["Release PR"]
     RP --> RV["Review and validation"]
     RV --> RM["Merge release PR"]
     RM --> RC["release-chart"]
     RC --> VR["verify-release"]
-    RC --> D["deploy-docs"]
+    RC --> D["deploy-docs<br/>publish"]
     M --> D
+    SM --> D
 ```
 
 The scheduled path stops at a normal pull request and review issues. It never
@@ -106,10 +109,11 @@ safe and still meaningful.
 
 ## deploy-docs
 
-Its path filter covers everything the site renders, which is broader than
-`docs/`: the root and chart READMEs, `charts/`, `examples/`, `mkdocs.yml`,
-`main.py`, and `requirements.txt` are all included. A chart-only pull request
-therefore runs this workflow too, because the chart README is part of the site.
+Its path filter covers every repository source rendered by the site, which is
+broader than `docs/`: the root README, SECURITY, and CONTRIBUTING language
+twins; `charts/`; `examples/`; `mkdocs.yml`; `main.py`; `hooks.py`; and
+`requirements.txt` are all included. A chart-only pull request therefore runs
+this workflow too, because the chart README is part of the site.
 
 Pull requests run `mkdocs build --strict` and upload the site artifact but do
 not deploy it. A matching change on `main`, a manual run, or a refresh
@@ -151,8 +155,8 @@ workflow. If the version tag does not already exist, it:
 2. packages and publishes the chart to OCI;
 3. signs the OCI artifact with keyless cosign;
 4. updates the Helm Repository data on `gh-pages`; and
-5. triggers `deploy-docs` so the release page and repository index are served
-   together.
+5. triggers `deploy-docs` so the documentation site and Helm Repository index
+   are served together.
 
 ## verify-release
 

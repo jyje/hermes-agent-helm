@@ -24,17 +24,20 @@ description: 지속적인 검증과 릴리즈 체크입니다.
 flowchart LR
     C["cron-fetch-image<br/>6시간마다"] --> U["appVersion 변경 PR"]
     C --> I["upstream-review 이슈"]
-    P["기여자 PR"] --> V["validate-chart"]
+    P["차트 관련 PR"] --> V["validate-chart"]
+    S["사이트 관련 PR"] --> B["deploy-docs<br/>빌드만 수행"]
     U --> V
-    V --> M["main에 머지"]
+    V --> M["차트 변경 머지"]
+    B --> SM["사이트 변경 머지"]
     M --> R["propose-release<br/>수동 실행"]
     R --> RP["릴리즈 PR"]
     RP --> RV["리뷰와 검증"]
     RV --> RM["릴리즈 PR 머지"]
     RM --> RC["release-chart"]
     RC --> VR["verify-release"]
-    RC --> D["deploy-docs"]
+    RC --> D["deploy-docs<br/>게시"]
     M --> D
+    SM --> D
 ```
 
 예약 실행 경로는 일반 pull request와 검토 이슈를 만드는 데서 멈춥니다. 차트를
@@ -110,10 +113,11 @@ Discord 체크)은 건너뛰고 **doctor 전용**으로 폴백합니다 - 안전
 
 ## deploy-docs
 
-이 workflow의 경로 필터는 `docs/`보다 넓게, 사이트가 렌더링하는 대상 전부를
-포함합니다. 루트와 차트의 README, `charts/`, `examples/`, `mkdocs.yml`,
-`main.py`, `requirements.txt`가 모두 해당합니다. 차트만 바꾼 pull request도
-이 workflow를 실행하는데, 차트 README가 사이트의 일부이기 때문입니다.
+이 workflow의 경로 필터는 `docs/`보다 넓게, 사이트가 렌더링하는 저장소
+소스를 모두 포함합니다. 루트 README, SECURITY, CONTRIBUTING의 언어별 문서,
+`charts/`, `examples/`, `mkdocs.yml`, `main.py`, `hooks.py`,
+`requirements.txt`가 모두 해당합니다. 차트만 바꾼 pull request도 이
+workflow를 실행하는데, 차트 README가 사이트의 일부이기 때문입니다.
 
 pull request는 `mkdocs build --strict`를 실행하고 사이트 아티팩트를
 업로드하지만 배포하지는 않습니다. 같은 변경이 `main`에 머지되거나, 수동
@@ -154,7 +158,8 @@ Artifact Hub 어노테이션, 생성된 차트 문서, 버전이 포함된 예�
 2. 차트를 패키징해 OCI에 게시합니다.
 3. keyless cosign으로 OCI 아티팩트에 서명합니다.
 4. `gh-pages`의 Helm Repository 데이터를 갱신합니다.
-5. 릴리즈 페이지와 저장소 인덱스를 함께 제공하도록 `deploy-docs`를 실행합니다.
+5. 문서 사이트와 Helm Repository 인덱스를 함께 제공하도록 `deploy-docs`를
+   실행합니다.
 
 ## verify-release
 
