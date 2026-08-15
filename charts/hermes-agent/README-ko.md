@@ -603,6 +603,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
+| deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
 | extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
 | extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
@@ -628,9 +629,10 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | podAnnotations | object | Annotations to add to the Pod. | `{}` |
 | podLabels | object | Labels to add to the Pod. | `{}` |
 | podSecurityContext | object | Pod-level securityContext. Left empty by default to stay compatible with the image's s6-overlay init (which starts as root and drops privileges itself). Add hardening here once verified for your environment. | `{}` |
-| probes | object | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 | `{"liveness":{},"readiness":{}}` |
+| probes | object | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 | `{"liveness":{},"readiness":{},"startup":{}}` |
 | probes.liveness | object | Liveness probe spec. Empty = no liveness probe. | `{}` |
 | probes.readiness | object | Readiness probe spec. Empty = no readiness probe. | `{}` |
+| probes.startup | object | Startup probe spec. Empty = no startup probe. Use this when first start takes longer than the liveness probe allows. | `{}` |
 | replicaCount | int | Set to 0 to prepare GitOps resources (Secret, ConfigMap, PVC, ...)    without starting an agent Pod, then scale to 1 after credentials and    optional device login are ready. The gateway and device-login init    container do not run while paused. Hermes Agent is a single-writer    workload bound to one HERMES_HOME (ReadWriteOnce PVC), so values above 1    are unsupported: Deployment replicas contend for the same volume and    StatefulSet replicas are disconnected agent identities. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
 | securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |

@@ -416,7 +416,8 @@
       "additionalProperties": false,
       "properties": {
         "liveness": { "type": "object" },
-        "readiness": { "type": "object" }
+        "readiness": { "type": "object" },
+        "startup": { "type": "object" }
       }
     },
 
@@ -468,6 +469,7 @@
     },
 
     "podAnnotations": { "type": "object" },
+    "deploymentAnnotations": { "type": "object" },
     "podLabels": { "type": "object" },
     "nodeSelector": { "type": "object" },
     "tolerations": { "type": "array" },

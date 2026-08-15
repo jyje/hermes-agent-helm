@@ -409,6 +409,9 @@ probes:
   liveness: {}
   # -- Readiness probe spec. Empty = no readiness probe.
   readiness: {}
+  # -- Startup probe spec. Empty = no startup probe. Use this when first start
+  # takes longer than the liveness probe allows.
+  startup: {}
 
 # -- Pod termination grace period in seconds. Empty = Kubernetes default (30s).
 # The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0:
@@ -475,6 +478,8 @@ tests:
 
 # -- Annotations to add to the Pod.
 podAnnotations: {}
+# -- Annotations to add to the Deployment or StatefulSet object.
+deploymentAnnotations: {}
 # -- Labels to add to the Pod.
 podLabels: {}
 
