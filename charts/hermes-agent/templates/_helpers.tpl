@@ -269,6 +269,10 @@ spec:
         {{- with .Values.extraEnvFrom }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- with .Values.probes.startup }}
+      startupProbe:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.probes.liveness }}
       livenessProbe:
         {{- toYaml . | nindent 8 }}
