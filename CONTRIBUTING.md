@@ -46,7 +46,7 @@ merging is what ships.
 | `dev` | Maintainer experimental / integration. | lint + docs-drift + template + kind `helm test` |
 | `main` | Default branch & PR target; stable. Releases cut from here. | same as dev |
 | `feat/<scope>` | One scoped implementation. Keep validation-only workflow changes out of this branch. | local verification before review |
-| `test/<feat-scope>` | Short-lived orphan branch containing only a remote-validation workflow. | checks out the approved implementation SHA, then deletes itself |
+| `test/<feat-scope>` | Orphan branch containing only a remote-validation workflow. Keep it while the validation loop is active. | checks out a pinned implementation SHA; delete after successful evidence is recorded |
 | _tags_ `vX.Y.Z` | The release itself: created by CI when the chart version changes. | publishes to GitHub Packages (OCI) |
 
 No long-lived `rc`/`release` branches - a release is a tag/event.
@@ -67,13 +67,14 @@ Keep implementation and remote-validation evidence separate:
    implementation branch.
 5. Pin the workflow checkout to the approved implementation SHA, push the test
    branch, and run its remote checks. Do not open a test-to-`main` pull request.
-6. Record the check URL and tested implementation SHA. After completion, delete
-   the temporary test branch. The only merge path remains `feat/<scope>` to
-   `main`, and it still requires a separate approval.
-
-If remote validation fails, return to the implementation branch, make a new
-commit after local verification and review, then create a new orphan test
-branch that checks out that commit.
+6. When a test workflow fails, fix and commit only the workflow on the orphan
+   test branch, then rerun it. When the implementation fails, fix and commit
+   `feat/<scope>` after local verification, then synchronize the test target by
+   updating its pinned checkout SHA. Do not Git-merge `feat/<scope>` into the
+   orphan branch.
+7. Record the passing check URL and tested implementation SHA, then delete the
+   test branch. The only merge path remains `feat/<scope>` to `main`, and it
+   still requires a separate approval.
 
 ## How to cut a release
 

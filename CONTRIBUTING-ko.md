@@ -42,7 +42,7 @@
 | `dev` | 메인테이너 실험용 / 통합용 | lint + docs-drift + template + kind `helm test` |
 | `main` | 기본 브랜치이자 PR 대상, 안정 버전. 릴리즈는 여기서 잘라냅니다 | dev와 동일 |
 | `feat/<scope>` | 하나의 범위에 한정한 구현. 검증 전용 workflow 변경은 이 브랜치에 넣지 않습니다 | 리뷰 전 로컬 검증 |
-| `test/<feat-scope>` | 원격 검증 workflow만 담는 단기 orphan 브랜치 | 승인된 구현 SHA를 checkout한 뒤 스스로 삭제 |
+| `test/<feat-scope>` | 원격 검증 workflow만 담는 orphan 브랜치. 검증 순환이 끝날 때까지 유지합니다 | 고정한 구현 SHA를 checkout하고 성공 증거를 기록한 뒤 삭제 |
 | _태그_ `vX.Y.Z` | 릴리즈 그 자체: 차트 버전이 바뀌면 CI가 생성 | GitHub Packages(OCI)에 배포 |
 
 장기 존속하는 `rc`/`release` 브랜치는 없습니다 - 릴리즈는 태그/이벤트입니다.
@@ -61,12 +61,13 @@
    구현 브랜치에는 검증 전용 GitHub Actions YAML을 추가하지 않습니다.
 5. workflow checkout을 승인된 구현 SHA로 고정하고 test 브랜치를 push해 원격
    검증을 실행합니다. test에서 `main`으로 향하는 PR은 열지 않습니다.
-6. check URL과 검증한 구현 SHA를 기록합니다. 완료 후 임시 test 브랜치를
-   삭제합니다. 유일한 병합 경로는 `feat/<scope>`에서 `main`이며, 여기에도
-   별도 승인이 필요합니다.
-
-원격 검증이 실패하면 구현 브랜치로 돌아가 로컬 검증과 리뷰 후 새 커밋을 만들고,
-그 커밋을 checkout하는 새 orphan test 브랜치를 만듭니다.
+6. test workflow가 실패하면 orphan test 브랜치에서 workflow만 수정해 커밋하고
+   다시 실행합니다. 구현이 실패하면 로컬 검증 후 `feat/<scope>`를 수정해
+   커밋하고, test workflow의 고정 checkout SHA를 새 구현 커밋으로 바꿉니다.
+   orphan 브랜치에 `feat/<scope>`를 Git merge하지 않습니다.
+7. 성공한 check URL과 검증한 구현 SHA를 기록한 뒤 test 브랜치를 삭제합니다.
+   유일한 병합 경로는 `feat/<scope>`에서 `main`이며, 여기에도 별도 승인이
+   필요합니다.
 
 ## 릴리즈를 잘라내는 방법
 
