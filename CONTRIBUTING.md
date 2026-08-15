@@ -72,9 +72,12 @@ Keep implementation and remote-validation evidence separate:
    `feat/<scope>` after local verification, then synchronize the test target by
    updating its pinned checkout SHA. Do not Git-merge `feat/<scope>` into the
    orphan branch.
-7. Record the passing check URL and tested implementation SHA, then delete the
-   test branch. The only merge path remains `feat/<scope>` to `main`, and it
-   still requires a separate approval.
+7. When remote CI passes, add a comment to the implementation pull request.
+   Include the tested implementation SHA, check URL, test input, expected
+   result, actual result, and a short safe log excerpt when it helps review.
+   Never include secrets or secret-derived output. Then delete the test branch.
+   The only merge path remains `feat/<scope>` to `main`, and it still requires
+   a separate approval.
 
 ## How to cut a release
 
