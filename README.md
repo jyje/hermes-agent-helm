@@ -4,7 +4,7 @@
 
 <img height="240" src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
 
-👩🏻‍💻 A Helm chart to run **Hermes Agent** on Kubernetes, community-powered, lightweight
+👩🏻‍💻 Hermes Agent on Kubernetes - sign in with Codex/Copilot, run agent teams, stay lightweight.
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jyje/hermes-agent-helm?style=social)](https://github.com/jyje/hermes-agent-helm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
