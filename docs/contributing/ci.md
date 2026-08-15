@@ -24,10 +24,13 @@ flowchart LR
     C["cron-fetch-image<br/>every 6 hours"] --> U["appVersion update PR"]
     C --> I["upstream-review issues"]
     P["Chart-related PR"] --> V["validate-chart"]
-    S["Site-related PR"] --> B["deploy-docs<br/>build only"]
+    P --> B["deploy-docs<br/>build only"]
+    S["Site-only PR"] --> SB["deploy-docs<br/>build only"]
     U --> V
+    U --> B
     V --> M["Merge chart change"]
-    B --> SM["Merge site change"]
+    B --> M
+    SB --> SM["Merge site change"]
     M --> R["propose-release<br/>manual"]
     R --> RP["Release PR"]
     RP --> RV["Review and validation"]
@@ -110,10 +113,10 @@ safe and still meaningful.
 ## deploy-docs
 
 Its path filter covers every repository source rendered by the site, which is
-broader than `docs/`: the root README, SECURITY, and CONTRIBUTING language
-twins; `charts/`; `examples/`; `mkdocs.yml`; `main.py`; `hooks.py`; and
-`requirements.txt` are all included. A chart-only pull request therefore runs
-this workflow too, because the chart README is part of the site.
+broader than `docs/`: the root README, SECURITY, and CONTRIBUTING files in both
+supported languages; `charts/`; `examples/`; `mkdocs.yml`; `main.py`;
+`hooks.py`; and `requirements.txt` are all included. A chart-only pull request
+therefore runs this workflow too, because the chart README is part of the site.
 
 Pull requests run `mkdocs build --strict` and upload the site artifact but do
 not deploy it. A matching change on `main`, a manual run, or a refresh

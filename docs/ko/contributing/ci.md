@@ -25,10 +25,13 @@ flowchart LR
     C["cron-fetch-image<br/>6시간마다"] --> U["appVersion 변경 PR"]
     C --> I["upstream-review 이슈"]
     P["차트 관련 PR"] --> V["validate-chart"]
-    S["사이트 관련 PR"] --> B["deploy-docs<br/>빌드만 수행"]
+    P --> B["deploy-docs<br/>빌드만 수행"]
+    S["사이트 전용 PR"] --> SB["deploy-docs<br/>빌드만 수행"]
     U --> V
+    U --> B
     V --> M["차트 변경 머지"]
-    B --> SM["사이트 변경 머지"]
+    B --> M
+    SB --> SM["사이트 변경 머지"]
     M --> R["propose-release<br/>수동 실행"]
     R --> RP["릴리즈 PR"]
     RP --> RV["리뷰와 검증"]
@@ -114,8 +117,8 @@ Discord 체크)은 건너뛰고 **doctor 전용**으로 폴백합니다 - 안전
 ## deploy-docs
 
 이 workflow의 경로 필터는 `docs/`보다 넓게, 사이트가 렌더링하는 저장소
-소스를 모두 포함합니다. 루트 README, SECURITY, CONTRIBUTING의 언어별 문서,
-`charts/`, `examples/`, `mkdocs.yml`, `main.py`, `hooks.py`,
+소스를 모두 포함합니다. 루트 README, SECURITY, CONTRIBUTING의 영문 및 한글
+문서, `charts/`, `examples/`, `mkdocs.yml`, `main.py`, `hooks.py`,
 `requirements.txt`가 모두 해당합니다. 차트만 바꾼 pull request도 이
 workflow를 실행하는데, 차트 README가 사이트의 일부이기 때문입니다.
 
