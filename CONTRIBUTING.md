@@ -21,7 +21,7 @@
 
 ## CI/CD
 
-- **Every PR and every push to `dev`/`main`** runs [validate-chart.yaml](.github/workflows/validate-chart.yaml):
+- **Chart pull requests** run [validate-chart.yaml](.github/workflows/validate-chart.yaml):
   `helm lint`, `helm template`, a chart-docs drift check, and a full install +
   test on an ephemeral **kind** cluster (real `hermes chat` round-trip when an
   `NVIDIA_API_KEY` secret is available).
@@ -45,9 +45,39 @@ merging is what ships.
 |---|---|---|
 | `dev` | Maintainer experimental / integration. | lint + docs-drift + template + kind `helm test` |
 | `main` | Default branch & PR target; stable. Releases cut from here. | same as dev |
+| `feat/<scope>` | One scoped implementation. Keep validation-only workflow changes out of this branch. | local verification before review |
+| `test/<feat-scope>` | Orphan branch containing only a remote-validation workflow. Keep it while the validation loop is active. | checks out a pinned implementation SHA; delete after successful evidence is recorded |
 | _tags_ `vX.Y.Z` | The release itself: created by CI when the chart version changes. | publishes to GitHub Packages (OCI) |
 
 No long-lived `rc`/`release` branches - a release is a tag/event.
+
+## Implementation and validation lifecycle
+
+Keep implementation and remote-validation evidence separate:
+
+1. Create a named worktree and a `feat/<scope>` branch for one implementation.
+2. Run local checks first: after a values change, run `make docs` to
+   regenerate `charts/hermes-agent/README.md`, and update `README-ko.md`
+   manually when its content is affected. Then run `make lint`,
+   `make template`, packaging where relevant, an isolated kind install,
+   rollout check, and the chart test Job.
+3. Review the diff and local evidence. Commit only after explicit approval.
+4. Create an orphan `test/<feat-scope>` branch with only a temporary
+   validation workflow. Do not add validation-only GitHub Actions YAML to the
+   implementation branch.
+5. Pin the workflow checkout to the approved implementation SHA, push the test
+   branch, and run its remote checks. Do not open a test-to-`main` pull request.
+6. When a test workflow fails, fix and commit only the workflow on the orphan
+   test branch, then rerun it. When the implementation fails, fix and commit
+   `feat/<scope>` after local verification, then synchronize the test target by
+   updating its pinned checkout SHA. Do not Git-merge `feat/<scope>` into the
+   orphan branch.
+7. When remote CI passes, add a comment to the implementation pull request.
+   Include the tested implementation SHA, check URL, test input, expected
+   result, actual result, and a short safe log excerpt when it helps review.
+   Never include secrets or secret-derived output. Then delete the test branch.
+   The only merge path remains `feat/<scope>` to `main`, and it still requires
+   a separate approval.
 
 ## How to cut a release
 
@@ -155,8 +185,8 @@ Changeset summaries, rather than commit subjects, are the release changelog.
 
 ## CI validation
 
-PRs and pushes run lint + an isolated **kind** install/test, and every release
-is re-verified against the published, cosign-signed artifact.
+Chart pull requests run lint + an isolated **kind** install/test, and every
+release is re-verified against the published, cosign-signed artifact.
 
 See **[docs/contributing/ci.md](docs/contributing/ci.md)** for the full pipeline - the parallel
 default / existingClaim test scenarios, the failover model pool, fork-PR
@@ -175,13 +205,14 @@ See **[docs/contributing/local-development.md](docs/contributing/local-developme
 ```bash
 make lint        # helm lint
 make template    # render manifests
-make docs        # regenerate the chart README (helm-docs) - commit the result
+make docs        # regenerate the English chart README (helm-docs) - commit the result
 make test        # install + helm test (needs a cluster/kind)
 pnpm changeset   # add a release intent for a user-visible chart change
 make propose     # preview the pending calculated version
 ```
 
-CI fails if the chart README is out of date, so always `make docs` after editing
-`values.yaml`.
+CI reruns helm-docs and fails if `charts/hermes-agent/README.md` is out of
+date. It does not generate `README-ko.md`, so keep the Korean twin in sync
+manually after editing `values.yaml`.
 
 See [AGENTS.md](AGENTS.md) for chart design principles.
