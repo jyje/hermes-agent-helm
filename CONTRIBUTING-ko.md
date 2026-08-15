@@ -156,7 +156,7 @@ SemVer 선택과 fix 예제를 포함한 전체 가이드는
 차트를 **다음 두 곳 모두**에 배포합니다:
 
 - `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent`(OCI 아티팩트), 그리고
-- `https://<owner>.github.io/hermes-agent-helm`의 클래식 Helm 저장소
+- `https://<owner>.github.io/hermes-agent-helm`의 Helm Repository
   (`gh-pages` 브랜치에 배포되며, `index.yaml`은 이전 릴리즈들과 병합됨)
 
 다른 이유로 `Chart.yaml`을 건드리는 커밋(예: `appVersion`, description)은

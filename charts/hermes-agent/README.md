@@ -25,7 +25,7 @@ helm upgrade --install hermes-agent \
 ```
 
 ```bash
-# Classic Helm repo
+# Helm Repository
 helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
 helm repo update
 helm upgrade --install hermes-agent hermes-agent/hermes-agent \

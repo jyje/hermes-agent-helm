@@ -42,7 +42,7 @@ Research release.
       --wait
     ```
 
-2. **Classic Helm repo** — a Helm repository is also published to GitHub Pages, if you'd rather add it once and install by name:
+2. **Helm Repository** - a Helm repository is also published to GitHub Pages, if you'd rather add it once and install by name:
 
     ```bash
     helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
@@ -101,8 +101,28 @@ install examples (including messenger integrations), see
 
 ## Full Installation
 
+### OCI (recommended)
+
 ```bash
-# add the Helm repository and fetch the latest chart index
+# render the chart and check its templates before installing
+helm template hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+  --set-string env.OPENAI_API_KEY='sk-...'
+
+# install with the generic defaults (set your provider key)
+# release name == chart name keeps resources clean (hermes-agent-0, not hermes-agent-hermes-agent-0)
+helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+
+# run the install test (doctor-style Job)
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+### Helm Repository
+
+```bash
+# add the Helm Repository and fetch the latest chart index
 helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
 helm repo update
 
@@ -111,7 +131,6 @@ helm template hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...'
 
 # install with the generic defaults (set your provider key)
-# release name == chart name keeps resources clean (hermes-agent-0, not hermes-agent-hermes-agent-0)
 helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
