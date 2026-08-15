@@ -141,6 +141,24 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 [ArgoCD 예제](examples/argocd/)는
 [charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
 
+## 자동화
+
+GitHub Actions가 변경사항을 검증하고, 문서를 게시하며, upstream Hermes 이미지를
+추적하고, 서명된 차트 아티팩트를 릴리즈합니다.
+
+| Workflow | 트리거 | 역할 |
+|---|---|---|
+| [`validate-chart`](.github/workflows/validate-chart.yaml) | 차트 관련 pull request | lint, 렌더링, 생성 문서 확인, 격리된 kind 클러스터 차트 테스트 |
+| [`deploy-docs`](.github/workflows/deploy-docs.yaml) | 사이트 관련 pull request, `main` 변경 또는 수동 실행 | pull request에서 사이트를 빌드하고 pull request 외 실행에서 GitHub Pages에 게시 |
+| [`cron-fetch-image`](.github/workflows/cron-fetch-image.yaml) | 6시간마다 또는 수동 실행 | 새 Hermes 이미지를 감지하고 appVersion 변경 PR과 upstream-review 이슈 생성 |
+| [`propose-release`](.github/workflows/propose-release.yaml) | 수동 실행 | 대기 중인 Changeset을 검토 가능한 릴리즈 PR 하나로 결합 |
+| [`release-chart`](.github/workflows/release-chart.yaml) | `main`의 차트 버전 변경 | 태그와 GitHub Release를 만들고 서명된 OCI 및 Helm Repository 아티팩트를 게시한 뒤 문서 사이트 갱신 |
+| [`verify-release`](.github/workflows/verify-release.yaml) | 차트 릴리즈 성공 | 서명을 확인하고 OCI에서 설치한 게시 아티팩트 테스트 |
+
+예약된 이미지 확인 작업은 직접 릴리즈하지 않습니다. 업데이트 PR도 다른 차트
+변경과 동일한 리뷰 및 Changesets 릴리즈 경로를 따릅니다. 전체 lifecycle은
+[CI 가이드](docs/ko/contributing/ci.md)를 참고하세요.
+
 ## 개발
 
 레포지토리를 클론하고, 게시된 레지스트리가 아니라 로컬 차트 경로(상대경로)로

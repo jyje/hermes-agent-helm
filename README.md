@@ -145,6 +145,24 @@ values table, the "More examples" table (`values-*.yaml` for every supported
 provider plus Discord/Telegram and LiteLLM - copy the raw YAML and pass it with
 `-f`), and an [ArgoCD example](examples/argocd/).
 
+## Automation
+
+GitHub Actions validates changes, publishes documentation, tracks upstream
+Hermes images, and releases signed chart artifacts.
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| [`validate-chart`](.github/workflows/validate-chart.yaml) | Chart-related pull requests | Lint, render, check generated docs, and test the chart on isolated kind clusters. |
+| [`deploy-docs`](.github/workflows/deploy-docs.yaml) | Site-related pull requests, changes on `main`, or manual runs | Build the site for pull requests and publish it to GitHub Pages outside pull requests. |
+| [`cron-fetch-image`](.github/workflows/cron-fetch-image.yaml) | Every 6 hours or manually | Detect a newer Hermes image, open an appVersion update PR, and create upstream-review issues. |
+| [`propose-release`](.github/workflows/propose-release.yaml) | Manual | Combine pending Changesets into one reviewable release PR. |
+| [`release-chart`](.github/workflows/release-chart.yaml) | A chart version change on `main` | Tag the release, create the GitHub Release, publish signed OCI and Helm Repository artifacts, and refresh the documentation site. |
+| [`verify-release`](.github/workflows/verify-release.yaml) | A successful chart release | Verify the signature, install from OCI, and test the published artifact. |
+
+The scheduled image check never publishes a release directly. Its update PR
+enters the same review and Changesets release path as any other chart change.
+See the [CI guide](docs/contributing/ci.md) for the complete lifecycle.
+
 ## Development
 
 Clone the repo and install from the local chart path (a relative path, not
