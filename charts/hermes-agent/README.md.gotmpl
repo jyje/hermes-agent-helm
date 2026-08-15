@@ -90,8 +90,9 @@ It deploys:
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
   (no inbound port - the gateway is outbound); for `deployment`: a standalone
-  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard,
-  and an **optional** Ingress in front of it (`ingress.enabled`)
+  PVC instead. Either way, an **optional** ClusterIP Service for explicitly
+  selected dashboard, API server, or webhook listener ports, and an
+  **optional** Ingress in front of the dashboard (`ingress.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 The agent's command execution uses the **`local` backend** (commands run inside
@@ -450,6 +451,28 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   oauth2-proxy/basic-auth Ingress annotation) or on a private network - see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
+### API server and webhook listeners
+
+`apiServer.enabled` starts Hermes' OpenAI-compatible API server. Its default
+chart host is `0.0.0.0` so a Kubernetes Service can reach it, unlike the
+upstream loopback default. Set `API_SERVER_KEY` through `env` or, preferably,
+an externally managed Secret referenced by `extraEnvFrom`: it is required even
+for a loopback-only server. Use `apiServer.corsOrigins` only for an explicit,
+narrow browser-origin allowlist. See the upstream [API server
+guide](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server).
+
+`webhook.enabled` starts the one generic webhook receiver. Telegram, Discord,
+Slack, and other integrations are routes behind that listener, not separate
+listeners. Set `WEBHOOK_SECRET` or a per-route secret through `env` or
+`extraEnvFrom`; see the upstream [webhook
+guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks).
+
+Neither runtime setting exposes a port by itself. Keep `service.ports: []` for
+the legacy dashboard-only Service, or specify every Service port explicitly.
+The copy-ready [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)
+overlay exposes API server and webhook ports and references an external Secret
+for the required credentials.
+
 ## Gateway lifecycle: rollouts, shutdown, and drain
 
 As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to
@@ -586,10 +609,10 @@ source) - not for every individual key upstream ships.
 ## More examples
 
 Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
-(e.g. a Raspberry Pi / arm64 k3s cluster). All secrets in these files are
-**dummy placeholders** - override them at install time with `--set-string` (see
-the command in each file's header comment), or via the SealedSecret +
-`extraEnvFrom` pattern above.
+(e.g. a Raspberry Pi / arm64 k3s cluster). Credentials in these files are
+**dummy placeholders or external Secret references** - override placeholders at
+install time with `--set-string` (see the command in each file's header
+comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 
 | File | Model provider | Extras |
 | --- | --- | --- |
@@ -612,6 +635,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
+| [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/advanced/teams/reference.md) |

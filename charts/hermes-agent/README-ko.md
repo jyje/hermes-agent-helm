@@ -88,8 +88,9 @@ Kubernetes에서 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를
 - `.env`를 담는 **Secret**(`envFrom`으로 주입)
 - `controller.type=statefulset`인 경우: DNS/거버넌스용 헤드리스 Service(인바운드
   포트 없음 - gateway는 아웃바운드); `deployment`인 경우: 대신 독립 PVC. 둘 다
-  대시보드용 **선택적** ClusterIP Service와 그 앞단의 **선택적** Ingress
-  (`ingress.enabled`)를 가질 수 있습니다
+  선택한 dashboard, API server, webhook 리스너 포트용 **선택적** ClusterIP
+  Service와 dashboard 앞단의 **선택적** Ingress(`ingress.enabled`)를 가질 수
+  있습니다
 - `hermes doctor` 스타일 체크를 실행하는 **Helm test** Job(`helm test`)
 
 에이전트의 명령 실행은 **`local` 백엔드**를 사용합니다(명령이 파드 내부에서
@@ -444,6 +445,28 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
   annotation) 뒤에서나 사설 네트워크에서만 설정하세요 - `values.yaml`의
   `ingress.hosts` / `ingress.tls`를 참고하세요.
 
+### API server와 webhook 리스너
+
+`apiServer.enabled`는 Hermes의 OpenAI 호환 API server를 시작합니다. Kubernetes
+Service가 연결할 수 있도록 차트의 기본 host는 업스트림 loopback 기본값과 달리
+`0.0.0.0`입니다. loopback 전용 server라도 `API_SERVER_KEY`가 필요하므로 `env`
+또는 권장 방식인 `extraEnvFrom`으로 참조하는 외부 관리 Secret을 통해 설정하세요.
+`apiServer.corsOrigins`는 명시적이고 좁은 browser origin 허용 목록에만 사용하세요.
+공식 [API server 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server)를
+참고하세요.
+
+`webhook.enabled`는 하나의 범용 webhook receiver를 시작합니다. Telegram,
+Discord, Slack 등은 별도 리스너가 아니라 이 리스너 뒤의 route입니다.
+`WEBHOOK_SECRET` 또는 route별 secret을 `env`나 `extraEnvFrom`으로 설정하세요.
+공식 [webhook 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks)를
+참고하세요.
+
+두 런타임 설정 모두 포트를 자동 노출하지 않습니다. 기존 dashboard만 노출하는
+Service를 유지하려면 `service.ports: []`를 두고, API server나 webhook을 노출할
+때는 필요한 Service port를 모두 명시하세요. 바로 사용할 수 있는
+[`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)은 API
+server와 webhook 포트를 노출하고 필요한 자격증명은 외부 Secret으로 참조합니다.
+
 ## 무인(unattended) 승인
 
 Gateway 파드에는 **TTY가 없습니다** - 위험한 `terminal`/`execute_code` 명령에
@@ -545,9 +568,10 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 ## 더 많은 예제
 
 소규모/홈 클러스터(예: Raspberry Pi / arm64 k3s 클러스터)를 대상으로 한,
-바로 적용 가능한 `-f` 오버레이입니다. 이 파일들의 모든 시크릿은 **더미
-플레이스홀더**입니다 - 설치 시점에 `--set-string`으로 덮어쓰거나(각 파일
-헤더 주석의 커맨드 참고), 위의 SealedSecret + `extraEnvFrom` 패턴을 사용하세요.
+바로 적용 가능한 `-f` 오버레이입니다. 이 파일의 자격증명은 **더미 플레이스홀더
+또는 외부 Secret 참조**입니다. 플레이스홀더는 설치 시점에 `--set-string`으로
+덮어쓰거나(각 파일 헤더 주석의 커맨드 참고), 위의 SealedSecret +
+`extraEnvFrom` 패턴을 사용하세요.
 
 | 파일 | 모델 제공자 | 추가 사항 |
 | --- | --- | --- |
@@ -570,6 +594,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
+| [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook**: 명시적 Service port와 외부 listener secret |
 | [`values-soul.yaml`](values-soul.yaml) | any | **영속 정체성**: 실용적인 엔지니어링 말투, 런타임 편집 보존 |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어**: 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀**: 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; [Teams](../../docs/ko/advanced/teams/reference.md) 참고 |
@@ -588,6 +613,11 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
 | affinity | object | Affinity rules for Pod scheduling. | `{}` |
+| apiServer | object | ------------------------------------------------------------------------- | `{"corsOrigins":"","enabled":false,"host":"0.0.0.0","port":8642}` |
+| apiServer.corsOrigins | string | Comma-separated browser origins allowed to call the API directly. Empty    disables browser CORS access. | `""` |
+| apiServer.enabled | bool | Enable Hermes' OpenAI-compatible HTTP API server. | `false` |
+| apiServer.host | string | Bind address. Upstream defaults to 127.0.0.1; a Kubernetes Service needs    a non-loopback address. API_SERVER_KEY is still required on loopback. | `"0.0.0.0"` |
+| apiServer.port | int | API server port. | `8642` |
 | args | list | Arguments passed through the image entrypoint. `gateway run` selects the    non-interactive outbound messaging service instead of the default TUI. | `["gateway","run"]` |
 | auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
 | auth.deviceFlow.enabled | bool | Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from `env`/`extraEnvFrom`. | `false` |
@@ -647,8 +677,9 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |
 | service | object | ------------------------------------------------------------------------- | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` |
 | service.annotations | object | Annotations to add to the Service. | `{}` |
-| service.enabled | bool | Create a ClusterIP Service (only useful if you expose the dashboard). | `false` |
-| service.port | int | Service port (and the dashboard's container port). | `9119` |
+| service.enabled | bool | Create a ClusterIP Service for explicitly selected listeners. | `false` |
+| service.port | int | Legacy dashboard Service port. Used only while `service.ports` is empty,    preserving the existing dashboard-only Service behaviour. | `9119` |
+| service.ports | list | Explicit Service ports. A non-empty list replaces the legacy dashboard    port entirely. Enabling apiServer or webhook does not add a Service port    automatically. | `[]` |
 | service.type | string | Service type. | `"ClusterIP"` |
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
@@ -669,6 +700,8 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
+| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Telegram, Discord,    Slack, and other sources are routes behind this single listener. | `false` |
+| webhook.port | int | Webhook receiver port. | `8644` |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

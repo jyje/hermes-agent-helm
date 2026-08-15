@@ -83,6 +83,29 @@ Test image reference. Falls back to the main image when tests.image fields are e
 {{- end }}
 
 {{/*
+Logical ports exposed by the chart Service. An empty explicit list keeps the
+legacy dashboard-only Service byte-for-byte compatible. Callers may parse this
+list for another Kubernetes port shape, such as containerPorts.
+*/}}
+{{- define "hermes-agent.servicePorts" -}}
+{{- if .Values.service.ports }}
+{{- range .Values.service.ports }}
+- name: {{ .name }}
+  port: {{ .port }}
+  targetPort: {{ .targetPort | default .port }}
+  protocol: {{ .protocol | default "TCP" }}
+{{- end }}
+{{- else -}}
+# Intended for the management dashboard (port 9119). Requires the dashboard
+# to be enabled and bound to 0.0.0.0 (--insecure) inside the container.
+- name: dashboard
+  port: {{ .Values.service.port }}
+  targetPort: {{ .Values.service.port }}
+  protocol: TCP
+{{- end }}
+{{- end }}
+
+{{/*
 Pod template (metadata + spec), shared by the StatefulSet and Deployment
 controllers. Caller is expected to nest this under `template:` with `nindent 4`.
 */}}
@@ -251,11 +274,37 @@ spec:
       args:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.service.ports }}
+      ports:
+        {{- range (include "hermes-agent.servicePorts" . | fromYamlArray) }}
+        - name: {{ .name }}
+          containerPort: {{ .targetPort | default .port }}
+          protocol: {{ .protocol | default "TCP" }}
+        {{- end }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
+        {{- if .Values.apiServer.enabled }}
+        - name: API_SERVER_ENABLED
+          value: "true"
+        - name: API_SERVER_HOST
+          value: {{ .Values.apiServer.host | quote }}
+        - name: API_SERVER_PORT
+          value: {{ .Values.apiServer.port | quote }}
+        {{- with .Values.apiServer.corsOrigins }}
+        - name: API_SERVER_CORS_ORIGINS
+          value: {{ . | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.webhook.enabled }}
+        - name: WEBHOOK_ENABLED
+          value: "true"
+        - name: WEBHOOK_PORT
+          value: {{ .Values.webhook.port | quote }}
+        {{- end }}
         {{- if .Values.team.enabled }}
         # Team mode makes explicit body mentions the only bot-to-bot trigger.
         - name: DISCORD_ALLOW_BOTS
