@@ -95,6 +95,14 @@
       }
     },
 
+    "soul": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" }
+      }
+    },
+
     "bootstrap": {
       "type": "object",
       "additionalProperties": false,

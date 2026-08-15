@@ -86,7 +86,7 @@ It deploys:
 - a **Deployment** (default) or **StatefulSet** (`controller.type`), single
   replica with persistent `HERMES_HOME`, running the image's s6-supervised
   gateway
-- a **ConfigMap** holding the partial `config.yaml`
+- a **ConfigMap** holding the partial `config.yaml` and optional `SOUL.md`
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
   (no inbound port - the gateway is outbound); for `deployment`: a standalone
@@ -407,6 +407,14 @@ the full upstream config (which would drift across Hermes versions).
   volume) by an init container, because Hermes also writes to its home at
   runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=true`
   (default) re-seeds on every deploy; set `false` to seed only when absent.
+- **`SOUL.md` identity**: set `.Values.soul.text` to seed a persistent agent
+  identity into `HERMES_HOME/SOUL.md`. Leave it empty to let Hermes create its
+  own starter file on first run. Its seed decision is independent from
+  `config.yaml`: with `bootstrap.overwrite=false`, an existing identity is
+  preserved; with `true`, the chart replaces it on every deploy. Do not put
+  secrets in this ConfigMap-backed value. See the upstream
+  [SOUL.md guide](https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes)
+  for identity content and scope.
 - **Secrets / API keys**: set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
 

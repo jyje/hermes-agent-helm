@@ -84,7 +84,7 @@ Kubernetes에서 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를
 
 - 영속 `HERMES_HOME`을 가진 단일 레플리카의 **Deployment**(기본) 또는
   **StatefulSet**(`controller.type`) - 이미지의 s6-supervised gateway를 실행
-- 부분 `config.yaml`을 담는 **ConfigMap**
+- 부분 `config.yaml`과 선택적 `SOUL.md`를 담는 **ConfigMap**
 - `.env`를 담는 **Secret**(`envFrom`으로 주입)
 - `controller.type=statefulset`인 경우: DNS/거버넌스용 헤드리스 Service(인바운드
   포트 없음 - gateway는 아웃바운드); `deployment`인 경우: 대신 독립 PVC. 둘 다
@@ -401,6 +401,14 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
   `auth.json`, self-improvement). `bootstrap.overwrite=true`(기본값)는 매
   배포마다 다시 시드하고, `false`로 설정하면 없을 때만 시드합니다(런타임
   수정 보존).
+- **`SOUL.md` 정체성**: `.Values.soul.text`를 설정하면 영속 에이전트 정체성을
+  `HERMES_HOME/SOUL.md`에 시드합니다. 비워 두면 Hermes가 첫 실행에서 자체
+  시작 파일을 만듭니다. `config.yaml`과는 독립적으로 처리하므로
+  `bootstrap.overwrite=false`에서는 기존 정체성을 보존하고, `true`에서는 매
+  배포마다 차트 내용으로 교체합니다. ConfigMap 기반 값에는 시크릿을 넣지
+  마세요. 정체성 내용과 범위는 공식
+  [SOUL.md 가이드](https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes)를
+  참고하세요.
 - **시크릿 / API 키**: `.Values.env` 아래 설정하세요. Secret으로 렌더링되어
   `envFrom`을 통해 환경변수로 주입됩니다(env가 `config.yaml`보다 우선).
 
@@ -597,8 +605,8 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
 | auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid;    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
-| bootstrap.enabled | bool | Seed the rendered config.yaml into HERMES_HOME via an init container. | `true` |
-| bootstrap.overwrite | bool | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). | `true` |
+| bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
+| bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
@@ -644,6 +652,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
+| soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |
 | terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast: the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop: the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
 | tests | object | ------------------------------------------------------------------------- | `{"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |

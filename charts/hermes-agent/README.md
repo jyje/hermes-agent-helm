@@ -86,7 +86,7 @@ It deploys:
 - a **Deployment** (default) or **StatefulSet** (`controller.type`), single
   replica with persistent `HERMES_HOME`, running the image's s6-supervised
   gateway
-- a **ConfigMap** holding the partial `config.yaml`
+- a **ConfigMap** holding the partial `config.yaml` and optional `SOUL.md`
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
   (no inbound port - the gateway is outbound); for `deployment`: a standalone
@@ -407,6 +407,14 @@ the full upstream config (which would drift across Hermes versions).
   volume) by an init container, because Hermes also writes to its home at
   runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=true`
   (default) re-seeds on every deploy; set `false` to seed only when absent.
+- **`SOUL.md` identity**: set `.Values.soul.text` to seed a persistent agent
+  identity into `HERMES_HOME/SOUL.md`. Leave it empty to let Hermes create its
+  own starter file on first run. Its seed decision is independent from
+  `config.yaml`: with `bootstrap.overwrite=false`, an existing identity is
+  preserved; with `true`, the chart replaces it on every deploy. Do not put
+  secrets in this ConfigMap-backed value. See the upstream
+  [SOUL.md guide](https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes)
+  for identity content and scope.
 - **Secrets / API keys**: set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
 
@@ -635,8 +643,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
 | auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid;    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
-| bootstrap.enabled | bool | Seed the rendered config.yaml into HERMES_HOME via an init container. | `true` |
-| bootstrap.overwrite | bool | true: overwrite HERMES_HOME/config.yaml with chart content on every    deploy (declarative). false: seed only if it does not already exist    (preserve runtime edits). | `true` |
+| bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
+| bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
@@ -682,6 +690,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
+| soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |
 | team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":""},"members":[],"name":"","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.37","uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
 | team.enabled | bool | Enable the chart-native leader/member team protocol, roster skill, and shared knowledge volume mount for this release. | `false` |
 | team.identity | string | This release's identity. For a leader it must equal `leader.name`; for a member it must match one entry under `members`. | `""` |
