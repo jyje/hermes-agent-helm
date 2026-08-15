@@ -168,7 +168,7 @@ Once any of the above merges to `main`,
 and publishes the chart to **both**:
 
 - `oci://ghcr.io/<owner>/hermes-agent-helm/hermes-agent` (OCI artifact), and
-- the classic Helm repository at `https://<owner>.github.io/hermes-agent-helm`
+- the Helm Repository at `https://<owner>.github.io/hermes-agent-helm`
   (published to the `gh-pages` branch, `index.yaml` merged with prior releases).
 
 Commits that touch `Chart.yaml` for other reasons (e.g. `appVersion`,

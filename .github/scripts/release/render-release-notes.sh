@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Assemble the GitHub Release body: chart description (from Chart.yaml,
-# single source of truth) + install snippets (latest / this version / OCI) +
+# single source of truth) + OCI-first install snippets +
 # the changelog section for this version (extracted from CHANGELOG.md, so it
 # matches the release-proposal PR exactly). Contributors are not included
 # here: GitHub renders a native contributors block on the release page
@@ -35,28 +35,20 @@ ${DESCRIPTION}
 
 ## Install
 
-### Latest (Helm repo)
+### OCI (recommended)
 \`\`\`bash
-helm repo add ${CHART_NAME} https://${OWNER}.github.io/${REPO_NAME}
-helm repo update
-helm upgrade --install ${CHART_NAME} ${CHART_NAME}/${CHART_NAME} \\
-  --namespace ${CHART_NAME} --create-namespace \\
-  --set-string env.OPENAI_API_KEY='sk-...' \\
-  --wait
-\`\`\`
-
-### This version (v${VERSION})
-\`\`\`bash
-helm upgrade --install ${CHART_NAME} ${CHART_NAME}/${CHART_NAME} \\
+helm upgrade --install ${CHART_NAME} oci://ghcr.io/${REPO}/${CHART_NAME} \\
   --namespace ${CHART_NAME} --create-namespace \\
   --version ${VERSION} \\
   --set-string env.OPENAI_API_KEY='sk-...' \\
   --wait
 \`\`\`
 
-### OCI
+### Helm Repository
 \`\`\`bash
-helm upgrade --install ${CHART_NAME} oci://ghcr.io/${REPO}/${CHART_NAME} \\
+helm repo add ${CHART_NAME} https://${OWNER}.github.io/${REPO_NAME}
+helm repo update
+helm upgrade --install ${CHART_NAME} ${CHART_NAME}/${CHART_NAME} \\
   --namespace ${CHART_NAME} --create-namespace \\
   --version ${VERSION} \\
   --set-string env.OPENAI_API_KEY='sk-...' \\

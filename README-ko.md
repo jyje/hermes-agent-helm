@@ -42,7 +42,7 @@
       --wait
     ```
 
-2. **클래식 Helm 저장소** — 한 번 추가해두고 이름으로 설치하는 방식을 원하면, GitHub Pages에 배포된 Helm 저장소도 있습니다:
+2. **Helm Repository** - 한 번 추가해두고 이름으로 설치하는 방식을 원하면, GitHub Pages에 배포된 Helm 저장소도 있습니다:
 
     ```bash
     helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
@@ -97,8 +97,28 @@
 
 ## 전체 설치
 
+### OCI (권장)
+
 ```bash
-# Helm 저장소를 추가하고 최신 차트 인덱스를 가져옵니다
+# 설치 전에 차트를 렌더링해 템플릿을 확인합니다
+helm template hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+  --set-string env.OPENAI_API_KEY='sk-...'
+
+# 제네릭 기본값으로 설치 (제공자 키 설정)
+# 릴리즈 이름 == 차트 이름으로 리소스명이 깔끔함 (hermes-agent-hermes-agent-0 아니라 hermes-agent-0)
+helm upgrade --install hermes-agent oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+
+# 설치 테스트 실행 (doctor 스타일 Job)
+helm test hermes-agent -n hermes-agent
+kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
+```
+
+### Helm Repository
+
+```bash
+# Helm Repository를 추가하고 최신 차트 인덱스를 가져옵니다
 helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
 helm repo update
 
@@ -107,7 +127,6 @@ helm template hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...'
 
 # 제네릭 기본값으로 설치 (제공자 키 설정)
-# 릴리즈 이름 == 차트 이름으로 리소스명이 깔끔함 (hermes-agent-hermes-agent-0 아니라 hermes-agent-0)
 helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait

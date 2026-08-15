@@ -3,22 +3,22 @@ title: Hermes Agent 설치
 description: 제공자 키로 차트를 설치한 뒤, 렌더링된 워크로드를 검증합니다.
 ---
 
-## Helm 저장소에서 설치
+## OCI 아티팩트로 설치 (권장)
+
+```bash
+helm upgrade --install hermes-agent \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
+  --version <chart-version> --namespace hermes-agent --create-namespace \
+  --set-string env.OPENAI_API_KEY='sk-...' --wait
+```
+
+## 또는 Helm Repository에서 설치
 
 ```bash
 helm repo add hermes-agent https://jyje.github.io/hermes-agent-helm
 helm repo update
 helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --namespace hermes-agent --create-namespace \
-  --set-string env.OPENAI_API_KEY='sk-...' --wait
-```
-
-## 또는 OCI 아티팩트로 설치
-
-```bash
-helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent \
-  --version <chart-version> --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
