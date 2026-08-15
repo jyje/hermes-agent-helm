@@ -89,8 +89,8 @@ Kubernetes에서 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를
 - `controller.type=statefulset`인 경우: DNS/거버넌스용 헤드리스 Service(인바운드
   포트 없음 - gateway는 아웃바운드); `deployment`인 경우: 대신 독립 PVC. 둘 다
   선택한 dashboard, API server, webhook 리스너 포트용 **선택적** ClusterIP
-  Service와 dashboard 앞단의 **선택적** Ingress(`ingress.enabled`)를 가질 수
-  있습니다
+  Service와 **선택적** Ingress 또는 Gateway API HTTPRoute(`ingress.enabled` 또는
+  `httpRoute.enabled`)를 가질 수 있습니다
 - `hermes doctor` 스타일 체크를 실행하는 **Helm test** Job(`helm test`)
 
 에이전트의 명령 실행은 **`local` 백엔드**를 사용합니다(명령이 파드 내부에서
@@ -438,12 +438,10 @@ Kubernetes Secret에 넣고 `extraEnvFrom`으로 참조하세요.
 시 checksum 검증된 `bws` CLI를 `HERMES_HOME`에 내려받으므로, Pod에는
 Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 
-- **대시보드 Ingress**: 관리 대시보드(`service.port`, 기본값 9119)는
+- **대시보드 라우팅**: 관리 대시보드(`service.port`, 기본값 9119)는
   `127.0.0.1` 너머로 바인딩하려면 `--insecure`가 필요한데, 업스트림은 이것이
-  **네트워크에 API 키를 노출**한다고 경고합니다. `service.enabled: true`와
-  `ingress.enabled: true`는 인증(예: oauth2-proxy/basic-auth Ingress
-  annotation) 뒤에서나 사설 네트워크에서만 설정하세요 - `values.yaml`의
-  `ingress.hosts` / `ingress.tls`를 참고하세요.
+  **네트워크에 API 키를 노출**한다고 경고합니다. 인증(예: oauth2-proxy/basic-auth
+  Ingress annotation) 뒤에서나 사설 네트워크에서만 라우팅하세요.
 
 ### API server와 webhook 리스너
 
@@ -466,6 +464,25 @@ Service를 유지하려면 `service.ports: []`를 두고, API server나 webhook�
 때는 필요한 Service port를 모두 명시하세요. 바로 사용할 수 있는
 [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)은 API
 server와 webhook 포트를 노출하고 필요한 자격증명은 외부 Secret으로 참조합니다.
+
+### HTTP 라우팅: Ingress 또는 HTTPRoute
+
+두 라우팅 리소스는 기본으로 꺼져 있습니다. 설치된 Ingress controller가 있으면
+`ingress`를 사용하세요. 클러스터에 Gateway API CRD와 `parentRefs`로 참조할
+Gateway가 이미 있으면 `httpRoute`를 사용하세요. 같은 host와 path에 두 리소스를
+함께 켜기보다 클러스터가 운영하는 라우팅 API 하나를 선택하세요.
+
+각 Ingress path는 `service`와 `port`를 덮어쓸 수 있습니다. Service 이름을 생략하면
+이 차트의 Service를 대상으로 하므로 `service.enabled: true`가 필요합니다. 외부
+Service 이름을 명시하면 차트 Service 없이도 됩니다. HTTPRoute도 각
+`backendRefs` 항목에 같은 기본 규칙을 적용합니다. 암시적 chart-Service backend가
+존재하지 않는 Service를 가리키면 차트가 일찍 실패합니다.
+
+[`values-ingress-listeners.yaml`](values-ingress-listeners.yaml)은 `/v1` API와
+webhook 트래픽을 서로 다른 Ingress host와 Service port로 라우팅합니다.
+[`values-httproute.yaml`](values-httproute.yaml)은 Gateway API 시작점입니다. 하나의
+HTTPRoute에서 hostname은 모든 rule에 적용되므로, 리스너 rule을 host 단위로
+분리해야 하면 별도의 HTTPRoute를 만드세요.
 
 ## 무인(unattended) 승인
 
@@ -595,6 +612,8 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook**: 명시적 Service port와 외부 listener secret |
+| [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 리스너 라우팅**: `/v1` API와 webhook host가 별도 Service port 사용 |
+| [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 사전에 만든 Gateway를 통한 리스너 라우팅 |
 | [`values-soul.yaml`](values-soul.yaml) | any | **영속 정체성**: 실용적인 엔지니어링 말투, 런타임 편집 보존 |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어**: 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀**: 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; [Teams](../../docs/ko/advanced/teams/reference.md) 참고 |
@@ -651,6 +670,10 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var: e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
+| httpRoute.enabled | bool | Create a Gateway API HTTPRoute. The cluster must already provide the    Gateway API CRD and a Gateway selected by `parentRefs`. | `false` |
+| httpRoute.hostnames | list | HTTP hostnames accepted by this route. | `[]` |
+| httpRoute.parentRefs | list | Gateway API parent references. | `[]` |
+| httpRoute.rules | list | HTTPRoute rules. An empty backendRef name targets this chart's Service. | `[]` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
 | image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
@@ -658,7 +681,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
 | ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |
 | ingress.enabled | bool | Create an Ingress resource. | `false` |
-| ingress.hosts | list | Host/path rules, all routed to the Service port above. | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` |
+| ingress.hosts | list | Host/path rules. Each path defaults to this chart's Service and the    legacy dashboard port; override `service` and `port` per listener. | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` |
 | ingress.tls | list | TLS configuration for the Ingress. | `[]` |
 | nameOverride | string | Override the chart name used in resource names. | `""` |
 | nodeSelector | object | Node selector for Pod scheduling. | `{}` |

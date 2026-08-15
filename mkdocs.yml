@@ -156,6 +156,7 @@ nav:
           - advanced/integrations/index.md
           - Anthropic + Discord: advanced/integrations/anthropic-and-discord.md
           - Ingress: advanced/integrations/ingress.md
+          - HTTPRoute: advanced/integrations/httproute.md
           - LiteLLM: advanced/integrations/litellm.md
           - LiteLLM (in-cluster): advanced/integrations/litellm-k8s.md
           - OpenAI + Telegram: advanced/integrations/openai-and-telegram.md
