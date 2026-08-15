@@ -39,6 +39,11 @@ So: lint + test gate every change; the *release* itself is just a normal
 reviewed PR (the version bump) - the pending Changesets decide its SemVer,
 merging is what ships.
 
+The two flows above are the ones you hit as a contributor. Every workflow,
+including scheduled upstream image tracking and post-release verification, is
+documented in [docs/contributing/ci.md](docs/contributing/ci.md) - keep that
+page as the single source for workflow details rather than restating them here.
+
 ## Branch model
 
 | Branch | Purpose | CI |

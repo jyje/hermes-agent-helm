@@ -143,21 +143,19 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 
 ## 자동화
 
-GitHub Actions가 변경사항을 검증하고, 문서를 게시하며, upstream Hermes 이미지를
-추적하고, 서명된 차트 아티팩트를 릴리즈합니다.
+이 저장소의 자동화 중 차트 사용자에게 직접 영향을 주는 세 가지입니다.
 
-| Workflow | 트리거 | 역할 |
-|---|---|---|
-| [`validate-chart`](.github/workflows/validate-chart.yaml) | 차트 관련 pull request | lint, 렌더링, 생성 문서 확인, 격리된 kind 클러스터 차트 테스트 |
-| [`deploy-docs`](.github/workflows/deploy-docs.yaml) | 사이트 관련 pull request, `main` 변경 또는 수동 실행 | pull request에서 사이트를 빌드하고 pull request 외 실행에서 GitHub Pages에 게시 |
-| [`cron-fetch-image`](.github/workflows/cron-fetch-image.yaml) | 6시간마다 또는 수동 실행 | 새 Hermes 이미지를 감지하고 appVersion 변경 PR과 upstream-review 이슈 생성 |
-| [`propose-release`](.github/workflows/propose-release.yaml) | 수동 실행 | 대기 중인 Changeset을 검토 가능한 릴리즈 PR 하나로 결합 |
-| [`release-chart`](.github/workflows/release-chart.yaml) | `main`의 차트 버전 변경 | 태그와 GitHub Release를 만들고 서명된 OCI 및 Helm Repository 아티팩트를 게시한 뒤 문서 사이트 갱신 |
-| [`verify-release`](.github/workflows/verify-release.yaml) | 차트 릴리즈 성공 | 서명을 확인하고 OCI에서 설치한 게시 아티팩트 테스트 |
+- **Upstream 추적.** 예약된 작업이 6시간마다 새 Hermes 이미지를 확인하고
+  `appVersion` 업데이트 pull request를 엽니다. 스스로 릴리즈를 게시하지는
+  않습니다. 이 업데이트도 다른 차트 변경과 동일한 리뷰 및 Changesets 경로를
+  거칩니다.
+- **서명된 릴리즈.** 게시 시 Helm Repository 인덱스와 함께 cosign으로 서명된
+  OCI 아티팩트를 만듭니다.
+- **릴리즈 이후 검증.** 릴리즈마다 CI가 게시된 아티팩트를 OCI에서 설치하고,
+  서명을 확인한 뒤, 차트 자체 테스트 스위트를 그 아티팩트에 대해 실행합니다.
 
-예약된 이미지 확인 작업은 직접 릴리즈하지 않습니다. 업데이트 PR도 다른 차트
-변경과 동일한 리뷰 및 Changesets 릴리즈 경로를 따릅니다. 전체 lifecycle은
-[CI 가이드](docs/ko/contributing/ci.md)를 참고하세요.
+각 workflow와 트리거, 그리고 서로 어떻게 연결되는지는
+[CI 가이드](docs/ko/contributing/ci.md)에 정리되어 있습니다.
 
 ## 개발
 

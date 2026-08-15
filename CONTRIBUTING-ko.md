@@ -35,6 +35,11 @@
 즉: lint + test가 모든 변경사항을 게이트합니다; *릴리즈* 자체는 단순한
 리뷰된 PR (버전 범프) - 대기 중인 Changesets가 SemVer를 결정하고, 머지가 배포합니다.
 
+위 두 흐름은 기여자가 실제로 마주치는 부분입니다. 예약된 upstream 이미지 추적과
+릴리즈 이후 검증을 포함한 모든 workflow는
+[docs/ko/contributing/ci.md](docs/ko/contributing/ci.md)에 정리되어 있습니다.
+workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단일 출처로 유지하세요.
+
 ## 브랜치 모델
 
 | 브랜치 | 목적 | CI |

@@ -12,7 +12,7 @@ description: 지속적인 검증과 릴리즈 체크입니다.
 | Workflow | 트리거 | 역할 |
 |---|---|---|
 | [validate-chart.yaml](../../../.github/workflows/validate-chart.yaml) | 차트, 테스트, 검증 스크립트 또는 이 workflow를 변경하는 pull request | 머지 전 lint, 생성 문서 드리프트 확인, 격리된 **kind** 설치/테스트 시나리오 |
-| [deploy-docs.yaml](../../../.github/workflows/deploy-docs.yaml) | 문서 pull request, `main`의 문서 변경, 수동 실행 및 릴리즈 갱신 | 엄격한 링크 검사로 사이트를 빌드하고 pull request 외 실행에서 GitHub Pages에 배포 |
+| [deploy-docs.yaml](../../../.github/workflows/deploy-docs.yaml) | 사이트가 렌더링하는 대상(`docs/`, 각 README, `charts/`, `examples/`, `mkdocs.yml` 등)을 건드리는 pull request와 `main` push, 수동 실행, 릴리즈 갱신 | 엄격한 링크 검사로 사이트를 빌드하고 pull request 외 실행에서 GitHub Pages에 배포 |
 | [cron-fetch-image.yaml](../../../.github/workflows/cron-fetch-image.yaml) | 6시간마다 또는 수동 실행 | 새 upstream 이미지를 감지하고 appVersion 변경 PR과 upstream-review 이슈 생성 |
 | [propose-release.yaml](../../../.github/workflows/propose-release.yaml) | 수동 실행 | 게시하지 않고 대기 중인 Changeset을 검토 가능한 릴리즈 PR 하나로 변환 |
 | [release-chart.yaml](../../../.github/workflows/release-chart.yaml) | `charts/hermes-agent/Chart.yaml`을 바꾸는 `main` push | `vX.Y.Z` 태그 생성, OCI와 Helm Repository 게시, OCI cosign 서명 및 Pages 갱신 |
@@ -110,10 +110,15 @@ Discord 체크)은 건너뛰고 **doctor 전용**으로 폴백합니다 - 안전
 
 ## deploy-docs
 
-문서 관련 pull request는 `mkdocs build --strict`를 실행하고 사이트
-아티팩트를 업로드하지만 배포하지는 않습니다. 같은 변경이 `main`에 머지되거나,
-수동 실행하거나, `release-chart`가 갱신을 요청하면 GitHub Pages Actions API를
-통해 빌드된 사이트를 배포합니다.
+이 workflow의 경로 필터는 `docs/`보다 넓게, 사이트가 렌더링하는 대상 전부를
+포함합니다. 루트와 차트의 README, `charts/`, `examples/`, `mkdocs.yml`,
+`main.py`, `requirements.txt`가 모두 해당합니다. 차트만 바꾼 pull request도
+이 workflow를 실행하는데, 차트 README가 사이트의 일부이기 때문입니다.
+
+pull request는 `mkdocs build --strict`를 실행하고 사이트 아티팩트를
+업로드하지만 배포하지는 않습니다. 같은 변경이 `main`에 머지되거나, 수동
+실행하거나, `release-chart`가 갱신을 요청하면 GitHub Pages Actions API를 통해
+빌드된 사이트를 배포합니다.
 
 이 workflow는 `gh-pages` 브랜치의 `index.yaml`과 패키징된 차트 아카이브를
 사이트 출력에 병합합니다. 이 브랜치는 Helm Repository 데이터 저장소이고,

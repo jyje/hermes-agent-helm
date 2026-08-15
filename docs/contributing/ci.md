@@ -11,7 +11,7 @@ documentation site, track upstream images, and release signed chart artifacts.
 | Workflow | Trigger | Role |
 |---|---|---|
 | [validate-chart.yaml](../../.github/workflows/validate-chart.yaml) | Pull requests that change the chart, tests, validation scripts, or this workflow | Lint, generated-docs drift checks, and isolated **kind** install/test scenarios before merge. |
-| [deploy-docs.yaml](../../.github/workflows/deploy-docs.yaml) | Documentation pull requests, documentation changes on `main`, manual runs, and release refreshes | Build the site with strict link checks and deploy it to GitHub Pages outside pull requests. |
+| [deploy-docs.yaml](../../.github/workflows/deploy-docs.yaml) | Pull requests and `main` pushes touching anything the site renders (`docs/`, the READMEs, `charts/`, `examples/`, `mkdocs.yml`, ...), manual runs, and release refreshes | Build the site with strict link checks and deploy it to GitHub Pages outside pull requests. |
 | [cron-fetch-image.yaml](../../.github/workflows/cron-fetch-image.yaml) | Every 6 hours or manually | Detect a newer upstream image, open an appVersion update PR, and create upstream-review issues. |
 | [propose-release.yaml](../../.github/workflows/propose-release.yaml) | Manual | Consume pending Changesets into one reviewable release PR without publishing. |
 | [release-chart.yaml](../../.github/workflows/release-chart.yaml) | Push to `main` that changes `charts/hermes-agent/Chart.yaml` | Tag `vX.Y.Z`, publish OCI and Helm Repository artifacts, cosign-sign OCI, and refresh Pages. |
@@ -106,10 +106,15 @@ safe and still meaningful.
 
 ## deploy-docs
 
-Documentation-related pull requests run `mkdocs build --strict` and upload the
-site artifact, but do not deploy it. A matching change on `main`, a manual run,
-or a refresh requested by `release-chart` deploys the built site through the
-GitHub Pages Actions API.
+Its path filter covers everything the site renders, which is broader than
+`docs/`: the root and chart READMEs, `charts/`, `examples/`, `mkdocs.yml`,
+`main.py`, and `requirements.txt` are all included. A chart-only pull request
+therefore runs this workflow too, because the chart README is part of the site.
+
+Pull requests run `mkdocs build --strict` and upload the site artifact but do
+not deploy it. A matching change on `main`, a manual run, or a refresh
+requested by `release-chart` deploys the built site through the GitHub Pages
+Actions API.
 
 The workflow merges `index.yaml` and packaged chart archives from the
 `gh-pages` branch into the site output. The branch is a Helm Repository data
