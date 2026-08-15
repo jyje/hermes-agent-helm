@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.5.0
+
+### Minor Changes
+
+- a3b5e83: Update the default Hermes Agent image to v2026.8.13.
+- 490b555: Feature(config): Seed SOUL.md alongside config.yaml
+
+  Configure a persistent Hermes identity that the chart seeds into HERMES_HOME.
+
+- 60fc84c: Feature(values): Startup probes and controller annotations
+
+  Configure a startup probe and annotations on Deployment or StatefulSet resources.
+
+### Patch Changes
+
+- eef7b2c: Documentation(values): Add SOUL identity example
+
+  Provide a ready-to-adapt values overlay for a durable Hermes identity and safe bootstrap preservation.
+
 ## 1.4.0
 
 ### Minor Changes
