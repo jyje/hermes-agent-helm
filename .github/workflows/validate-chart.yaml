@@ -59,6 +59,16 @@ jobs:
 
       - uses: azure/setup-helm@v5
 
+      - name: install yq
+        env:
+          YQ_VERSION: "v4.53.3"
+        run: |
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; x86_64) arch=amd64 ;; esac
+          curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${arch}" \
+            -o "$RUNNER_TEMP/yq"
+          sudo install -m 0755 "$RUNNER_TEMP/yq" /usr/local/bin/yq
+          yq --version
+
       - name: helm lint
         run: helm lint charts/hermes-agent --set env.OPENAI_API_KEY=sk-test
 
@@ -67,8 +77,18 @@ jobs:
           helm template hermes-agent charts/hermes-agent \
             --set-string env.OPENAI_API_KEY=sk-test > /dev/null
 
+      - name: render values examples
+        run: |
+          set -euo pipefail
+          for values_file in charts/hermes-agent/values-*.yaml; do
+            echo "Rendering ${values_file}"
+            helm template example charts/hermes-agent -f "$values_file" > /dev/null
+          done
+
       - name: validate paused replica count
         run: |
+          # This exact scalar check stays with grep. Use yq for future
+          # structured manifest assertions.
           for controller in deployment statefulset; do
             helm template paused charts/hermes-agent \
               --set controller.type="$controller" --set replicaCount=0 \
