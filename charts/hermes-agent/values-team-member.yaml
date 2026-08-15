@@ -67,7 +67,7 @@ team:
     retain: true
     permissions:
       enabled: false
-      image: busybox:1.37
+      image: busybox:1.38
       uid: 10000
       gid: 10000
 
@@ -86,7 +86,7 @@ extraEnv:
 
 extraInitContainers:
   - name: init-private-home
-    image: busybox:1.37
+    image: busybox:1.38
     command: ["sh", "-c", "chown -R 10000:10000 /home"]
     volumeMounts:
       - name: data

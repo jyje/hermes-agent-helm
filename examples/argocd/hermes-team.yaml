@@ -106,7 +106,7 @@ spec:
                 retain: true
                 permissions:
                   enabled: {{ .ownsSharedResources }}
-                  image: busybox:1.37
+                  image: busybox:1.38
                   uid: 10000
                   gid: 10000
 
