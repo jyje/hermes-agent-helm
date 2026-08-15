@@ -5,14 +5,47 @@ description: 지속적인 검증과 릴리즈 체크입니다.
 
 # CI / 지속적 검증
 
-이 저장소에는 세 개의 GitHub Actions workflow가 있어, PR부터 서명된
-게시 아티팩트까지 변경사항을 함께 검증합니다.
+이 저장소에는 여섯 개의 GitHub Actions workflow가 있어 변경사항을 검증하고,
+문서 사이트를 게시하며, upstream 이미지를 추적하고, 서명된 차트 아티팩트를
+릴리즈합니다.
 
 | Workflow | 트리거 | 역할 |
 |---|---|---|
-| [validate-chart.yaml](../../../.github/workflows/validate-chart.yaml) | `charts/hermes-agent/**`를 건드리는 PR과 `dev`/`main`로의 push | 무엇이든 머지되기 전에 lint + 격리된 **kind** 설치/테스트 |
-| [release-chart.yaml](../../../.github/workflows/release-chart.yaml) | `charts/hermes-agent/Chart.yaml`을 바꾸는 `main`로의 push | `vX.Y.Z` 태그를 만들고, OCI 아티팩트 + Helm 저장소를 배포하고, cosign으로 서명. [CONTRIBUTING.md](../../../CONTRIBUTING.md#how-to-cut-a-release) 참고 |
+| [validate-chart.yaml](../../../.github/workflows/validate-chart.yaml) | 차트, 테스트, 검증 스크립트 또는 이 workflow를 변경하는 pull request | 머지 전 lint, 생성 문서 드리프트 확인, 격리된 **kind** 설치/테스트 시나리오 |
+| [deploy-docs.yaml](../../../.github/workflows/deploy-docs.yaml) | 사이트가 렌더링하는 대상(`docs/`, 각 README, `charts/`, `examples/`, `mkdocs.yml` 등)을 건드리는 pull request와 `main` push, 수동 실행, 릴리즈 갱신 | 엄격한 링크 검사로 사이트를 빌드하고 pull request 외 실행에서 GitHub Pages에 배포 |
+| [cron-fetch-image.yaml](../../../.github/workflows/cron-fetch-image.yaml) | 6시간마다 또는 수동 실행 | 새 upstream 이미지를 감지하고 appVersion 변경 PR과 upstream-review 이슈 생성 |
+| [propose-release.yaml](../../../.github/workflows/propose-release.yaml) | 수동 실행 | 게시하지 않고 대기 중인 Changeset을 검토 가능한 릴리즈 PR 하나로 변환 |
+| [release-chart.yaml](../../../.github/workflows/release-chart.yaml) | `charts/hermes-agent/Chart.yaml`을 바꾸는 `main` push | `vX.Y.Z` 태그 생성, OCI와 Helm Repository 게시, OCI cosign 서명 및 Pages 갱신 |
 | [verify-release.yaml](../../../.github/workflows/verify-release.yaml) | `release-chart` 성공 이후 | **게시되어 서명된** 아티팩트를 처음부터 끝까지 다시 검증 |
+
+## workflow 연결 구조
+
+```mermaid
+flowchart LR
+    C["cron-fetch-image<br/>6시간마다"] --> U["appVersion 변경 PR"]
+    C --> I["upstream-review 이슈"]
+    P["차트 관련 PR"] --> V["validate-chart"]
+    P --> B["deploy-docs<br/>빌드만 수행"]
+    S["사이트 전용 PR"] --> SB["deploy-docs<br/>빌드만 수행"]
+    U --> V
+    U --> B
+    V --> M["차트 변경 머지"]
+    B --> M
+    SB --> SM["사이트 변경 머지"]
+    M --> R["propose-release<br/>수동 실행"]
+    R --> RP["릴리즈 PR"]
+    RP --> RV["리뷰와 검증"]
+    RV --> RM["릴리즈 PR 머지"]
+    RM --> RC["release-chart"]
+    RC --> VR["verify-release"]
+    RC --> D["deploy-docs<br/>게시"]
+    M --> D
+    SM --> D
+```
+
+예약 실행 경로는 일반 pull request와 검토 이슈를 만드는 데서 멈춥니다. 차트를
+직접 게시하지 않습니다. 메인테이너가 Changesets 릴리즈 PR을 준비하고 검토한 뒤
+머지해야 게시가 시작됩니다.
 
 ## validate-chart
 
@@ -26,11 +59,11 @@ description: 지속적인 검증과 릴리즈 체크입니다.
 
 ### `test`
 
-시나리오 두 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
+시나리오 세 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
 클러스터**(별도 러너)에서 돕니다 - 완전히 격리되어 있고, 하나로 뭉친 로그
 대신 job별로 고유한 상태·타임아웃·실패 진단을 갖습니다. PR 체크 목록에는
-`test (message)`와 `test (existing-claim)`으로 따로 표시됩니다. 시나리오
-로직은 workflow에 인라인으로 있지 않고
+`test (message)`, `test (existing-claim)`, `test (team)`으로 따로
+표시됩니다. 시나리오 로직은 workflow에 인라인으로 있지 않고
 [.github/scripts](../../../.github/scripts)(`lib.sh` + 시나리오별 스크립트)에
 있습니다.
 
@@ -80,6 +113,56 @@ description: 지속적인 검증과 릴리즈 체크입니다.
 Fork PR은 저장소 시크릿을 받지 못하므로, chat 라운드트립(그리고 라이브
 Discord 체크)은 건너뛰고 **doctor 전용**으로 폴백합니다 - 안전하면서도
 여전히 의미 있는 검증입니다.
+
+## deploy-docs
+
+이 workflow의 경로 필터는 `docs/`보다 넓게, 사이트가 렌더링하는 저장소
+소스를 모두 포함합니다. 루트 README, SECURITY, CONTRIBUTING의 영문 및 한글
+문서, `charts/`, `examples/`, `mkdocs.yml`, `main.py`, `hooks.py`,
+`requirements.txt`가 모두 해당합니다. 차트만 바꾼 pull request도 이
+workflow를 실행하는데, 차트 README가 사이트의 일부이기 때문입니다.
+
+pull request는 `mkdocs build --strict`를 실행하고 사이트 아티팩트를
+업로드하지만 배포하지는 않습니다. 같은 변경이 `main`에 머지되거나, 수동
+실행하거나, `release-chart`가 갱신을 요청하면 GitHub Pages Actions API를 통해
+빌드된 사이트를 배포합니다.
+
+이 workflow는 `gh-pages` 브랜치의 `index.yaml`과 패키징된 차트 아카이브를
+사이트 출력에 병합합니다. 이 브랜치는 Helm Repository 데이터 저장소이고,
+`deploy-docs`만 Pages 사이트를 게시합니다.
+
+## cron-fetch-image
+
+`0 */6 * * *` 스케줄은 UTC 기준 00:00, 06:00, 12:00, 18:00에 실행됩니다.
+수동 실행도 같은 절차를 따릅니다.
+
+1. Docker Hub에서 날짜 기반 `nousresearch/hermes-agent` 태그를 가져옵니다.
+2. 최신 태그를 차트의 현재 `appVersion`과 비교합니다.
+3. 새 이미지가 있으면 minor Changeset을 포함한 appVersion 변경 PR을 만듭니다.
+4. 독립적으로 NVIDIA NIM이 그 사이의 upstream 릴리즈 노트를 검토하고,
+   차트와 관련된 후속 작업마다 레이블이 있는 이슈를 하나씩 만듭니다.
+
+버전 변경과 upstream-review job은 서로 독립적입니다. 메인테이너는 모든 후속
+이슈의 구현을 기다리지 않고 일반 검증을 통과한 이미지 변경을 머지할 수 있습니다.
+
+## propose-release
+
+대기 중인 Changeset이 릴리즈 준비를 마치면 메인테이너가 이 workflow를
+실행합니다. 하나의 릴리즈 PR로 결합하고 릴리즈 manifest, `Chart.yaml`,
+Artifact Hub 어노테이션, 생성된 차트 문서, 버전이 포함된 예제를 동기화합니다.
+차트를 게시하지는 않습니다.
+
+## release-chart
+
+릴리즈 PR을 머지하면 `main`의 차트 버전이 바뀌고 이 workflow가 시작됩니다.
+해당 버전 태그가 아직 없다면 다음 작업을 수행합니다.
+
+1. `vX.Y.Z` 태그와 GitHub Release를 생성합니다.
+2. 차트를 패키징해 OCI에 게시합니다.
+3. keyless cosign으로 OCI 아티팩트에 서명합니다.
+4. `gh-pages`의 Helm Repository 데이터를 갱신합니다.
+5. 문서 사이트와 Helm Repository 인덱스를 함께 제공하도록 `deploy-docs`를
+   실행합니다.
 
 ## verify-release
 

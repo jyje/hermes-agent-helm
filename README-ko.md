@@ -141,6 +141,22 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 [ArgoCD 예제](examples/argocd/)는
 [charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
 
+## 자동화
+
+이 저장소의 자동화 중 차트 사용자에게 직접 영향을 주는 세 가지입니다.
+
+- **Upstream 추적.** 예약된 작업이 6시간마다 새 Hermes 이미지를 확인하고
+  `appVersion` 업데이트 pull request를 엽니다. 스스로 릴리즈를 게시하지는
+  않습니다. 이 업데이트도 다른 차트 변경과 동일한 리뷰 및 Changesets 경로를
+  거칩니다.
+- **서명된 릴리즈.** 게시 시 Helm Repository 인덱스와 함께 cosign으로 서명된
+  OCI 아티팩트를 만듭니다.
+- **릴리즈 이후 검증.** 릴리즈마다 CI가 게시된 아티팩트를 OCI에서 설치하고,
+  서명을 확인한 뒤, 차트 자체 테스트 스위트를 그 아티팩트에 대해 실행합니다.
+
+각 workflow와 트리거, 그리고 서로 어떻게 연결되는지는
+[CI 가이드](docs/ko/contributing/ci.md)에 정리되어 있습니다.
+
 ## 개발
 
 레포지토리를 클론하고, 게시된 레지스트리가 아니라 로컬 차트 경로(상대경로)로

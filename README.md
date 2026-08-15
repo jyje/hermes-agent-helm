@@ -145,6 +145,23 @@ values table, the "More examples" table (`values-*.yaml` for every supported
 provider plus Discord/Telegram and LiteLLM - copy the raw YAML and pass it with
 `-f`), and an [ArgoCD example](examples/argocd/).
 
+## Automation
+
+Three things this repository automates that affect you as a chart user:
+
+- **Upstream tracking.** A scheduled job checks for a newer Hermes image every
+  six hours and opens an `appVersion` update pull request. It never publishes a
+  release on its own: the update goes through the same review and Changesets
+  path as any other chart change.
+- **Signed releases.** Publishing produces a cosign-signed OCI artifact
+  alongside the Helm repository index.
+- **Post-release verification.** After every release, CI installs the published
+  artifact from OCI, verifies its signature, and runs the chart's own test suite
+  against it.
+
+Every workflow, its triggers, and how they connect is documented in the
+[CI guide](docs/contributing/ci.md).
+
 ## Development
 
 Clone the repo and install from the local chart path (a relative path, not
