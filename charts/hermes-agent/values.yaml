@@ -60,6 +60,12 @@ serviceAccount:
   name: ""
   # -- Annotations to add to the ServiceAccount.
   annotations: {}
+  # -- Mount the ServiceAccount token into the Pod. The agent does not call
+  #    the Kubernetes API, so this chart turns it off. Behaviour change on
+  #    upgrade: without this field, Kubernetes applies its own default of
+  #    true. Set to true if something inside the Pod deliberately calls the
+  #    API (e.g. kubectl-style tooling in an extraContainer).
+  automountServiceAccountToken: false
 
 # ---------------------------------------------------------------------------
 # config.yaml -> Hermes reads $HERMES_HOME/config.yaml as a PARTIAL OVERRIDE on
@@ -242,6 +248,30 @@ extraInitContainers: []
 #    volumeMounts:
 #      - name: team-workspace
 #        mountPath: /work
+
+# -- Extra sidecar containers appended to the Pod's main `containers:` list.
+#    Distinct from `extraInitContainers` (init phase only). Full container
+#    spec; giving a sidecar its own resources and a PSS-compatible
+#    securityContext is the operator's responsibility.
+extraContainers: []
+#  - name: log-forwarder
+#    image: busybox:1.38
+#    # Replace this command and mount with the log source your deployment uses.
+#    command: ["sh", "-c", "tail -F /data/application.log"]
+#    resources:
+#      requests: { cpu: 10m, memory: 16Mi }
+#      limits: { cpu: 50m, memory: 32Mi }
+#    securityContext:
+#      runAsNonRoot: true
+#      runAsUser: 65534
+#      allowPrivilegeEscalation: false
+#      readOnlyRootFilesystem: true
+#      capabilities: { drop: ["ALL"] }
+#      seccompProfile: { type: RuntimeDefault }
+#    volumeMounts:
+#      - name: data
+#        mountPath: /data
+#        readOnly: true
 
 # -- Extra raw manifests rendered as-is alongside this chart's resources.
 #    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
@@ -553,3 +583,8 @@ nodeSelector: {}
 tolerations: []
 # -- Affinity rules for Pod scheduling.
 affinity: {}
+
+# -- RuntimeClass for the Pod. Set to a sandboxed runtime (gVisor: "gvisor",
+#    Kata: "kata-containers") to add a kernel isolation boundary around the
+#    agent's shell execution. Empty by default: the cluster's default runtime.
+runtimeClassName: ""

@@ -663,6 +663,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
 | deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
+| extraContainers | list | Extra sidecar containers appended to the Pod's main `containers:` list.    Distinct from `extraInitContainers` (init phase only). Full container    spec; giving a sidecar its own resources and a PSS-compatible    securityContext is the operator's responsibility. | `[]` |
 | extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
 | extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
 | extraInitContainers | list | Extra init containers, appended after the chart's own (seed-config,    device-flow login). Full container spec; combine with `extraVolumes` for    one-time preparation of a user-provided volume (for example, a shared    knowledge volume used independently of the Discord team handoff). | `[]` |
@@ -697,6 +698,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | probes.startup | object | Startup probe spec. Empty = no startup probe. Use this when first start takes longer than the liveness probe allows. | `{}` |
 | replicaCount | int | Set to 0 to prepare GitOps resources (Secret, ConfigMap, PVC, ...)    without starting an agent Pod, then scale to 1 after credentials and    optional device login are ready. The gateway and device-login init    container do not run while paused. Hermes Agent is a single-writer    workload bound to one HERMES_HOME (ReadWriteOnce PVC), so values above 1    are unsupported: Deployment replicas contend for the same volume and    StatefulSet replicas are disconnected agent identities. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
+| runtimeClassName | string | RuntimeClass for the Pod. Set to a sandboxed runtime (gVisor: "gvisor",    Kata: "kata-containers") to add a kernel isolation boundary around the    agent's shell execution. Empty by default: the cluster's default runtime. | `""` |
 | securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |
 | service | object | ------------------------------------------------------------------------- | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` |
 | service.annotations | object | Annotations to add to the Service. | `{}` |
@@ -705,6 +707,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | service.ports | list | Explicit Service ports. A non-empty list replaces the legacy dashboard    port entirely. Enabling apiServer or webhook does not add a Service port    automatically. | `[]` |
 | service.type | string | Service type. | `"ClusterIP"` |
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
+| serviceAccount.automountServiceAccountToken | bool | Mount the ServiceAccount token into the Pod. The agent does not call    the Kubernetes API, so this chart turns it off. Behaviour change on    upgrade: without this field, Kubernetes applies its own default of    true. Set to true if something inside the Pod deliberately calls the    API (e.g. kubectl-style tooling in an extraContainer). | `false` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
 | soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |

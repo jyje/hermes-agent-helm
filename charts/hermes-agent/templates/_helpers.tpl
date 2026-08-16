@@ -132,6 +132,10 @@ metadata:
     {{- end }}
 spec:
   serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
+  automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+  {{- with .Values.runtimeClassName }}
+  runtimeClassName: {{ . | quote }}
+  {{- end }}
   {{- with .Values.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
   {{- end }}
@@ -355,6 +359,9 @@ spec:
         {{- with .Values.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+    {{- with .Values.extraContainers }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   volumes:
     {{- if .Values.bootstrap.enabled }}
     - name: config

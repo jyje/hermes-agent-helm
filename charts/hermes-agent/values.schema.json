@@ -48,7 +48,8 @@
       "properties": {
         "create": { "type": "boolean" },
         "name": { "type": "string" },
-        "annotations": { "type": "object" }
+        "annotations": { "type": "object" },
+        "automountServiceAccountToken": { "type": "boolean" }
       }
     },
 
@@ -268,6 +269,18 @@
       }
     },
     "extraInitContainers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "image"],
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "image": { "type": "string" }
+        }
+      }
+    },
+    "extraContainers": {
       "type": "array",
       "items": {
         "type": "object",
@@ -575,6 +588,7 @@
     "podLabels": { "type": "object" },
     "nodeSelector": { "type": "object" },
     "tolerations": { "type": "array" },
-    "affinity": { "type": "object" }
+    "affinity": { "type": "object" },
+    "runtimeClassName": { "type": "string" }
   }
 }
