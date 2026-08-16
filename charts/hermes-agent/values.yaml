@@ -495,3 +495,8 @@ nodeSelector: {}
 tolerations: []
 # -- Affinity rules for Pod scheduling.
 affinity: {}
+
+# -- RuntimeClass for the Pod. Set to a sandboxed runtime (gVisor: "gvisor",
+#    Kata: "kata-containers") to add a kernel isolation boundary around the
+#    agent's shell execution. Empty by default: the cluster's default runtime.
+runtimeClassName: ""

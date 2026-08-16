@@ -109,6 +109,9 @@ metadata:
     {{- end }}
 spec:
   serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
+  {{- with .Values.runtimeClassName }}
+  runtimeClassName: {{ . }}
+  {{- end }}
   {{- with .Values.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
   {{- end }}

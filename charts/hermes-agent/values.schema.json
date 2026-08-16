@@ -481,6 +481,7 @@
     "podLabels": { "type": "object" },
     "nodeSelector": { "type": "object" },
     "tolerations": { "type": "array" },
-    "affinity": { "type": "object" }
+    "affinity": { "type": "object" },
+    "runtimeClassName": { "type": "string" }
   }
 }
