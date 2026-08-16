@@ -109,6 +109,7 @@ metadata:
     {{- end }}
 spec:
   serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
+  automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
   {{- with .Values.runtimeClassName }}
   runtimeClassName: {{ . }}
   {{- end }}

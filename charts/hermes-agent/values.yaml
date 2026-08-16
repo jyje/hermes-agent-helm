@@ -60,6 +60,12 @@ serviceAccount:
   name: ""
   # -- Annotations to add to the ServiceAccount.
   annotations: {}
+  # -- Mount the ServiceAccount token into the Pod. The agent does not call
+  #    the Kubernetes API, so this chart turns it off. Behaviour change on
+  #    upgrade: without this field, Kubernetes applies its own default of
+  #    true. Set to true if something inside the Pod deliberately calls the
+  #    API (e.g. kubectl-style tooling in an extraContainer).
+  automountServiceAccountToken: false
 
 # ---------------------------------------------------------------------------
 # config.yaml -> Hermes reads $HERMES_HOME/config.yaml as a PARTIAL OVERRIDE on

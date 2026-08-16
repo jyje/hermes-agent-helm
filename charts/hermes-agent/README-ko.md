@@ -652,6 +652,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | service.port | int | Service port (and the dashboard's container port). | `9119` |
 | service.type | string | Service type. | `"ClusterIP"` |
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
+| serviceAccount.automountServiceAccountToken | bool | Mount the ServiceAccount token into the Pod. The agent does not call    the Kubernetes API, so this chart turns it off. Behaviour change on    upgrade: without this field, Kubernetes applies its own default of    true. Set to true if something inside the Pod deliberately calls the    API (e.g. kubectl-style tooling in an extraContainer). | `false` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
 | soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |
