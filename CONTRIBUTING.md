@@ -67,21 +67,13 @@ Keep implementation and remote-validation evidence separate:
    `make template`, packaging where relevant, an isolated kind install,
    rollout check, and the chart test Job.
 3. Review the diff and local evidence. Commit only after explicit approval.
-4. Create an orphan `test/<feat-scope>` branch with only a temporary
-   validation workflow. Do not add validation-only GitHub Actions YAML to the
+4. Run the repository's
+   [`implementation-validation-cycle`](.claude/skills/implementation-validation-cycle/SKILL.md)
+   skill for the orphan `test/<feat-scope>` branch, remote evidence, failure
+   classification, PR comment, and cleanup. It pins the exact verified
+   implementation SHA and keeps validation-only workflow YAML out of the
    implementation branch.
-5. Pin the workflow checkout to the approved implementation SHA, push the test
-   branch, and run its remote checks. Do not open a test-to-`main` pull request.
-6. When a test workflow fails, fix and commit only the workflow on the orphan
-   test branch, then rerun it. When the implementation fails, fix and commit
-   `feat/<scope>` after local verification, then synchronize the test target by
-   updating its pinned checkout SHA. Do not Git-merge `feat/<scope>` into the
-   orphan branch.
-7. When remote CI passes, add a comment to the implementation pull request.
-   Include the tested implementation SHA, check URL, test input, expected
-   result, actual result, and a short safe log excerpt when it helps review.
-   Never include secrets or secret-derived output. Then delete the test branch.
-   The only merge path remains `feat/<scope>` to `main`, and it still requires
+5. The only merge path remains `feat/<scope>` to `main`, and it still requires
    a separate approval.
 
 ## How to cut a release

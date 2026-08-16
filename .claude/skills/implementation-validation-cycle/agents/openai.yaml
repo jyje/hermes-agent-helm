@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implementation Validation Cycle"
+  short_description: "Run safe feature-to-orphan-CI validation loops."
+  default_prompt: "Use $implementation-validation-cycle to validate this feature PR remotely."

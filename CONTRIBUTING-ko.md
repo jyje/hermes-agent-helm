@@ -62,19 +62,13 @@ workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단
    `README-ko.md`를 수동으로 갱신합니다. 이어서 `make lint`, `make template`,
    필요한 경우 패키징, 격리된 kind 설치, rollout 확인, 차트 test Job을 실행합니다.
 3. diff와 로컬 검증 증거를 리뷰합니다. 명시적인 승인 후에만 커밋합니다.
-4. 임시 검증 workflow만 담은 orphan `test/<feat-scope>` 브랜치를 만듭니다.
-   구현 브랜치에는 검증 전용 GitHub Actions YAML을 추가하지 않습니다.
-5. workflow checkout을 승인된 구현 SHA로 고정하고 test 브랜치를 push해 원격
-   검증을 실행합니다. test에서 `main`으로 향하는 PR은 열지 않습니다.
-6. test workflow가 실패하면 orphan test 브랜치에서 workflow만 수정해 커밋하고
-   다시 실행합니다. 구현이 실패하면 로컬 검증 후 `feat/<scope>`를 수정해
-   커밋하고, test workflow의 고정 checkout SHA를 새 구현 커밋으로 바꿉니다.
-   orphan 브랜치에 `feat/<scope>`를 Git merge하지 않습니다.
-7. 원격 CI가 성공하면 구현 PR에 댓글을 남깁니다. 검증한 구현 SHA, check URL,
-   테스트 입력, 기대 결과, 실제 결과를 포함하고, 리뷰에 도움이 될 때는 안전한
-   짧은 로그 발췌도 넣습니다. 시크릿이나 시크릿에서 유래한 출력은 절대 포함하지
-   않습니다. 그 뒤 test 브랜치를 삭제합니다. 유일한 병합 경로는
-   `feat/<scope>`에서 `main`이며, 여기에도 별도 승인이 필요합니다.
+4. orphan `test/<feat-scope>` 브랜치, 원격 증거, 실패 분류, PR 댓글, 정리는
+   저장소의
+   [`implementation-validation-cycle`](.claude/skills/implementation-validation-cycle/SKILL.md)
+   스킬로 수행합니다. 이 스킬은 정확히 검증한 구현 SHA를 고정하고, 구현
+   브랜치에는 검증 전용 GitHub Actions YAML을 넣지 않습니다.
+5. 유일한 병합 경로는 `feat/<scope>`에서 `main`이며, 여기에도 별도 승인이
+   필요합니다.
 
 ## 릴리즈를 잘라내는 방법
 
