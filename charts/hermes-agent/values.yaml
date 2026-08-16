@@ -191,7 +191,7 @@ team:
       # only when the storage backend permits ownership changes.
       enabled: false
       # -- Init image used for shared-volume ownership preparation.
-      image: busybox:1.37
+      image: busybox:1.38
       # -- Runtime owner for the shared knowledge directory.
       uid: 10000
       gid: 10000
@@ -237,7 +237,7 @@ extraVolumeMounts: []
 #    knowledge volume used independently of the Discord team handoff).
 extraInitContainers: []
 #  - name: init-workspace
-#    image: busybox:1.37
+#    image: busybox:1.38
 #    command: ["sh", "-c", "chown 10000:10000 /work"]
 #    volumeMounts:
 #      - name: team-workspace
