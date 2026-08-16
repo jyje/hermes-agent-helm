@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.6.0
+
+### Minor Changes
+
+- 8d3b9a1: Dependency(image): Update BusyBox init image
+
+  Update the shared-volume ownership init image and team examples to BusyBox 1.38.
+
+- f8594ce: Feature(values): Expose runtimeClassName, extraContainers, and stop mounting the ServiceAccount token by default
+
+  Add `runtimeClassName` for kernel-isolated runtimes (gVisor, Kata) and
+  `extraContainers` for sidecars. Set `serviceAccount.automountServiceAccountToken`
+  to `false` by default, since the agent never calls the Kubernetes API; this is a
+  behaviour change on upgrade, previously Kubernetes applied its own default of
+  `true`. Override with `serviceAccount.automountServiceAccountToken: true` if
+  something inside the Pod deliberately needs the API.
+
+- 23da5db: Feature(values): Model API server and webhook listeners
+
+  Configure Hermes API server and webhook runtime listeners, then expose only the selected ports through the chart Service.
+
+- 2e3e1a0: Feature(values): Route Ingress/HTTPRoute per listener (dashboard, apiServer, webhook)
+
+  Route dashboard, API server, and webhook listeners to explicit Ingress paths or Gateway API HTTPRoute backends.
+
+### Patch Changes
+
+- 6496b8c: Documentation(automation): Explain how releases are tracked, signed, and verified
+
+  Summarize upstream image tracking, signed release publication, and post-release
+  verification in the README, and correct the CI guide to cover all six workflows
+  and three kind test scenarios.
+
+- b8caefc: Documentation(install): Put OCI installation first
+
+  Present OCI as the recommended installation method and retain the Helm Repository as an alternative.
+
+- 76f00d2: Documentation(docs): Refresh the README tagline
+
+  Highlight Codex and Copilot account sign-in, agent teams, and the chart's lightweight defaults.
+
 ## 1.5.0
 
 ### Minor Changes
