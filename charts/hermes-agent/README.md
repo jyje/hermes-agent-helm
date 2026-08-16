@@ -652,6 +652,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
 | deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
+| extraContainers | list | Extra sidecar containers appended to the Pod's main `containers:` list.    Distinct from `extraInitContainers` (init phase only). Full container    spec; giving a sidecar its own resources and a PSS-compatible    securityContext is the operator's responsibility. | `[]` |
 | extraEnv | list | Plain (non-secret) env vars injected directly on the container. | `[]` |
 | extraEnvFrom | list | Extra envFrom sources (reference existing ConfigMaps/Secrets). | `[]` |
 | extraInitContainers | list | Extra init containers, appended after the chart's own (seed-config,    device-flow login). Full container spec; combine with `extraVolumes` for    one-time preparation of a user-provided volume (for example, a shared    knowledge volume used independently of the Discord team handoff). | `[]` |

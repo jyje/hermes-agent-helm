@@ -310,6 +310,9 @@ spec:
         {{- with .Values.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+    {{- with .Values.extraContainers }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   volumes:
     {{- if .Values.bootstrap.enabled }}
     - name: config

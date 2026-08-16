@@ -249,6 +249,28 @@ extraInitContainers: []
 #      - name: team-workspace
 #        mountPath: /work
 
+# -- Extra sidecar containers appended to the Pod's main `containers:` list.
+#    Distinct from `extraInitContainers` (init phase only). Full container
+#    spec; giving a sidecar its own resources and a PSS-compatible
+#    securityContext is the operator's responsibility.
+extraContainers: []
+#  - name: log-forwarder
+#    image: busybox:1.38
+#    command: ["sh", "-c", "tail -F /data/hermes.log"]
+#    resources:
+#      requests: { cpu: 10m, memory: 16Mi }
+#      limits: { cpu: 50m, memory: 32Mi }
+#    securityContext:
+#      runAsNonRoot: true
+#      runAsUser: 65534
+#      allowPrivilegeEscalation: false
+#      readOnlyRootFilesystem: true
+#      capabilities: { drop: ["ALL"] }
+#    volumeMounts:
+#      - name: data
+#        mountPath: /data
+#        readOnly: true
+
 # -- Extra raw manifests rendered as-is alongside this chart's resources.
 #    Each entry is `tpl`-rendered, so `{{ .Release.Namespace }}` etc. work, and
 #    may be either an object or a multiline string (see examples/argocd/).
