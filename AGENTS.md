@@ -92,6 +92,11 @@ as a **Secret**.
 - Package for release with `make package` (runs docs + lint, then
   `helm package`). `Chart.yaml` carries `artifacthub.io/*` annotations for the
   eventual Artifact Hub publish.
+- For feature-branch remote evidence, use
+  [`.claude/skills/implementation-validation-cycle/SKILL.md`](.claude/skills/implementation-validation-cycle/SKILL.md).
+  It verifies the full implementation SHA before creating an orphan
+  `test/<scope>` branch, distinguishes implementation from harness failures,
+  records safe PR evidence, and only then cleans up the test branch.
 
 ## Scope
 
