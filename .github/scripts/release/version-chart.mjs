@@ -23,35 +23,25 @@ const statusPath = resolve(root, 'dist/release/changeset-status.json');
 // is the other half: regroup the section CHANGELOG.md just gained by that
 // prefix instead. Keep this vocabulary and changelog-category.cjs's comment
 // pointing at each other if either changes.
+// Keys must track .changeset/README.md's approved category list exactly -
+// nothing more, nothing less - so an unapproved category (Refactor, Chore,
+// ...) falls to "Other" instead of getting its own heading. Insertion order
+// doubles as display order (see CATEGORY_ORDER below), matching the order
+// .changeset/README.md lists them in.
 const CATEGORY_LABELS = {
   Feature: 'Features',
   Fix: 'Fixes',
-  Bug: 'Fixes',
   Security: 'Security',
   Dependency: 'Dependencies',
-  Performance: 'Performance',
-  Refactor: 'Refactoring',
   Documentation: 'Documentation',
   Deprecated: 'Deprecated',
   Removed: 'Removed',
-  Build: 'Build',
-  Test: 'Tests',
-  Chore: 'Chores',
 };
-const CATEGORY_ORDER = [
-  'Features',
-  'Fixes',
-  'Security',
-  'Dependencies',
-  'Performance',
-  'Refactoring',
-  'Documentation',
-  'Deprecated',
-  'Removed',
-  'Build',
-  'Tests',
-  'Chores',
-];
+// Derived, never hand-duplicated: a label present only in CATEGORY_LABELS
+// used to mean its bullets rendered nowhere - dropped, not just misgrouped,
+// since the output loop below only iterates CATEGORY_ORDER. Deriving it
+// removes that failure mode entirely.
+const CATEGORY_ORDER = Object.values(CATEGORY_LABELS);
 const OTHER_LABEL = 'Other';
 
 function run(command, args) {
@@ -106,7 +96,13 @@ function regroupChangelogByCategory(version) {
 
   const buckets = new Map();
   for (const bullet of bullets) {
-    const match = bullet.match(/\b([A-Z][a-zA-Z]+)\([^)]+\):/);
+    // Match only the bullet's first line - the "Category(scope): Title"
+    // prefix changelog-category.cjs writes. Matching the whole bullet let a
+    // Word(...): -shaped substring anywhere in the continuation paragraph
+    // mis-group an otherwise non-conforming entry instead of it falling to
+    // "Other".
+    const firstLine = bullet.split('\n', 1)[0];
+    const match = firstLine.match(/\b([A-Z][a-zA-Z]+)\([^)]+\):/);
     const label = (match && CATEGORY_LABELS[match[1]]) || OTHER_LABEL;
     if (!buckets.has(label)) buckets.set(label, []);
     buckets.get(label).push(bullet);

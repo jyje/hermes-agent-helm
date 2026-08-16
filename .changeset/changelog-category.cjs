@@ -49,16 +49,24 @@ async function getReleaseLine(changeset, _type, options) {
 
   let credit = '';
   if (changeset.commit) {
-    // A commit that isn't pushed/indexed on GitHub yet (or any API hiccup)
-    // resolves to undefined here - degrade to a plain, linkless bullet
-    // rather than fail the whole release. Still log it: a silently missing
-    // credit line is easy to miss until someone reads a real release.
+    // The commit link needs no API call - repo + SHA is enough to build
+    // GitHub's canonical commit URL - so it's written first and unconditionally.
+    // This is the traceability floor: Changesets' own default changelog
+    // always embeds this same short SHA locally, so a GitHub lookup failing
+    // below must not regress below that baseline to a bare, linkless bullet.
+    const shortSha = changeset.commit.slice(0, 7);
+    credit = ` [\`${shortSha}\`](https://github.com/${repo}/commit/${changeset.commit})`;
+
+    // The PR link and author credit are best-effort enhancements on top of
+    // that floor: a commit that isn't pushed/indexed on GitHub yet (or any
+    // other API hiccup) resolves to undefined here rather than failing the
+    // whole release. Still log it: a silently degraded credit line is easy
+    // to miss until someone reads a real release.
     const info = await getCommitInfo({ commit: changeset.commit, repo }).catch((error) => {
       console.warn(`[changelog-category] getCommitInfo(${changeset.commit}) failed: ${error.message}`);
       return undefined;
     });
-    const parts = [info?.pull?.markdownLink, info?.commit?.markdownLink].filter(Boolean);
-    if (parts.length) credit += ` ${parts.join(' ')}`;
+    if (info?.pull?.markdownLink) credit = ` ${info.pull.markdownLink}${credit}`;
     if (info?.author?.markdownLink && !maintainers.has(info.author.login)) {
       credit += BOT_LOGIN_PATTERN.test(info.author.login)
         ? ` — 🤖 automated by ${info.author.markdownLink}`
