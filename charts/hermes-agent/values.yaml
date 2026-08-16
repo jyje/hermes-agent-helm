@@ -390,11 +390,11 @@ service:
   # -- Annotations to add to the Service.
   annotations: {}
 
-# Ingress for the management dashboard. Requires `service.enabled: true` AND
-# the dashboard running with --insecure (see the `service` comment above for
-# the API-key exposure warning): only enable this behind authentication
-# (e.g. an ingress-level oauth2-proxy/basic-auth annotation) or on a private
-# network.
+# Ingress and Gateway API HTTPRoute are opt-in, cluster-specific HTTP routing
+# resources. Pick the one supported by your cluster. Any backend that omits a
+# Service name targets this chart's Service and therefore requires
+# `service.enabled: true`. Routing the management dashboard also requires
+# --insecure and strong authentication (see the `service` comment above).
 ingress:
   # -- Create an Ingress resource.
   enabled: false
@@ -402,17 +402,42 @@ ingress:
   className: ""
   # -- Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules).
   annotations: {}
-  # -- Host/path rules, all routed to the Service port above.
+  # -- Host/path rules. Each path defaults to this chart's Service and the
+  #    legacy dashboard port; override `service` and `port` per listener.
   hosts:
     - host: hermes-agent.example.com
       paths:
         - path: /
           pathType: Prefix
+          # -- Optional backend Service name. Empty targets this chart's Service.
+          # service: ""
+          # -- Optional backend Service port. Omit to use `service.port`.
+          # port: 9119
   # -- TLS configuration for the Ingress.
   tls: []
   #  - secretName: hermes-agent-tls
   #    hosts:
   #      - hermes-agent.example.com
+
+httpRoute:
+  # -- Create a Gateway API HTTPRoute. The cluster must already provide the
+  #    Gateway API CRD and a Gateway selected by `parentRefs`.
+  enabled: false
+  # -- Gateway API parent references.
+  parentRefs: []
+  #  - name: my-gateway
+  #    sectionName: https
+  # -- HTTP hostnames accepted by this route.
+  hostnames: []
+  # -- HTTPRoute rules. An empty backendRef name targets this chart's Service.
+  rules: []
+  #  - matches:
+  #      - path:
+  #          type: PathPrefix
+  #          value: /v1
+  #    backendRefs:
+  #      - name: ""
+  #        port: 8642
 
 # -- Container resource requests/limits. Lightweight defaults aimed at small
 # clusters (incl. Raspberry Pi / arm64).

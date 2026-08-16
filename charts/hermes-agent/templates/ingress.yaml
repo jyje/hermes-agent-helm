@@ -23,13 +23,16 @@ spec:
       http:
         paths:
           {{- range .paths }}
+          {{- if and (not .service) (not $.Values.service.enabled) }}
+          {{- fail "ingress path falls back to the chart Service, but service.enabled is false; set service.enabled=true or paths[].service to an external Service" }}
+          {{- end }}
           - path: {{ .path }}
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "hermes-agent.fullname" $ }}
+                name: {{ .service | default (include "hermes-agent.fullname" $) }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ .port | default $.Values.service.port }}
           {{- end }}
     {{- end }}
 {{- end }}

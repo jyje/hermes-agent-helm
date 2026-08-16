@@ -92,7 +92,8 @@ It deploys:
   (no inbound port - the gateway is outbound); for `deployment`: a standalone
   PVC instead. Either way, an **optional** ClusterIP Service for explicitly
   selected dashboard, API server, or webhook listener ports, and an
-  **optional** Ingress in front of the dashboard (`ingress.enabled`)
+  **optional** Ingress or Gateway API HTTPRoute (`ingress.enabled` or
+  `httpRoute.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 The agent's command execution uses the **`local` backend** (commands run inside
@@ -444,12 +445,11 @@ credential in an externally managed Kubernetes Secret referenced through
 first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
 so the pod needs egress to Bitwarden and GitHub Releases.
 
-- **Dashboard Ingress**: the management dashboard (`service.port`, default
+- **Dashboard routing**: the management dashboard (`service.port`, default
   9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
-  warns **exposes API keys on the network**. Set `service.enabled: true` and
-  `ingress.enabled: true` only behind authentication (e.g. an
-  oauth2-proxy/basic-auth Ingress annotation) or on a private network - see
-  `ingress.hosts` / `ingress.tls` in `values.yaml`.
+  warns **exposes API keys on the network**. Route it only behind
+  authentication (for example, an oauth2-proxy/basic-auth Ingress annotation)
+  or on a private network.
 
 ### API server and webhook listeners
 
@@ -472,6 +472,26 @@ the legacy dashboard-only Service, or specify every Service port explicitly.
 The copy-ready [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)
 overlay exposes API server and webhook ports and references an external Secret
 for the required credentials.
+
+### HTTP routing: Ingress or HTTPRoute
+
+Both routing resources are off by default. Use `ingress` for an installed
+Ingress controller. Use `httpRoute` when the cluster already provides the
+Gateway API CRD and a Gateway to reference through `parentRefs`. Pick the
+routing API your cluster operates rather than enabling both for the same host
+and path.
+
+Each Ingress path can override `service` and `port`. An omitted Service name
+targets this chart's Service, so it requires `service.enabled: true`; explicitly
+named external Services are allowed without the chart Service. HTTPRoute uses
+the same defaulting rule for each `backendRefs` entry. The chart fails early if
+an implicit chart-Service backend would point at no Service.
+
+[`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) routes `/v1`
+and webhook traffic through distinct Ingress hosts and Service ports.
+[`values-httproute.yaml`](values-httproute.yaml) is the equivalent Gateway API
+starting point. HTTPRoute hostnames apply to all rules in one resource; create
+separate HTTPRoutes when host-level isolation between listener rules is needed.
 
 ## Gateway lifecycle: rollouts, shutdown, and drain
 
@@ -636,6 +656,8 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
+| [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
+| [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: listener routing through a pre-existing Gateway |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/advanced/teams/reference.md) |
@@ -688,14 +710,19 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var: e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
+| httpRoute.enabled | bool | Create a Gateway API HTTPRoute. The cluster must already provide the    Gateway API CRD and a Gateway selected by `parentRefs`. | `false` |
+| httpRoute.hostnames | list | HTTP hostnames accepted by this route. | `[]` |
+| httpRoute.parentRefs | list | Gateway API parent references. | `[]` |
+| httpRoute.rules | list | HTTPRoute rules. An empty backendRef name targets this chart's Service. | `[]` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
 | image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
 | imagePullSecrets | list | Image pull secrets for private registries. | `[]` |
+| ingress | object | insecure and strong authentication (see the `service` comment above). | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]}` |
 | ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
 | ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |
 | ingress.enabled | bool | Create an Ingress resource. | `false` |
-| ingress.hosts | list | Host/path rules, all routed to the Service port above. | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` |
+| ingress.hosts | list | Host/path rules. Each path defaults to this chart's Service and the    legacy dashboard port; override `service` and `port` per listener. | `[{"host":"hermes-agent.example.com","paths":[{"path":"/","pathType":"Prefix"}]}]` |
 | ingress.tls | list | TLS configuration for the Ingress. | `[]` |
 | nameOverride | string | Override the chart name used in resource names. | `""` |
 | nodeSelector | object | Node selector for Pod scheduling. | `{}` |
