@@ -256,7 +256,8 @@ extraInitContainers: []
 extraContainers: []
 #  - name: log-forwarder
 #    image: busybox:1.38
-#    command: ["sh", "-c", "tail -F /data/hermes.log"]
+#    # Replace this command and mount with the log source your deployment uses.
+#    command: ["sh", "-c", "tail -F /data/application.log"]
 #    resources:
 #      requests: { cpu: 10m, memory: 16Mi }
 #      limits: { cpu: 50m, memory: 32Mi }
@@ -266,6 +267,7 @@ extraContainers: []
 #      allowPrivilegeEscalation: false
 #      readOnlyRootFilesystem: true
 #      capabilities: { drop: ["ALL"] }
+#      seccompProfile: { type: RuntimeDefault }
 #    volumeMounts:
 #      - name: data
 #        mountPath: /data

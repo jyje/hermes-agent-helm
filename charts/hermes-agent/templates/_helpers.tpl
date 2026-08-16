@@ -111,7 +111,7 @@ spec:
   serviceAccountName: {{ include "hermes-agent.serviceAccountName" . }}
   automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
   {{- with .Values.runtimeClassName }}
-  runtimeClassName: {{ . }}
+  runtimeClassName: {{ . | quote }}
   {{- end }}
   {{- with .Values.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
