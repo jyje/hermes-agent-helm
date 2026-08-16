@@ -90,8 +90,9 @@ It deploys:
 - a **Secret** holding the `.env` (injected via `envFrom`)
 - for `controller.type=statefulset`: a headless Service for DNS/governance
   (no inbound port - the gateway is outbound); for `deployment`: a standalone
-  PVC instead. Either way, an **optional** ClusterIP Service for the dashboard,
-  and an **optional** Ingress in front of it (`ingress.enabled`)
+  PVC instead. Either way, an **optional** ClusterIP Service for explicitly
+  selected dashboard, API server, or webhook listener ports, and an
+  **optional** Ingress in front of the dashboard (`ingress.enabled`)
 - a **Helm test** Job (`helm test`) that runs a `hermes doctor` style check
 
 The agent's command execution uses the **`local` backend** (commands run inside
@@ -450,6 +451,28 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   oauth2-proxy/basic-auth Ingress annotation) or on a private network - see
   `ingress.hosts` / `ingress.tls` in `values.yaml`.
 
+### API server and webhook listeners
+
+`apiServer.enabled` starts Hermes' OpenAI-compatible API server. Its default
+chart host is `0.0.0.0` so a Kubernetes Service can reach it, unlike the
+upstream loopback default. Set `API_SERVER_KEY` through `env` or, preferably,
+an externally managed Secret referenced by `extraEnvFrom`: it is required even
+for a loopback-only server. Use `apiServer.corsOrigins` only for an explicit,
+narrow browser-origin allowlist. See the upstream [API server
+guide](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server).
+
+`webhook.enabled` starts the one generic webhook receiver. Telegram, Discord,
+Slack, and other integrations are routes behind that listener, not separate
+listeners. Set `WEBHOOK_SECRET` or a per-route secret through `env` or
+`extraEnvFrom`; see the upstream [webhook
+guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks).
+
+Neither runtime setting exposes a port by itself. Keep `service.ports: []` for
+the legacy dashboard-only Service, or specify every Service port explicitly.
+The copy-ready [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)
+overlay exposes API server and webhook ports and references an external Secret
+for the required credentials.
+
 ## Gateway lifecycle: rollouts, shutdown, and drain
 
 As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to
@@ -586,10 +609,10 @@ source) - not for every individual key upstream ships.
 ## More examples
 
 Ready-to-adapt `-f` overlays for common setups, aimed at a small/home cluster
-(e.g. a Raspberry Pi / arm64 k3s cluster). All secrets in these files are
-**dummy placeholders** - override them at install time with `--set-string` (see
-the command in each file's header comment), or via the SealedSecret +
-`extraEnvFrom` pattern above.
+(e.g. a Raspberry Pi / arm64 k3s cluster). Credentials in these files are
+**dummy placeholders or external Secret references** - override placeholders at
+install time with `--set-string` (see the command in each file's header
+comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 
 | File | Model provider | Extras |
 | --- | --- | --- |
@@ -612,6 +635,7 @@ the command in each file's header comment), or via the SealedSecret +
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
+| [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/advanced/teams/reference.md) |
@@ -626,6 +650,11 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
 | affinity | object | Affinity rules for Pod scheduling. | `{}` |
+| apiServer | object | ------------------------------------------------------------------------- | `{"corsOrigins":"","enabled":false,"host":"0.0.0.0","port":8642}` |
+| apiServer.corsOrigins | string | Comma-separated browser origins allowed to call the API directly. Empty    disables browser CORS access. | `""` |
+| apiServer.enabled | bool | Enable Hermes' OpenAI-compatible HTTP API server. | `false` |
+| apiServer.host | string | Bind address. Upstream defaults to 127.0.0.1; a Kubernetes Service needs    a non-loopback address. API_SERVER_KEY is still required on loopback. | `"0.0.0.0"` |
+| apiServer.port | int | API server port. | `8642` |
 | args | list | Arguments passed through the image entrypoint. `gateway run` selects the    non-interactive outbound messaging service instead of the default TUI. | `["gateway","run"]` |
 | auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
 | auth.deviceFlow.enabled | bool | Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from `env`/`extraEnvFrom`. | `false` |
@@ -683,10 +712,10 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | replicaCount | int | Set to 0 to prepare GitOps resources (Secret, ConfigMap, PVC, ...)    without starting an agent Pod, then scale to 1 after credentials and    optional device login are ready. The gateway and device-login init    container do not run while paused. Hermes Agent is a single-writer    workload bound to one HERMES_HOME (ReadWriteOnce PVC), so values above 1    are unsupported: Deployment replicas contend for the same volume and    StatefulSet replicas are disconnected agent identities. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
 | securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |
-| service | object | ------------------------------------------------------------------------- | `{"annotations":{},"enabled":false,"port":9119,"type":"ClusterIP"}` |
 | service.annotations | object | Annotations to add to the Service. | `{}` |
-| service.enabled | bool | Create a ClusterIP Service (only useful if you expose the dashboard). | `false` |
-| service.port | int | Service port (and the dashboard's container port). | `9119` |
+| service.enabled | bool | Create a ClusterIP Service for explicitly selected listeners. | `false` |
+| service.port | int | Legacy dashboard Service port. Used only while `service.ports` is empty,    preserving the existing dashboard-only Service behaviour. | `9119` |
+| service.ports | list | Explicit Service ports. A non-empty list replaces the legacy dashboard    port entirely. Enabling apiServer or webhook does not add a Service port    automatically. | `[]` |
 | service.type | string | Service type. | `"ClusterIP"` |
 | serviceAccount.annotations | object | Annotations to add to the ServiceAccount. | `{}` |
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
@@ -732,6 +761,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
+| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Telegram, Discord,    Slack, and other sources are routes behind this single listener. | `false` |
+| webhook.port | int | Webhook receiver port. | `8644` |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

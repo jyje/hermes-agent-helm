@@ -364,6 +364,26 @@
       }
     },
 
+    "apiServer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "host": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "corsOrigins": { "type": "string" }
+      }
+    },
+
+    "webhook": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+      }
+    },
+
     "service": {
       "type": "object",
       "additionalProperties": false,
@@ -371,6 +391,20 @@
         "enabled": { "type": "boolean" },
         "type": { "type": "string" },
         "port": { "type": "integer" },
+        "ports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "port"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+              "targetPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+              "protocol": { "type": "string", "enum": ["TCP"] }
+            }
+          }
+        },
         "annotations": { "type": "object" }
       }
     },

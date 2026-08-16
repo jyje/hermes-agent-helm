@@ -33,10 +33,5 @@ spec:
   selector:
     {{- include "hermes-agent.selectorLabels" . | nindent 4 }}
   ports:
-    # Intended for the management dashboard (port 9119). Requires the dashboard
-    # to be enabled and bound to 0.0.0.0 (--insecure) inside the container.
-    - name: dashboard
-      port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
-      protocol: TCP
+{{ include "hermes-agent.servicePorts" . | indent 4 }}
 {{- end }}
