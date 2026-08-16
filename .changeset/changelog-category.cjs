@@ -23,6 +23,16 @@
 //      need to know it.
 const { getCommitInfo } = require('@changesets/get-github-info');
 
+// GitHub stamps every bot identity's login with a literal "[bot]" suffix
+// (dependabot[bot], jyje-bot[bot], github-actions[bot], ...) - that's the
+// platform's own signal, so this repo doesn't have to hand-maintain a bot
+// roster next to `maintainers` in .changeset/config.json. A bot's commits
+// are automation the maintainer already approved (its workflow triggers,
+// its PRs get reviewed), not an outside contribution and not invisible
+// maintainer work either - so it gets its own credit phrasing, distinct
+// from both "thanks" (outside human) and no-credit (maintainer).
+const BOT_LOGIN_PATTERN = /\[bot\]$/;
+
 async function getReleaseLine(changeset, _type, options) {
   const repo = options?.repo;
   if (!repo) {
@@ -41,12 +51,18 @@ async function getReleaseLine(changeset, _type, options) {
   if (changeset.commit) {
     // A commit that isn't pushed/indexed on GitHub yet (or any API hiccup)
     // resolves to undefined here - degrade to a plain, linkless bullet
-    // rather than fail the whole release.
-    const info = await getCommitInfo({ commit: changeset.commit, repo }).catch(() => undefined);
+    // rather than fail the whole release. Still log it: a silently missing
+    // credit line is easy to miss until someone reads a real release.
+    const info = await getCommitInfo({ commit: changeset.commit, repo }).catch((error) => {
+      console.warn(`[changelog-category] getCommitInfo(${changeset.commit}) failed: ${error.message}`);
+      return undefined;
+    });
     const parts = [info?.pull?.markdownLink, info?.commit?.markdownLink].filter(Boolean);
     if (parts.length) credit += ` ${parts.join(' ')}`;
     if (info?.author?.markdownLink && !maintainers.has(info.author.login)) {
-      credit += ` — thanks ${info.author.markdownLink}!`;
+      credit += BOT_LOGIN_PATTERN.test(info.author.login)
+        ? ` — 🤖 automated by ${info.author.markdownLink}`
+        : ` — thanks ${info.author.markdownLink}!`;
     }
   }
 
