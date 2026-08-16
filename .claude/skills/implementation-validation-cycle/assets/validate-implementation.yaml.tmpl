@@ -1,0 +1,41 @@
+name: 🔬 validate implementation
+
+on:
+  push:
+    branches:
+      - __TEST_BRANCH__
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chart:
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: __REPOSITORY__
+          ref: __IMPLEMENTATION_SHA__
+
+      - uses: azure/setup-helm@v5
+      - uses: helm/kind-action@v1
+
+      - name: Lint and render
+        run: |
+          set -euo pipefail
+          make lint
+          make template > /dev/null
+
+      - name: Install and run the chart test
+        run: |
+          set -euo pipefail
+          helm upgrade --install hermes-agent charts/hermes-agent \
+            --namespace hermes-agent --create-namespace \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --wait --timeout 5m
+          helm test hermes-agent --namespace hermes-agent --timeout 5m
+
+      - name: Show test logs
+        if: always()
+        run: kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1 || true
