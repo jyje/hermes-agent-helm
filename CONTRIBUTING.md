@@ -50,8 +50,8 @@ page as the single source for workflow details rather than restating them here.
 |---|---|---|
 | `dev` | Maintainer experimental / integration. | lint + docs-drift + template + kind `helm test` |
 | `main` | Default branch & PR target; stable. Releases cut from here. | same as dev |
-| `feat/<scope>` | One scoped implementation. Keep validation-only workflow changes out of this branch. | local verification before review |
-| `test/<feat-scope>` | Orphan branch containing only a remote-validation workflow. Keep it while the validation loop is active. | checks out a pinned implementation SHA; delete after successful evidence is recorded |
+| `<category>/<scope>` | One scoped implementation, `category` matching its Conventional Commits type (`feat`, `fix`, `docs`, `chore`, ...). Keep validation-only workflow changes out of this branch. | local verification before review |
+| `test/<scope>` | Orphan branch containing only a remote-validation workflow. Keep it while the validation loop is active. | checks out a pinned implementation SHA; delete after successful evidence is recorded |
 | _tags_ `vX.Y.Z` | The release itself: created by CI when the chart version changes. | publishes to GitHub Packages (OCI) |
 
 No long-lived `rc`/`release` branches - a release is a tag/event.
@@ -60,7 +60,9 @@ No long-lived `rc`/`release` branches - a release is a tag/event.
 
 Keep implementation and remote-validation evidence separate:
 
-1. Create a named worktree and a `feat/<scope>` branch for one implementation.
+1. Create a named worktree and a `<category>/<scope>` branch for one
+   implementation, `category` matching its Conventional Commits type
+   (`feat/`, `fix/`, `docs/`, ...).
 2. Run local checks first: after a values change, run `make docs` to
    regenerate `charts/hermes-agent/README.md`, and update `README-ko.md`
    manually when its content is affected. Then run `make lint`,
@@ -77,8 +79,8 @@ Keep implementation and remote-validation evidence separate:
    GitHub closing keyword (`Closes #123`, `Fixes #123`, `Resolves #123`) so
    merging closes it automatically. #161 and #162 stayed open after their
    implementing PRs (#182, #183) merged because this step was skipped.
-6. The only merge path remains `feat/<scope>` to `main`, and it still requires
-   a separate approval.
+6. The only merge path remains `<category>/<scope>` to `main`, and it still
+   requires a separate approval.
 
 ## How to cut a release
 

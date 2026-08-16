@@ -46,8 +46,8 @@ workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단
 |---|---|---|
 | `dev` | 메인테이너 실험용 / 통합용 | lint + docs-drift + template + kind `helm test` |
 | `main` | 기본 브랜치이자 PR 대상, 안정 버전. 릴리즈는 여기서 잘라냅니다 | dev와 동일 |
-| `feat/<scope>` | 하나의 범위에 한정한 구현. 검증 전용 workflow 변경은 이 브랜치에 넣지 않습니다 | 리뷰 전 로컬 검증 |
-| `test/<feat-scope>` | 원격 검증 workflow만 담는 orphan 브랜치. 검증 순환이 끝날 때까지 유지합니다 | 고정한 구현 SHA를 checkout하고 성공 증거를 기록한 뒤 삭제 |
+| `<category>/<scope>` | 하나의 범위에 한정한 구현. `category`는 Conventional Commits 타입(`feat`, `fix`, `docs`, `chore` 등)과 일치시킵니다. 검증 전용 workflow 변경은 이 브랜치에 넣지 않습니다 | 리뷰 전 로컬 검증 |
+| `test/<scope>` | 원격 검증 workflow만 담는 orphan 브랜치. 검증 순환이 끝날 때까지 유지합니다 | 고정한 구현 SHA를 checkout하고 성공 증거를 기록한 뒤 삭제 |
 | _태그_ `vX.Y.Z` | 릴리즈 그 자체: 차트 버전이 바뀌면 CI가 생성 | GitHub Packages(OCI)에 배포 |
 
 장기 존속하는 `rc`/`release` 브랜치는 없습니다 - 릴리즈는 태그/이벤트입니다.
@@ -56,7 +56,9 @@ workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단
 
 구현과 원격 검증 증거를 분리해서 유지합니다:
 
-1. 하나의 구현마다 이름 있는 worktree와 `feat/<scope>` 브랜치를 만듭니다.
+1. 하나의 구현마다 이름 있는 worktree와 `<category>/<scope>` 브랜치를 만듭니다.
+   `category`는 Conventional Commits 타입(`feat/`, `fix/`, `docs/` 등)과
+   일치시킵니다.
 2. 로컬 검증을 먼저 수행합니다: values 변경 후 `make docs`로
    `charts/hermes-agent/README.md`를 재생성하고, 내용에 영향이 있으면
    `README-ko.md`를 수동으로 갱신합니다. 이어서 `make lint`, `make template`,
@@ -71,8 +73,8 @@ workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단
    (`Closes #123`, `Fixes #123`, `Resolves #123`)로 그 이슈를 명시해서 병합 시
    자동으로 닫히게 합니다. #161과 #162는 구현 PR(#182, #183)이 병합된 뒤에도
    이 단계를 빠뜨려서 계속 열려 있었습니다.
-6. 유일한 병합 경로는 `feat/<scope>`에서 `main`이며, 여기에도 별도 승인이
-   필요합니다.
+6. 유일한 병합 경로는 `<category>/<scope>`에서 `main`이며, 여기에도 별도
+   승인이 필요합니다.
 
 ## 릴리즈를 잘라내는 방법
 
