@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# The template ships with THIS skill, not with the target --repo: --repo may
+# be checked out to any branch/commit of the implementation, including one
+# that predates this skill's own merge. Resolve it relative to this script,
+# not to $repo's working tree.
+SKILL_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -65,7 +71,7 @@ preflight() {
 }
 
 render_workflow() {
-  local template="$repo/.claude/skills/implementation-validation-cycle/assets/validate-implementation.yaml.tmpl"
+  local template="$SKILL_DIR/assets/validate-implementation.yaml.tmpl"
   local target="$worktree/.github/workflows/validate-implementation.yaml"
   local remote
   remote=$(git -C "$repo" config --get remote.origin.url | sed -E 's#(git@github.com:|https://github.com/)##; s#\.git$##')

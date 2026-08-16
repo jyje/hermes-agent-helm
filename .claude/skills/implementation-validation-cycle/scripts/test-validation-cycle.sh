@@ -12,11 +12,12 @@ git -C "$fixture/repo" config user.name test
 git -C "$fixture/repo" config user.email test@example.invalid
 git -C "$fixture/repo" config commit.gpgSign false
 git -C "$fixture/repo" remote add origin "$fixture/origin.git"
-mkdir -p "$fixture/repo/.claude/skills/implementation-validation-cycle/assets"
-cp "$skill_dir/assets/validate-implementation.yaml.tmpl" \
-  "$fixture/repo/.claude/skills/implementation-validation-cycle/assets/"
+# The template ships with the skill's own checkout (SKILL_DIR in
+# validation-cycle.sh), not with --repo, so the fixture repo deliberately
+# does NOT carry a .claude/skills/ copy - this is what --repo looks like on
+# any branch that predates the skill's own merge.
 printf 'fixture\n' > "$fixture/repo/file"
-git -C "$fixture/repo" add file .claude
+git -C "$fixture/repo" add file
 git -C "$fixture/repo" -c commit.gpgSign=false commit -m fixture >/dev/null
 git -C "$fixture/repo" push -u origin main >/dev/null
 git -C "$fixture/repo" switch -c feat/fixture >/dev/null
