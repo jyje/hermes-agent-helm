@@ -73,7 +73,11 @@ Keep implementation and remote-validation evidence separate:
    classification, PR comment, and cleanup. It pins the exact verified
    implementation SHA and keeps validation-only workflow YAML out of the
    implementation branch.
-5. The only merge path remains `feat/<scope>` to `main`, and it still requires
+5. If the branch closes a tracked issue, name it in the PR description with a
+   GitHub closing keyword (`Closes #123`, `Fixes #123`, `Resolves #123`) so
+   merging closes it automatically. #161 and #162 stayed open after their
+   implementing PRs (#182, #183) merged because this step was skipped.
+6. The only merge path remains `feat/<scope>` to `main`, and it still requires
    a separate approval.
 
 ## How to cut a release

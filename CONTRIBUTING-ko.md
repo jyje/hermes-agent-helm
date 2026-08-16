@@ -67,7 +67,11 @@ workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단
    [`implementation-validation-cycle`](.claude/skills/implementation-validation-cycle/SKILL.md)
    스킬로 수행합니다. 이 스킬은 정확히 검증한 구현 SHA를 고정하고, 구현
    브랜치에는 검증 전용 GitHub Actions YAML을 넣지 않습니다.
-5. 유일한 병합 경로는 `feat/<scope>`에서 `main`이며, 여기에도 별도 승인이
+5. 브랜치가 추적 중인 이슈를 해결한다면, PR 설명에 GitHub의 closing keyword
+   (`Closes #123`, `Fixes #123`, `Resolves #123`)로 그 이슈를 명시해서 병합 시
+   자동으로 닫히게 합니다. #161과 #162는 구현 PR(#182, #183)이 병합된 뒤에도
+   이 단계를 빠뜨려서 계속 열려 있었습니다.
+6. 유일한 병합 경로는 `feat/<scope>`에서 `main`이며, 여기에도 별도 승인이
    필요합니다.
 
 ## 릴리즈를 잘라내는 방법
