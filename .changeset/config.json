@@ -1,6 +1,9 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
-  "changelog": "@changesets/cli/changelog",
+  "changelog": [
+    "./changelog-category.cjs",
+    { "repo": "jyje/hermes-agent-helm", "maintainers": ["jyje"] }
+  ],
   "commit": false,
   "fixed": [],
   "linked": [],

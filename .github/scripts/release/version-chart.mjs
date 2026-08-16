@@ -14,7 +14,43 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '../../..');
 const packageName = '@jyje/hermes-agent-helm';
 const chartPath = resolve(root, 'charts/hermes-agent/Chart.yaml');
+const changelogPath = resolve(root, 'CHANGELOG.md');
 const statusPath = resolve(root, 'dist/release/changeset-status.json');
+
+// .changeset/changelog-category.cjs keeps every bullet's "Type(scope): Title"
+// prefix intact (see that file for why: apply-release-plan hardcodes the
+// Major/Minor/Patch headers, so a changelog module can't replace them). This
+// is the other half: regroup the section CHANGELOG.md just gained by that
+// prefix instead. Keep this vocabulary and changelog-category.cjs's comment
+// pointing at each other if either changes.
+const CATEGORY_LABELS = {
+  Feature: 'Features',
+  Fix: 'Fixes',
+  Bug: 'Fixes',
+  Security: 'Security',
+  Dependency: 'Dependencies',
+  Performance: 'Performance',
+  Refactor: 'Refactoring',
+  Documentation: 'Documentation',
+  Remove: 'Removed',
+  Build: 'Build',
+  Test: 'Tests',
+  Chore: 'Chores',
+};
+const CATEGORY_ORDER = [
+  'Features',
+  'Fixes',
+  'Security',
+  'Dependencies',
+  'Performance',
+  'Refactoring',
+  'Documentation',
+  'Removed',
+  'Build',
+  'Tests',
+  'Chores',
+];
+const OTHER_LABEL = 'Other';
 
 function run(command, args) {
   execFileSync(command, args, { cwd: root, stdio: 'inherit' });
@@ -39,6 +75,47 @@ function readChangeset(id) {
 
 function artifactHubKind(type) {
   return { major: 'changed', minor: 'added', patch: 'fixed' }[type];
+}
+
+// Rewrite CHANGELOG.md's "## <version>" section from
+// "### Major/Minor/Patch Changes" (apply-release-plan's fixed grouping) into
+// "### Features" / "### Fixes" / ... by reading the "Type(scope): Title"
+// prefix changelog-category.cjs left on every bullet. A bullet whose author
+// didn't follow that convention (e.g. an older manual entry, or a
+// machine-generated one) falls into "### Other" rather than being dropped -
+// this must never lose an entry, only regroup it.
+function regroupChangelogByCategory(version) {
+  const changelog = readFileSync(changelogPath, 'utf8');
+  const heading = `## ${version}\n`;
+  const start = changelog.indexOf(heading);
+  if (start === -1) throw new Error(`CHANGELOG.md has no "${heading.trim()}" section to regroup`);
+  const bodyStart = start + heading.length;
+  const nextHeadingOffset = changelog.slice(bodyStart).search(/\n## /);
+  const bodyEnd = nextHeadingOffset === -1 ? changelog.length : bodyStart + nextHeadingOffset + 1;
+  const body = changelog.slice(bodyStart, bodyEnd);
+
+  // One bullet = a "- " line at column 0, plus every following line that is
+  // blank or indented (its continuation paragraph), up to the next "- " or
+  // "### " line or the end of the section.
+  const bullets = [...body.matchAll(/^-.*(?:\n(?:[ \t].*)?)*/gm)]
+    .map((m) => m[0].replace(/\n+$/, ''))
+    .filter((bullet) => bullet.trim().length > 0);
+  if (!bullets.length) throw new Error(`No bullets found under "${heading.trim()}" - refusing to rewrite it empty`);
+
+  const buckets = new Map();
+  for (const bullet of bullets) {
+    const match = bullet.match(/\b([A-Z][a-zA-Z]+)\([^)]+\):/);
+    const label = (match && CATEGORY_LABELS[match[1]]) || OTHER_LABEL;
+    if (!buckets.has(label)) buckets.set(label, []);
+    buckets.get(label).push(bullet);
+  }
+
+  const orderedLabels = [...CATEGORY_ORDER, OTHER_LABEL].filter((label) => buckets.has(label));
+  const rebuiltBody = `\n${orderedLabels
+    .map((label) => `### ${label}\n\n${buckets.get(label).join('\n\n')}\n`)
+    .join('\n')}\n`;
+
+  writeFileSync(changelogPath, changelog.slice(0, bodyStart) + rebuiltBody + changelog.slice(bodyEnd));
 }
 
 function replaceChartVersionAndChanges(version, changes) {
@@ -76,6 +153,8 @@ const packageVersion = JSON.parse(readFileSync(resolve(root, 'package.json'), 'u
 if (packageVersion !== release.newVersion) {
   throw new Error(`Changesets planned ${release.newVersion}, but wrote ${packageVersion}`);
 }
+
+regroupChangelogByCategory(packageVersion);
 
 replaceChartVersionAndChanges(
   packageVersion,
