@@ -40,14 +40,27 @@ chart's current and new tracked appVersion.
 2. A snapshot of what the chart already exposes (values.yaml + the env vars \
 documented in its README).
 
+Two values in this chart are FREE-FORM PASSTHROUGHS, deep-merged or appended \
+verbatim with no chart-side validation: `config:` (any key you set is \
+written into config.yaml as-is, on top of Hermes' own built-in defaults) and \
+`extraEnv`/`extraEnvFrom` (any env var). A new config.yaml key or a new env \
+var upstream adds is therefore ALREADY usable today, whether or not this \
+chart names it by name - that alone is NEVER a reason to file an item. Only \
+flag a config.yaml key or env var if something ELSE about it needs chart \
+action: the chart should set its own default for it, an EXISTING documented \
+value or example silently breaks because of it (a breaking rename), or it's \
+prominent enough to deserve a discoverability example.
+
 From the upstream changes, identify ONLY the ones that should change \
-something in the CHART - e.g. a new required/optional env var worth adding \
-to values.yaml or the README table, a new messaging platform worth a \
-values-*.yaml example, a new config.yaml key, a breaking config/env rename, \
-a security fix needing urgent action, or a constraint that invalidates a \
-documented assumption (e.g. AGENTS.md/README claims). Ignore anything that \
-doesn't affect how the chart is configured or deployed - most desktop-app- \
-only UI work, internal refactors, and CLI-only features need no chart change.
+something in the CHART - e.g. a new messaging platform worth a values-*.yaml \
+example, a new Service port/route or container/volume/RBAC need, a \
+values.schema.json validation gap, a breaking rename of a key an EXISTING \
+chart example or documented value relies on, a security fix needing urgent \
+action, or a constraint that invalidates a documented assumption (e.g. \
+AGENTS.md/README claims). Ignore anything that doesn't affect how the chart \
+is configured or deployed - most desktop-app-only UI work, internal \
+refactors, and CLI-only features need no chart change, and neither does a \
+bare new config.yaml key or env var on its own (see above).
 
 List every relevant item you find - do not cap the count, but do not invent \
 busywork either; if truly nothing applies, return an empty list.
