@@ -5,6 +5,40 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.8.18."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.18
+    created: "2026-08-18T13:17:08.792106178Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: f84d83d4f3fee6140e5c0cb95a1ebb1313e2bf060341cf72ca222f7c8581effb
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.8.0.tgz
+    version: 1.8.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Update the default Hermes Agent image to v2026.8.16.2."
         - kind: "added"
           description: "Update the default Hermes Agent image to v2026.8.16."
@@ -1175,4 +1209,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-18T12:53:51.794417871Z"
+generated: "2026-08-18T13:17:08.789252921Z"
