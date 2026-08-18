@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.0
+
+### Minor Changes
+
+- 71e8ed3: Update the default Hermes Agent image to v2026.8.18.
+
 ## 1.7.0
 
 ### Minor Changes
