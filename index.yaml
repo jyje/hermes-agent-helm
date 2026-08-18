@@ -5,6 +5,42 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.8.16.2."
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.8.16."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.16.2
+    created: "2026-08-18T12:53:51.797218014Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: da4105ad9c39cbc49fc59efc87e6c074e7c3bae07a58b334b4c503d15ddfe247
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.7.0.tgz
+    version: 1.7.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Dependency(image): Update BusyBox init image Update the shared-volume ownership init image and team examples to BusyBox 1.38."
         - kind: "fixed"
           description: "Documentation(automation): Explain how releases are tracked, signed, and verified Summarize upstream image tracking, signed release publication, and post-rel..."
@@ -1139,4 +1175,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-16T03:51:14.419301473Z"
+generated: "2026-08-18T12:53:51.794417871Z"
