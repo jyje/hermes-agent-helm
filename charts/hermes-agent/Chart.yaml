@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.6.0
+version: 1.7.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -35,16 +35,6 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: "added"
-      description: "Dependency(image): Update BusyBox init image Update the shared-volume ownership init image and team examples to BusyBox 1.38."
-    - kind: "fixed"
-      description: "Documentation(automation): Explain how releases are tracked, signed, and verified Summarize upstream image tracking, signed release publication, and post-rel..."
+      description: "Update the default Hermes Agent image to v2026.8.16.2."
     - kind: "added"
-      description: "Feature(values): Expose runtimeClassName, extraContainers, and stop mounting the ServiceAccount token by default Add `runtimeClassName` for kernel-isolated r..."
-    - kind: "added"
-      description: "Feature(values): Model API server and webhook listeners Configure Hermes API server and webhook runtime listeners, then expose only the selected ports throug..."
-    - kind: "fixed"
-      description: "Documentation(install): Put OCI installation first Present OCI as the recommended installation method and retain the Helm Repository as an alternative."
-    - kind: "added"
-      description: "Feature(values): Route Ingress/HTTPRoute per listener (dashboard, apiServer, webhook) Route dashboard, API server, and webhook listeners to explicit Ingress..."
-    - kind: "fixed"
-      description: "Documentation(docs): Refresh the README tagline Highlight Codex and Copilot account sign-in, agent teams, and the chart's lightweight defaults."
+      description: "Update the default Hermes Agent image to v2026.8.16."
