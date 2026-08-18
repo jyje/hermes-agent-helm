@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.0
+
+### Minor Changes
+
+- c9a2c74: Update the default Hermes Agent image to v2026.8.16.2.
+- 2917713: Update the default Hermes Agent image to v2026.8.16.
+
 ## 1.6.0
 
 ### Minor Changes
