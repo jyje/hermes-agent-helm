@@ -473,6 +473,36 @@ The copy-ready [`values-api-server-and-webhook.yaml`](values-api-server-and-webh
 overlay exposes API server and webhook ports and references an external Secret
 for the required credentials.
 
+### A2A (Agent-to-Agent) listener
+
+Unlike the two listeners above, A2A has no dedicated chart values or env var
+switch - upstream's only on-switch is the `gateway.platforms.a2a` block in
+`config.yaml`, so enable it directly through the chart's existing free-form
+`config:` passthrough:
+
+```yaml
+config:
+  gateway:
+    platforms:
+      a2a:
+        enabled: true
+        extra:
+          port: 9900
+extraEnv:
+  - name: A2A_HOST      # upstream defaults to 127.0.0.1; widen for a Service
+    value: "0.0.0.0"
+  - name: A2A_PORT
+    value: "9900"
+```
+
+Set `A2A_BEARER_TOKEN` (shared) or `A2A_PEER_TOKENS` (per-peer, preferred)
+through `env` or `extraEnvFrom`: upstream only widens the bind past loopback
+once one is configured. See the upstream [A2A
+guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a).
+The copy-ready [`values-a2a.yaml`](values-a2a.yaml) overlay exposes the port
+through an explicit Service and references an external Secret for the
+required token.
+
 ### HTTP routing: Ingress or HTTPRoute
 
 Both routing resources are off by default. Use `ingress` for an installed
@@ -656,6 +686,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
+| [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**, config.yaml passthrough + explicit Service port, so other A2A agents can discover and drive this one |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: listener routing through a pre-existing Gateway |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
