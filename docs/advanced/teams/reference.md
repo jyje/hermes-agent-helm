@@ -253,6 +253,13 @@ and `march`):
 > support guarantee; keep the bots in a dedicated trusted channel and be ready
 > to stop or scale them down during testing.
 
+The chart only fills in `group_sessions_per_user`, `discord.thread_require_mention`,
+`discord.history_backfill`, and `discord.allow_mentions.*` when `config:`
+doesn't already set them - an explicit value in your own `config:` always
+wins. `discord.thread_require_mention` and `allow_mentions` are part of the
+loop brake described above; only override them if you understand and accept
+that trade-off.
+
 Each instance still has its normal private `HERMES_HOME` PVC for configuration
 and its own gateway session cache. Those PVCs are not shared and do not carry
 tasks or results between agents. The examples include a small init container
