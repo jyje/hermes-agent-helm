@@ -102,6 +102,43 @@ jobs:
             exit 1
           fi
 
+      - name: validate NetworkPolicy egress
+        run: |
+          set -euo pipefail
+          helm template np charts/hermes-agent \
+            --set-string env.OPENAI_API_KEY=sk-test --set networkPolicy.enabled=true \
+            --show-only templates/networkpolicy.yaml > np.yaml
+
+          # Cloud metadata endpoint (IPv4 IMDS) blocked.
+          yq -e 'select(.kind == "NetworkPolicy").spec.egress[].to[]?.ipBlock.except[]? == "169.254.0.0/16"' np.yaml \
+            | grep -q true
+
+          # IPv6 ULA/link-local (where the IMDS equivalent lives) blocked,
+          # public IPv6 still reachable via the ::/0 base CIDR.
+          yq -e '
+            select(.kind == "NetworkPolicy").spec.egress[].to[]? | select(.ipBlock.cidr == "::/0") | .ipBlock.except
+          ' np.yaml | grep -q 'fc00::/7'
+          yq -e '
+            select(.kind == "NetworkPolicy").spec.egress[].to[]? | select(.ipBlock.cidr == "::/0") | .ipBlock.except
+          ' np.yaml | grep -q 'fe80::/10'
+
+          # DNS peer scoped to kube-system by default.
+          yq -e '
+            select(.kind == "NetworkPolicy").spec.egress[].to[]?.namespaceSelector.matchLabels."kubernetes.io/metadata.name" == "kube-system"
+          ' np.yaml | grep -q true
+
+          # Ingress denied entirely by default. Helm's `with` renders an
+          # empty extraIngress as a null key rather than `[]`; both mean
+          # "no rules" to Kubernetes (deny-all under policyTypes: [Ingress]).
+          yq -e '((select(.kind == "NetworkPolicy").spec.ingress) // []) | length == 0' np.yaml | grep -q true
+
+          # The LiteLLM example renders and keeps the in-cluster allowance.
+          helm template np-litellm charts/hermes-agent \
+            -f charts/hermes-agent/values-networkpolicy-litellm.yaml \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --show-only templates/networkpolicy.yaml > np-litellm.yaml
+          yq -e 'select(.kind == "NetworkPolicy").spec.egress | length > 0' np-litellm.yaml | grep -q true
+
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
