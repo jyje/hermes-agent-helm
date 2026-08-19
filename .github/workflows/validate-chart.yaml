@@ -184,7 +184,7 @@ jobs:
     env:
       NS: test-hermes-chart
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-      CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
+      CI_MODELS: "nvidia/nemotron-3.5-lightning-30b-a3b,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
       # Optional live Discord verification: only scenario-message.sh ever
       # uses these (it's the only scenario installing Discord), so they're
       # simply unread on the existing-claim job.
