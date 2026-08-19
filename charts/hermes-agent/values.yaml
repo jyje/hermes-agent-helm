@@ -469,6 +469,45 @@ httpRoute:
   #      - name: ""
   #        port: 8642
 
+# ---------------------------------------------------------------------------
+# The agent runs its own shell/code execution inside this Pod (see
+# `config.terminal.backend` above) - without egress control that sandbox has
+# no network boundary: lateral movement to other in-cluster Services, and
+# reachability of the cloud metadata endpoint (169.254.169.254 / fd00::/8),
+# which on most managed clusters hands out node IAM credentials.
+# ---------------------------------------------------------------------------
+networkPolicy:
+  # -- Create a NetworkPolicy isolating both directions. Ingress is denied
+  #    entirely by default - not an oversight: `hermes gateway run` is
+  #    outbound-only, so nothing needs to reach this Pod unless a listener
+  #    (dashboard, apiServer, webhook, a2a, ...) is exposed. Use
+  #    `extraIngress` in that case.
+  enabled: false
+  # -- Permit DNS lookups to kube-dns/CoreDNS. Required for the agent to
+  #    resolve any provider/messaging endpoint.
+  allowDns: true
+  dns:
+    # -- Kubernetes' immutable namespace-name label keeps this peer limited
+    #    to kube-system. Override both selectors for a distribution whose
+    #    DNS runs elsewhere.
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: kube-system
+    podSelector:
+      matchLabels:
+        k8s-app: kube-dns
+  # -- Block RFC1918 ranges and the cloud metadata endpoint (both IPv4
+  #    169.254.0.0/16 and its IPv6 equivalent within fd00::/8) while still
+  #    permitting public internet egress. Set false when the agent must
+  #    reach an in-cluster proxy such as LiteLLM - see
+  #    values-networkpolicy-litellm.yaml for a precise allowlist instead.
+  blockPrivateEgress: true
+  # -- Additional raw NetworkPolicy egress rules, appended as-is.
+  extraEgress: []
+  # -- Additional raw NetworkPolicy ingress rules, appended as-is. Required
+  #    before enabling networkPolicy alongside any exposed listener.
+  extraIngress: []
+
 # -- Container resource requests/limits. Lightweight defaults aimed at small
 # clusters (incl. Raspberry Pi / arm64).
 resources:

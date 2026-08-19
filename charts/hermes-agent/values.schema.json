@@ -514,6 +514,26 @@
       }
     },
 
+    "networkPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "allowDns": { "type": "boolean" },
+        "dns": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "namespaceSelector": { "type": "object" },
+            "podSelector": { "type": "object" }
+          }
+        },
+        "blockPrivateEgress": { "type": "boolean" },
+        "extraEgress": { "type": "array" },
+        "extraIngress": { "type": "array" }
+      }
+    },
+
     "resources": {
       "type": "object",
       "additionalProperties": false,

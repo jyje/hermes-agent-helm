@@ -160,6 +160,7 @@ nav:
           - LiteLLM: advanced/integrations/litellm.md
           - LiteLLM (in-cluster): advanced/integrations/litellm-k8s.md
           - OpenAI + Telegram: advanced/integrations/openai-and-telegram.md
+          - NetworkPolicy: advanced/integrations/networkpolicy.md
       - Patterns:
           - advanced/patterns/index.md
           - Bitwarden Secrets Manager: advanced/patterns/bitwarden.md
