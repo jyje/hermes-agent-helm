@@ -4,6 +4,40 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "added"
+          description: "Feature(values): Add an opt-in NetworkPolicy blocking the cloud metadata endpoint Add `networkPolicy.*` rendering a NetworkPolicy that denies all ingress by..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.18
+    created: "2026-08-19T13:35:35.604206387Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB A Helm chart to run Hermes Agent
+      on Kubernetes, community-powered, lightweight  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 1e50859e46486502c09c681de8844928392139dd090631ba31fa0d6f5695d99b
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.10.0.tgz
+    version: 1.10.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "fixed"
           description: "Documentation(values): Add A2A (Agent-to-Agent) listener example Provide a copy-ready values overlay and README guidance for exposing Hermes' A2A listener th..."
         - kind: "added"
@@ -1245,4 +1279,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-19T09:42:22.622690405Z"
+generated: "2026-08-19T13:35:35.601063575Z"
