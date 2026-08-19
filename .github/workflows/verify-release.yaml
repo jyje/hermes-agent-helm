@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 20
     env:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-      CI_MODELS: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
+      CI_MODELS: "nvidia/nemotron-3.5-lightning-30b-a3b,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
 
     steps:
       - uses: actions/checkout@v7
@@ -121,15 +121,19 @@ jobs:
         timeout-minutes: 8
         run: |
           set -euo pipefail
-          ns=verify-hermes-chart
-          pod=$(kubectl get pod -n "$ns" -l app.kubernetes.io/name=hermes-agent \
-            -o jsonpath='{.items[0].metadata.name}')
+          NS=verify-hermes-chart
+          # Reuse chat_round_trip from lib.sh instead of a second copy of the
+          # same failover loop: an earlier hand-duplicated version here had
+          # no per-model timeout, so one hung model (NIM-side, not a chart
+          # bug) blocked the whole step instead of failing over.
+          . .github/scripts/lib.sh
+          pod=$(pod_name)
           echo "Pod: $pod"
 
           # Inject a test skill via the PVC mount
           echo "=== skill injection ==="
           # shellcheck disable=SC2016  # $HERMES_HOME/$skill_dir expand in the pod's shell, not the runner
-          kubectl exec -n "$ns" "$pod" -- sh -c '
+          kubectl exec -n "$NS" "$pod" -- sh -c '
             skill_dir="${HERMES_HOME:-/opt/data}/skills"
             mkdir -p "$skill_dir"
             printf "# CI Ping\n\nWhen the user says \"ci-ping\", reply with exactly: CI_PONG\n" \
@@ -138,21 +142,8 @@ jobs:
             cat "$skill_dir/ci-test.md"
           '
 
-          # Chat round-trip with injected skill
           echo "=== chat with injected skill ==="
-          ok=false
-          for model in $(echo "$CI_MODELS" | tr ',' ' '); do
-            echo "--- model: $model ---"
-            # Prompt goes via -q (not positional) and --max-turns bounds the
-            # round-trip: same invocation the chart's own test hook uses.
-            if kubectl exec -n "$ns" "$pod" -- \
-                hermes chat -m "$model" --provider nvidia \
-                  -q "ci-ping" --max-turns 2; then
-              ok=true; break
-            fi
-            echo "model $model failed, trying next"
-          done
-          [ "$ok" = "true" ] || { echo "::error::All models failed chat round-trip"; exit 1; }
+          chat_round_trip "$pod" || { echo "::error::All models failed chat round-trip"; exit 1; }
 
       - name: Show test logs
         if: always()
