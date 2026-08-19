@@ -99,23 +99,30 @@ Discord's typing indicator is display state, not authoritative evidence that a m
 Durable accepted team knowledge is mounted at {{ .Values.team.sharedVolume.mountPath }}; it is not a task queue or completion signal.
 {{- end -}}
 
-{{/* Merge team-safe conversation settings and identity context into config.yaml. */}}
+{{/*
+Merge team-safe conversation settings and identity context into config.yaml.
+The discord/group_sessions_per_user defaults below only fill in a key the
+user hasn't already set under `config:` (see hermes-agent.setConfigDefault) -
+an existing team install that never touched these keys renders byte-identical
+config.yaml; anyone who wants different team-mode Discord behavior can now
+set it themselves. agent.environment_hint is exempt: it's generated from the
+team roster (team.members/team.leader/team.identity), not a static default,
+so it always merges rather than only filling a gap.
+*/}}
 {{- define "hermes-agent.effectiveConfig" -}}
 {{- include "hermes-agent.team.validate" . -}}
 {{- $config := deepCopy .Values.config -}}
 {{- if .Values.team.enabled -}}
-  {{- $_ := set $config "group_sessions_per_user" false -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $config "group_sessions_per_user" false) -}}
   {{- $discord := deepCopy (default (dict) (get $config "discord")) -}}
-  {{- $_ := set $discord "thread_require_mention" true -}}
-  {{- $_ := set $discord "history_backfill" true -}}
-  {{- if not (hasKey $discord "history_backfill_limit") -}}
-    {{- $_ := set $discord "history_backfill_limit" 50 -}}
-  {{- end -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $discord "thread_require_mention" true) -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $discord "history_backfill" true) -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $discord "history_backfill_limit" 50) -}}
   {{- $allowMentions := deepCopy (default (dict) (get $discord "allow_mentions")) -}}
-  {{- $_ := set $allowMentions "everyone" false -}}
-  {{- $_ := set $allowMentions "roles" false -}}
-  {{- $_ := set $allowMentions "users" true -}}
-  {{- $_ := set $allowMentions "replied_user" false -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $allowMentions "everyone" false) -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $allowMentions "roles" false) -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $allowMentions "users" true) -}}
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $allowMentions "replied_user" false) -}}
   {{- $_ := set $discord "allow_mentions" $allowMentions -}}
   {{- $_ := set $config "discord" $discord -}}
 

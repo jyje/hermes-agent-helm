@@ -245,6 +245,12 @@ spec:
 > 지원 보장이 아닙니다. 전용 신뢰 채널에서 시험하고 필요하면 즉시 봇을 중지하거나
 > scale down할 준비를 하세요.
 
+차트는 `group_sessions_per_user`, `discord.thread_require_mention`,
+`discord.history_backfill`, `discord.allow_mentions.*`를 `config:`에서 아직
+설정하지 않은 경우에만 채웁니다 — 여러분이 `config:`에 직접 넣은 값이 항상
+우선합니다. `discord.thread_require_mention`과 `allow_mentions`는 위에서 설명한
+루프 브레이크의 일부이므로, 그 trade-off를 이해하고 받아들일 때만 오버라이드하세요.
+
 각 인스턴스에는 설정과 자체 gateway 세션 캐시를 위한 일반 사설
 `HERMES_HOME` PVC가 남습니다. 이 PVC들은 공유되지 않으며 에이전트 사이에서
 과제나 결과를 운반하지 않습니다. 일부 local-path provisioner가 PVC 루트를

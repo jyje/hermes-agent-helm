@@ -83,6 +83,23 @@ Test image reference. Falls back to the main image when tests.image fields are e
 {{- end }}
 
 {{/*
+Set $dict[$key] = $default, but only when $dict doesn't already have that key
+- so a chart-computed default (team mode's config.yaml overlay, or any future
+one) never clobbers a value the user already set under `config:`. Go maps are
+reference types, so mutating $dict here is visible to the caller with no
+return value needed. Call as:
+  {{- $_ := include "hermes-agent.setConfigDefault" (list $dict "key" $default) -}}
+*/}}
+{{- define "hermes-agent.setConfigDefault" -}}
+{{- $dict := index . 0 -}}
+{{- $key := index . 1 -}}
+{{- $default := index . 2 -}}
+{{- if not (hasKey $dict $key) -}}
+  {{- $_ := set $dict $key $default -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Logical ports exposed by the chart Service. An empty explicit list keeps the
 legacy dashboard-only Service byte-for-byte compatible. Callers may parse this
 list for another Kubernetes port shape, such as containerPorts.
