@@ -465,6 +465,34 @@ Service를 유지하려면 `service.ports: []`를 두고, API server나 webhook�
 [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)은 API
 server와 webhook 포트를 노출하고 필요한 자격증명은 외부 Secret으로 참조합니다.
 
+### A2A(Agent-to-Agent) 리스너
+
+위 두 리스너와 달리 A2A는 전용 chart 값이나 env var 스위치가 없습니다 —
+업스트림의 유일한 스위치는 `config.yaml`의 `gateway.platforms.a2a` 블록이라,
+차트가 이미 갖고 있는 free-form `config:` passthrough로 직접 켭니다:
+
+```yaml
+config:
+  gateway:
+    platforms:
+      a2a:
+        enabled: true
+        extra:
+          port: 9900
+extraEnv:
+  - name: A2A_HOST      # 업스트림 기본값은 127.0.0.1 - Service를 위해 넓힘
+    value: "0.0.0.0"
+  - name: A2A_PORT
+    value: "9900"
+```
+
+`A2A_BEARER_TOKEN`(공유) 또는 `A2A_PEER_TOKENS`(피어별, 권장)를 `env`나
+`extraEnvFrom`으로 설정하세요 — 업스트림은 이 토큰이 설정돼야만 loopback
+너머로 바인딩을 넓힙니다. 공식
+[A2A 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)를
+참고하세요. 바로 사용할 수 있는 [`values-a2a.yaml`](values-a2a.yaml)은 명시적
+Service port로 이 포트를 노출하고 필요한 토큰은 외부 Secret으로 참조합니다.
+
 ### HTTP 라우팅: Ingress 또는 HTTPRoute
 
 두 라우팅 리소스는 기본으로 꺼져 있습니다. 설치된 Ingress controller가 있으면
@@ -612,6 +640,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (basic-auth) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook**: 명시적 Service port와 외부 listener secret |
+| [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**: config.yaml passthrough + 명시적 Service port로 다른 A2A 에이전트가 발견·구동 가능 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 리스너 라우팅**: `/v1` API와 webhook host가 별도 Service port 사용 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 사전에 만든 Gateway를 통한 리스너 라우팅 |
 | [`values-soul.yaml`](values-soul.yaml) | any | **영속 정체성**: 실용적인 엔지니어링 말투, 런타임 편집 보존 |
