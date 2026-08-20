@@ -19,8 +19,11 @@
 //      bullet - that prefix is the parseable signal
 //      .github/scripts/release/version-chart.mjs's regroupChangelogByCategory
 //      uses in a second pass, right after `changeset version` writes
-//      CHANGELOG.md. The category vocabulary lives there; this file does not
-//      need to know it.
+//      CHANGELOG.md. The category vocabulary lives in
+//      .github/scripts/release/changelog-categories.mjs; this file does not
+//      need to know it, but changelog-categories.test.mjs runs this file's
+//      getReleaseLine for real to keep the two in sync - keep that test
+//      updated if this bullet format ever changes.
 const { getCommitInfo } = require('@changesets/get-github-info');
 
 // GitHub stamps every bot identity's login with a literal "[bot]" suffix
