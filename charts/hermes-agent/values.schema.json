@@ -221,7 +221,8 @@
                 "enabled": { "type": "boolean" },
                 "image": { "type": "string", "minLength": 1 },
                 "uid": { "type": "integer", "minimum": 0 },
-                "gid": { "type": "integer", "minimum": 0 }
+                "gid": { "type": "integer", "minimum": 0 },
+                "securityContext": { "type": "object" }
               }
             }
           }
@@ -336,6 +337,7 @@
                 "limits": { "type": "object" }
               }
             },
+            "securityContext": { "type": "object" },
             "providers": {
               "type": "object",
               "additionalProperties": {
