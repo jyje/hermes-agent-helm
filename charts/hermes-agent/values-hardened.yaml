@@ -21,6 +21,16 @@
 # read-only rootfs without an execable /run does. Kubernetes' own `emptyDir`
 # does not set `noexec` unless the node/runtime does something unusual - if
 # this overlay fails to start, check that first.
+#
+# Do NOT stack this file with another example that also sets `extraVolumes`/
+# `extraVolumeMounts` (e.g. values-google-vertex.yaml, values-shared-knowledge.yaml)
+# via `-f values-hardened.yaml -f values-other.yaml`: Helm replaces array
+# values wholesale rather than merging them, so whichever file is listed last
+# silently wins and the other's mounts vanish - here, that means losing the
+# /run and /tmp tmpfs mounts with no error, and the pod fails to boot under a
+# read-only rootfs exactly like the unmounted case this file's own
+# investigation documented. Copy this file's `extraVolumes`/`extraVolumeMounts`
+# entries into the other values file (merging the lists yourself) instead.
 
 config:
   model:
@@ -47,13 +57,18 @@ securityContext:
 # to boot, and the agent's own tooling needs a writable /tmp. HERMES_HOME
 # (persistence.mountPath) is already a separate PVC, not rootfs, so it
 # doesn't need to be listed here.
+# sizeLimit bounds these - a medium:Memory emptyDir is RAM-backed and
+# uncapped by default, which would otherwise leave a hardening profile with
+# an unbounded memory-exhaustion vector.
 extraVolumes:
   - name: run-tmpfs
     emptyDir:
       medium: Memory
+      sizeLimit: 16Mi
   - name: tmp-tmpfs
     emptyDir:
       medium: Memory
+      sizeLimit: 64Mi
 
 extraVolumeMounts:
   - name: run-tmpfs
@@ -74,7 +89,8 @@ team:
 # `restricted`, but only once its target uid already owns (or matches
 # tokenOwner, making the internal chown a same-uid no-op) the destination
 # path - left disabled here since it needs a real interactive login, which
-# CI cannot perform. To harden it too:
+# CI cannot perform. To harden it too, set the same restricted-required
+# fields as the main securityContext above, not just runAsUser/runAsGroup:
 #
 # auth:
 #   deviceFlow:
@@ -82,3 +98,6 @@ team:
 #     securityContext:
 #       runAsUser: 10000
 #       runAsGroup: 10000
+#       allowPrivilegeEscalation: false
+#       capabilities:
+#         drop: [ALL]

@@ -208,6 +208,12 @@ team:
       # -- securityContext for the chown init container. Defaults to root -
       # `chown` across arbitrary storage backends needs it. Not overridable
       # to non-root; disable `permissions.enabled` instead under `restricted`.
+      # Setting this to `{}` does NOT restore an image-default user the way
+      # `auth.deviceFlow.securityContext: {}` does - it renders an explicit
+      # empty securityContext, which inherits podSecurityContext's fields
+      # (e.g. a hardened profile's non-root runAsUser), silently breaking the
+      # chown this container exists to perform. Disable `permissions.enabled`
+      # instead of clearing this value.
       securityContext:
         runAsUser: 0
         runAsGroup: 0
