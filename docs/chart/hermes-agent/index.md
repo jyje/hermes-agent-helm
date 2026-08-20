@@ -1,11 +1,11 @@
 ---
 title: "Hermes Agent"
-description: "👩🏻‍💻 Hermes Agent on Kubernetes - sign in with Codex/Copilot, run agent teams, stay lightweight"
+description: "👩🏻‍💻 Hermes Agent on Kubernetes - sign in with Codex/Copilot, run agent teams, stay lightweight."
 ---
 
 # Hermes Agent
 
-👩🏻‍💻 Hermes Agent on Kubernetes - sign in with Codex/Copilot, run agent teams, stay lightweight
+👩🏻‍💻 Hermes Agent on Kubernetes - sign in with Codex/Copilot, run agent teams, stay lightweight.
 
 - [Install](../../getting-started/install.md)
 - [Examples](examples/index.md)
