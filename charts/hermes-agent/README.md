@@ -523,6 +523,27 @@ and webhook traffic through distinct Ingress hosts and Service ports.
 starting point. HTTPRoute hostnames apply to all rules in one resource; create
 separate HTTPRoutes when host-level isolation between listener rules is needed.
 
+### Pod Security Standards hardening
+
+`podSecurityContext`/`securityContext` are empty by default so the chart stays
+compatible with any cluster, but non-root and a read-only rootfs are both
+CI-verified to work against the pinned image: its s6-overlay drops to a
+non-root uid on its own, and boots fine read-only once `/run` and `/tmp` are
+writable+executable tmpfs mounts (`/run` holds s6's own init binary, which it
+execs at startup). Use
+[`values-hardened.yaml`](values-hardened.yaml) rather than hand-rolling this -
+it's a Pod Security Standards `restricted`-compliant overlay, install it into
+a namespace with `pod-security.kubernetes.io/enforce=restricted` set.
+
+Two init containers need their own securityContext, not just the pod/main
+container's: `auth.deviceFlow.securityContext` (empty by default, inherits
+the login image's own user) works non-root once its target uid already owns
+the token's destination - `values-hardened.yaml` shows the override, matching
+`tokenOwner`. `team.sharedVolume.permissions`'s ownership-preparation
+container needs root to `chown` across arbitrary storage backends and has no
+non-root option - disable `permissions.enabled` under `restricted` and rely on
+`podSecurityContext.fsGroup` instead, when the storage backend honours it.
+
 ## Gateway lifecycle: rollouts, shutdown, and drain
 
 As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to
@@ -690,6 +711,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: listener routing through a pre-existing Gateway |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM proxy (in-cluster) | **Egress-locked NetworkPolicy**: blocks RFC1918 and the cloud metadata endpoint, with a precise allowlist for the LiteLLM Service |
+| [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **Pod Security Standards `restricted`**: non-root, read-only rootfs, dropped capabilities - CI-verified in a `restricted`-enforcing namespace |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/advanced/teams/reference.md) |
@@ -710,7 +732,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | apiServer.host | string | Bind address. Upstream defaults to 127.0.0.1; a Kubernetes Service needs    a non-loopback address. API_SERVER_KEY is still required on loopback. | `"0.0.0.0"` |
 | apiServer.port | int | API server port. | `8642` |
 | args | list | Arguments passed through the image entrypoint. `gateway run` selects the    non-interactive outbound messaging service instead of the default TUI. | `["gateway","run"]` |
-| auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
+| auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"securityContext":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
 | auth.deviceFlow.enabled | bool | Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from `env`/`extraEnvFrom`. | `false` |
 | auth.deviceFlow.forceRelogin | bool | Force a fresh login even if a token already exists on the volume. | `false` |
 | auth.deviceFlow.image | object | Login image for GitHub-style profiles. OpenAI Codex uses the pinned    Hermes image so auth.json persistence and refresh stay version-aligned. | `{"repository":"python","tag":"3.13-slim"}` |
@@ -725,8 +747,9 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | auth.deviceFlow.providers.openai-codex.flow | string | Use the OpenAI Codex device-code flow bundled with the pinned    Hermes version and persist refreshable credentials in auth.json. | `"openai-codex"` |
 | auth.deviceFlow.providers.openai-codex.issuer | string | OpenAI account issuer. Override only for a compatible test server. | `"https://auth.openai.com"` |
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
+| auth.deviceFlow.securityContext | object | securityContext for the device-login init container. Empty by    default - inherits the image's own user (root for the Python image,    the pinned Hermes image otherwise). Overriding to a non-root uid only    works if that uid can already write the token's destination path;    see values-hardened.yaml for a verified non-root override (uid/gid    matching tokenOwner, so the chown above becomes a same-uid no-op). | `{}` |
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
-| auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid;    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
+| auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. By default this init    container inherits the login image's own user (root for the Python    image below) so it can write to any storage class reliably, then    chowns the token to this owner. Set it to the Hermes runtime uid; the    upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
 | bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
@@ -771,7 +794,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | persistence.storageClass | string | StorageClass for the volumeClaimTemplate. Empty = cluster default. | `""` |
 | podAnnotations | object | Annotations to add to the Pod. | `{}` |
 | podLabels | object | Labels to add to the Pod. | `{}` |
-| podSecurityContext | object | Pod-level securityContext. Left empty by default to stay compatible with the image's s6-overlay init (which starts as root and drops privileges itself). Add hardening here once verified for your environment. | `{}` |
+| podSecurityContext | object | Pod-level securityContext. Left empty by default to stay compatible with the image's s6-overlay init (which starts as root and drops privileges itself). Non-root and read-only rootfs are both CI-verified to work; see values-hardened.yaml for a Pod Security Standards `restricted`-compliant overlay rather than hand-rolling this. | `{}` |
 | probes | object | Health probes. Empty = none. The image's s6-overlay already supervises and auto-restarts the gateway in-container, so k8s probes are optional. Provide a full probe spec to enable, e.g. an exec check:   liveness:     exec: { command: ["hermes","gateway","status"] }     initialDelaySeconds: 30     periodSeconds: 30 | `{"liveness":{},"readiness":{},"startup":{}}` |
 | probes.liveness | object | Liveness probe spec. Empty = no liveness probe. | `{}` |
 | probes.readiness | object | Readiness probe spec. Empty = no readiness probe. | `{}` |
@@ -790,7 +813,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
 | soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |
-| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":""},"members":[],"name":"","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.38","uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
+| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":""},"members":[],"name":"","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.38","securityContext":{"runAsGroup":0,"runAsUser":0},"uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
 | team.enabled | bool | Enable the chart-native leader/member team protocol, roster skill, and shared knowledge volume mount for this release. | `false` |
 | team.identity | string | This release's identity. For a leader it must equal `leader.name`; for a member it must match one entry under `members`. | `""` |
 | team.leader.mentionEnv | string | Environment variable containing the leader's Discord user ID. Supply it through a Secret/SealedSecret; the ID is expanded by Hermes at runtime. | `""` |
@@ -804,8 +827,9 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | team.sharedVolume.create | bool | Create the shared PVC from this release. Set true on exactly one leader release; all members set false and reference the same `claimName`. | `false` |
 | team.sharedVolume.enabled | bool | Mount a required RWX knowledge volume when team mode is enabled. | `true` |
 | team.sharedVolume.mountPath | string | Mount path for durable accepted team knowledge. | `"/opt/data/team-knowledge"` |
-| team.sharedVolume.permissions.enabled | bool | On the leader, chown the shared volume before Hermes starts. Enable only when the storage backend permits ownership changes. | `false` |
+| team.sharedVolume.permissions.enabled | bool | On the leader, chown the shared volume before Hermes starts. Enable only when the storage backend permits ownership changes. This init container needs root (see securityContext below), so it is incompatible with Pod Security Standards `restricted` - set false and rely on `podSecurityContext.fsGroup` instead when the storage backend honours it. See values-hardened.yaml. | `false` |
 | team.sharedVolume.permissions.image | string | Init image used for shared-volume ownership preparation. | `"busybox:1.38"` |
+| team.sharedVolume.permissions.securityContext | object | securityContext for the chown init container. Defaults to root - `chown` across arbitrary storage backends needs it. Not overridable to non-root; disable `permissions.enabled` instead under `restricted`. Setting this to `{}` does NOT restore an image-default user the way `auth.deviceFlow.securityContext: {}` does - it renders an explicit empty securityContext, which inherits podSecurityContext's fields (e.g. a hardened profile's non-root runAsUser), silently breaking the chown this container exists to perform. Disable `permissions.enabled` instead of clearing this value. | `{"runAsGroup":0,"runAsUser":0}` |
 | team.sharedVolume.permissions.uid | int | Runtime owner for the shared knowledge directory. | `10000` |
 | team.sharedVolume.retain | bool | Keep a chart-created shared claim when the owning release is removed. | `true` |
 | team.sharedVolume.size | string | Requested shared storage size used only when `create=true`. | `"10Gi"` |

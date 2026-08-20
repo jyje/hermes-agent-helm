@@ -1,0 +1,22 @@
+name: Install yq
+description: Install a pinned yq release for structured YAML assertions in CI.
+
+inputs:
+  version:
+    description: yq release tag to install.
+    required: false
+    default: "v4.53.3"
+
+runs:
+  using: composite
+  steps:
+    - name: install yq
+      shell: bash
+      env:
+        YQ_VERSION: ${{ inputs.version }}
+      run: |
+        arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; x86_64) arch=amd64 ;; esac
+        curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${arch}" \
+          -o "$RUNNER_TEMP/yq"
+        sudo install -m 0755 "$RUNNER_TEMP/yq" /usr/local/bin/yq
+        yq --version

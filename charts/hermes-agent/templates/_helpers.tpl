@@ -213,6 +213,10 @@ spec:
       image: "{{ $df.image.repository }}:{{ $df.image.tag }}"
       {{- end }}
       imagePullPolicy: {{ .Values.image.pullPolicy }}
+      {{- with $df.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       command: ["python3", "/login/device_login.py"]
       env:
         - name: HERMES_HOME
@@ -269,8 +273,7 @@ spec:
       image: {{ .Values.team.sharedVolume.permissions.image | quote }}
       imagePullPolicy: IfNotPresent
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
+        {{- toYaml .Values.team.sharedVolume.permissions.securityContext | nindent 8 }}
       command:
         - sh
         - -c
