@@ -104,24 +104,26 @@ The only exemption is CI-only, tooling, or other unreleased maintenance
 work (workflow YAML, scripts, this contributing guide) that ships nothing
 a chart user would see.
 
-### Categorizing project-maintenance work
+### Deciding whether Documentation or CI work needs a Changeset
 
-Every PR title / commit subject uses the same `Category(scope): Title` shape
-as a Changeset summary (see below), whether or not it adds a Changeset. Two
-categories exist in each of two scopes:
-
-| Category | `chart` scope | `project` scope |
-|---|---|---|
-| `Documentation` | User-facing chart docs (README, `values-*.yaml` comments, `docs/`) - **Changeset-eligible** | Contributor/maintenance docs (this file, `AGENTS.md`) - **not Changeset-eligible** |
-| `CI` | A workflow or script change that alters what a chart user receives (rare - e.g. the docs-generation step itself) - **Changeset-eligible** | CI/tooling maintenance with no effect on the shipped chart (a new lint assertion, a workflow refactor) - **not Changeset-eligible** |
-
-The `chart`/`project` distinction decides Changeset eligibility; it is not
-part of the Changeset Category vocabulary itself (`Feature`, `Fix`,
-`Security`, `Dependency`, `Documentation`, `Deprecated`, `Removed` - see
+`Documentation` and CI/tooling work are the two kinds most often
+miscategorized, because both can be either **chart-facing** (a chart user
+sees it) or **project-internal** (only a contributor does). This decides
+Changeset eligibility only - it is not a new PR-title or commit-subject
+format; those keep following
+[Conventional Commits](#conventional-commits-recommended) as already
+described further down, and `scope` inside an actual Changeset summary keeps
+the free-form meaning defined in
 [Write an item that can become a release note](#write-an-item-that-can-become-a-release-note)
-below). A `CI(project)` or `Documentation(project)` PR never gets a
-`.changeset/*.md` file; if in doubt whether something is user-visible, it
-almost certainly is `chart`-scoped and needs one.
+below (`chart`, `values`, `docs`, `image`, ...), not this chart/project axis.
+
+| Kind of work | Chart-facing | Project-internal |
+|---|---|---|
+| Documentation | README, `values-*.yaml` comments, `docs/` - **needs a Changeset** | This file, `AGENTS.md`, other contributor guides - **no Changeset** |
+| CI / tooling | A workflow or script change that alters what a chart user receives (rare - e.g. the docs-generation step itself) - **needs a Changeset** | CI/tooling maintenance with no effect on the shipped chart (a new lint assertion, a workflow refactor) - **no Changeset** |
+
+If in doubt whether something is user-visible, it almost certainly is
+chart-facing and needs one.
 
 ### Promoting a validation to permanent CI
 
@@ -148,9 +150,10 @@ whether to promote it into `validate-chart.yaml` using these criteria:
   loop? A slow check belongs in `test`'s existing matrix, not a new always-on
   step.
 
-If it passes all five, file a **separate CI/tooling issue and PR** (`CI(project)`,
-no Changeset) rather than folding the new assertion into the feature PR that
-motivated it - the feature PR's own diff should stay scoped to the feature.
+If it passes all five, file a **separate CI/tooling issue and PR**
+(project-internal, no Changeset) rather than folding the new assertion into
+the feature PR that motivated it - the feature PR's own diff should stay
+scoped to the feature.
 The only exception is when the feature PR would otherwise reintroduce the
 exact regression the validation guards against before the follow-up lands -
 in that narrow case, add the assertion directly to the feature PR instead of

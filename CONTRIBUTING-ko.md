@@ -96,24 +96,25 @@ CI가 이를 강제하지 않으므로 PR을 열기 전에 스스로 diff를 검
 예외는 차트 사용자에게 아무것도 드러나지 않는 CI 전용/툴링/기타 미배포
 유지보수 작업(workflow YAML, 스크립트, 이 기여 가이드 자체)입니다.
 
-### 프로젝트 유지보수 작업 분류하기
+### Documentation·CI 작업에 Changeset이 필요한지 판단하기
 
-모든 PR 제목/커밋 subject는 Changeset을 추가하든 안 하든 아래(릴리즈 노트가 될
-수 있는 항목 작성하기)와 같은 `Category(scope): Title` 형태를 씁니다. 카테고리
-2개 × scope 2개, 총 4가지 조합이 있습니다:
+`Documentation`과 CI/툴링 작업이 가장 자주 잘못 분류되는 두 종류입니다 -
+둘 다 **차트가 사용자에게 보여주는 것**일 수도, **프로젝트 내부용**(기여자만
+보는 것)일 수도 있기 때문입니다. 이건 Changeset 대상 여부만 가르는
+구분이지, 새로운 PR 제목/커밋 subject 형식이 아닙니다 - 그건 아래에서
+설명하는 [Conventional Commits](#conventional-commits권장)를 그대로
+따릅니다. 실제 Changeset 요약 안의 `scope`도 아래
+[릴리즈 노트가 될 수 있는 항목 작성하기](#릴리즈-노트가-될-수-있는-항목-작성하기)에서
+정의한 자유 형식(`chart`, `values`, `docs`, `image` 등) 그대로이지, 이
+차트/프로젝트 축이 아닙니다.
 
-| Category | `chart` scope | `project` scope |
+| 작업 종류 | 차트가 보여주는 것 | 프로젝트 내부용 |
 |---|---|---|
-| `Documentation` | 사용자가 보는 차트 문서(README, `values-*.yaml` 주석, `docs/`) - **Changeset 대상** | 기여자/유지보수용 문서(이 파일, `AGENTS.md`) - **Changeset 비대상** |
-| `CI` | 사용자가 받는 결과물을 바꾸는 workflow/스크립트 변경(드묾 - 예: 문서 생성 단계 자체) - **Changeset 대상** | 배포되는 차트에 영향 없는 CI/툴링 유지보수(새 lint assertion, workflow 리팩터링) - **Changeset 비대상** |
+| Documentation | README, `values-*.yaml` 주석, `docs/` - **Changeset 필요** | 이 파일, `AGENTS.md` 등 기여자 가이드 - **Changeset 불필요** |
+| CI/툴링 | 사용자가 받는 결과물을 바꾸는 workflow/스크립트 변경(드묾 - 예: 문서 생성 단계 자체) - **Changeset 필요** | 배포되는 차트에 영향 없는 CI/툴링 유지보수(새 lint assertion, workflow 리팩터링) - **Changeset 불필요** |
 
-`chart`/`project` 구분은 Changeset 대상 여부를 가르는 것이지, Changeset
-Category 어휘 자체의 일부가 아닙니다(`Feature`, `Fix`, `Security`,
-`Dependency`, `Documentation`, `Deprecated`, `Removed` - 아래
-[릴리즈 노트가 될 수 있는 항목 작성하기](#릴리즈-노트가-될-수-있는-항목-작성하기)
-참고). `CI(project)`나 `Documentation(project)` PR은 절대
-`.changeset/*.md` 파일을 만들지 않습니다. 사용자에게 보이는지 애매하면
-거의 항상 `chart` scope이고 Changeset이 필요하다고 보면 됩니다.
+사용자에게 보이는지 애매하면 거의 항상 차트가 보여주는 쪽이고 Changeset이
+필요하다고 보면 됩니다.
 
 ### 검증을 영구 CI로 승격하기
 
@@ -139,8 +140,8 @@ Category 어휘 자체의 일부가 아닙니다(`Feature`, `Fix`, `Security`,
   매트릭스에 속합니다.
 
 다섯 기준을 모두 통과하면, 그 assertion을 유발한 기능 PR에 끼워넣지 말고
-**별도의 CI/tooling 이슈와 PR**(`CI(project)`, Changeset 없음)로 분리하세요
-- 기능 PR의 diff는 기능 자체로 범위를 유지해야 합니다. 유일한 예외는 후속
+**별도의 CI/tooling 이슈와 PR**(프로젝트 내부용, Changeset 없음)로
+분리하세요 - 기능 PR의 diff는 기능 자체로 범위를 유지해야 합니다. 유일한 예외는 후속
 PR이 나오기 전에 기능 PR 자체가 그 검증이 막으려는 바로 그 회귀를 다시
 불러들이는 경우입니다 - 이 좁은 경우에만 알려진 gap을 열어두는 대신
 assertion을 기능 PR에 바로 추가하세요.

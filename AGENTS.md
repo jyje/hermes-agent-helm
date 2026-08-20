@@ -99,13 +99,15 @@ as a **Secret**.
   records safe PR evidence, and only then cleans up the test branch.
 - **Promoting a temporary validation to permanent CI is a separate change.**
   If an orphan-branch check (or anything discovered during review) guards a
-  reusable invariant with deterministic input, no new fork-unsafe secret, an
-  obvious `lint`-vs-`test` trigger, and low runtime cost, file a separate
-  `CI(project)` issue/PR for it (no Changeset) instead of folding the
+  reusable invariant, runs on deterministic input (or degrades gracefully
+  like the NIM pattern), needs no new secret unavailable to fork PRs (or
+  fails closed when one's missing), defaults to the `lint` trigger unless it
+  genuinely needs a live cluster, and stays cheap, file a separate
+  project-internal issue/PR for it (no Changeset) instead of folding the
   assertion into the feature PR that motivated it - see CONTRIBUTING.md
-  "Promoting a validation to permanent CI" for the full criteria. Bundle it
-  into the feature PR only when skipping it would let that same PR
-  reintroduce the regression the check exists to catch.
+  "Promoting a validation to permanent CI" for the full criteria and their
+  exceptions. Bundle it into the feature PR only when skipping it would let
+  that same PR reintroduce the regression the check exists to catch.
 
 ## Scope
 
