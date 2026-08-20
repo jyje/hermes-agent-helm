@@ -171,6 +171,14 @@ spec:
               mountPath: /seed
               readOnly: true
             {{- end }}
+            {{- if .Values.securityContext.readOnlyRootFilesystem }}
+            # `hermes chat`/`hermes doctor` write transient files (e.g. this
+            # Job's own chat-response capture) to /tmp; a read-only rootfs
+            # needs it mounted explicitly, unlike the main workload's
+            # `extraVolumeMounts` (which this Job doesn't use).
+            - name: tmp
+              mountPath: /tmp
+            {{- end }}
       volumes:
         {{- if .Values.bootstrap.enabled }}
         - name: config
@@ -179,4 +187,9 @@ spec:
         {{- end }}
         - name: data
           emptyDir: {}
+        {{- if .Values.securityContext.readOnlyRootFilesystem }}
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        {{- end }}
 {{- end }}
