@@ -523,6 +523,27 @@ and webhook traffic through distinct Ingress hosts and Service ports.
 starting point. HTTPRoute hostnames apply to all rules in one resource; create
 separate HTTPRoutes when host-level isolation between listener rules is needed.
 
+### Pod Security Standards hardening
+
+`podSecurityContext`/`securityContext` are empty by default so the chart stays
+compatible with any cluster, but non-root and a read-only rootfs are both
+CI-verified to work against the pinned image: its s6-overlay drops to a
+non-root uid on its own, and boots fine read-only once `/run` and `/tmp` are
+writable+executable tmpfs mounts (`/run` holds s6's own init binary, which it
+execs at startup). Use
+[`values-hardened.yaml`](values-hardened.yaml) rather than hand-rolling this -
+it's a Pod Security Standards `restricted`-compliant overlay, install it into
+a namespace with `pod-security.kubernetes.io/enforce=restricted` set.
+
+Two init containers need their own securityContext, not just the pod/main
+container's: `auth.deviceFlow.securityContext` (empty by default, inherits
+the login image's own user) works non-root once its target uid already owns
+the token's destination - `values-hardened.yaml` shows the override, matching
+`tokenOwner`. `team.sharedVolume.permissions`'s ownership-preparation
+container needs root to `chown` across arbitrary storage backends and has no
+non-root option - disable `permissions.enabled` under `restricted` and rely on
+`podSecurityContext.fsGroup` instead, when the storage backend honours it.
+
 ## Gateway lifecycle: rollouts, shutdown, and drain
 
 As of image `v2026.7.1` the gateway defaults `agent.restart_drain_timeout` to
@@ -690,6 +711,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: listener routing through a pre-existing Gateway |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM proxy (in-cluster) | **Egress-locked NetworkPolicy**: blocks RFC1918 and the cloud metadata endpoint, with a precise allowlist for the LiteLLM Service |
+| [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **Pod Security Standards `restricted`**: non-root, read-only rootfs, dropped capabilities - CI-verified in a `restricted`-enforcing namespace |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (any works) | **Leader-orchestrated team**: serialized explicit bot @mentions plus a leader-writable/member-read-only RWX knowledge PVC; no file-based task handoff; see [Teams](../../docs/advanced/teams/reference.md) |

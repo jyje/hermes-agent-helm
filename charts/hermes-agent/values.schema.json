@@ -221,7 +221,8 @@
                 "enabled": { "type": "boolean" },
                 "image": { "type": "string", "minLength": 1 },
                 "uid": { "type": "integer", "minimum": 0 },
-                "gid": { "type": "integer", "minimum": 0 }
+                "gid": { "type": "integer", "minimum": 0 },
+                "securityContext": { "type": "object" }
               }
             }
           }
@@ -312,6 +313,7 @@
             "notify": { "type": "string", "enum": ["discord", "logs"] },
             "timeoutSeconds": { "type": "integer", "minimum": 1 },
             "forceRelogin": { "type": "boolean" },
+            "securityContext": { "type": "object" },
             "tokenOwner": {
               "type": "object",
               "additionalProperties": false,

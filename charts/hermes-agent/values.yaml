@@ -194,13 +194,23 @@ team:
     retain: true
     permissions:
       # -- On the leader, chown the shared volume before Hermes starts. Enable
-      # only when the storage backend permits ownership changes.
+      # only when the storage backend permits ownership changes. This init
+      # container needs root (see securityContext below), so it is
+      # incompatible with Pod Security Standards `restricted` - set false and
+      # rely on `podSecurityContext.fsGroup` instead when the storage backend
+      # honours it. See values-hardened.yaml.
       enabled: false
       # -- Init image used for shared-volume ownership preparation.
       image: busybox:1.38
       # -- Runtime owner for the shared knowledge directory.
       uid: 10000
       gid: 10000
+      # -- securityContext for the chown init container. Defaults to root -
+      # `chown` across arbitrary storage backends needs it. Not overridable
+      # to non-root; disable `permissions.enabled` instead under `restricted`.
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
 
 # ---------------------------------------------------------------------------
 # .env / secrets -> Hermes reads API keys from the environment, which take
@@ -312,14 +322,22 @@ auth:
     timeoutSeconds: 870
     # -- Force a fresh login even if a token already exists on the volume.
     forceRelogin: false
-    # -- uid/gid that should own the written token file. The login init
-    #    container runs as root so it can write to any storage class reliably,
-    #    then chowns the token to this owner. Set it to the Hermes runtime uid;
-    #    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the
+    # -- uid/gid that should own the written token file. By default this init
+    #    container inherits the login image's own user (root for the Python
+    #    image below) so it can write to any storage class reliably, then
+    #    chowns the token to this owner. Set it to the Hermes runtime uid; the
+    #    upstream image's s6-overlay runs the agent as uid/gid 10000: so the
     #    non-root agent can read the credential.
     tokenOwner:
       uid: 10000
       gid: 10000
+    # -- securityContext for the device-login init container. Empty by
+    #    default - inherits the image's own user (root for the Python image,
+    #    the pinned Hermes image otherwise). Overriding to a non-root uid only
+    #    works if that uid can already write the token's destination path;
+    #    see values-hardened.yaml for a verified non-root override (uid/gid
+    #    matching tokenOwner, so the chown above becomes a same-uid no-op).
+    securityContext: {}
     # -- Login image for GitHub-style profiles. OpenAI Codex uses the pinned
     #    Hermes image so auth.json persistence and refresh stay version-aligned.
     image:
@@ -520,13 +538,21 @@ resources:
 
 # -- Pod-level securityContext. Left empty by default to stay compatible with
 # the image's s6-overlay init (which starts as root and drops privileges
-# itself). Add hardening here once verified for your environment.
+# itself). Non-root and read-only rootfs are both CI-verified to work; see
+# values-hardened.yaml for a Pod Security Standards `restricted`-compliant
+# overlay rather than hand-rolling this.
 podSecurityContext: {}
-#  fsGroup: 1000
+#  runAsNonRoot: true
+#  runAsUser: 10000
+#  runAsGroup: 10000
+#  fsGroup: 10000
+#  seccompProfile:
+#    type: RuntimeDefault
 
 # -- Container-level securityContext. Same caveat as `podSecurityContext` above.
 securityContext: {}
 #  allowPrivilegeEscalation: false
+#  readOnlyRootFilesystem: true
 #  capabilities:
 #    drop: [ALL]
 

@@ -512,6 +512,27 @@ webhook 트래픽을 서로 다른 Ingress host와 Service port로 라우팅합�
 HTTPRoute에서 hostname은 모든 rule에 적용되므로, 리스너 rule을 host 단위로
 분리해야 하면 별도의 HTTPRoute를 만드세요.
 
+### Pod Security Standards 하드닝
+
+`podSecurityContext`/`securityContext`는 어떤 클러스터에서도 동작하도록
+기본값이 비어 있지만, non-root와 read-only rootfs 둘 다 pinned 이미지 기준으로
+CI 검증됐습니다: s6-overlay가 스스로 non-root uid로 내려가고, `/run`과 `/tmp`가
+쓰기 가능한 실행형(execable) tmpfs이기만 하면 read-only 상태로도 정상
+부팅합니다(`/run`엔 s6 자신의 init 바이너리가 있고, 시작할 때 그걸 exec합니다).
+직접 만들지 말고 [`values-hardened.yaml`](values-hardened.yaml)을 쓰세요 -
+Pod Security Standards `restricted`를 만족하는 오버레이이고,
+`pod-security.kubernetes.io/enforce=restricted`가 설정된 namespace에 설치하면
+됩니다.
+
+init container 2개는 pod/메인 컨테이너와 별도로 자기만의 securityContext가
+필요합니다: `auth.deviceFlow.securityContext`(기본값 비어 있음, login 이미지의
+기본 유저를 그대로 씀)는 대상 uid가 토큰 저장 경로를 이미 소유하고 있으면
+non-root로도 동작합니다 - `values-hardened.yaml`이 `tokenOwner`와 맞춘 오버라이드
+예시를 보여줍니다. `team.sharedVolume.permissions`의 소유권 준비 컨테이너는
+임의의 storage backend에 `chown`하려면 root가 필요해서 non-root 옵션이
+없습니다 - `restricted` 아래에서는 `permissions.enabled`를 꺼두고, storage
+backend가 fsGroup을 지원한다면 `podSecurityContext.fsGroup`에 맡기세요.
+
 ## 무인(unattended) 승인
 
 Gateway 파드에는 **TTY가 없습니다** - 위험한 `terminal`/`execute_code` 명령에
@@ -644,6 +665,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 리스너 라우팅**: `/v1` API와 webhook host가 별도 Service port 사용 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 사전에 만든 Gateway를 통한 리스너 라우팅 |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM proxy (in-cluster) | **Egress 제한 NetworkPolicy**: RFC1918과 클라우드 metadata endpoint 차단, LiteLLM Service만 정확히 허용 |
+| [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **Pod Security Standards `restricted`**: non-root, read-only rootfs, capability 전부 drop - `restricted`를 강제하는 namespace에서 CI 검증됨 |
 | [`values-soul.yaml`](values-soul.yaml) | any | **영속 정체성**: 실용적인 엔지니어링 말투, 런타임 편집 보존 |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어**: 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |
 | [`values-team-leader.yaml`](values-team-leader.yaml) + [`values-team-member.yaml`](values-team-member.yaml) | NVIDIA NIM (무엇이든 가능) | **리더 주도 팀**: 직렬 명시적 봇 @mention과 리더 쓰기/멤버 읽기 전용 RWX 지식 PVC; 파일 기반 과제 핸드오프는 사용하지 않음; [Teams](../../docs/ko/advanced/teams/reference.md) 참고 |
@@ -683,8 +705,9 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | auth.deviceFlow.providers.openai-codex.flow | string | Use the OpenAI Codex device-code flow bundled with the pinned    Hermes version and persist refreshable credentials in auth.json. | `"openai-codex"` |
 | auth.deviceFlow.providers.openai-codex.issuer | string | OpenAI account issuer. Override only for a compatible test server. | `"https://auth.openai.com"` |
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
+| auth.deviceFlow.securityContext | object | securityContext for the device-login init container. Empty by    default - inherits the image's own user (root for the Python image,    the pinned Hermes image otherwise). Overriding to a non-root uid only    works if that uid can already write the token's destination path;    see values-hardened.yaml for a verified non-root override (uid/gid    matching tokenOwner, so the chown above becomes a same-uid no-op). | `{}` |
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
-| auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. The login init    container runs as root so it can write to any storage class reliably,    then chowns the token to this owner. Set it to the Hermes runtime uid;    the upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
+| auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. By default this init    container inherits the login image's own user (root for the Python    image below) so it can write to any storage class reliably, then    chowns the token to this owner. Set it to the Hermes runtime uid; the    upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
 | bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |

@@ -178,7 +178,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team]
+        scenario: [message, existing-claim, team, hardened]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
@@ -196,6 +196,16 @@ jobs:
       - uses: azure/setup-helm@v5
 
       - uses: helm/kind-action@v1
+
+      - name: install yq
+        if: matrix.scenario == 'hardened'
+        env:
+          YQ_VERSION: "v4.53.3"
+        run: |
+          arch=$(uname -m); case "$arch" in aarch64) arch=arm64 ;; x86_64) arch=amd64 ;; esac
+          curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${arch}" \
+            -o "$RUNNER_TEMP/yq"
+          sudo install -m 0755 "$RUNNER_TEMP/yq" /usr/local/bin/yq
 
       - name: Run ${{ matrix.scenario }} scenario
         timeout-minutes: 12
