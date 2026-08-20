@@ -139,6 +139,60 @@ jobs:
             --show-only templates/networkpolicy.yaml > np-litellm.yaml
           yq -e 'select(.kind == "NetworkPolicy").spec.egress | length > 0' np-litellm.yaml | grep -q true
 
+      - name: validate hardened init-container securityContext overrides
+        # These two init containers are not exercised by the hardened kind
+        # scenario (device login needs a human OAuth approval; the shared-volume
+        # chown is documented as incompatible with `restricted`), so their
+        # securityContext plumbing is asserted here by rendering instead.
+        run: |
+          set -euo pipefail
+
+          # auth-device-login: no securityContext key at all by default -
+          # byte-identical to before this change - and the override renders
+          # when set. `yq -e` treats a `false` result as failure, same as a
+          # missing one, so check absence with plain yq + grep instead.
+          helm template ad-default charts/hermes-agent \
+            --set-string env.OPENAI_API_KEY=sk-test --set auth.deviceFlow.enabled=true \
+            --show-only templates/deployment.yaml > ad-default.yaml
+          if yq '
+            select(.kind == "Deployment").spec.template.spec.initContainers[]
+              | select(.name == "auth-device-login")
+          ' ad-default.yaml | grep -q "securityContext:"; then
+            echo "::error::auth-device-login rendered a securityContext with no override set"
+            exit 1
+          fi
+
+          helm template ad-override charts/hermes-agent \
+            --set-string env.OPENAI_API_KEY=sk-test --set auth.deviceFlow.enabled=true \
+            --set-json 'auth.deviceFlow.securityContext={"runAsNonRoot":true}' \
+            --show-only templates/deployment.yaml > ad-override.yaml
+          yq -e '
+            select(.kind == "Deployment").spec.template.spec.initContainers[]
+              | select(.name == "auth-device-login") | .securityContext.runAsNonRoot == true
+          ' ad-override.yaml | grep -q true
+
+          # init-team-shared: defaults to the same root chown as before this
+          # change (values.yaml carries the old hardcoded values), and an
+          # override renders when set.
+          helm template its-default charts/hermes-agent \
+            -f charts/hermes-agent/values-team-leader.yaml \
+            --set-string env.OPENAI_API_KEY=sk-test --set team.sharedVolume.permissions.enabled=true \
+            --show-only templates/deployment.yaml > its-default.yaml
+          yq -e '
+            select(.kind == "Deployment").spec.template.spec.initContainers[]
+              | select(.name == "init-team-shared") | .securityContext.runAsUser == 0
+          ' its-default.yaml | grep -q true
+
+          helm template its-override charts/hermes-agent \
+            -f charts/hermes-agent/values-team-leader.yaml \
+            --set-string env.OPENAI_API_KEY=sk-test --set team.sharedVolume.permissions.enabled=true \
+            --set-json 'team.sharedVolume.permissions.securityContext={"runAsUser":10000,"runAsGroup":10000}' \
+            --show-only templates/deployment.yaml > its-override.yaml
+          yq -e '
+            select(.kind == "Deployment").spec.template.spec.initContainers[]
+              | select(.name == "init-team-shared") | .securityContext.runAsUser == 10000
+          ' its-override.yaml | grep -q true
+
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
@@ -178,7 +232,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team]
+        scenario: [message, existing-claim, team, hardened]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:

@@ -1,0 +1,79 @@
+# values-hardened.yaml
+#
+# A Pod Security Standards `restricted`-compatible profile, CI-verified
+# against a namespace labelled `pod-security.kubernetes.io/enforce=restricted`
+# (see .github/scripts/scenario-hardened.sh). The upstream image's default
+# user is root (`docker inspect --format '{{.Config.User}}'`), and its
+# s6-overlay entrypoint needs an executable /run - both are why every field
+# below is required, not just runAsNonRoot: true on its own.
+#
+# Not covered here: `auth.deviceFlow` (its init container writes the token
+# file as root, then chowns it - see values.yaml's comment on
+# auth.deviceFlow.securityContext) and `team.sharedVolume.permissions`
+# (disabled below; podSecurityContext.fsGroup takes over ownership instead of
+# a root chown init container). Combine either with this profile only after
+# testing, not by assumption.
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-hardened.yaml \
+#     --set-string env.OPENAI_API_KEY='sk-...' --wait
+
+podSecurityContext:
+  runAsNonRoot: true
+  # Image's default user is root, so runAsNonRoot alone is not enough:
+  # without an explicit non-root runAsUser, the kubelet refuses to start the
+  # container (CreateContainerConfigError).
+  runAsUser: 10000
+  runAsGroup: 10000
+  # Owns the persistence PVC (and the team-shared PVC, if combined with team
+  # mode) so uid 10000 can write to it without a root chown init container.
+  fsGroup: 10000
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+# The s6-overlay entrypoint needs a writable, executable /run and /tmp even
+# under a read-only root filesystem; S6_READ_ONLY_ROOT tells it to expect
+# that instead of writing into the (now read-only) root. extraVolumeMounts
+# only applies to the main container - matches the s6-supervised process,
+# which is the only thing here that needs them.
+extraEnv:
+  - name: S6_READ_ONLY_ROOT
+    value: "1"
+
+# medium: Memory (tmpfs), not the disk-backed default: a plain emptyDir is
+# created drwxrwsrwx (world-writable, no sticky bit), which s6-overlay's
+# preinit refuses as insecure and fails to start under. tmpfs is created
+# drwxrwsrwt - sticky bit set, the same convention /tmp itself uses - which
+# is what it actually requires. Verified against a live PSS `restricted`
+# namespace: the plain emptyDir crash-loops
+# ("has insecure and/or unworkable permissions"), medium: Memory does not.
+extraVolumes:
+  - name: run
+    emptyDir:
+      medium: Memory
+  - name: tmp
+    emptyDir:
+      medium: Memory
+
+extraVolumeMounts:
+  - name: run
+    mountPath: /run
+  - name: tmp
+    mountPath: /tmp
+
+team:
+  sharedVolume:
+    permissions:
+      # The chown init container is hardcoded to run as root
+      # (team.sharedVolume.permissions.securityContext), which Pod Security
+      # Standards `restricted` rejects outright. podSecurityContext.fsGroup
+      # above already owns every mounted volume as uid 10000, so skip it
+      # rather than override its securityContext to something untested.
+      enabled: false
