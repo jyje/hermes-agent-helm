@@ -69,8 +69,8 @@ async function getReleaseLine(changeset, _type, options) {
     if (info?.pull?.markdownLink) credit = ` ${info.pull.markdownLink}${credit}`;
     if (info?.author?.markdownLink && !maintainers.has(info.author.login)) {
       credit += BOT_LOGIN_PATTERN.test(info.author.login)
-        ? ` — 🤖 automated by ${info.author.markdownLink}`
-        : ` — thanks ${info.author.markdownLink}!`;
+        ? ` - 🤖 automated by ${info.author.markdownLink}`
+        : ` - thanks ${info.author.markdownLink}!`;
     }
   }
 
