@@ -125,6 +125,12 @@ spec:
               echo {{ .Values.tests.chat.prompt | quote }}
 
               chat_ok=false
+              # $HERMES_HOME, not /tmp: it's always mounted and writable
+              # (unlike /tmp, which is only present under
+              # securityContext.readOnlyRootFilesystem when the caller adds
+              # its own tmpfs mount to THIS Job - see values-hardened.yaml's
+              # comment on why the main Deployment container needs one).
+              chat_response_file="$HERMES_HOME/.ci-chat-response.txt"
               {{- if .Values.tests.chat.models }}
               for model in {{ .Values.tests.chat.models | join " " }}; do
                 echo "--- model: $model (timeout {{ .Values.tests.chat.timeout }}s) ---"
@@ -132,10 +138,10 @@ spec:
                 timeout -k 10 {{ .Values.tests.chat.timeout }} hermes chat \
                   -m "$model" --provider {{ .Values.config.model.provider | quote }} \
                   -q {{ .Values.tests.chat.prompt | quote }} \
-                  --max-turns {{ .Values.tests.chat.maxTurns }} | tee /tmp/chat-response.txt
+                  --max-turns {{ .Values.tests.chat.maxTurns }} | tee "$chat_response_file"
                 chat_status=$?
                 set -e
-                if [ $chat_status -eq 0 ] && [ -s /tmp/chat-response.txt ]; then
+                if [ $chat_status -eq 0 ] && [ -s "$chat_response_file" ]; then
                   chat_ok=true
                   echo "--- model $model succeeded ---"
                   break
@@ -147,10 +153,10 @@ spec:
               set +e
               timeout -k 10 {{ .Values.tests.chat.timeout }} hermes chat \
                 -q {{ .Values.tests.chat.prompt | quote }} \
-                --max-turns {{ .Values.tests.chat.maxTurns }} | tee /tmp/chat-response.txt
+                --max-turns {{ .Values.tests.chat.maxTurns }} | tee "$chat_response_file"
               chat_status=$?
               set -e
-              [ $chat_status -eq 0 ] && [ -s /tmp/chat-response.txt ] && chat_ok=true
+              [ $chat_status -eq 0 ] && [ -s "$chat_response_file" ] && chat_ok=true
               {{- end }}
               echo "--- end response ---"
               if [ "{{ .Values.tests.chat.failOnError }}" = "true" ] && [ "$chat_ok" != "true" ]; then
