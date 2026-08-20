@@ -14,6 +14,7 @@ on:
       - "charts/hermes-agent/**"
       - "tests/**"
       - ".github/scripts/**"
+      - ".changeset/*.cjs"
       - ".github/workflows/validate-chart.yaml"
 
 jobs:
@@ -133,6 +134,24 @@ jobs:
 
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: install release tooling
+        run: pnpm install --frozen-lockfile
+
+      - name: changelog category regression test
+        # Guards the coupling between .changeset/changelog-category.cjs's
+        # bullet format and .github/scripts/release/changelog-categories.mjs's
+        # category regex (see both files' comments) - a hand-copied fixture
+        # here would miss exactly the drift this exists to catch.
+        run: node --test .github/scripts/release/*.test.mjs
 
       - name: install helm-docs
         env:
