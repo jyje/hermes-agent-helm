@@ -4,7 +4,7 @@
 
 <img height="240" src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm.png" alt="Kubernetes × Hermes Agent"/>
 
-👩🏻‍💻 Hermes Agent on Kubernetes - sign in with Codex/Copilot, run agent teams, stay lightweight.
+👩🏻‍💻 Kubernetes에서 실행하는 Hermes Agent - Codex/Copilot 계정으로 로그인하고, 에이전트 팀을 운영하며, 가볍게 유지됩니다.
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jyje/hermes-agent-helm?style=social)](https://github.com/jyje/hermes-agent-helm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

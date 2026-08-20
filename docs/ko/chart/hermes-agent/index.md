@@ -1,11 +1,11 @@
 ---
 title: "Hermes Agent"
-description: "👩🏻‍💻 Kubernetes에서 Hermes Agent를 실행하는 커뮤니티 기반의 경량 Helm 차트"
+description: "👩🏻‍💻 Kubernetes에서 실행하는 Hermes Agent - Codex/Copilot 계정으로 로그인하고, 에이전트 팀을 운영하며, 가볍게 유지됩니다."
 ---
 
 # Hermes Agent
 
-👩🏻‍💻 Kubernetes에서 Hermes Agent를 실행하는 커뮤니티 기반의 경량 Helm 차트
+👩🏻‍💻 Kubernetes에서 실행하는 Hermes Agent - Codex/Copilot 계정으로 로그인하고, 에이전트 팀을 운영하며, 가볍게 유지됩니다.
 
 - [설치](../../getting-started/install.md)
 - [예제](examples/index.md)
