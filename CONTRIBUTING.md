@@ -104,6 +104,61 @@ The only exemption is CI-only, tooling, or other unreleased maintenance
 work (workflow YAML, scripts, this contributing guide) that ships nothing
 a chart user would see.
 
+### Deciding whether Documentation or CI work needs a Changeset
+
+`Documentation` and CI/tooling work are the two kinds most often
+miscategorized, because both can be either **chart-facing** (a chart user
+sees it) or **project-internal** (only a contributor does). This decides
+Changeset eligibility only - it is not a new PR-title or commit-subject
+format; those keep following
+[Conventional Commits](#conventional-commits-recommended) as already
+described further down, and `scope` inside an actual Changeset summary keeps
+the free-form meaning defined in
+[Write an item that can become a release note](#write-an-item-that-can-become-a-release-note)
+below (`chart`, `values`, `docs`, `image`, ...), not this chart/project axis.
+
+| Kind of work | Chart-facing | Project-internal |
+|---|---|---|
+| Documentation | README, `values-*.yaml` comments, `docs/` - **needs a Changeset** | This file, `AGENTS.md`, other contributor guides - **no Changeset** |
+| CI / tooling | A workflow or script change that alters what a chart user receives (rare - e.g. the docs-generation step itself) - **needs a Changeset** | CI/tooling maintenance with no effect on the shipped chart (a new lint assertion, a workflow refactor) - **no Changeset** |
+
+If in doubt whether something is user-visible, it almost certainly is
+chart-facing and needs one.
+
+### Promoting a validation to permanent CI
+
+The [implementation-validation-cycle](.claude/skills/implementation-validation-cycle/SKILL.md)
+skill's orphan `test/<scope>` branch exists to validate one PR, then gets
+deleted - it is not a place to leave a check you want to keep running forever.
+When a validation step turns out to guard a standing invariant, decide
+whether to promote it into `validate-chart.yaml` using these criteria:
+
+- **Reusable invariant** - does it assert something that should always hold
+  (e.g. "an unset value falls back to X"), not just a fact about this one PR's
+  diff?
+- **Deterministic input** - does it run on fixed local input (`helm template`
+  + `yq`/`grep`) rather than a live external call? A live call is acceptable
+  only if it already degrades gracefully with no secret configured, matching
+  this repo's own NVIDIA NIM pattern.
+- **Secret safety** - does it avoid requiring a new secret unavailable to fork
+  PRs, or fail closed (skip, not error) when one is missing?
+- **Trigger** - does it belong in the `lint` job (every PR, cheap, no
+  cluster) or the `test` job (kind-based, gated on
+  `needs.changes.outputs.functional`)? Default to `lint` unless it genuinely
+  needs a live cluster.
+- **Runtime cost** - does it add seconds, not minutes, to every PR's feedback
+  loop? A slow check belongs in `test`'s existing matrix, not a new always-on
+  step.
+
+If it passes all five, file a **separate CI/tooling issue and PR**
+(project-internal, no Changeset) rather than folding the new assertion into
+the feature PR that motivated it - the feature PR's own diff should stay
+scoped to the feature.
+The only exception is when the feature PR would otherwise reintroduce the
+exact regression the validation guards against before the follow-up lands -
+in that narrow case, add the assertion directly to the feature PR instead of
+leaving a known gap open.
+
 ### Write an item that can become a release note
 
 The YAML frontmatter is native Changesets data: keep it limited to package

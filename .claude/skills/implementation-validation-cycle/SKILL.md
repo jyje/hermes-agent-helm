@@ -76,5 +76,5 @@ honestly; do not claim the remote result was local evidence.
 
 Add a profile only when its commands and assertions are deterministic. Keep
 feature-specific assertions in the temporary workflow, not the implementation
-branch. Use issue #188 to decide whether a proven assertion should become
-permanent CI.
+branch. See CONTRIBUTING.md's "Promoting a validation to permanent CI" for
+the criteria deciding whether a proven assertion should become permanent CI.

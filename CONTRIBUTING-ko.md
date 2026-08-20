@@ -96,6 +96,56 @@ CI가 이를 강제하지 않으므로 PR을 열기 전에 스스로 diff를 검
 예외는 차트 사용자에게 아무것도 드러나지 않는 CI 전용/툴링/기타 미배포
 유지보수 작업(workflow YAML, 스크립트, 이 기여 가이드 자체)입니다.
 
+### Documentation·CI 작업에 Changeset이 필요한지 판단하기
+
+`Documentation`과 CI/툴링 작업이 가장 자주 잘못 분류되는 두 종류입니다 -
+둘 다 **차트가 사용자에게 보여주는 것**일 수도, **프로젝트 내부용**(기여자만
+보는 것)일 수도 있기 때문입니다. 이건 Changeset 대상 여부만 가르는
+구분이지, 새로운 PR 제목/커밋 subject 형식이 아닙니다 - 그건 아래에서
+설명하는 [Conventional Commits](#conventional-commits권장)를 그대로
+따릅니다. 실제 Changeset 요약 안의 `scope`도 아래
+[릴리즈 노트가 될 수 있는 항목 작성하기](#릴리즈-노트가-될-수-있는-항목-작성하기)에서
+정의한 자유 형식(`chart`, `values`, `docs`, `image` 등) 그대로이지, 이
+차트/프로젝트 축이 아닙니다.
+
+| 작업 종류 | 차트가 보여주는 것 | 프로젝트 내부용 |
+|---|---|---|
+| Documentation | README, `values-*.yaml` 주석, `docs/` - **Changeset 필요** | 이 파일, `AGENTS.md` 등 기여자 가이드 - **Changeset 불필요** |
+| CI/툴링 | 사용자가 받는 결과물을 바꾸는 workflow/스크립트 변경(드묾 - 예: 문서 생성 단계 자체) - **Changeset 필요** | 배포되는 차트에 영향 없는 CI/툴링 유지보수(새 lint assertion, workflow 리팩터링) - **Changeset 불필요** |
+
+사용자에게 보이는지 애매하면 거의 항상 차트가 보여주는 쪽이고 Changeset이
+필요하다고 보면 됩니다.
+
+### 검증을 영구 CI로 승격하기
+
+[implementation-validation-cycle](.claude/skills/implementation-validation-cycle/SKILL.md)
+스킬의 orphan `test/<scope>` 브랜치는 PR 하나를 검증하기 위한 것이고 그 뒤
+삭제됩니다 - 계속 유지하고 싶은 체크를 남겨두는 곳이 아닙니다. 어떤 검증
+단계가 항상 지켜져야 할 불변조건을 지키는 것으로 드러나면, 다음 기준으로
+`validate-chart.yaml`에 승격할지 판단하세요:
+
+- **재사용 가능한 불변조건** - "값을 안 주면 X로 fallback한다"처럼 항상
+  성립해야 하는 것을 검증하나요, 아니면 이번 PR의 diff에 대한 사실 하나만
+  검증하나요?
+- **결정적 입력** - 실시간 외부 호출이 아니라 고정된 로컬 입력(`helm
+  template` + `yq`/`grep`)으로 도나요? 실시간 호출은 이 repo의 NVIDIA NIM
+  패턴처럼 secret이 없을 때 우아하게 degrade할 때만 허용됩니다.
+- **Secret 안전성** - fork PR에서 못 쓰는 새 secret이 필요 없나요, 혹은
+  없을 때 fail-closed(에러가 아니라 skip)하나요?
+- **트리거** - `lint` job(모든 PR, 저렴함, 클러스터 없음)이 맞나요, 아니면
+  `test` job(kind 기반, `needs.changes.outputs.functional`로 게이팅)이
+  맞나요? 진짜로 살아있는 클러스터가 필요한 게 아니라면 `lint`가 기본입니다.
+- **실행 비용** - 모든 PR의 피드백 루프에 분 단위가 아니라 초 단위만
+  추가하나요? 느린 체크는 새 always-on 단계가 아니라 `test`의 기존
+  매트릭스에 속합니다.
+
+다섯 기준을 모두 통과하면, 그 assertion을 유발한 기능 PR에 끼워넣지 말고
+**별도의 CI/tooling 이슈와 PR**(프로젝트 내부용, Changeset 없음)로
+분리하세요 - 기능 PR의 diff는 기능 자체로 범위를 유지해야 합니다. 유일한 예외는 후속
+PR이 나오기 전에 기능 PR 자체가 그 검증이 막으려는 바로 그 회귀를 다시
+불러들이는 경우입니다 - 이 좁은 경우에만 알려진 gap을 열어두는 대신
+assertion을 기능 PR에 바로 추가하세요.
+
 ### 릴리즈 노트가 될 수 있는 항목 작성하기
 
 YAML frontmatter는 Changesets 고유 데이터이므로 패키지 이름과
