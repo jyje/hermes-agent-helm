@@ -2,7 +2,7 @@
 "@jyje/hermes-agent-helm": patch
 ---
 
-Documentation(chart): Add a Production Checklist to the repo README
+Documentation(docs): Add a Production Checklist to the repo README
 
 Add a "Production Checklist" table (English and Korean) covering Pod
 Security Standards, egress control, kernel isolation, secret management, and

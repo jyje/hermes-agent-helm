@@ -108,10 +108,10 @@ actually backs the claim, so you can judge it yourself instead of taking a
 
 | Concern | How | Verified by |
 |---|---|---|
-| Pod Security Standards | `-f values-hardened.yaml` | hardened kind scenario (PSS `restricted`) |
+| Pod Security Standards | `-f charts/hermes-agent/values-hardened.yaml` | hardened kind scenario (PSS `restricted`) |
 | Egress control | `networkPolicy.enabled=true` | rendered-policy assertion in CI |
 | Kernel isolation | `runtimeClassName: gvisor` (or another sandboxed runtime) | cluster-dependent - documented only |
-| Secret management | the [Bitwarden](charts/hermes-agent/values-bitwarden.yaml) or [SealedSecret](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) examples | rendered in CI's values-examples smoke test |
+| Secret management | the [Bitwarden example](charts/hermes-agent/values-bitwarden.yaml) or [SealedSecret walkthrough](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) | Bitwarden: CI's values-examples smoke test · SealedSecret: documented only |
 | Upgrade safety | `bootstrap.overwrite=false` preserves runtime edits | documented behavior - not yet CI-verified ([#235](https://github.com/jyje/hermes-agent-helm/issues/235)) |
 
 ## Full Installation
