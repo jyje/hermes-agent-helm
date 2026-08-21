@@ -95,6 +95,21 @@
 자세한 리소스 구조, 설정 모델, 제공자별 설치 예제(메신저 통합 포함)는
 [charts/hermes-agent/README-ko.md](charts/hermes-agent/README-ko.md)를 참고하세요.
 
+## 프로덕션 체크리스트
+
+아래 항목은 기본값으로 켜져 있지 않습니다 - 기본값은 앞서 설명한 대로 경량을
+유지합니다. 각 행은 필요할 때 직접 켜는 옵션이고, 무엇이 그 주장을 실제로
+뒷받침하는지 함께 적어 두었습니다. `production-ready` 라벨을 그냥 믿는 대신
+직접 판단할 수 있게 하기 위해서입니다.
+
+| 관심사 | 방법 | 검증 근거 |
+|---|---|---|
+| Pod Security Standards | `-f values-hardened.yaml` | hardened kind 시나리오 (PSS `restricted`) |
+| Egress 제어 | `networkPolicy.enabled=true` | CI의 렌더링된 정책 assertion |
+| 커널 격리 | `runtimeClassName: gvisor` (또는 다른 샌드박스 런타임) | 클러스터에 따라 다름 - 문서화만 되어 있음 |
+| 시크릿 관리 | [Bitwarden](charts/hermes-agent/values-bitwarden.yaml) 또는 [SealedSecret](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) 예제 | CI의 values 예제 스모크 테스트에서 렌더링 확인 |
+| 업그레이드 안전성 | `bootstrap.overwrite=false`가 런타임 수정 내용을 보존 | 문서화된 동작 - 아직 CI로 검증되지 않음 ([#235](https://github.com/jyje/hermes-agent-helm/issues/235)) |
+
 ## 전체 설치
 
 ### OCI (권장)
