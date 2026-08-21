@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.11.0
+
+### Features
+
+- [#232](https://github.com/jyje/hermes-agent-helm/pull/232) [`eaf4b63`](https://github.com/jyje/hermes-agent-helm/commit/eaf4b631477fb2303ddc956733ed0758c19bf40b) - Feature(values): Ship a CI-verified Pod Security Standards hardening profile
+
+  Add `auth.deviceFlow.securityContext` and `team.sharedVolume.permissions.securityContext`
+  so both non-default init containers can be overridden for a non-root or
+  read-only-rootfs deployment, alongside the existing `podSecurityContext`/
+  `securityContext`. Add `values-hardened.yaml`, a Pod Security Standards
+  `restricted`-compliant overlay verified end-to-end in a CI kind cluster that
+  enforces `restricted` admission: non-root and a read-only rootfs both work
+  against the pinned image once `/run` and `/tmp` are writable+executable tmpfs
+  mounts. Defaults are unchanged; existing installs are unaffected.
+
+### Documentation
+
+- [#227](https://github.com/jyje/hermes-agent-helm/pull/227) [`1e00502`](https://github.com/jyje/hermes-agent-helm/commit/1e005022ea311998042d532bb6cb5d7ae92e8730) - Documentation(chart): Align the chart tagline with the repo description
+
+  Sync `Chart.yaml`'s description, the chart README (English and Korean), and
+  the docs-site chart index pages to the same tagline the repo README and
+  GitHub repo description already carry, so Artifact Hub stops showing the
+  older framing.
+
+- [#236](https://github.com/jyje/hermes-agent-helm/pull/236) [`838a7b3`](https://github.com/jyje/hermes-agent-helm/commit/838a7b302dc838736af0ec56e6562c553db2772b) - Documentation(docs): Add a Production Checklist to the repo README
+
+  Add a "Production Checklist" table (English and Korean) covering Pod
+  Security Standards, egress control, kernel isolation, secret management, and
+  upgrade safety, each row pointing at what actually backs the claim (a CI
+  scenario, or "documented only" where no automated check exists yet) instead
+  of a bare `production-ready` label.
+
+### Other
+
+- [#240](https://github.com/jyje/hermes-agent-helm/pull/240) [`330835c`](https://github.com/jyje/hermes-agent-helm/commit/330835ccc022ef3028c3a7bfbf6076fd9aefc575) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Update the default Hermes Agent image to v2026.8.19.
+
 ## 1.10.0
 
 ### Minor Changes
