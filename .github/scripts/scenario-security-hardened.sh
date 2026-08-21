@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# hardened scenario: install values-hardened.yaml into a namespace enforcing
-# Pod Security Standards `restricted` and verify the workload is actually
-# admitted and runs - not just that the rendered YAML looks compliant. Runs
-# against its own ephemeral kind cluster (separate from the other scenarios).
+# security-hardened scenario: install values-hardened.yaml into a namespace
+# enforcing Pod Security Standards `restricted` and verify the workload is
+# actually admitted and runs - not just that the rendered YAML looks
+# compliant. Runs against its own ephemeral kind cluster (separate from the
+# other scenarios).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=.github/scripts/lib.sh
@@ -37,7 +38,7 @@ kubectl exec -n "$NS" "$pod" -- hermes doctor
 # left disabled under restricted (root-only, see values-hardened.yaml).
 # Assert their rendering instead, each with its feature enabled.
 echo "[$NS] asserting auth.deviceFlow.securityContext renders when set"
-helm template hardened-check charts/hermes-agent \
+helm template security-hardened-check charts/hermes-agent \
   --set-string env.OPENAI_API_KEY=sk-test \
   --set auth.deviceFlow.enabled=true \
   --set auth.deviceFlow.provider=github-copilot \
@@ -46,7 +47,7 @@ helm template hardened-check charts/hermes-agent \
   | grep -q true
 
 echo "[$NS] asserting team.sharedVolume.permissions.securityContext renders when the init is enabled"
-helm template hardened-check charts/hermes-agent \
+helm template security-hardened-check charts/hermes-agent \
   --set-string env.OPENAI_API_KEY=sk-test \
   --set-string env.DISCORD_BOT_TOKEN=x --set-string env.DISCORD_HOME_CHANNEL=1 \
   --set team.enabled=true --set team.name=t --set team.identity=lead --set team.role=leader \
@@ -56,4 +57,4 @@ helm template hardened-check charts/hermes-agent \
   | yq -e 'select(.kind == "Deployment" or .kind == "StatefulSet") | .spec.template.spec.initContainers[] | select(.name == "init-team-shared") | .securityContext.runAsUser == 0' \
   | grep -q true
 
-echo "[$NS] hardened scenario passed"
+echo "[$NS] security-hardened scenario passed"

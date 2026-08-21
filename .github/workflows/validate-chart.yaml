@@ -220,7 +220,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team, hardened]
+        scenario: [message, existing-claim, team, security-hardened]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
@@ -240,7 +240,7 @@ jobs:
       - uses: helm/kind-action@v1
 
       - uses: ./.github/actions/install-yq
-        if: matrix.scenario == 'hardened'
+        if: matrix.scenario == 'security-hardened'
 
       - name: Run ${{ matrix.scenario }} scenario
         timeout-minutes: 12
