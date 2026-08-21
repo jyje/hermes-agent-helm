@@ -8,6 +8,15 @@ name: 🔒 verify-release
 #
 # Runs automatically after every successful release-chart run.
 # Failure here means the published artifact is broken or the signature is invalid.
+#
+# release-chart.yaml triggers on any push touching Chart.yaml, including an
+# appVersion-only bump - its own tag-existence guard then no-ops (no new tag,
+# no new OCI push) and still finishes with conclusion: success. workflow_run
+# can't see that guard's result directly (job/step outputs from the
+# triggering workflow aren't visible here the way workflow_call would make
+# them), so the `check` job below re-derives the same answer independently:
+# does the resolved version's tag actually point at this push's commit? If
+# not, release-chart no-op'd and there is nothing new to verify.
 
 on:
   workflow_run:
@@ -16,10 +25,41 @@ on:
 
 permissions:
   packages: read   # pull the signed OCI artifact from ghcr
+  contents: read   # read tag refs to detect a no-op release-chart run
 
 jobs:
-  verify:
+  check:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-26.04-arm
+    outputs:
+      should_verify: ${{ steps.tag.outputs.should_verify }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0   # need tag refs, not just this commit
+
+      - name: Check whether release-chart actually published something new
+        id: tag
+        run: |
+          VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
+          tag_sha="$(git rev-list -n 1 "refs/tags/v$VER" 2>/dev/null || true)"
+          if [ "$tag_sha" = "${{ github.event.workflow_run.head_sha }}" ]; then
+            echo "should_verify=true" >> "$GITHUB_OUTPUT"
+            echo "v$VER was tagged at this push - release-chart published something new."
+          else
+            echo "should_verify=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::v$VER's tag doesn't point at this push - release-chart no-op'd (tag already existed). Nothing new to verify."
+          fi
+
+  verify:
+    needs: check
+    # A job's own `if:` replaces the implicit success() GitHub applies when
+    # none is given - `needs: check` alone would NOT stop this job from
+    # attempting to run if `check` itself errored (not just skipped).
+    # should_verify happens to end up empty either way, comparing false, but
+    # that's incidental, not guaranteed - check success() explicitly.
+    if: ${{ success() && needs.check.outputs.should_verify == 'true' }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 20
     env:
