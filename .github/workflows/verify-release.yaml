@@ -54,7 +54,12 @@ jobs:
 
   verify:
     needs: check
-    if: ${{ needs.check.outputs.should_verify == 'true' }}
+    # A job's own `if:` replaces the implicit success() GitHub applies when
+    # none is given - `needs: check` alone would NOT stop this job from
+    # attempting to run if `check` itself errored (not just skipped).
+    # should_verify happens to end up empty either way, comparing false, but
+    # that's incidental, not guaranteed - check success() explicitly.
+    if: ${{ success() && needs.check.outputs.should_verify == 'true' }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 20
     env:
