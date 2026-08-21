@@ -132,6 +132,37 @@ jobs:
             --show-only templates/networkpolicy.yaml > np-litellm.yaml
           yq -e 'select(.kind == "NetworkPolicy").spec.egress | length > 0' np-litellm.yaml | grep -q true
 
+      - name: validate team-mode config overrides
+        # hermes-agent.effectiveConfig (_team.tpl) only fills in a
+        # discord.*/group_sessions_per_user default when the user hasn't
+        # already set it under `config:` (hermes-agent.setConfigDefault's
+        # hasKey guard). This was previously verified by hand-diffing all 28
+        # values-*.yaml examples, not by CI - a future edit reintroducing an
+        # unconditional overwrite would pass the team kind scenario silently
+        # (it runs a doctor/chat round-trip, not a config.yaml content check).
+        run: |
+          set -euo pipefail
+          helm template team-default charts/hermes-agent \
+            -f charts/hermes-agent/values-team-leader.yaml \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --show-only templates/configmap.yaml > team-default-cm.yaml
+          default_val=$(yq '.data."config.yaml"' team-default-cm.yaml | yq '.discord.thread_require_mention')
+          if [ "$default_val" != "true" ]; then
+            echo "::error::default discord.thread_require_mention should be true, got: $default_val"
+            exit 1
+          fi
+
+          helm template team-override charts/hermes-agent \
+            -f charts/hermes-agent/values-team-leader.yaml \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --set config.discord.thread_require_mention=false \
+            --show-only templates/configmap.yaml > team-override-cm.yaml
+          override_val=$(yq '.data."config.yaml"' team-override-cm.yaml | yq '.discord.thread_require_mention')
+          if [ "$override_val" != "false" ]; then
+            echo "::error::config: override should win over the team-mode default, got: $override_val"
+            exit 1
+          fi
+
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
