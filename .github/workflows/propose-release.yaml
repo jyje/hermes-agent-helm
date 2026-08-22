@@ -80,7 +80,7 @@ jobs:
 
       - name: Create or update the Changesets release PR
         if: steps.release-version.outputs.has-release == 'true'
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: pnpm release:version
           commit: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
