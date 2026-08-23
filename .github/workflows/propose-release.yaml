@@ -82,8 +82,7 @@ jobs:
         if: steps.release-version.outputs.has-release == 'true'
         uses: changesets/action@v2
         with:
-          version: pnpm release:version
-          commit: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
-          title: "🚀 release(hermes-agent): v${{ steps.release-version.outputs.version }}"
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          version-script: pnpm release:version
+          commit-message: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
+          pr-title: "🚀 release(hermes-agent): v${{ steps.release-version.outputs.version }}"
+          github-token: ${{ steps.app-token.outputs.token }}
