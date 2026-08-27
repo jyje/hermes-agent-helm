@@ -80,7 +80,14 @@ jobs:
 
       - name: Create or update the Changesets release PR
         if: steps.release-version.outputs.has-release == 'true'
-        uses: changesets/action@v2
+        # Pinned to an exact v1.x release, not the floating `@v2` major tag:
+        # changesets/action v2 requires Changesets CLI v3, and this repo's
+        # release tooling (package.json's @changesets/cli, and the custom
+        # changelog module in .changeset/) is built against CLI v2. `@v2`
+        # silently resolved to v2.1.1 and broke every propose-release run
+        # with "This version of the Changesets action is designed to work
+        # with Changesets CLI v3" - v1.x is the CLI-v2-compatible line.
+        uses: changesets/action@v1.9.0
         with:
           version-script: pnpm release:version
           commit-message: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
