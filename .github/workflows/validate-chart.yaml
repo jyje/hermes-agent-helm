@@ -220,7 +220,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team, security-hardened]
+        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:

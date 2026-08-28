@@ -85,7 +85,7 @@ make docs
 ## Running the CI test scenarios locally
 
 [validate-chart.yaml](../../.github/workflows/validate-chart.yaml)'s `test` job
-runs two scenarios as a **matrix** - each on its own ephemeral kind cluster.
+runs five scenarios as a **matrix** - each on its own ephemeral kind cluster.
 The scenario logic itself lives in
 [.github/scripts](../../.github/scripts) (`lib.sh` + one script per scenario), so
 you can reproduce exactly what CI does, scenario by scenario, against a local
@@ -98,19 +98,22 @@ export NS=test-hermes-chart
 export CI_MODELS="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
 export NVIDIA_API_KEY='nvapi-...'   # omit for a doctor-only run (no live chat)
 
+# Choose exactly one scenario per cluster:
 .github/scripts/scenario-message.sh
-# or:
-.github/scripts/scenario-existing-claim.sh
+# .github/scripts/scenario-existing-claim.sh
+# .github/scripts/scenario-team.sh
+# .github/scripts/scenario-security-hardened.sh
+# .github/scripts/scenario-bootstrap-overwrite.sh
 
 kind delete cluster --name hermes-verify
 ```
 
-Each script is self-contained - install, hook test, and (for
+Each script is self-contained - install, its scenario assertion, and (for
 `scenario-message.sh`, when `NVIDIA_API_KEY` is set) the skill-injection +
 chat round-trip, exactly as CI runs it. `DISCORD_BOT_TOKEN` /
 `DISCORD_HOME_CHANNEL` are optional and only consumed by
 `scenario-message.sh`. Run each scenario against its **own** cluster (as
-above) - both scripts default `NS` to `test-hermes-chart`, matching CI's
+above) - all scripts default `NS` to `test-hermes-chart`, matching CI's
 per-matrix-job isolation; reusing one cluster for both back-to-back will
 collide unless you delete the namespace or override `NS` between runs.
 

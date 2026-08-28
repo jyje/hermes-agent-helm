@@ -59,11 +59,12 @@ flowchart LR
 
 ### `test`
 
-시나리오 세 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
+시나리오 다섯 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
 클러스터**(별도 러너)에서 돕니다 - 완전히 격리되어 있고, 하나로 뭉친 로그
 대신 job별로 고유한 상태·타임아웃·실패 진단을 갖습니다. PR 체크 목록에는
-`test (message)`, `test (existing-claim)`, `test (team)`으로 따로
-표시됩니다. 시나리오 로직은 workflow에 인라인으로 있지 않고
+`test (message)`, `test (existing-claim)`, `test (team)`,
+`test (security-hardened)`, `test (bootstrap-overwrite)`로 따로 표시됩니다.
+시나리오 로직은 workflow에 인라인으로 있지 않고
 [.github/scripts](../../../.github/scripts)(`lib.sh` + 시나리오별 스크립트)에
 있습니다.
 
@@ -107,6 +108,15 @@ flowchart LR
 멤버가 이를 교차로 읽은 뒤, 멤버의 쓰기가 거부되는지 확인합니다. 이렇게
 멀티 인스턴스 공유 지식의 경계를 검증하되, 이 볼륨을 작업 핸드오프
 경로로 취급하지는 않습니다.
+
+`security-hardened` 시나리오는 Pod Security Standards `restricted`를 강제한
+네임스페이스에 `values-hardened.yaml`을 설치합니다. 렌더링된 securityContext를
+검증하고, 허용된 읽기 전용 root filesystem Pod에서 `hermes doctor`를 실행합니다.
+
+`bootstrap-overwrite` 시나리오는 영속 config 계약을 검증합니다.
+`bootstrap.overwrite=false`로 설치하고, 실행 중인 Pod의 `config.yaml`에 마커를
+쓴 뒤, 무해한 Pod annotation으로 seed init container가 다시 실행되도록 업그레이드합니다.
+새 Pod에도 마커가 남아 있어야 런타임 편집이 업그레이드 뒤에도 보존됨을 증명합니다.
 
 ### Fork PR
 
