@@ -4,6 +4,40 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.8.27."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.27
+    created: "2026-08-28T20:08:08.5485+09:00"
+    description: "\\U0001F469\\U0001F3FB\\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 3dd79aea46452c90e38b9ce5917cb1d55690c228ab36195b8f309f92d7bf317a
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.12.0.tgz
+    version: 1.12.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "fixed"
           description: "Documentation(chart): Align the chart tagline with the repo description Sync `Chart.yaml`'s description, the chart README (English and Korean), and the docs-..."
         - kind: "added"
@@ -1319,4 +1353,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-21T13:13:46.986739049Z"
+generated: "2026-08-28T20:08:08.541609+09:00"
