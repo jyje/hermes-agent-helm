@@ -85,7 +85,7 @@ make docs
 ## CI 테스트 시나리오를 로컬에서 실행하기
 
 [validate-chart.yaml](../../../.github/workflows/validate-chart.yaml)의
-`test` job은 시나리오 두 개를 **매트릭스**로 실행하며, 각각 자기만의 임시
+`test` job은 시나리오 다섯 개를 **매트릭스**로 실행하며, 각각 자기만의 임시
 kind 클러스터에서 돕니다. 시나리오 로직 자체는
 [.github/scripts](../../../.github/scripts)(`lib.sh` + 시나리오별 스크립트)에
 있으므로, CI가 하는 일을 시나리오 단위로 로컬 kind 클러스터에서 그대로
@@ -98,18 +98,21 @@ export NS=test-hermes-chart
 export CI_MODELS="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
 export NVIDIA_API_KEY='nvapi-...'   # 생략하면 doctor 전용 실행(라이브 chat 없음)
 
+# 클러스터마다 정확히 하나의 시나리오를 선택하세요:
 .github/scripts/scenario-message.sh
-# 또는:
-.github/scripts/scenario-existing-claim.sh
+# .github/scripts/scenario-existing-claim.sh
+# .github/scripts/scenario-team.sh
+# .github/scripts/scenario-security-hardened.sh
+# .github/scripts/scenario-bootstrap-overwrite.sh
 
 kind delete cluster --name hermes-verify
 ```
 
-각 스크립트는 독립적입니다 - 설치, 훅 테스트, 그리고(`scenario-message.sh`의
+각 스크립트는 독립적입니다 - 설치, 각 시나리오의 검증, 그리고(`scenario-message.sh`의
 경우, `NVIDIA_API_KEY`가 설정되어 있을 때) skill 주입 + chat 라운드트립까지,
 CI가 실행하는 것과 정확히 같습니다. `DISCORD_BOT_TOKEN` /
 `DISCORD_HOME_CHANNEL`은 선택이며 `scenario-message.sh`에서만 씁니다. 각
-시나리오는 **자기만의** 클러스터에서 실행하세요(위처럼) - 두 스크립트 모두
+시나리오는 **자기만의** 클러스터에서 실행하세요(위처럼) - 모든 스크립트가
 `NS` 기본값이 `test-hermes-chart`로, CI의 매트릭스별 job 격리와
 일치합니다. 하나의 클러스터를 두 시나리오에 연달아 재사용하면 실행 사이에
 네임스페이스를 지우거나 `NS`를 재정의하지 않는 한 충돌합니다.

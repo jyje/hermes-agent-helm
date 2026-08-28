@@ -59,10 +59,11 @@ result.
 
 ### `test`
 
-Three scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
+Five scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
 (a separate runner) - fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
-separately: `test (message)`, `test (existing-claim)`, and `test (team)`.
+separately: `test (message)`, `test (existing-claim)`, `test (team)`,
+`test (security-hardened)`, and `test (bootstrap-overwrite)`.
 Scenario logic lives in [.github/scripts](../../.github/scripts) (`lib.sh` +
 one script per scenario) rather than inline in the workflow.
 
@@ -103,6 +104,16 @@ it read-write on the leader and read-only on a member, writes a probe from the
 leader, cross-reads it from the member, and confirms that a member write is
 rejected. It therefore covers the multi-instance shared-knowledge boundary
 without treating the volume as a task handoff path.
+
+The `security-hardened` scenario installs `values-hardened.yaml` in a namespace
+enforcing Pod Security Standards `restricted`. It verifies the rendered security
+contexts and runs `hermes doctor` in the admitted read-only-root-filesystem pod.
+
+The `bootstrap-overwrite` scenario validates the durable config contract. It
+installs with `bootstrap.overwrite=false`, writes a marker into the running
+pod's `config.yaml`, and then upgrades with a harmless Pod annotation to force
+the seed init container to run again. The marker must still exist in the new
+pod, proving that runtime edits survive an upgrade.
 
 ### Fork PRs
 
