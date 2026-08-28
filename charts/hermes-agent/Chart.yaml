@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.11.0
+version: 1.12.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -34,11 +34,5 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: "fixed"
-      description: "Documentation(chart): Align the chart tagline with the repo description Sync `Chart.yaml`'s description, the chart README (English and Korean), and the docs-..."
     - kind: "added"
-      description: "Update the default Hermes Agent image to v2026.8.19."
-    - kind: "fixed"
-      description: "Documentation(docs): Add a Production Checklist to the repo README Add a \"Production Checklist\" table (English and Korean) covering Pod Security Standards, e..."
-    - kind: "added"
-      description: "Feature(values): Ship a CI-verified Pod Security Standards hardening profile Add `auth.deviceFlow.securityContext` and `team.sharedVolume.permissions.securit..."
+      description: "Update the default Hermes Agent image to v2026.8.27."
