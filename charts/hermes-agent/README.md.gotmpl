@@ -212,6 +212,35 @@ can go under `.Values.extraEnv` (plain env). Setting the token is enough to
   `env.TELEGRAM_BOT_TOKEN` (optionally `TELEGRAM_HOME_CHANNEL`,
   `TELEGRAM_ALLOWED_USERS` via `extraEnv`).
 
+- **Slack**: set `env.SLACK_BOT_TOKEN` and `env.SLACK_APP_TOKEN` for Socket
+  Mode. To suppress link and media previews in messages sent by the native
+  Slack adapter, add this partial `config.yaml` override:
+
+  ```yaml
+  config:
+    platforms:
+      slack:
+        extra:
+          unfurl_links: false
+          unfurl_media: false
+  ```
+
+  For Slack messages sent through the relay adapter, use the relay namespace
+  instead:
+
+  ```yaml
+  config:
+    platforms:
+      relay:
+        extra:
+          slack:
+            unfurl_links: false
+            unfurl_media: false
+  ```
+
+  Omit either key to preserve Slack's default unfurling behavior. These
+  settings affect outbound Slack messages only.
+
 See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ["More examples"](#more-examples) for copy-pasteable messenger blocks.
 
