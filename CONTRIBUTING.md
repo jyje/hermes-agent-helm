@@ -44,6 +44,46 @@ including scheduled upstream image tracking and post-release verification, is
 documented in [docs/contributing/ci.md](docs/contributing/ci.md) - keep that
 page as the single source for workflow details rather than restating them here.
 
+## Documentation locales
+
+Korean (`ko`) is the full-parity locale. Every English docs page and the root
+and chart READMEs have Korean twins. Keep those pairs equivalent in the same
+change.
+
+New locales are deliberately smaller. They translate only the entry path and
+fall back to English elsewhere. This keeps security and operational guidance
+accurate until a native-speaking maintainer can maintain a broader translation.
+Do not expand a locale's scope incidentally in an unrelated docs PR.
+
+| Entry page | Localized form |
+| --- | --- |
+| Root README | `README-<locale>.md`, included by `docs/<locale>/index.md` |
+| Chart README | `charts/hermes-agent/README-<locale>.md`, included by `docs/<locale>/chart/index.md` |
+| Getting started | `docs/<locale>/getting-started/index.md` and `install.md` |
+| Chart landing | `docs/<locale>/chart/hermes-agent/index.md` |
+| Section landings | `docs/<locale>/advanced/index.md` and `about/index.md` |
+| Contributing | Keep the English `CONTRIBUTING.md` source |
+
+Add this front matter to every translated page. Use the full SHA of the
+English source commit used for the translation, then update it whenever the
+translation is refreshed:
+
+```yaml
+translation_source:
+  path: README.md
+  commit: 0123456789abcdef0123456789abcdef01234567
+```
+
+Every entry-scoped locale landing page must also show this reader-facing
+notice, translated into that locale:
+
+> This locale translates the entry path. Sections not available in this
+> language use English.
+
+The generated `## Values` table in every chart README stays English. It is
+generated from `values.yaml`, so translating a copy would create a second,
+drifting reference.
+
 ## Branch model
 
 | Branch | Purpose | CI |
@@ -271,6 +311,7 @@ make propose     # preview the pending calculated version
 
 CI reruns helm-docs and fails if `charts/hermes-agent/README.md` is out of
 date. It does not generate `README-ko.md`, so keep the Korean twin in sync
-manually after editing `values.yaml`.
+manually after editing `values.yaml`. An entry-scoped locale only needs a
+manual update when the affected page belongs to its entry path.
 
 See [AGENTS.md](AGENTS.md) for chart design principles.

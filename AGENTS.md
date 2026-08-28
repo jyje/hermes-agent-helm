@@ -62,16 +62,18 @@ as a **Secret**.
 
 ## Workflow
 
-- **Multi-language docs stay in sync.** Every `README.md` (English) has a
-  `README-ko.md` (Korean) twin - at the repo root, under `charts/hermes-agent/`,
-  and under `docs/` (`advanced/teams/reference.md`/`ko/advanced/teams/reference.md`,
-  `about/roadmap.md`/`ko/about/roadmap.md`).
-  Each pair must describe the same thing. When you edit one, apply the
-  equivalent edit to its twin in the same change - don't leave them
-  diverging. If another language edition is added later, the same rule
-  applies to it too. Exception: the chart README's auto-generated `## Values`
-  table (see below) stays English-only in both files to avoid a second
-  hand-translated copy drifting from `values.yaml`.
+- **Documentation locales have explicit scopes.** Korean (`ko`) has full
+  parity: every English `README.md` has a `README-ko.md` twin at the repo root
+  and under `charts/hermes-agent/`, and every English page under `docs/` has
+  its `docs/ko/` twin. When you edit either side, apply the equivalent edit to
+  its twin in the same change. Other locales are entry-path scoped, not
+  full-tree mirrors: update only their translated entry pages, and do not
+  require a translation for an unrelated English or Korean page. Their entry
+  landing page must tell readers that the remaining sections use English.
+  Record the source path and full English commit SHA in each translated page's
+  front matter. See `CONTRIBUTING.md` for the entry-path list and notice
+  wording. The chart README's auto-generated `## Values` table stays English
+  in every locale so it cannot drift from `values.yaml`.
 - **Changeset release items are a contributor contract.** For every
   user-visible chart change - including a new `values-*.yaml` example, a new
   ArgoCD example, or docs a user reads, not just template/default changes -
@@ -87,7 +89,9 @@ as a **Secret**.
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
   `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
   This only updates `README.md`; if the change affects prose covered in
-  `README-ko.md` (not just the values table), update that by hand too.
+  `README-ko.md` (not just the values table), update that by hand too. Update
+  an entry-scoped locale only when the changed page is in that locale's entry
+  path.
 - Validate with `make lint` and `make template`.
 - Package for release with `make package` (runs docs + lint, then
   `helm package`). `Chart.yaml` carries `artifacthub.io/*` annotations for the
