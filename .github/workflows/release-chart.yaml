@@ -118,12 +118,25 @@ jobs:
       - name: Verify signature (self-check)
         if: steps.ver.outputs.exists == 'false'
         run: |
-          cosign verify \
-            --certificate-identity-regexp \
-              "https://github.com/${{ github.repository }}/.*" \
-            --certificate-oidc-issuer \
-              "https://token.actions.githubusercontent.com" \
-            "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"
+          for attempt in 1 2 3 4 5; do
+            if cosign verify \
+              --certificate-identity-regexp \
+                "https://github.com/${{ github.repository }}/.*" \
+              --certificate-oidc-issuer \
+                "https://token.actions.githubusercontent.com" \
+              "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 5 ]; then
+              delay=$((attempt * 5))
+              echo "::warning::Signature is not visible in GHCR yet; retrying in ${delay}s (attempt ${attempt}/5)."
+              sleep "$delay"
+            fi
+          done
+
+          echo "::error::Signature was not visible in GHCR after five verification attempts."
+          exit 1
 
       - name: Checkout existing Helm repo index (gh-pages)
         if: steps.ver.outputs.exists == 'false'
