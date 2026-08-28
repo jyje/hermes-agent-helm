@@ -209,6 +209,36 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   `env.TELEGRAM_BOT_TOKEN`을 설정하세요(선택적으로 `TELEGRAM_HOME_CHANNEL`,
   `TELEGRAM_ALLOWED_USERS`를 `extraEnv`로).
 
+- **Slack**: Socket Mode에는 `env.SLACK_BOT_TOKEN`과
+  `env.SLACK_APP_TOKEN`을 설정하세요. 네이티브 Slack 어댑터가 보내는 메시지의
+  링크와 미디어 미리보기를 끄려면 다음 부분 `config.yaml` 오버라이드를
+  추가하세요.
+
+  ```yaml
+  config:
+    platforms:
+      slack:
+        extra:
+          unfurl_links: false
+          unfurl_media: false
+  ```
+
+  relay 어댑터를 통해 전송하는 Slack 메시지에는 대신 relay 네임스페이스를
+  사용하세요.
+
+  ```yaml
+  config:
+    platforms:
+      relay:
+        extra:
+          slack:
+            unfurl_links: false
+            unfurl_media: false
+  ```
+
+  Slack의 기본 unfurl 동작을 유지하려면 각 키를 생략하세요. 이 설정은
+  Slack으로 나가는 메시지에만 적용됩니다.
+
 복사해서 바로 쓸 수 있는 메신저 설정 블록은 ["More examples"](#more-examples)의
 `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml`을
 참고하세요.
