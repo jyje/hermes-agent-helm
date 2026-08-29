@@ -87,7 +87,7 @@ jobs:
         # silently resolved to v2.1.1 and broke every propose-release run
         # with "This version of the Changesets action is designed to work
         # with Changesets CLI v3" - v1.x is the CLI-v2-compatible line.
-        uses: changesets/action@v1.9.0
+        uses: changesets/action@v2.1.1
         with:
           # v1.9.0's input names (version/commit/title), not v2's
           # (version-script/commit-message/pr-title) - passing the v2 names
