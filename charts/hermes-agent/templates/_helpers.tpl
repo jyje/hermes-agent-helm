@@ -67,6 +67,22 @@ Headless service name used for StatefulSet governance.
 {{- end }}
 
 {{/*
+Name of the env Secret referenced by every chart-owned envFrom (main
+container, auth-device-login init container, helm test Job). Normally the
+chart's own Secret (secret.yaml); when externalSecret.enabled, secret.yaml
+never renders and this becomes the ExternalSecret's target name instead -
+externalSecret.target.name when set, or the same <fullname>-env default
+otherwise, so every reference stays in lockstep without extraEnvFrom.
+*/}}
+{{- define "hermes-agent.envSecretName" -}}
+{{- if and .Values.externalSecret.enabled .Values.externalSecret.target.name -}}
+{{- .Values.externalSecret.target.name -}}
+{{- else -}}
+{{- printf "%s-env" (include "hermes-agent.fullname" .) -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Main image reference. Falls back to Chart.AppVersion when image.tag is empty.
 */}}
 {{- define "hermes-agent.image" -}}
@@ -132,7 +148,10 @@ metadata:
   annotations:
     # Roll pods when config/secret content changes.
     checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-    checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    # secret.yaml never renders while externalSecret.enabled (see that
+    # template and hermes-agent.envSecretName) - hash the ExternalSecret
+    # manifest instead, so changing its target/data still rolls the Pod.
+    checksum/secret: {{ include (print $.Template.BasePath (ternary "/externalsecret.yaml" "/secret.yaml" .Values.externalSecret.enabled)) . | sha256sum }}
     {{- if and .Values.team.enabled .Values.team.skill.enabled }}
     # Roll leaders and members when the rendered shared skill changes. Members
     # reference the leader-owned ConfigMap, so hashing only the created resource
@@ -252,7 +271,7 @@ spec:
         {{- end }}
       envFrom:
         - secretRef:
-            name: {{ include "hermes-agent.fullname" . }}-env
+            name: {{ include "hermes-agent.envSecretName" . }}
         {{- with .Values.extraEnvFrom }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -345,7 +364,7 @@ spec:
         {{- end }}
       envFrom:
         - secretRef:
-            name: {{ include "hermes-agent.fullname" . }}-env
+            name: {{ include "hermes-agent.envSecretName" . }}
         {{- with .Values.extraEnvFrom }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

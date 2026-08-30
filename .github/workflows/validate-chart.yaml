@@ -132,6 +132,76 @@ jobs:
             --show-only templates/networkpolicy.yaml > np-litellm.yaml
           yq -e 'select(.kind == "NetworkPolicy").spec.egress | length > 0' np-litellm.yaml | grep -q true
 
+      - name: validate ExternalSecret replaces the env Secret
+        # No kind scenario covers this: the External Secrets Operator CRDs
+        # aren't installed there, so an ExternalSecret would fail to
+        # register. Render-only assertions here instead.
+        run: |
+          set -euo pipefail
+
+          # Default: the chart's own Secret renders, no ExternalSecret.
+          helm template default-secret charts/hermes-agent \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --show-only templates/secret.yaml > default-secret.yaml
+          yq -e 'select(.kind == "Secret").metadata.name == "default-secret-hermes-agent-env"' default-secret.yaml \
+            | grep -q true
+          if helm template default-es charts/hermes-agent \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --show-only templates/externalsecret.yaml 2>/dev/null | grep -q .; then
+            echo "::error::templates/externalsecret.yaml must render nothing when externalSecret.enabled is false"
+            exit 1
+          fi
+
+          # Enabled, no explicit target: the chart's own Secret stops
+          # rendering, and the ExternalSecret + every chart-owned envFrom
+          # (main container, helm test Job) fall back to the same
+          # <fullname>-env name.
+          es_args=(--set-string env.OPENAI_API_KEY=sk-test --set externalSecret.enabled=true \
+            --set externalSecret.secretStoreRef.name=my-store)
+          if helm template es-default charts/hermes-agent "${es_args[@]}" \
+            --show-only templates/secret.yaml 2>/dev/null | grep -q .; then
+            echo "::error::templates/secret.yaml must not render while externalSecret.enabled is true"
+            exit 1
+          fi
+          helm template es-default charts/hermes-agent "${es_args[@]}" \
+            --show-only templates/externalsecret.yaml > es-default.yaml
+          yq -e 'select(.kind == "ExternalSecret").metadata.name == "es-default-hermes-agent-env"' es-default.yaml | grep -q true
+          yq -e 'select(.kind == "ExternalSecret").spec.target.name == "es-default-hermes-agent-env"' es-default.yaml | grep -q true
+          helm template es-default charts/hermes-agent "${es_args[@]}" \
+            --show-only templates/deployment.yaml > es-default-deploy.yaml
+          yq -e 'select(.kind == "Deployment").spec.template.spec.containers[0].envFrom[0].secretRef.name == "es-default-hermes-agent-env"' es-default-deploy.yaml \
+            | grep -q true
+          helm template es-default charts/hermes-agent "${es_args[@]}" \
+            --show-only templates/tests/test-hermes-doctor.yaml > es-default-test.yaml
+          yq -e 'select(.kind == "Job").spec.template.spec.containers[0].envFrom[0].secretRef.name == "es-default-hermes-agent-env"' es-default-test.yaml \
+            | grep -q true
+
+          # Enabled with an explicit target: every chart-owned reference
+          # (ExternalSecret's own name, spec.target.name, main container
+          # envFrom, test Job envFrom) uses that name instead.
+          es_target_args=("${es_args[@]}" --set externalSecret.target.name=custom-secret)
+          helm template es-target charts/hermes-agent "${es_target_args[@]}" \
+            --show-only templates/externalsecret.yaml > es-target.yaml
+          yq -e 'select(.kind == "ExternalSecret").metadata.name == "custom-secret"' es-target.yaml | grep -q true
+          yq -e 'select(.kind == "ExternalSecret").spec.target.name == "custom-secret"' es-target.yaml | grep -q true
+          helm template es-target charts/hermes-agent "${es_target_args[@]}" \
+            --show-only templates/deployment.yaml > es-target-deploy.yaml
+          yq -e 'select(.kind == "Deployment").spec.template.spec.containers[0].envFrom[0].secretRef.name == "custom-secret"' es-target-deploy.yaml \
+            | grep -q true
+
+          # Changing ExternalSecret data changes the pod template checksum,
+          # so a rotated remoteRef still triggers a rollout.
+          checksum_before=$(yq '.spec.template.metadata.annotations."checksum/secret"' es-default-deploy.yaml)
+          helm template es-default charts/hermes-agent "${es_args[@]}" \
+            --set externalSecret.data[0].secretKey=OPENAI_API_KEY \
+            --set externalSecret.data[0].remoteRef.key=hermes-agent/openai \
+            --show-only templates/deployment.yaml > es-data-deploy.yaml
+          checksum_after=$(yq '.spec.template.metadata.annotations."checksum/secret"' es-data-deploy.yaml)
+          if [ "$checksum_before" = "$checksum_after" ]; then
+            echo "::error::checksum/secret must change when externalSecret.data changes"
+            exit 1
+          fi
+
       - name: validate team-mode config overrides
         # hermes-agent.effectiveConfig (_team.tpl) only fills in a
         # discord.*/group_sessions_per_user default when the user hasn't
