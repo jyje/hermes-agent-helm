@@ -298,6 +298,50 @@ extraContainers: []
 extraResources: []
 
 # ---------------------------------------------------------------------------
+# externalSecret -> replace the chart's own env Secret (above) with an
+# ExternalSecret for External Secrets Operator (ESO) users. This is a sole
+# replacement, not an addition: enabling it stops `secret.yaml` from
+# rendering entirely, and `env` above is then ignored - wire secret values
+# solely through `data`/`dataFrom` below. Every chart-owned envFrom reference
+# (main container, auth device-login init container, helm test Job) follows
+# automatically, no `extraEnvFrom` needed.
+#
+# ESO does not guarantee restarting the Pod when the external provider
+# rotates the secret's contents later - that's a reloader controller's job,
+# and this chart doesn't bundle one. Pair this with a tool like Reloader or
+# Stakater if that's required.
+# ---------------------------------------------------------------------------
+externalSecret:
+  # -- Render an ExternalSecret instead of the chart's own env Secret.
+  #    Requires the External Secrets Operator CRDs to already be installed
+  #    in-cluster.
+  enabled: false
+  # -- How often ESO resyncs the target Secret from the provider.
+  refreshInterval: 1h
+  # -- Which SecretStore/ClusterSecretStore to pull from. `name` is required
+  #    when enabled.
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: ""
+  target:
+    # -- Target Secret name. Empty defaults to the chart's own env Secret
+    #    name (`<fullname>-env`); when set, every chart-owned envFrom
+    #    reference uses this name instead.
+    name: ""
+    creationPolicy: Owner
+    deletionPolicy: Retain
+  # -- Individual remoteRef -> key mappings. See the External Secrets
+  #    Operator docs for the full field set.
+  data: []
+  #  - secretKey: OPENAI_API_KEY
+  #    remoteRef:
+  #      key: hermes-agent/openai
+  #      property: api-key
+  # -- Bulk provider-native secret imports. See the External Secrets
+  #    Operator docs for the full field set.
+  dataFrom: []
+
+# ---------------------------------------------------------------------------
 # auth -> Interactive credential bootstrap.
 #
 # By default the agent authenticates with the static provider key from `env`

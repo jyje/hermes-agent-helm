@@ -71,7 +71,7 @@ spec:
               value: {{ .Values.persistence.mountPath | quote }}
           envFrom:
             - secretRef:
-                name: {{ include "hermes-agent.fullname" . }}-env
+                name: {{ include "hermes-agent.envSecretName" . }}
             {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

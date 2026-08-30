@@ -300,6 +300,34 @@
       }
     },
 
+    "externalSecret": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "refreshInterval": { "type": "string" },
+        "secretStoreRef": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "kind": { "type": "string" },
+            "name": { "type": "string" }
+          }
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "creationPolicy": { "type": "string" },
+            "deletionPolicy": { "type": "string" }
+          }
+        },
+        "data": { "type": "array" },
+        "dataFrom": { "type": "array" }
+      }
+    },
+
     "auth": {
       "type": "object",
       "additionalProperties": false,
