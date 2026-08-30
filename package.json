@@ -13,7 +13,7 @@
     "release:version": "node .github/scripts/release/version-chart.mjs"
   },
   "devDependencies": {
-    "@changesets/cli": "2.31.0",
+    "@changesets/cli": "3.0.1",
     "@changesets/get-github-info": "^1.0.0"
   }
 }

@@ -80,20 +80,22 @@ jobs:
 
       - name: Create or update the Changesets release PR
         if: steps.release-version.outputs.has-release == 'true'
-        # Pinned to an exact v1.x release, not the floating `@v2` major tag:
-        # changesets/action v2 requires Changesets CLI v3, and this repo's
-        # release tooling (package.json's @changesets/cli, and the custom
-        # changelog module in .changeset/) is built against CLI v2. `@v2`
-        # silently resolved to v2.1.1 and broke every propose-release run
-        # with "This version of the Changesets action is designed to work
-        # with Changesets CLI v3" - v1.x is the CLI-v2-compatible line.
-        uses: changesets/action@v1.9.0
+        # Pinned to an exact v2.x release, not the floating `@v2` major tag.
+        # changesets/action v2 requires Changesets CLI v3, which is what
+        # this repo's release tooling (package.json's @changesets/cli, and
+        # the custom changelog module in .changeset/) runs on since the
+        # CLI v3 migration - keep the two upgraded together; bumping this
+        # action without also bumping @changesets/cli to a v3.x release
+        # reintroduces "This version of the Changesets action is designed
+        # to work with Changesets CLI v3" (see git blame for the v1.9.0
+        # pin this replaced, and #243/#251 for the incident that caused it).
+        uses: changesets/action@v2.1.1
         with:
-          # v1.9.0's input names (version/commit/title), not v2's
-          # (version-script/commit-message/pr-title) - passing the v2 names
-          # here silently no-ops: the action logs "Unexpected input(s)" and
-          # skips creating/updating the release PR instead of failing loudly.
-          version: pnpm release:version
-          commit: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
-          title: "🚀 release(hermes-agent): v${{ steps.release-version.outputs.version }}"
+          # v2's input names (version-script/commit-message/pr-title), not
+          # v1.9.0's (version/commit/title) - passing the v1 names here
+          # silently no-ops: the action logs "Unexpected input(s)" and skips
+          # creating/updating the release PR instead of failing loudly.
+          version-script: pnpm release:version
+          commit-message: "🚀 chore(release): propose chart v${{ steps.release-version.outputs.version }}"
+          pr-title: "🚀 release(hermes-agent): v${{ steps.release-version.outputs.version }}"
           github-token: ${{ steps.app-token.outputs.token }}
