@@ -14,6 +14,14 @@ updates:
       prefix: "🤖 ci"
       prefix-development: "🤖 ci"
       include: "scope"
+    ignore:
+      # v2 requires Changesets CLI v3; this repo's release tooling is built
+      # against CLI v2. A v2 bump broke propose-release once already (#243,
+      # fixed in #251 by pinning to v1.9.0) and dependabot keeps proposing it
+      # again because it isn't aware of the incompatibility. Stay on v1
+      # until the release tooling is migrated to CLI v3.
+      - dependency-name: "changesets/action"
+        versions: [">= 2"]
 
   # Helm charts
   - package-ecosystem: "helm"
