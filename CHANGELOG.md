@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.12.1
+
+### Documentation
+
+- [#254](https://github.com/jyje/hermes-agent-helm/pull/254) [`410781e`](https://github.com/jyje/hermes-agent-helm/commit/410781e2b4bdace2c949a8c35647813b9ed4d931) - Documentation(messaging): Slack link unfurl controls
+
+  Document native and relay Slack configuration paths for suppressing outbound link and media previews.
+
 ## 1.12.0
 
 ### Other
