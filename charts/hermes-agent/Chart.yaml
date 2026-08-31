@@ -13,7 +13,7 @@ version: 1.12.1
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
-appVersion: "v2026.8.27"
+appVersion: "v2026.8.31"
 
 keywords:
   - hermes
