@@ -130,7 +130,8 @@ list for another Kubernetes port shape, such as containerPorts.
 {{- end }}
 {{- else -}}
 # Intended for the management dashboard (port 9119). Requires the dashboard
-# to be enabled and bound to 0.0.0.0 (--insecure) inside the container.
+# to be enabled (HERMES_DASHBOARD=1) with an auth provider configured; it
+# binds 0.0.0.0 inside the container by default (see values-ingress.yaml).
 - name: dashboard
   port: {{ .Values.service.port }}
   targetPort: {{ .Values.service.port }}

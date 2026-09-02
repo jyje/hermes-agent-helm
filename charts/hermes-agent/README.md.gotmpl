@@ -475,10 +475,20 @@ first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
 so the pod needs egress to Bitwarden and GitHub Releases.
 
 - **Dashboard routing**: the management dashboard (`service.port`, default
-  9119) requires `--insecure` to bind beyond `127.0.0.1`, which the upstream
-  warns **exposes API keys on the network**. Route it only behind
-  authentication (for example, an oauth2-proxy/basic-auth Ingress annotation)
-  or on a private network.
+  9119) is an s6 service inside the image that stays down until
+  `HERMES_DASHBOARD=1` is set. It binds `0.0.0.0` in-container, and on any
+  non-loopback bind upstream's auth gate is mandatory: configure the bundled
+  password provider (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD`),
+  OAuth or OIDC, or the dashboard **fails closed and never listens**. The old
+  `--insecure` / `HERMES_DASHBOARD_INSECURE` escape hatch is a deprecated
+  no-op upstream. Behind a TLS-terminating Ingress, set
+  `config.dashboard.public_url` to the external origin and list the ingress
+  controller in `config.dashboard.trusted_proxies` (exact IP or a bounded
+  CIDR; `0.0.0.0/0` is rejected), otherwise its `X-Forwarded-Proto` is
+  ignored and cookies are not marked `Secure`. The dashboard still shows API
+  keys to whoever is logged in, so keep it on a private network or add a
+  second auth layer at the proxy. See
+  [`values-ingress.yaml`](values-ingress.yaml).
 
 ### API server and webhook listeners
 
@@ -734,7 +744,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager** supplies provider keys at startup |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
-| [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (basic-auth) |
+| [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (dashboard enabled, upstream password gate, trusted proxy) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**, config.yaml passthrough + explicit Service port, so other A2A agents can discover and drive this one |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |

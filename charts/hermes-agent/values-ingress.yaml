@@ -1,22 +1,33 @@
 # values-ingress.yaml
 #
 # Exposes the Hermes management dashboard (service.port, default 9119) via an
-# Ingress. The upstream warns this dashboard EXPOSES API KEYS on the network,
-# so it MUST sit behind authentication: this example uses nginx's basic-auth
-# annotations. Adjust `ingressClassName` / annotations for your controller
-# (Traefik, HAProxy, ...).
+# Ingress.
 #
-# Dummy key: override at install time. The basic-auth Secret referenced by
-# the annotation below must be created separately:
+# The dashboard is an s6 service inside the image and stays DOWN until
+# HERMES_DASHBOARD=1 is set. In-container it binds 0.0.0.0, and on any
+# non-loopback bind upstream's auth gate is mandatory: without an auth
+# provider the dashboard fails closed and never listens, so an Ingress in
+# front of it would answer 502/503. This example uses the bundled
+# username/password provider. The deprecated `--insecure` /
+# HERMES_DASHBOARD_INSECURE escape hatch is a no-op upstream.
 #
-#   htpasswd -cb /tmp/auth admin '<your-password>'
-#   kubectl create secret generic hermes-agent-dashboard-auth -n hermes-agent \
-#     --from-file=auth=/tmp/auth
+# The dashboard shows API keys to whoever is logged in. Keep it on a private
+# network, or add a second auth layer at the proxy (oauth2-proxy, an
+# ingress basic-auth annotation, ...) as defence in depth.
+#
+# Dummy values: override at install time. Never commit real credentials.
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
 #     -f charts/hermes-agent/values-ingress.yaml \
-#     --set-string env.OPENAI_API_KEY='sk-<real>' --wait
+#     --set-string env.OPENAI_API_KEY='sk-<real>' \
+#     --set-string env.HERMES_DASHBOARD_BASIC_AUTH_PASSWORD='<strong password>' \
+#     --set-string env.HERMES_DASHBOARD_BASIC_AUTH_SECRET="$(openssl rand -base64 32)" \
+#     --wait
+#
+# Or reference an externally managed Secret holding those keys through
+# `extraEnvFrom` instead of `env` (see the README's "Secret provisioning
+# strategies").
 
 config:
   model:
@@ -24,9 +35,31 @@ config:
     default: gpt-4o-mini
   terminal:
     backend: local
+  dashboard:
+    # External origin the dashboard is reached at. Drives OAuth callbacks and
+    # is accepted as an exact Host / WebSocket Origin behind the proxy.
+    public_url: "https://hermes-agent.example.com"
+    # Only listed peers may supply X-Forwarded-Proto / X-Forwarded-For. Put
+    # your ingress controller's pod CIDR (or its exact pod IP) here; Hermes
+    # rejects unbounded entries such as 0.0.0.0/0. Without this, a
+    # TLS-terminating ingress is not trusted and cookies are not marked
+    # Secure.
+    trusted_proxies:
+      - "10.244.0.0/16"
 
+# Non-secret switch: start the supervised dashboard service.
+extraEnv:
+  - name: HERMES_DASHBOARD
+    value: "1"
+
+# Secrets rendered into the chart's env Secret.
 env:
   OPENAI_API_KEY: "sk-DUMMY_replace_me_000000000000000000000000"
+  HERMES_DASHBOARD_BASIC_AUTH_USERNAME: "admin"
+  HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: "DUMMY_replace_me"
+  # 32+ random bytes signing the provider's session tokens; set it so logins
+  # survive pod restarts (blank = a fresh random key per process).
+  HERMES_DASHBOARD_BASIC_AUTH_SECRET: "DUMMY_replace_me_with_openssl_rand_base64_32"
 
 service:
   enabled: true
@@ -36,10 +69,7 @@ service:
 ingress:
   enabled: true
   className: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: hermes-agent-dashboard-auth
-    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Hermes Agent Dashboard"
+  annotations: {}
   hosts:
     - host: hermes-agent.example.com
       paths:
