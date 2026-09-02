@@ -441,11 +441,21 @@ persistence:
 # and exposes no inbound API, so no access Service is created by default. A
 # headless Service is always created for StatefulSet DNS/governance.
 #
-# The management `dashboard` (default port 9119, binds to 127.0.0.1), optional
-# OpenAI-compatible API server, and optional webhook receiver are inbound HTTP
-# listeners. Enabling a listener does not expose it through Kubernetes: choose
-# its Service ports explicitly below. The dashboard requires `--insecure` for a
-# non-loopback bind, which the upstream warns EXPOSES API KEYS on the network.
+# The management `dashboard`, optional OpenAI-compatible API server, and
+# optional webhook receiver are inbound HTTP listeners. Enabling a listener
+# does not expose it through Kubernetes: choose its Service ports explicitly
+# below.
+#
+# The dashboard is an s6 service inside the image, off by default: set
+# `HERMES_DASHBOARD=1` (via `extraEnv`) to start it. In-container it binds
+# `0.0.0.0:9119` (`HERMES_DASHBOARD_HOST` / `_PORT`), and on any non-loopback
+# bind upstream's auth gate is mandatory: provide the bundled password
+# provider (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD`, secrets, so
+# put them in `env`), OAuth (`HERMES_DASHBOARD_OAUTH_CLIENT_ID`) or OIDC, or
+# the service fails closed and stays down. `HERMES_DASHBOARD_INSECURE` and the
+# `--insecure` flag are deprecated no-ops upstream and do not disable the
+# gate. Behind a TLS-terminating Ingress also set `config.dashboard.public_url`
+# and `config.dashboard.trusted_proxies`; see values-ingress.yaml.
 # ---------------------------------------------------------------------------
 apiServer:
   # -- Enable Hermes' OpenAI-compatible HTTP API server.
@@ -492,7 +502,8 @@ service:
 # resources. Pick the one supported by your cluster. Any backend that omits a
 # Service name targets this chart's Service and therefore requires
 # `service.enabled: true`. Routing the management dashboard also requires
-# --insecure and strong authentication (see the `service` comment above).
+# the dashboard to be enabled with an auth provider (see the listener comment
+# above and values-ingress.yaml).
 ingress:
   # -- Create an Ingress resource.
   enabled: false
