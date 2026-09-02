@@ -650,18 +650,18 @@ A few more commonly-used ones, current as of image `{{ template "chart.appVersio
 | Variable | Purpose |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek provider |
-| `FIREWORKS_API_KEY` | Fireworks AI provider |
-| `DEEPINFRA_API_KEY` / `DEEPINFRA_BASE_URL` | DeepInfra provider and optional endpoint override |
-| `UPSTAGE_API_KEY` / `UPSTAGE_BASE_URL` | Upstage Solar provider and optional endpoint override |
 | `ZAI_API_KEY` | Z.AI / GLM provider (built-in key `zai`; `GLM_BASE_URL` picks the Global/China/Coding-Plan endpoint) |
-| `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock provider |
+| `MODEL_API_KEY` | Meta Model API (Muse Spark) provider (built-in key `meta-ai`; `META_API_KEY` is accepted as an alias, `META_BASE_URL` overrides the endpoint) |
+| `NEBIUS_API_KEY` / `NEBIUS_BASE_URL` | Nebius Token Factory provider (built-in key `nebius-token-factory`) and optional endpoint override |
+| `RAMP_ROUTER_API_KEY` / `RAMP_ROUTER_BASE_URL` | Ramp Router provider (built-in key `router`) and optional endpoint override |
+| `TOKENPLAN_API_KEY` / `TOKENPLAN_BASE_URL` | Tencent TokenPlan provider (built-in key `tencent-tokenplan`, Anthropic Messages endpoint) and optional endpoint override |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI provider |
-| `NOUS_INFERENCE_BASE_URL` | Override the Nous OAuth inference endpoint |
 | `HERMES_WRITE_SAFE_ROOT` | Restrict `write_file`/`patch` to these root dirs (OS path separator for multiple) |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack bot (Socket Mode) |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
-| `HERMES_MAX_ITERATIONS` | Tool-calling loop limit (default: 90) |
+| `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | Bundled username/password provider for the dashboard auth gate, which upstream engages on any non-loopback bind; `HERMES_DASHBOARD_PUBLIC_URL` declares the external origin behind an Ingress |
+| `HERMES_MAX_ITERATIONS` | Tool-calling iteration budget per conversation (upstream default: 500; this chart seeds the equivalent `config.agent.max_turns: 90` into `config.yaml`) |
 | `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
 | `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
 | `HERMES_TIMEZONE` | IANA timezone override |

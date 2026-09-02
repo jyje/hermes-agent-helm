@@ -600,23 +600,23 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 전체 레퍼런스(각 Hermes 릴리즈에 맞춰 최신 상태 유지):
 **[Environment Variables - Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
-이미지 `v2026.7.1` 기준으로 자주 쓰이는 몇 가지를 더 소개합니다:
+이미지 `v2026.8.31` 기준으로 자주 쓰이는 몇 가지를 더 소개합니다:
 
 | 변수 | 용도 |
 | --- | --- |
 | `DEEPSEEK_API_KEY` | DeepSeek 제공자 |
-| `FIREWORKS_API_KEY` | Fireworks AI 제공자 |
-| `DEEPINFRA_API_KEY` / `DEEPINFRA_BASE_URL` | DeepInfra 제공자 및 선택적 엔드포인트 오버라이드 |
-| `UPSTAGE_API_KEY` / `UPSTAGE_BASE_URL` | Upstage Solar 제공자 및 선택적 엔드포인트 오버라이드 |
 | `ZAI_API_KEY` | Z.AI / GLM 제공자 (내장 키 `zai`; `GLM_BASE_URL`로 Global/중국/Coding Plan 엔드포인트 선택) |
-| `AWS_REGION` / `AWS_PROFILE` | Amazon Bedrock 제공자 |
+| `MODEL_API_KEY` | Meta Model API (Muse Spark) 제공자 (내장 키 `meta-ai`; 별칭 `META_API_KEY`도 허용, `META_BASE_URL`로 엔드포인트 오버라이드) |
+| `NEBIUS_API_KEY` / `NEBIUS_BASE_URL` | Nebius Token Factory 제공자 (내장 키 `nebius-token-factory`) 및 선택적 엔드포인트 오버라이드 |
+| `RAMP_ROUTER_API_KEY` / `RAMP_ROUTER_BASE_URL` | Ramp Router 제공자 (내장 키 `router`) 및 선택적 엔드포인트 오버라이드 |
+| `TOKENPLAN_API_KEY` / `TOKENPLAN_BASE_URL` | Tencent TokenPlan 제공자 (내장 키 `tencent-tokenplan`, Anthropic Messages 엔드포인트) 및 선택적 엔드포인트 오버라이드 |
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI 제공자 |
-| `NOUS_INFERENCE_BASE_URL` | Nous OAuth 추론 엔드포인트 오버라이드 |
 | `HERMES_WRITE_SAFE_ROOT` | `write_file`/`patch`를 이 루트 디렉터리들로 제한 (여러 개는 OS 경로 구분자로) |
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack 봇 (Socket Mode) |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
-| `HERMES_MAX_ITERATIONS` | 도구 호출 루프 제한 (기본값: 90) |
+| `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 대시보드 auth gate용 내장 사용자명/비밀번호 제공자 (업스트림은 non-loopback 바인드에서 항상 이 gate를 켬); `HERMES_DASHBOARD_PUBLIC_URL`은 Ingress 뒤의 외부 origin 선언 |
+| `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (업스트림 기본값: 500; 이 차트는 같은 knob인 `config.agent.max_turns: 90`을 `config.yaml`에 시드) |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `SESSION_IDLE_MINUTES` | 유휴 세션 초기화 주기 (기본값: 1440) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
