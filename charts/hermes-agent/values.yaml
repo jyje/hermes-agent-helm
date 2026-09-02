@@ -106,7 +106,13 @@ config:
     # clusters (e.g. MicroK8s / Raspberry Pi). Keep this `local`.
     backend: local
   agent:
-    max_turns: 90
+    # Upstream leaves `max_turns` unlimited: a hard turn cap caused silent
+    # mid-task truncation, so it now relies on the HERMES_MAX_ITERATIONS
+    # budget (500, with a wrap-up grace call) plus `gateway_timeout` below.
+    # Earlier chart versions seeded `max_turns: 90`, which was just a mirror
+    # of the then-upstream default, not a chart decision. Set it here only as
+    # a deliberate per-deployment cost guard.
+    # max_turns: 90
     gateway_timeout: 1800
 
 # -- Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It

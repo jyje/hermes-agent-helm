@@ -661,7 +661,7 @@ A few more commonly-used ones, current as of image `v2026.8.31`:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | Bundled username/password provider for the dashboard auth gate, which upstream engages on any non-loopback bind; `HERMES_DASHBOARD_PUBLIC_URL` declares the external origin behind an Ingress |
-| `HERMES_MAX_ITERATIONS` | Tool-calling iteration budget per conversation (upstream default: 500; this chart seeds the equivalent `config.agent.max_turns: 90` into `config.yaml`) |
+| `HERMES_MAX_ITERATIONS` | Tool-calling iteration budget per conversation (default: 500, then one wrap-up grace call); a hard cap is `config.agent.max_turns`, unlimited upstream by default and no longer seeded by this chart |
 | `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
 | `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
 | `HERMES_TIMEZONE` | IANA timezone override |
@@ -782,7 +782,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
 | bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
-| config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800,"max_turns":90},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
+| config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
 | deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
