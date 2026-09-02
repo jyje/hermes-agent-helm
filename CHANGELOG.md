@@ -1,5 +1,86 @@
 # Changelog
 
+## 1.13.0
+
+### Features
+
+- [#261](https://github.com/jyje/hermes-agent-helm/pull/261) [`cab6ac3`](https://github.com/jyje/hermes-agent-helm/commit/cab6ac3b4af2656f11b586f6fb27713e9c0d1133) - Feature(secrets): Render an ExternalSecret for External Secrets Operator users
+
+  Add `externalSecret.*` values. Setting `externalSecret.enabled: true` renders
+  an ExternalSecret as the sole replacement for the chart's own env Secret,
+  not an addition beside it: `secret.yaml` stops rendering, `env` is ignored,
+  and every chart-owned `envFrom` (main container, auth device-login init
+  container, helm test Job) automatically follows the ExternalSecret's target
+  name via a new `hermes-agent.envSecretName` helper - no `extraEnvFrom`
+  needed. An empty `externalSecret.target.name` falls back to the chart's own
+  `<fullname>-env` name; a set one is used everywhere instead. The pod
+  template's `checksum/secret` annotation hashes the rendered ExternalSecret
+  in this mode, so changing `target`/`data`/`dataFrom` still triggers a
+  rollout. Automatic Pod restart on provider-side secret rotation is out of
+  scope - pair with a reloader controller (Reloader, Stakater) for that.
+  Defaults are unchanged; existing installs are unaffected.
+
+### Fixes
+
+- [#277](https://github.com/jyje/hermes-agent-helm/pull/277) [`95e9642`](https://github.com/jyje/hermes-agent-helm/commit/95e9642f76419108023b2d49ef4d7b62dec1e156) - Fix(config): Stop seeding agent.max_turns, following upstream's unlimited default
+
+  The chart has seeded `config.agent.max_turns: 90` since its first commit. That
+  value was a mirror of the upstream default at the time (`v2026.6.5`), not a
+  chart decision, and upstream has since made `agent.max_turns` unlimited by
+  default because a hard turn cap caused silent mid-task truncation; the
+  `HERMES_MAX_ITERATIONS` budget (500, followed by a wrap-up grace call) and
+  `agent.gateway_timeout` are the runaway guards now. The seed is removed and
+  left as a commented example with that rationale, so new installs get upstream
+  behaviour. Existing installs with `bootstrap.overwrite: true` (the default)
+  pick up the change on their next rollout; set `config.agent.max_turns`
+  explicitly to keep a cap. The README env-var row is reworded to match.
+
+### Documentation
+
+- [#275](https://github.com/jyje/hermes-agent-helm/pull/275) [`852fc04`](https://github.com/jyje/hermes-agent-helm/commit/852fc04cbe4c8564f4b543419208f24482342e97) - Documentation(approvals): Cover unattended_mode and protected instruction files
+
+  Add `approvals.unattended_mode` (new upstream between v2026.8.27 and
+  v2026.8.31) and `single_query_mode` to the README's "Unattended approvals"
+  section next to `cron_mode`, and explain which surfaces each of the three
+  "nobody can answer" switches governs: `unattended_mode` is the one that
+  applies to sessions arriving through the chart's `apiServer` / `webhook`
+  listeners, and it denies dangerous commands outright by default. Note that
+  writes to the agent's own instruction files always require approval with no
+  yolo bypass. English and Korean READMEs updated together.
+
+- [#276](https://github.com/jyje/hermes-agent-helm/pull/276) [`266de12`](https://github.com/jyje/hermes-agent-helm/commit/266de1241e99c760c8e01c1457a4c4a29397042e) - Documentation(dashboard): Describe the real dashboard lifecycle and make values-ingress.yaml work
+
+  The chart described the management dashboard as "binds 127.0.0.1, needs
+  `--insecure` beyond that, which exposes API keys". None of that matches the
+  pinned image: the dashboard is an s6 service that stays down until
+  `HERMES_DASHBOARD=1`, it binds `0.0.0.0` in-container, and on any non-loopback
+  bind upstream's auth gate is mandatory, so without a configured provider it
+  fails closed and never listens; `--insecure` / `HERMES_DASHBOARD_INSECURE`
+  are deprecated no-ops. `values-ingress.yaml` never enabled the dashboard at
+  all, leaving its Ingress pointing at nothing. The example now enables the
+  service, configures the bundled username/password provider through `env`, and
+  sets `config.dashboard.public_url` plus a bounded `trusted_proxies` entry for
+  the ingress controller (new upstream between v2026.8.27 and v2026.8.31) so
+  `X-Forwarded-Proto` from a TLS-terminating ingress is honoured. Comments in
+  values.yaml, `_helpers.tpl` and both READMEs are corrected to match.
+
+- [#274](https://github.com/jyje/hermes-agent-helm/pull/274) [`ae4c209`](https://github.com/jyje/hermes-agent-helm/commit/ae4c209db5ae0da9f468ffcac00d298489bad791) - Documentation(env): Refresh the curated environment-variable table for v2026.8.31
+
+  Re-check the chart README's "Environment variables" teaser table against the
+  upstream reference at the pinned `v2026.8.31` tag. Add the providers that
+  arrived since the last refresh (Meta Model API, Nebius Token Factory, Ramp
+  Router, Tencent TokenPlan) and the dashboard auth-gate variables; drop rows
+  already covered by the provider table and its `values-*.yaml` examples
+  (Fireworks, DeepInfra, Upstage) plus two low-signal overrides, keeping the
+  table at its previous size. Correct the `HERMES_MAX_ITERATIONS` row: the
+  upstream default is 500, not 90; 90 is the value this chart seeds as
+  `config.agent.max_turns`. The Korean README twin gets the same table and its
+  stale hard-coded image version.
+
+### Other
+
+- [#262](https://github.com/jyje/hermes-agent-helm/pull/262) [`dd360e4`](https://github.com/jyje/hermes-agent-helm/commit/dd360e4085b39726e6eed0fa774292fa6b9a73d2) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Update the default Hermes Agent image to v2026.8.31.
+
 ## 1.12.1
 
 ### Documentation
