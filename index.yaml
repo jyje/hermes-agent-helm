@@ -5,6 +5,50 @@ entries:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
         - kind: "fixed"
+          description: "Documentation(approvals): Cover unattended_mode and protected instruction files Add `approvals.unattended_mode` (new upstream between v2026.8.27 and v2026.8...."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Describe the real dashboard lifecycle and make values-ingress.yaml work The chart described the management dashboard as \"binds 127...."
+        - kind: "added"
+          description: "Fix(config): Stop seeding agent.max_turns, following upstream's unlimited default The chart has seeded `config.agent.max_turns: 90` since its first commit. T..."
+        - kind: "fixed"
+          description: "Documentation(env): Refresh the curated environment-variable table for v2026.8.31 Re-check the chart README's \"Environment variables\" teaser table against th..."
+        - kind: "added"
+          description: "Feature(secrets): Render an ExternalSecret for External Secrets Operator users Add `externalSecret.*` values. Setting `externalSecret.enabled: true` renders..."
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.8.31."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.8.31
+    created: "2026-09-02T15:26:25.532882396Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 1ca95ce53bda8248164c0c01ea76ebbbb02d80fc89a5f36eccc564ebeed9bc59
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.13.0.tgz
+    version: 1.13.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: "fixed"
           description: "Documentation(messaging): Slack link unfurl controls Document native and relay Slack configuration paths for suppressing outbound link and media previews."
       artifacthub.io/license: MIT
     apiVersion: v2
@@ -1387,4 +1431,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-08-30T04:17:29.741430753Z"
+generated: "2026-09-02T15:26:25.528788917Z"
