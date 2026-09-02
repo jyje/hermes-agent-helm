@@ -26,6 +26,14 @@ jobs:
     # appVersion change swaps the default image, which IS a functional change
     # even when Chart.yaml is the only file touched: that must still run the
     # kind scenarios.
+    #
+    # README.md.gotmpl is allowlisted alongside the README.md it generates: a
+    # template edit cannot change a rendered manifest, only helm-docs output,
+    # and the `lint` job's "helm-docs is up to date" step regenerates the
+    # README from it and fails on drift. Without it a docs-only chart README
+    # PR paid for the whole kind matrix (see #279). values-*.yaml stays OUT:
+    # those are real chart inputs, and values-hardened.yaml is consumed by
+    # the security-hardened scenario.
     runs-on: ubuntu-26.04-arm
     outputs:
       functional: ${{ steps.filter.outputs.functional }}
@@ -44,7 +52,7 @@ jobs:
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
           echo "Changed files:"
           echo "$changed"
-          if echo "$changed" | grep -vE '^(\.changeset/.*|charts/hermes-agent/(Chart\.yaml|README(-ko)?\.md)|examples/helm/README\.md|CHANGELOG\.md|package\.json|pnpm-lock\.yaml)$' | grep -q .; then
+          if echo "$changed" | grep -vE '^(\.changeset/.*|charts/hermes-agent/(Chart\.yaml|README(-ko)?\.md|README\.md\.gotmpl)|examples/helm/README\.md|CHANGELOG\.md|package\.json|pnpm-lock\.yaml)$' | grep -q .; then
             echo "functional=true" >> "$GITHUB_OUTPUT"
           elif git diff "$base" "${{ github.sha }}" -- charts/hermes-agent/Chart.yaml | grep -qE '^\+appVersion:'; then
             echo "appVersion changed - new default image, running functional tests"
