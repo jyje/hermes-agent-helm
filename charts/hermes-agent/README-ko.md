@@ -644,7 +644,7 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 대시보드 auth gate용 내장 사용자명/비밀번호 제공자 (업스트림은 non-loopback 바인드에서 항상 이 gate를 켬); `HERMES_DASHBOARD_PUBLIC_URL`은 Ingress 뒤의 외부 origin 선언 |
-| `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (업스트림 기본값: 500; 이 차트는 같은 knob인 `config.agent.max_turns: 90`을 `config.yaml`에 시드) |
+| `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (기본값: 500, 소진 시 마무리용 grace call 1회); 하드 캡은 `config.agent.max_turns`로, 업스트림 기본은 무제한이며 이 차트도 더 이상 시드하지 않음 |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `SESSION_IDLE_MINUTES` | 유휴 세션 초기화 주기 (기본값: 1440) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
