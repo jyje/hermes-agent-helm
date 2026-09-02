@@ -621,15 +621,35 @@ config:
       - "rm -rf /"       # any approval/yolo logic even sees them: safe to keep
       - "curl.*\\|.*sh"  # even in yolo mode
     cron_mode: deny       # unattended cron runs: "deny" (default) or "approve"
+    unattended_mode: deny # API server / webhook sessions: "deny" (default) or "approve"
+    single_query_mode: deny  # one-shot `hermes chat -q` runs: same choice
     discord_prompt_timeout: 120  # seconds a Discord button prompt stays live
                                  # (clamped upstream; default 300s / 5 min)
 ```
+
+`cron_mode`, `unattended_mode` and `single_query_mode` are the three
+"nobody can answer" switches. They cover, respectively, cron jobs, sessions
+that arrive through the `apiServer` / `webhook` listeners this chart can
+expose, and one-shot `-q` runs. Each defaults to `deny`: when such a session
+hits a dangerous-command prompt, the command is refused immediately instead
+of blocking for the approval timeout, and the agent has to find another
+path. `approve` auto-approves everything in that context. Messaging
+platforms with a human on the other end (Discord, Telegram, ...) are not
+covered by these switches: they get the interactive prompt, bounded by the
+platform's prompt timeout.
+
+Separately from command approvals, writes to the agent's own instruction
+files (`AGENTS.md`, `SOUL.md`, skills, memory stores) always ask for approval
+and fail closed when no human channel exists, with no yolo bypass
+(upstream `security.protected_instruction_files`, on by default). Expect
+Hermes' self-improvement skill writes to prompt in chat rather than land
+silently.
 
 `approvals.deny` is a allowlist-of-refusals, not a full policy - it exists to
 hard-block specific dangerous patterns regardless of any other approval mode
 you run with. It does not, by itself, make the gateway non-interactive; pair
 it with whatever HERMES_YOLO_MODE / approval-mode setting fits your risk
-tolerance (see the [Configuration guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+tolerance (see the [Security guide](https://hermes-agent.nousresearch.com/docs/user-guide/security)
 for the full picture - approvals policy is deliberately not duplicated here).
 
 ## Environment variables

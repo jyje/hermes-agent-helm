@@ -577,15 +577,33 @@ config:
       - "rm -rf /"       # 무조건 거부됩니다: yolo 모드에서도 안전하게 유지
       - "curl.*\\|.*sh"
     cron_mode: deny       # 무인 cron 실행: "deny"(기본값) 또는 "approve"
+    unattended_mode: deny # API 서버 / webhook 세션: "deny"(기본값) 또는 "approve"
+    single_query_mode: deny  # 단발 `hermes chat -q` 실행: 같은 선택지
     discord_prompt_timeout: 120  # Discord 버튼 프롬프트 유지 시간(초)
                                  # (업스트림에서 clamp됨; 기본값 300초/5분)
 ```
 
+`cron_mode`, `unattended_mode`, `single_query_mode`는 "답할 사람이 없는"
+세 가지 상황을 위한 스위치입니다. 각각 cron 작업, 이 차트가 노출할 수 있는
+`apiServer` / `webhook` 리스너로 들어온 세션, 단발 `-q` 실행을 다룹니다.
+기본값은 모두 `deny`입니다: 그런 세션이 위험 명령 프롬프트에 걸리면 승인
+타임아웃 동안 멈추는 대신 즉시 거부되고, 에이전트는 다른 경로를 찾아야
+합니다. `approve`는 그 컨텍스트의 모든 명령을 자동 승인합니다. 상대편에
+사람이 있는 메시징 플랫폼(Discord, Telegram 등)은 이 스위치의 대상이 아니며,
+플랫폼별 프롬프트 타임아웃 안에서 인터랙티브 프롬프트를 받습니다.
+
+명령 승인과는 별개로, 에이전트 자신의 지시 파일(`AGENTS.md`, `SOUL.md`,
+skills, memory 저장소)에 대한 쓰기는 항상 승인을 요구하고, 사람 채널이 없으면
+fail-closed되며, yolo 우회가 없습니다(업스트림
+`security.protected_instruction_files`, 기본 켜짐). Hermes의 self-improvement
+skill 쓰기는 조용히 반영되는 대신 채팅에서 프롬프트로 나타난다고 보면
+됩니다.
+
 `approvals.deny`는 전체 정책이 아니라 "거부 목록"입니다 - 다른 승인 모드가
 무엇이든 상관없이 특정 위험 패턴을 무조건 막기 위해 존재합니다. 이것만으로
 gateway가 비대화형이 되지는 않으니, 감수할 위험 수준에 맞는
-HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은 [설정
-가이드](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)
+HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은 [보안
+가이드](https://hermes-agent.nousresearch.com/docs/user-guide/security)
 참고 - 승인 정책 전체를 여기서 다시 다루지는 않습니다).
 
 ## 환경변수
