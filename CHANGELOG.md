@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.14.0
+
+### Other
+
+- [#281](https://github.com/jyje/hermes-agent-helm/pull/281) [`cf8ea3b`](https://github.com/jyje/hermes-agent-helm/commit/cf8ea3b84f5b9e30792bce949d169d383c25336f) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Update the default Hermes Agent image to v2026.9.7.
+
 ## 1.13.0
 
 ### Features
