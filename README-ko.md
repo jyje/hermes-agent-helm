@@ -12,7 +12,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
 
-[English](README.md) · [한국어](README-ko.md) · **🚀 [Hermes 팀](docs/ko/advanced/teams/index.md)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
+[English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md) · **🚀 [Hermes 팀](docs/ko/advanced/teams/index.md)** · [Chart docs](charts/hermes-agent/README-ko.md) · [CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY-ko.md) · [AGENTS](AGENTS.md)
 
 ---
 

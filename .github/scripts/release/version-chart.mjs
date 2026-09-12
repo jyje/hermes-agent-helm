@@ -149,6 +149,8 @@ run('helm-docs', ['--chart-search-root=charts', '--template-files=README.md.gotm
 for (const path of [
   resolve(root, 'examples/helm/README.md'),
   resolve(root, 'charts/hermes-agent/README-ko.md'),
+  resolve(root, 'charts/hermes-agent/README-ja.md'),
+  resolve(root, 'charts/hermes-agent/README-zh.md'),
 ]) {
   const source = readFileSync(path, 'utf8');
   writeFileSync(path, source.replaceAll(release.oldVersion, packageVersion));
