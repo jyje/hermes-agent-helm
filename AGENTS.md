@@ -70,9 +70,11 @@ as a **Secret**.
   full-tree mirrors: update only their translated entry pages, and do not
   require a translation for an unrelated English or Korean page. Their entry
   landing page must tell readers that the remaining sections use English.
-  Record the source path and full English commit SHA in each translated page's
-  front matter. See `CONTRIBUTING.md` for the entry-path list and notice
-  wording. The chart README's auto-generated `## Values` table stays English
+  Record the source path and full English commit SHA in each translated page:
+  as front matter on `docs/<locale>/` pages, and as a first-line HTML comment
+  in translated READMEs, which GitHub renders directly and would otherwise show
+  the front matter as a table. See `CONTRIBUTING.md` for the entry-path list,
+  both forms, and the notice wording. The chart README's auto-generated `## Values` table stays English
   in every locale so it cannot drift from `values.yaml`.
 - **Changeset release items are a contributor contract.** For every
   user-visible chart change - including a new `values-*.yaml` example, a new
