@@ -89,6 +89,28 @@ plugins:
             Security policy: 보안 정책
             Source documents: 소스 문서
             About: 정보
+        - locale: ja
+          name: 日本語
+          build: true
+          nav_translations:
+            Home: ホーム
+            Chart: チャート
+            Hermes Agent: Hermes Agent
+            Getting started: はじめに
+            Install: インストール
+            Advanced: 高度な使い方
+            About: このプロジェクトについて
+        - locale: zh
+          name: 简体中文
+          build: true
+          nav_translations:
+            Home: 首页
+            Chart: Chart
+            Hermes Agent: Hermes Agent
+            Getting started: 入门
+            Install: 安装
+            Advanced: 进阶使用
+            About: 关于
 
 markdown_extensions:
   - admonition

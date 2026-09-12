@@ -46,6 +46,19 @@ page as the single source for workflow details rather than restating them here.
 
 ## Documentation locales
 
+English is the default language and the source of truth. Keep every language
+selector in this order: **English, 한국어, 日本語, 简体中文** (`en`, `ko`, `ja`,
+`zh`). English is served at the site root; translations use `/ko/`, `/ja/`,
+and `/zh/`. Chinese here means Simplified Chinese; Traditional Chinese is a
+separate future locale, not an alias for `zh`.
+
+Use consistent terminology in translated entry pages: Japanese uses
+プロバイダー, エージェント, チャート, and デプロイ; Simplified Chinese uses
+提供商, 智能体, Chart, 部署, and 密钥. Keep identifiers, commands, environment
+variables, and example filenames verbatim. Translate warnings without
+weakening their meaning, and do not imply native-speaker review unless it
+actually took place.
+
 Korean (`ko`) is the full-parity locale. Every English docs page and the root
 and chart READMEs have Korean twins. Keep those pairs equivalent in the same
 change.

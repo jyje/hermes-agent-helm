@@ -24,8 +24,10 @@ import posixpath
 import re
 import subprocess
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from markupsafe import Markup
+from mkdocs.utils.meta import get_data
 
 REPO_ROOT = Path(__file__).parent
 _GITHUB_BLOB = "https://github.com/jyje/hermes-agent-helm/blob/main/"
@@ -39,15 +41,18 @@ _GITHUB_TREE = "https://github.com/jyje/hermes-agent-helm/tree/main/"
 # list of the same facts is just a place for them to drift apart. Every
 # `.md`-target directive site-wide qualifies (`.yaml`-target snippets, e.g.
 # a values file embedded in a fenced code block, need no link-fixing and
-# are left to pymdownx.snippets alone); every target is a distinct file, so
-# the reverse mapping is unambiguous.
+# are left to pymdownx.snippets alone). Duplicate includes use the shortest
+# page path as their canonical link destination.
 _INCLUDE_RE = re.compile(r'--8<--\s+"([^"]+\.md)"')
 _INCLUDES: dict[str, str] = {}
 _SIBLING_PAGES: dict[str, str] = {}
 _KO_SUFFIX_PAGES: dict[str, str] = {}
+_SITE_BASE = "/"
 
 
 def on_files(files, config):
+    global _SITE_BASE
+    _SITE_BASE = urlsplit(config.get("site_url") or "/").path.rstrip("/") + "/"
     _INCLUDES.clear()
     for file in files.documentation_pages():
         text = Path(file.abs_src_path).read_text(encoding="utf-8")
@@ -55,7 +60,10 @@ def on_files(files, config):
         if match:
             _INCLUDES[file.src_uri] = match.group(1)
     _SIBLING_PAGES.clear()
-    _SIBLING_PAGES.update({source: page for page, source in _INCLUDES.items()})
+    # A README can appear on both a landing and a reference page. Prefer the
+    # shortest route consistently, independent of file discovery order.
+    for page, source in sorted(_INCLUDES.items(), key=lambda item: (len(item[0]), item[0])):
+        _SIBLING_PAGES.setdefault(source, page)
     # Older source documents sometimes link to a sibling named
     # ``foo-ko.md``. The localized docs now live in a parallel ``ko/`` tree,
     # so discover the actual target from the page tree instead of assuming a
@@ -103,11 +111,13 @@ def _page_clean_path(docs_md_path: str) -> str:
     return clean
 
 
-def _relative_url(target_docs_md_path: str, current_page) -> str:
+def _docs_url(target_docs_md_path: str) -> str:
     target_clean = _page_clean_path(target_docs_md_path)
-    current_dir = current_page.url.rstrip("/") or "."
-    rel = posixpath.relpath(target_clean, start=current_dir)
-    return "./" if rel == "." else rel + "/"
+    # Keep an explicit source locale, including English, across i18n builds.
+    # Relative links like ../ can otherwise be resolved back to the current
+    # language by mkdocs-static-i18n. Derive the prefix from site_url so forks
+    # and local previews can use their own site path.
+    return _SITE_BASE if target_clean == "." else _SITE_BASE + target_clean + "/"
 
 
 def _resolve(target: str, anchor: str, page, source_dir: str) -> str | None:
@@ -117,7 +127,7 @@ def _resolve(target: str, anchor: str, page, source_dir: str) -> str | None:
 
     docs_match = _DOCS_LINK_RE.fullmatch(target)
     if docs_match:
-        return _relative_url(docs_match.group(1), page) + anchor
+        return _docs_url(docs_match.group(1)) + anchor
 
     repo_path = posixpath.normpath(posixpath.join(source_dir, target))
     if target.endswith("/") and not repo_path.endswith("/"):
@@ -133,13 +143,13 @@ def _resolve(target: str, anchor: str, page, source_dir: str) -> str | None:
     # which is not an in-tree page either and must not be left untouched.
     docs_page = _SIBLING_PAGES.get(repo_path)
     if docs_page:
-        return _relative_url(docs_page, page) + anchor
+        return _docs_url(docs_page) + anchor
 
     ko_match = _KO_SUFFIX_RE.fullmatch(target)
     if ko_match:
         ko_page = _KO_SUFFIX_PAGES.get(target)
         if ko_page:
-            return _relative_url(ko_page, page) + anchor
+            return _docs_url(ko_page) + anchor
 
     if repo_path == "docs" or repo_path.startswith("docs/"):
         return None  # inside the docs tree: a normal, already-working link
@@ -172,6 +182,9 @@ def on_page_markdown(markdown, page, config, files):
         if directive not in markdown:
             return markdown
         included = (REPO_ROOT / source).read_text(encoding="utf-8")
+        # The including page already owns its metadata. A translated README's
+        # provenance must remain source metadata, not a paragraph in the site.
+        included, _ = get_data(included)
         fixed = _fix_links(included, page, posixpath.dirname(source))
         return markdown.replace(directive, fixed)
 
