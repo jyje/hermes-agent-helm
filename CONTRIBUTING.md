@@ -77,14 +77,24 @@ Do not expand a locale's scope incidentally in an unrelated docs PR.
 | Section landings | `docs/<locale>/advanced/index.md` and `about/index.md` |
 | Contributing | Keep the English `CONTRIBUTING.md` source |
 
-Add this front matter to every translated page. Use the full SHA of the
+Record the English source of every translation. Use the full SHA of the
 English source commit used for the translation, then update it whenever the
-translation is refreshed:
+translation is refreshed. Translated `docs/<locale>/**/*.md` pages carry it
+as MkDocs front matter:
 
 ```yaml
 translation_source:
-  path: README.md
+  path: docs/getting-started/install.md
   commit: 0123456789abcdef0123456789abcdef01234567
+```
+
+Translated READMEs (`README-<locale>.md`, `charts/hermes-agent/README-<locale>.md`)
+are rendered directly on GitHub, which shows YAML front matter as a table
+above the document, so they carry the same facts as an HTML comment on the
+first line instead:
+
+```markdown
+<!-- translation_source: README.md @ 0123456789abcdef0123456789abcdef01234567 -->
 ```
 
 Every entry-scoped locale landing page must also show this reader-facing

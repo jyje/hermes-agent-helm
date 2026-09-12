@@ -1,5 +1,9 @@
 """Regression checks for translated README includes and language links.
 
+This directory is deliberately not a package: validate-chart.yaml's
+``unittest discover -s tests`` must not pick these up, because ``hooks``
+imports mkdocs, which only the deploy-docs workflow installs.
+
 Run with the documentation environment:
     python -m unittest discover -s tests/docs
 """
@@ -60,19 +64,6 @@ class DocsHooksTest(unittest.TestCase):
                 hooks._fix_links("[Chart](README.md#values)", self.page, "charts/hermes-agent"),
                 "[Chart](/custom-prefix/chart/#values)",
             )
-
-    def test_include_metadata_is_not_rendered_and_body_is_preserved(self):
-        self.configure([("ja/index.md", "README-ja.md")])
-        body = "# 日本語\n\n```yaml\nconfig: {}\n```\n\n---\n\n本文\n"
-        (self.root / "README-ja.md").write_text(
-            "---\ntranslation_source:\n  path: README.md\n  commit: "
-            + "a" * 40 + "\n---\n\n" + body,
-            encoding="utf-8",
-        )
-        self.assertEqual(
-            hooks.on_page_markdown('--8<-- "README-ja.md"', self.page, {}, None),
-            body,
-        )
 
     def test_untranslated_doc_link_keeps_english_and_unicode_anchor(self):
         self.configure([], site_url="https://example.test/")

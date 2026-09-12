@@ -1,8 +1,4 @@
----
-translation_source:
-  path: charts/hermes-agent/README.md
-  commit: 4c00dee9830393c8829109453d698bb1eb0ef3f3
----
+<!-- translation_source: charts/hermes-agent/README.md @ 4c00dee9830393c8829109453d698bb1eb0ef3f3 -->
 
 <div align="center" markdown="1">
 

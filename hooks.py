@@ -27,7 +27,6 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from markupsafe import Markup
-from mkdocs.utils.meta import get_data
 
 REPO_ROOT = Path(__file__).parent
 _GITHUB_BLOB = "https://github.com/jyje/hermes-agent-helm/blob/main/"
@@ -182,9 +181,6 @@ def on_page_markdown(markdown, page, config, files):
         if directive not in markdown:
             return markdown
         included = (REPO_ROOT / source).read_text(encoding="utf-8")
-        # The including page already owns its metadata. A translated README's
-        # provenance must remain source metadata, not a paragraph in the site.
-        included, _ = get_data(included)
         fixed = _fix_links(included, page, posixpath.dirname(source))
         return markdown.replace(directive, fixed)
 
