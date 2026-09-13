@@ -4,6 +4,46 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "fixed"
+          description: "Documentation(docs): Japanese entry documentation Add Japanese entry pages and README translations, with English fallback for the remaining guides and Englis..."
+        - kind: "fixed"
+          description: "Documentation(docs): Simplified Chinese entry documentation Add Simplified Chinese entry pages and README translations, preserving English reference values a..."
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.9.11."
+        - kind: "added"
+          description: "Feature(values): Nous free-tier overlay Add `values-nous.yaml`, a zero-key overlay that enables the v2026.9.11 Nous free tier (`nous/welcome` inference plus..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.9.11
+    created: "2026-09-13T12:16:23.185397848Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: f2f27f323e89ed6d76b14991f9590589364e506e7443347c293ffa7fcf567f34
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.15.0.tgz
+    version: 1.15.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "added"
           description: "Update the default Hermes Agent image to v2026.9.7."
       artifacthub.io/license: MIT
@@ -1465,4 +1505,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-09-11T16:45:23.643579394Z"
+generated: "2026-09-13T12:16:23.18090147Z"
