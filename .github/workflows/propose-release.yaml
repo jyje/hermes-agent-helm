@@ -89,7 +89,7 @@ jobs:
         # reintroduces "This version of the Changesets action is designed
         # to work with Changesets CLI v3" (see git blame for the v1.9.0
         # pin this replaced, and #243/#251 for the incident that caused it).
-        uses: changesets/action@v2.1.1
+        uses: changesets/action@v2.1.2
         with:
           # v2's input names (version-script/commit-message/pr-title), not
           # v1.9.0's (version/commit/title) - passing the v1 names here
