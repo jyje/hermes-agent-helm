@@ -12,7 +12,7 @@
 
 複数の LLM プロバイダーに対応するエージェントフレームワーク [Hermes Agent](https://github.com/NousResearch/hermes-agent) を Kubernetes 上で実行します。OpenAI、Anthropic、Gemini、OpenRouter、NVIDIA、LiteLLM/vLLM などの OpenAI 互換プロキシを含む、Hermes が対応するプロバイダーを `values.yaml` で設定できます。`helm test` によるヘルスチェックも付属しています。
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.14.0](https://img.shields.io/badge/Version-1.14.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.11](https://img.shields.io/badge/AppVersion-v2026.9.11-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.15.0](https://img.shields.io/badge/Version-1.15.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.11](https://img.shields.io/badge/AppVersion-v2026.9.11-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -23,7 +23,7 @@
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.14.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.15.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```

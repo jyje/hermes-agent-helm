@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.15.0
+
+### Features
+
+- [#292](https://github.com/jyje/hermes-agent-helm/pull/292) [`42f59b7`](https://github.com/jyje/hermes-agent-helm/commit/42f59b7bbb7d5277cfd8540aa612649ec5af6aca) - Feature(values): Nous free-tier overlay
+
+  Add `values-nous.yaml`, a zero-key overlay that enables the v2026.9.11 Nous free tier (`nous/welcome` inference plus connector tools) via `HERMES_GUEST_ONBOARDING=1`, and document that env var in the README's environment variable reference.
+
+### Documentation
+
+- [#290](https://github.com/jyje/hermes-agent-helm/pull/290) [`713b413`](https://github.com/jyje/hermes-agent-helm/commit/713b413a7f5f4ec5a5ea0d858a866e45b4abbc67) - Documentation(docs): Japanese entry documentation
+
+  Add Japanese entry pages and README translations, with English fallback for the remaining guides and English-first language navigation.
+
+- [#290](https://github.com/jyje/hermes-agent-helm/pull/290) [`713b413`](https://github.com/jyje/hermes-agent-helm/commit/713b413a7f5f4ec5a5ea0d858a866e45b4abbc67) - Documentation(docs): Simplified Chinese entry documentation
+
+  Add Simplified Chinese entry pages and README translations, preserving English reference values and the English, Korean, Japanese, Chinese language order.
+
+### Other
+
+- [#283](https://github.com/jyje/hermes-agent-helm/pull/283) [`4c00dee`](https://github.com/jyje/hermes-agent-helm/commit/4c00dee9830393c8829109453d698bb1eb0ef3f3) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Update the default Hermes Agent image to v2026.9.11.
+
 ## 1.14.0
 
 ### Other
