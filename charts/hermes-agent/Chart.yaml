@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.14.0
+version: 1.15.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -34,5 +34,11 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
+    - kind: "fixed"
+      description: "Documentation(docs): Japanese entry documentation Add Japanese entry pages and README translations, with English fallback for the remaining guides and Englis..."
+    - kind: "fixed"
+      description: "Documentation(docs): Simplified Chinese entry documentation Add Simplified Chinese entry pages and README translations, preserving English reference values a..."
     - kind: "added"
-      description: "Update the default Hermes Agent image to v2026.9.7."
+      description: "Update the default Hermes Agent image to v2026.9.11."
+    - kind: "added"
+      description: "Feature(values): Nous free-tier overlay Add `values-nous.yaml`, a zero-key overlay that enables the v2026.9.11 Nous free tier (`nous/welcome` inference plus..."
