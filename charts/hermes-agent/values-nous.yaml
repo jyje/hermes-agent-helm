@@ -1,0 +1,33 @@
+# values-nous.yaml
+#
+# Hermes Agent on the Nous free tier: zero external API keys required.
+# Nous Research's account service mints an anonymous identity at boot that
+# provides one free model (nous/welcome) plus a token for the managed
+# connector tools (web search, browser, Gmail, Linear, and other third-party
+# integrations). No sign-up, no provider key.
+#
+#   helm upgrade --install hermes-agent ./charts/hermes-agent \
+#     --namespace hermes-agent --create-namespace \
+#     -f charts/hermes-agent/values-nous.yaml --wait
+#
+# The free tier is meant as a zero-setup starting point (or a source of
+# connector tools alongside your own provider key, see the
+# HERMES_GUEST_ONBOARDING note in README.md), not a production inference
+# path: `nous/welcome` is a single shared model with no SLA. Switch to a
+# provider-specific values file (values-openai.yaml, values-openrouter.yaml,
+# ...) once you have your own key.
+
+config:
+  model:
+    provider: nous
+    default: nous/welcome
+  terminal:
+    backend: local
+
+env:
+  # Turns on the free-tier bootstrap at boot; unset (the chart default)
+  # leaves this feature off entirely, matching pre-v2026.9.11 behavior.
+  HERMES_GUEST_ONBOARDING: "1"
+  # Unused with the `nous` provider; overrides the chart's OpenAI placeholder
+  # so no dummy key is required.
+  OPENAI_API_KEY: "unused"

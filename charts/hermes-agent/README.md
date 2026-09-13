@@ -60,6 +60,7 @@ Set `config.model.provider` to a built-in key, supply its key under `env`:
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex device login (no API key) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | depends on the reference/aggregator models in the preset | [`values-moa.yaml`](values-moa.yaml) |
 | Custom (LiteLLM / vLLM / LM Studio) | your own id, under `config.providers` | depends on proxy | [`values-litellm.yaml`](values-litellm.yaml) |
+| Nous free tier (`nous/welcome`) | `nous` | none: anonymous identity minted at boot via `HERMES_GUEST_ONBOARDING=1` | [`values-nous.yaml`](values-nous.yaml) |
 
 > `openai` (no suffix) is **not** a valid provider key - it aliases to
 > OpenRouter. Use `openai-api`.
@@ -691,6 +692,7 @@ A few more commonly-used ones, current as of image `v2026.9.11`:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix homeserver integration |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | Bundled username/password provider for the dashboard auth gate, which upstream engages on any non-loopback bind; `HERMES_DASHBOARD_PUBLIC_URL` declares the external origin behind an Ingress |
+| `HERMES_GUEST_ONBOARDING` | Set to `1` to mint an anonymous Nous identity at boot (free `nous/welcome` inference plus connector tools: web search, browser, Gmail, Linear, ...). With a provider key already configured, only the connector-tools identity is minted; `active_provider` is left unchanged. Unset (default) matches pre-v2026.9.11 behavior. See `values-nous.yaml` for a zero-key overlay |
 | `HERMES_MAX_ITERATIONS` | Tool-calling iteration budget per conversation (default: 500, then one wrap-up grace call); a hard cap is `config.agent.max_turns`, unlimited upstream by default and no longer seeded by this chart |
 | `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
 | `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
@@ -762,6 +764,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | Endpoint override via `UPSTAGE_BASE_URL` |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | Reference models run in parallel, an aggregator model synthesizes the result |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager** supplies provider keys at startup |
+| [`values-nous.yaml`](values-nous.yaml) | Nous free tier (`nous`) | **Zero external API keys**: anonymous identity minted at boot (`HERMES_GUEST_ONBOARDING=1`) for `nous/welcome` inference and connector tools |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (dashboard enabled, upstream password gate, trusted proxy) |
