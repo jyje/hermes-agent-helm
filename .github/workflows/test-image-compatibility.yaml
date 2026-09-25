@@ -104,9 +104,17 @@ jobs:
           kubectl exec -n "$NS" "$pod" -- sh -ec '
             config="${HERMES_HOME:-/opt/data}/config.yaml"
             test -s "$config"
-            grep -Eq "^_config_version:[[:space:]]*[0-9]+" "$config"
-            grep -Eq "default:[[:space:]]*gpt-4o-mini" "$config"
-            test "$(cat "${HERMES_HOME:-/opt/data}/.env")" = "HERMES_COMPAT_TEST_MARKER=synthetic"
+            echo "Persisted config after startup migration:"
+            sed -n "1,24p" "$config"
+            if ! grep -Eq "_config_version:[[:space:]]*[0-9]+" "$config"; then
+              echo "::error::Migrated config has no numeric _config_version"; exit 1
+            fi
+            if ! grep -Fq "gpt-4o-mini" "$config"; then
+              echo "::error::User model value was not preserved"; exit 1
+            fi
+            if [ "$(cat "${HERMES_HOME:-/opt/data}/.env")" != "HERMES_COMPAT_TEST_MARKER=synthetic" ]; then
+              echo "::error::.env marker was not preserved"; exit 1
+            fi
             echo "Persisted config migrated; user model and .env marker preserved"
           '
           helm test hermes-agent --namespace "$NS" --timeout 5m
