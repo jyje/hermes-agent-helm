@@ -1,5 +1,5 @@
 ---
-"@jyje/hermes-agent-helm": major
+"@jyje/hermes-agent-helm": minor
 ---
 
 Fix(persistence): Migrate persisted Hermes config

@@ -12,7 +12,7 @@
 
 在 Kubernetes 上运行支持多个 LLM 提供商的智能体框架 [Hermes Agent](https://github.com/NousResearch/hermes-agent)。通过 `values.yaml` 即可配置 Hermes 支持的提供商，包括 OpenAI、Anthropic、Gemini、OpenRouter、NVIDIA，以及 LiteLLM/vLLM 等 OpenAI 兼容代理，并使用内置的 `helm test` 健康检查。
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.15.0](https://img.shields.io/badge/Version-1.15.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.11](https://img.shields.io/badge/AppVersion-v2026.9.11-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.15.0](https://img.shields.io/badge/Version-1.15.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.24](https://img.shields.io/badge/AppVersion-v2026.9.24-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
