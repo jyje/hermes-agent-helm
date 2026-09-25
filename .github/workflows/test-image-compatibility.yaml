@@ -1,0 +1,123 @@
+name: Test Hermes image compatibility
+
+on:
+  push:
+    branches:
+      - test/issue-313-image-compat-validation
+
+permissions:
+  contents: read
+
+jobs:
+  persisted-config:
+    name: ${{ matrix.image-tag }} / persisted config
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        image-tag: [v2026.9.11, v2026.9.14, v2026.9.21]
+    steps:
+      - name: Checkout test harness
+        uses: actions/checkout@v7
+
+      - name: Checkout pinned chart implementation
+        uses: actions/checkout@v7
+        with:
+          repository: jyje/hermes-agent-helm
+          ref: b57d192325b285710bf742853fc2badb31ac43ed
+          path: chart-source
+
+      - uses: azure/setup-helm@v5
+
+      - uses: helm/kind-action@v1
+
+      - name: Seed a synthetic partial config into an existing PVC
+        env:
+          NS: compat-${{ strategy.job-index }}
+        run: |
+          set -euo pipefail
+          kubectl create namespace "$NS"
+          cat <<'YAML' | kubectl apply -n "$NS" -f -
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: hermes-existing-home
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 1Gi
+          ---
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: seed-existing-home
+          spec:
+            restartPolicy: Never
+            containers:
+              - name: seed
+                image: busybox:1.36
+                command:
+                  - sh
+                  - -ec
+                  - |
+                    mkdir -p /opt/data
+                    printf 'model:\n  provider: openai\n  default: gpt-4o-mini\n' > /opt/data/config.yaml
+                    printf 'HERMES_COMPAT_TEST_MARKER=synthetic\n' > /opt/data/.env
+                    echo 'Seeded partial config without _config_version'
+                volumeMounts:
+                  - name: data
+                    mountPath: /opt/data
+            volumes:
+              - name: data
+                persistentVolumeClaim:
+                  claimName: hermes-existing-home
+          YAML
+          kubectl wait -n "$NS" --for=jsonpath='{.status.phase}'=Succeeded pod/seed-existing-home --timeout=180s
+          kubectl logs -n "$NS" seed-existing-home
+
+      - name: Install pinned chart with selected upstream image
+        env:
+          NS: compat-${{ strategy.job-index }}
+          IMAGE_TAG: ${{ matrix.image-tag }}
+        run: |
+          set -euo pipefail
+          helm upgrade --install hermes-agent chart-source/charts/hermes-agent \
+            --namespace "$NS" \
+            --set persistence.existingClaim=hermes-existing-home \
+            --set bootstrap.overwrite=false \
+            --set-string image.tag="$IMAGE_TAG" \
+            --set-string env.OPENAI_API_KEY=sk-test \
+            --wait --timeout 6m
+
+      - name: Assert migrated persisted config and run chart test
+        env:
+          NS: compat-${{ strategy.job-index }}
+          IMAGE_TAG: ${{ matrix.image-tag }}
+        run: |
+          set -euo pipefail
+          pod="$(kubectl get pod -n "$NS" -l app.kubernetes.io/name=hermes-agent \
+            -o jsonpath='{.items[0].metadata.name}')"
+          echo "Testing image $IMAGE_TAG in pod $pod"
+          # shellcheck disable=SC2016 # Variables expand inside the workload pod, not on the runner.
+          kubectl exec -n "$NS" "$pod" -- sh -ec '
+            config="${HERMES_HOME:-/opt/data}/config.yaml"
+            test -s "$config"
+            grep -Eq "^_config_version:[[:space:]]*[0-9]+" "$config"
+            grep -Eq "default:[[:space:]]*gpt-4o-mini" "$config"
+            test "$(cat "${HERMES_HOME:-/opt/data}/.env")" = "HERMES_COMPAT_TEST_MARKER=synthetic"
+            echo "Persisted config migrated; user model and .env marker preserved"
+          '
+          helm test hermes-agent --namespace "$NS" --timeout 5m
+
+      - name: Diagnostics on failure
+        if: failure()
+        env:
+          NS: compat-${{ strategy.job-index }}
+        run: |
+          kubectl get pods -n "$NS" -o wide || true
+          kubectl describe pods -n "$NS" || true
+          kubectl logs -n "$NS" -l app.kubernetes.io/name=hermes-agent -c seed-config --tail=-1 || true
+          kubectl logs -n "$NS" -l app.kubernetes.io/name=hermes-agent --all-containers --tail=-1 || true
+          kubectl logs -n "$NS" -l app.kubernetes.io/component=test --all-containers --tail=-1 || true
