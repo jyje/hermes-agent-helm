@@ -30,7 +30,7 @@ kubectl get pod -n "$NS" "$pod" \
   | jq -e '.readOnlyRootFilesystem == true and .allowPrivilegeEscalation == false'
 
 echo "[$NS] verifying the read-only rootfs pod is actually usable, not just admitted"
-kubectl exec -n "$NS" "$pod" -- hermes doctor
+run_doctor "$pod"
 
 # The two other init-container securityContexts (auth-device-login,
 # init-team-shared) aren't exercised live here: device login needs a real
