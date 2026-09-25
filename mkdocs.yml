@@ -196,6 +196,7 @@ nav:
           - Setting up a team: advanced/teams/index.md
           - Hermes teams: advanced/teams/reference.md
           - Hermes collaboration: advanced/teams/collaboration.md
+          - Telegram teams: advanced/teams/telegram.md
       - ArgoCD guide: advanced/argocd.md
   - Contributing:
       - contributing/index.md
