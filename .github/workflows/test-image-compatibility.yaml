@@ -130,7 +130,11 @@ jobs:
             echo "Persisted config after startup migration:"
             sed -n "1,24p" "$config"
             if ! grep -Eq "_config_version:[[:space:]]*[0-9]+" "$config"; then
-              echo "::error::Migrated config has no numeric _config_version"; exit 1
+              if [ "$CHART_LINE" = "published-v1.15.0" ]; then
+                echo "::warning::Published v1.15.0 chart did not persist a numeric _config_version in this scenario"
+              else
+                echo "::error::Post-#305 chart migration did not persist a numeric _config_version"; exit 1
+              fi
             fi
             if ! grep -Fq "gpt-4o-mini" "$config"; then
               echo "::error::User model value was not preserved"; exit 1
@@ -149,7 +153,7 @@ jobs:
                 echo "::warning::Legacy chart did not retain the synthetic .env marker in an active file or chart migration backup"
               fi
             fi
-            echo "Persisted config migrated; user model and .env marker preserved"
+            echo "Persisted config checks completed; user model value is present"
           '
           helm test hermes-agent --namespace "$NS" --timeout 5m
 
