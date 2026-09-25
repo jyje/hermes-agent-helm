@@ -413,15 +413,7 @@ spec:
           value: {{ .Values.webhook.port | quote }}
         {{- end }}
         {{- if .Values.team.enabled }}
-        # Team mode makes explicit body mentions the only bot-to-bot trigger.
-        - name: DISCORD_ALLOW_BOTS
-          value: "mentions"
-        - name: DISCORD_THREAD_REQUIRE_MENTION
-          value: "true"
-        - name: DISCORD_REPLY_TO_MODE
-          value: "off"
-        - name: DISCORD_ALLOW_MENTION_REPLIED_USER
-          value: "false"
+        {{- include "hermes-agent.team.env" . | trim | nindent 8 }}
         {{- end }}
         {{- with .Values.extraEnv }}
         {{- toYaml . | nindent 8 }}

@@ -1,6 +1,6 @@
 ---
 name: {{ include "hermes-agent.team.skillName" . }}
-description: Manage the {{ .Values.team.name }} Hermes team roster, leader and member responsibilities, member status, Discord handoffs, reviews, and shared knowledge. Use for any team, member, roster, online-status, delegation, handoff, or collaboration request.
+description: Manage the {{ .Values.team.name }} Hermes team roster, leader and member responsibilities, member status, {{ include "hermes-agent.team.platformLabel" . }} handoffs, reviews, and shared knowledge. Use for any team, member, roster, online-status, delegation, handoff, or collaboration request.
 ---
 
 # {{ .Values.team.name }} team protocol
@@ -19,7 +19,7 @@ configured team release.
 {{- end }}
 
 The roster states who is configured. It does not prove runtime availability.
-Never infer that a member is online, idle, or working from Discord's typing
+Never infer that a member is online, idle, or working from {{ include "hermes-agent.team.platformLabel" . }}'s typing
 indicator. Treat only an explicit team `TASK`, `RESULT`, or `BLOCKED` message
 as authoritative workflow state.
 
@@ -29,7 +29,7 @@ The shared volume is mounted at `{{ .Values.team.sharedVolume.mountPath }}`.
 The leader is its curator and may write durable, reviewed, reusable knowledge.
 Members receive a read-only mount and may consult it as background.
 Never use the volume for live assignments, queues, locks, progress, completion
-markers, or result handoffs. Discord messages must contain all context required
+markers, or result handoffs. {{ include "hermes-agent.team.platformLabel" . }} messages must contain all context required
 to perform and review a task.
 
 ## Leader workflow

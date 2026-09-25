@@ -346,6 +346,13 @@ The `file` and `memory` toolsets remain available for each agent's own work;
 only cross-agent handoffs through files, memory, hooks, or background work are
 prohibited.
 
+For Telegram teams, set `team.platform: telegram`, use the per-role Telegram
+values files, and follow the [Telegram teams guide](../../docs/advanced/teams/telegram.md).
+It covers the one-bot shared assistant pattern, BotFather setup, per-release
+Secrets, mention routing, loop safeguards, and the ArgoCD ApplicationSet.
+Telegram team examples are render-checked in CI; live Telegram delivery still
+needs a real deployment before relying on the handoff behavior.
+
 > Upstream currently documents Hermes bot-to-bot Discord conversation as an
 > unsupported topology with no built-in circuit breaker. The example is
 > experimental: use a dedicated trusted channel, keep a manual stop path, and
@@ -774,6 +781,9 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
+| [`values-telegram-team-assistant.yaml`](values-telegram-team-assistant.yaml) | OpenAI (`openai-api`) | **One Telegram bot shared by several authorized users** |
+| [`values-telegram-team-leader.yaml`](values-telegram-team-leader.yaml) + [`values-telegram-team-member.yaml`](values-telegram-team-member.yaml) | NVIDIA NIM | **Telegram leader/member team** with mention gating and loop safeguards |
+| [`examples/argocd/hermes-team-telegram.yaml`](../../examples/argocd/hermes-team-telegram.yaml) | any | **ArgoCD ApplicationSet** for one leader and multiple Telegram members, with per-release Secrets |
 | [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | **Google Chat bot** over a Pub/Sub pull subscription, service-account JSON mounted via `extraVolumes` |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) |: |
@@ -902,13 +912,15 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
 | soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |
-| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":""},"members":[],"name":"","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.38","securityContext":{"runAsGroup":0,"runAsUser":0},"uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
+| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":"","username":""},"members":[],"name":"","platform":"discord","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.38","securityContext":{"runAsGroup":0,"runAsUser":0},"uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
 | team.enabled | bool | Enable the chart-native leader/member team protocol, roster skill, and shared knowledge volume mount for this release. | `false` |
 | team.identity | string | This release's identity. For a leader it must equal `leader.name`; for a member it must match one entry under `members`. | `""` |
 | team.leader.mentionEnv | string | Environment variable containing the leader's Discord user ID. Supply it through a Secret/SealedSecret; the ID is expanded by Hermes at runtime. | `""` |
 | team.leader.name | string | Leader identity shared by every release in the team. | `""` |
+| team.leader.username | string | Telegram only: the leader bot's @username, without the `@`. | `""` |
 | team.members | list | Configured members. ApplicationSet users define this once in the common template so every generated release receives the same complete roster. | `[]` |
 | team.name | string | Stable team identifier used in the generated skill and default names. | `""` |
+| team.platform | string | Chat platform the team coordinates on: `discord` or `telegram`. It picks the mention format and the gates team mode enforces (see the chart README, "Agent team"). Every release in one team must use the same platform. | `"discord"` |
 | team.protocol.maxHandoffs | int | Maximum serial leader-to-member handoffs before escalating to a human. | `6` |
 | team.role | string | This release's team role. | `"member"` |
 | team.sharedVolume.accessModes | list | RWX access modes used only when `create=true`. | `["ReadWriteMany"]` |

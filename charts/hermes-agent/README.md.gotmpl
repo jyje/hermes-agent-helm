@@ -346,6 +346,13 @@ The `file` and `memory` toolsets remain available for each agent's own work;
 only cross-agent handoffs through files, memory, hooks, or background work are
 prohibited.
 
+For Telegram teams, set `team.platform: telegram`, use the per-role Telegram
+values files, and follow the [Telegram teams guide](../../docs/advanced/teams/telegram.md).
+It covers the one-bot shared assistant pattern, BotFather setup, per-release
+Secrets, mention routing, loop safeguards, and the ArgoCD ApplicationSet.
+Telegram team examples are render-checked in CI; live Telegram delivery still
+needs a real deployment before relying on the handoff behavior.
+
 > Upstream currently documents Hermes bot-to-bot Discord conversation as an
 > unsupported topology with no built-in circuit breaker. The example is
 > experimental: use a dedicated trusted channel, keep a manual stop path, and
@@ -774,6 +781,9 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
+| [`values-telegram-team-assistant.yaml`](values-telegram-team-assistant.yaml) | OpenAI (`openai-api`) | **One Telegram bot shared by several authorized users** |
+| [`values-telegram-team-leader.yaml`](values-telegram-team-leader.yaml) + [`values-telegram-team-member.yaml`](values-telegram-team-member.yaml) | NVIDIA NIM | **Telegram leader/member team** with mention gating and loop safeguards |
+| [`examples/argocd/hermes-team-telegram.yaml`](../../examples/argocd/hermes-team-telegram.yaml) | any | **ArgoCD ApplicationSet** for one leader and multiple Telegram members, with per-release Secrets |
 | [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | **Google Chat bot** over a Pub/Sub pull subscription, service-account JSON mounted via `extraVolumes` |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) |: |

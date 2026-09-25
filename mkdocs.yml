@@ -78,6 +78,7 @@ plugins:
             CI guide: CI 가이드
             Hermes teams: Hermes 팀
             Hermes collaboration: Hermes 협업
+            Telegram teams: Telegram 팀
             Roadmap: 로드맵
             DevOps roadmap: DevOps 로드맵
             OpenAI Codex: OpenAI Codex
@@ -196,6 +197,7 @@ nav:
           - Setting up a team: advanced/teams/index.md
           - Hermes teams: advanced/teams/reference.md
           - Hermes collaboration: advanced/teams/collaboration.md
+          - Telegram teams: advanced/teams/telegram.md
       - ArgoCD guide: advanced/argocd.md
   - Contributing:
       - contributing/index.md

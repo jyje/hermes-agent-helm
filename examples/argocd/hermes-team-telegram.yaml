@@ -1,0 +1,128 @@
+# One ApplicationSet generates the leader and every member of a Telegram team.
+# Same shape as hermes-team.yaml (the Discord variant): the roster, shared
+# skill and shared-volume policy are declared once in the template, and each
+# list entry carries only identity, role and the Secret with that bot's own
+# credentials. The leader is the sole owner of the shared skill ConfigMap and
+# the RWX knowledge PVC; members mount both read-only.
+#
+# Telegram routes on public bot @usernames, so the roster lists them directly
+# (no ID Secret as with Discord). Team mode enforces the Telegram gates
+# (TELEGRAM_ALLOW_BOTS=mentions, TELEGRAM_BOTS_REQUIRE_MENTION=true,
+# TELEGRAM_REQUIRE_MENTION=true, TELEGRAM_REPLY_TO_MODE=off) on every release.
+#
+# Before applying:
+#   1. Create one bot per agent in BotFather. Enable Bot-to-Bot Communication
+#      for each, add all of them to one group (or forum topic), and make each
+#      a group admin or turn Group Privacy off and re-add it. Never reuse a
+#      token: Telegram rejects concurrent polling for the same token.
+#   2. Ensure the default StorageClass supports ReadWriteMany, or set
+#      team.sharedVolume.storageClass below.
+#   3. Create a common Secret `hermes-team-telegram-routing` with the
+#      deployment's human allowlist and group, as env vars:
+#        TELEGRAM_ALLOWED_USERS, TELEGRAM_GROUP_ALLOWED_CHATS,
+#        TELEGRAM_HOME_CHANNEL
+#   4. Create one private Secret per agent holding its provider key and its
+#      own TELEGRAM_BOT_TOKEN. Names are listed under botSecret below.
+#
+# Pin targetRevision to an exact chart version in production.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: hermes-team-telegram
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - list:
+        elements:
+          - name: august
+            teamRole: leader
+            valuesProfile: leader
+            ownsSharedResources: "true"
+            botSecret: hermes-august-telegram-secrets
+          - name: may
+            teamRole: member
+            valuesProfile: member
+            ownsSharedResources: "false"
+            botSecret: hermes-may-telegram-secrets
+          - name: march
+            teamRole: member
+            valuesProfile: member
+            ownsSharedResources: "false"
+            botSecret: hermes-march-telegram-secrets
+  template:
+    metadata:
+      name: 'hermes-{{ .name }}'
+    spec:
+      project: default
+      source:
+        repoURL: ghcr.io/jyje/hermes-agent-helm
+        chart: hermes-agent
+        targetRevision: "*"
+        helm:
+          releaseName: 'hermes-{{ .name }}'
+          valueFiles:
+            - 'values-telegram-team-{{ .valuesProfile }}.yaml'
+          values: |
+            fullnameOverride: 'hermes-{{ .name }}'
+
+            team:
+              enabled: true
+              platform: telegram
+              name: hermes-team
+              role: '{{ .teamRole }}'
+              identity: '{{ .name }}'
+              leader:
+                name: august
+                username: hermes_august_bot
+              members:
+                - name: may
+                  role: Research and evidence gathering
+                  username: hermes_may_bot
+                  capabilities: [research, source-review]
+                - name: march
+                  role: Implementation and verification
+                  username: hermes_march_bot
+                  capabilities: [implementation, testing]
+              protocol:
+                maxHandoffs: 6
+              skill:
+                enabled: true
+                create: {{ .ownsSharedResources }}
+                name: hermes-team-roster
+                configMapName: hermes-team-skill
+                extraInstructions: ""
+              sharedVolume:
+                enabled: true
+                create: {{ .ownsSharedResources }}
+                claimName: hermes-team-knowledge
+                mountPath: /opt/data/team-knowledge
+                storageClass: ""
+                accessModes: [ReadWriteMany]
+                size: 10Gi
+                retain: true
+                permissions:
+                  enabled: {{ .ownsSharedResources }}
+                  image: busybox:1.38
+                  uid: 10000
+                  gid: 10000
+
+            # Drop the packaged placeholder routing values; the common Secret
+            # supplies them. The per-bot Secret comes last in envFrom, so its
+            # TELEGRAM_BOT_TOKEN and provider key override the dummies.
+            extraEnv: []
+            extraEnvFrom:
+              - secretRef:
+                  name: hermes-team-telegram-routing
+              - secretRef:
+                  name: '{{ .botSecret }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: hermes-team
+      syncPolicy:
+        automated:
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

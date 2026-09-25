@@ -13,5 +13,6 @@ description: 저장소 원본 Markdown을, 렌더링된 페이지와 raw 파일�
 - [CI 가이드](../contributing/ci.md)
 - [팀 가이드](../advanced/teams/reference.md)
 - [협업 가이드](../advanced/teams/collaboration.md)
+- [Telegram 팀 가이드](../advanced/teams/telegram.md)
 - [로드맵](roadmap.md)
 - [DevOps 로드맵](../contributing/devops-roadmap.md)
