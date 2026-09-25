@@ -134,16 +134,20 @@ bootstrap:
 
 # ---------------------------------------------------------------------------
 # Team mode -> one chart release still runs one independent Hermes identity,
-# while several releases share a Discord thread and one RWX knowledge volume.
-# The chart mounts one shared, read-only roster skill and appends a small
-# role-specific environment hint so the agent knows when to load it. Cross-agent
-# task handoffs stay visible in Discord; the shared volume stores only durable,
-# accepted knowledge.
+# while several releases share one chat (a Discord thread, or a Telegram group
+# or forum topic) and one RWX knowledge volume. The chart mounts one shared,
+# read-only roster skill and appends a small role-specific environment hint so
+# the agent knows when to load it. Cross-agent task handoffs stay visible in
+# the chat; the shared volume stores only durable, accepted knowledge.
 # ---------------------------------------------------------------------------
 team:
   # -- Enable the chart-native leader/member team protocol, roster skill, and
   # shared knowledge volume mount for this release.
   enabled: false
+  # -- Chat platform the team coordinates on: `discord` or `telegram`. It picks
+  # the mention format and the gates team mode enforces (see the chart README,
+  # "Agent team"). Every release in one team must use the same platform.
+  platform: discord
   # -- Stable team identifier used in the generated skill and default names.
   name: ""
   # -- This release's team role.
@@ -157,6 +161,8 @@ team:
     # -- Environment variable containing the leader's Discord user ID. Supply
     # it through a Secret/SealedSecret; the ID is expanded by Hermes at runtime.
     mentionEnv: ""
+    # -- Telegram only: the leader bot's @username, without the `@`.
+    username: ""
   # -- Configured members. ApplicationSet users define this once in the common
   # template so every generated release receives the same complete roster.
   members: []
@@ -164,6 +170,8 @@ team:
   #    role: Research and evidence gathering
   #    mentionEnv: TEAM_RESEARCHER_DISCORD_ID
   #    capabilities: [research, source-review]
+  #  Telegram teams give each member `username: <bot_username>` instead of
+  #  `mentionEnv`.
   protocol:
     # -- Maximum serial leader-to-member handoffs before escalating to a human.
     maxHandoffs: 6
