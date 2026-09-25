@@ -429,6 +429,17 @@ auth:
 
 # ---------------------------------------------------------------------------
 # Persistence: HERMES_HOME state lives here.
+#
+# HERMES_HOME holds SQLite databases (state.db and others) in WAL mode by
+# default. A PVC's access mode (RWO/RWX) says nothing about whether the
+# filesystem underneath supports the file locking and shared memory WAL needs:
+# prefer block-backed storage (ext4/xfs), and check what is actually mounted
+# at mountPath. Hermes detects virtiofs and 9p and falls back to `delete`
+# journaling for a fresh database there; it does not detect NFS/CIFS. On a
+# network filesystem set `config.database.journal_mode: delete` BEFORE the
+# first start. An existing WAL database is never switched live: stop the
+# workload first (see the storage guide). Keep one private HERMES_HOME per
+# agent; share knowledge through `team.sharedVolume`, never HERMES_HOME.
 # ---------------------------------------------------------------------------
 persistence:
   enabled: true
