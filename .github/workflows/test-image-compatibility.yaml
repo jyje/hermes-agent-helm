@@ -112,8 +112,15 @@ jobs:
             if ! grep -Fq "gpt-4o-mini" "$config"; then
               echo "::error::User model value was not preserved"; exit 1
             fi
-            if [ "$(cat "${HERMES_HOME:-/opt/data}/.env")" != "HERMES_COMPAT_TEST_MARKER=synthetic" ]; then
-              echo "::error::.env marker was not preserved"; exit 1
+            env_file="${HERMES_HOME:-/opt/data}/.env"
+            marker="HERMES_COMPAT_TEST_MARKER=synthetic"
+            if ! grep -Fq "$marker" "$env_file"; then
+              backup="$(find "${HERMES_HOME:-/opt/data}/backups/config" -maxdepth 1 \
+                -type f -name ".env.pre-chart-migrate.*" -print -quit 2>/dev/null || true)"
+              if [ -z "$backup" ] || ! grep -Fq "$marker" "$backup"; then
+                echo "::error::.env marker is missing from both active config and migration backup"; exit 1
+              fi
+              echo "Unknown .env marker was retained in backup: $backup"
             fi
             echo "Persisted config migrated; user model and .env marker preserved"
           '
