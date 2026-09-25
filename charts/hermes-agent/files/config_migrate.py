@@ -14,6 +14,7 @@ container, after the chart config has been copied to HERMES_HOME.
 
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -45,6 +46,34 @@ def _restore_backups(backups: dict[Path, Path]) -> list[Path]:
     return restored
 
 
+def _ensure_runtime_backup_ownership(paths: Iterable[Path]) -> None:
+    """Make chart-created backups writable by Hermes after the init container exits."""
+    from hermes_cli.config_backups import backups_dir, list_config_backups
+
+    try:
+        runtime_uid = int(os.environ.get("HERMES_MIGRATION_UID", "10000"))
+        runtime_gid = int(os.environ.get("HERMES_MIGRATION_GID", "10000"))
+    except ValueError as exc:
+        raise RuntimeError("Hermes migration UID and GID must be numeric") from exc
+    if not 1 <= runtime_uid <= 65534 or not 1 <= runtime_gid <= 65534:
+        raise RuntimeError("Hermes migration UID and GID must be between 1 and 65534")
+
+    for config_path in paths:
+        root = backups_dir(config_path)
+        for directory in (root.parent, root):
+            if directory.is_symlink():
+                raise RuntimeError(f"Refusing to change ownership through symlink {directory}")
+            if directory.exists():
+                if not directory.is_dir():
+                    raise RuntimeError(f"Expected backup directory at {directory}")
+                os.chown(directory, runtime_uid, runtime_gid, follow_symlinks=False)
+
+        for backup in list_config_backups(config_path, "pre-chart-migrate"):
+            if backup.is_symlink():
+                raise RuntimeError(f"Refusing to change ownership of symlink {backup}")
+            os.chown(backup, runtime_uid, runtime_gid, follow_symlinks=False)
+
+
 def main() -> int:
     from hermes_cli.config import (
         check_config_version,
@@ -56,6 +85,8 @@ def main() -> int:
     from hermes_cli.config_migrations import SUPPORT_FLOOR_VERSION, support_floor_message
 
     config_path = get_config_path()
+    env_path = get_env_path()
+    _ensure_runtime_backup_ownership((config_path, env_path))
     if not config_path.is_file():
         return 0
 
@@ -77,7 +108,7 @@ def main() -> int:
         )
         return 0
 
-    backups = _backup_existing((config_path, get_env_path()))
+    backups = _backup_existing((config_path, env_path))
     backup_text = ", ".join(str(path) for path in backups.values()) or "none"
     print(
         f"[chart-config-migrate] Migrating config schema "
@@ -106,6 +137,7 @@ def main() -> int:
             f"Migration did not advance config version to {latest_version} "
             f"(still {migrated_version}); restored: {restored_text}"
         )
+    _ensure_runtime_backup_ownership((config_path, env_path))
     return 0
 
 

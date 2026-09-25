@@ -59,6 +59,25 @@ Service account name.
 {{- end }}
 {{- end }}
 
+{{/* Runtime identity used by Hermes services for mutable HERMES_HOME files. */}}
+{{- define "hermes-agent.migrationUID" -}}
+{{- $uid := "10000" -}}
+{{- if .Values.podSecurityContext.runAsUser }}{{- $uid = printf "%v" .Values.podSecurityContext.runAsUser -}}{{- end }}
+{{- if .Values.securityContext.runAsUser }}{{- $uid = printf "%v" .Values.securityContext.runAsUser -}}{{- end }}
+{{- with index .Values.env "PUID" }}{{- $uid = printf "%v" . -}}{{- end }}
+{{- with index .Values.env "HERMES_UID" }}{{- $uid = printf "%v" . -}}{{- end }}
+{{- $uid -}}
+{{- end }}
+
+{{- define "hermes-agent.migrationGID" -}}
+{{- $gid := "10000" -}}
+{{- if .Values.podSecurityContext.runAsGroup }}{{- $gid = printf "%v" .Values.podSecurityContext.runAsGroup -}}{{- end }}
+{{- if .Values.securityContext.runAsGroup }}{{- $gid = printf "%v" .Values.securityContext.runAsGroup -}}{{- end }}
+{{- with index .Values.env "PGID" }}{{- $gid = printf "%v" . -}}{{- end }}
+{{- with index .Values.env "HERMES_GID" }}{{- $gid = printf "%v" . -}}{{- end }}
+{{- $gid -}}
+{{- end }}
+
 {{/*
 Headless service name used for StatefulSet governance.
 */}}
@@ -217,6 +236,10 @@ spec:
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
+        - name: HERMES_MIGRATION_UID
+          value: {{ include "hermes-agent.migrationUID" . | quote }}
+        - name: HERMES_MIGRATION_GID
+          value: {{ include "hermes-agent.migrationGID" . | quote }}
       volumeMounts:
         - name: config
           mountPath: /seed

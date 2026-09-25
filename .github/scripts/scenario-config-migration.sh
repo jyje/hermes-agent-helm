@@ -2,6 +2,9 @@
 # Verify safe config migration on a fresh HERMES_HOME and a persistent claim.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# This scenario checks config behavior only; keep it deterministic when the
+# workflow provides live model credentials to its other scenario jobs.
+unset NVIDIA_API_KEY CI_MODELS
 # shellcheck source=.github/scripts/lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
@@ -36,6 +39,10 @@ grep -F '[chart-config-migrate] Migrating config schema' "/tmp/config-migration-
 kubectl exec -n "$NS" "$pod" -- \
   /opt/hermes/.venv/bin/python -c \
   'from hermes_cli.config import get_config_path; from hermes_cli.config_backups import list_config_backups; backups = list_config_backups(get_config_path(), "pre-chart-migrate"); print(f"config backups: {len(backups)}"); assert backups'
+# shellcheck disable=SC2016  # HERMES_HOME expands inside the pod's shell
+kubectl exec -n "$NS" "$pod" -- \
+  /command/s6-setuidgid hermes sh -eu -c \
+  'path="${HERMES_HOME:-/opt/data}/backups/config/.chart-runtime-write-check"; touch "$path"; rm "$path"'
 
 echo "[$NS] testing a chart-managed replacement on an existing PVC"
 # shellcheck disable=SC2016  # HERMES_HOME expands in the pod's shell
