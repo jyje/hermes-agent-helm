@@ -4,6 +4,52 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "added"
+          description: "Fix(persistence): Migrate persisted Hermes config Run Hermes' non-interactive config migration after chart seeding, with backups and a documented recovery pa..."
+        - kind: "added"
+          description: "Feature(examples): Add a Google Chat Pub/Sub example Add `values-google-chat.yaml`, which runs Hermes as a Google Chat bot over a Cloud Pub/Sub pull subscrip..."
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.9.14."
+        - kind: "added"
+          description: "Update the default Hermes Agent image to v2026.9.21."
+        - kind: "fixed"
+          description: "Documentation(providers): Sign in to OpenRouter from a running pod Document `hermes auth add openrouter --type oauth` (new in `v2026.9.14`) as an explicit, i..."
+        - kind: "fixed"
+          description: "Documentation(readme): Nav row line break Separate the language-switcher row from the repository nav row (Hermes Team, Chart docs, CONTRIBUTING, SECURITY, AG..."
+        - kind: "fixed"
+          description: "Documentation(storage): Explain which filesystems suit HERMES_HOME's SQLite databases Explain that a PVC access mode does not establish the file locking and..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.9.24
+    created: "2026-09-25T16:50:19.581452738Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: b0e22cc98edd759a62dd0914dc201a95d795ac709f5ff085168c751d1e059df7
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.16.0.tgz
+    version: 1.16.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "fixed"
           description: "Documentation(docs): Japanese entry documentation Add Japanese entry pages and README translations, with English fallback for the remaining guides and Englis..."
         - kind: "fixed"
@@ -1505,4 +1551,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-09-13T12:16:23.18090147Z"
+generated: "2026-09-25T16:50:19.577077483Z"
