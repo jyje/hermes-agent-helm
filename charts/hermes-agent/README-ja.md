@@ -461,6 +461,7 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex デバイスログイン**と Discord ボット |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord ボット**を設定済み |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram ボット**を設定済み |
+| [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | Pub/Sub pull サブスクリプションで **Google Chat ボット**を設定済み。サービスアカウント JSON は `extraVolumes` でマウント |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | : |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | : |
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | : |

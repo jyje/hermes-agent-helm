@@ -774,6 +774,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device login** + Discord bot |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord bot** wired in |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram bot** wired in |
+| [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | **Google Chat bot** over a Pub/Sub pull subscription, service-account JSON mounted via `extraVolumes` |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) |: |
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini |: |

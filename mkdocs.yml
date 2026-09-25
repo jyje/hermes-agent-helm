@@ -182,6 +182,7 @@ nav:
           - LiteLLM: advanced/integrations/litellm.md
           - LiteLLM (in-cluster): advanced/integrations/litellm-k8s.md
           - OpenAI + Telegram: advanced/integrations/openai-and-telegram.md
+          - Google Chat: advanced/integrations/google-chat.md
           - NetworkPolicy: advanced/integrations/networkpolicy.md
       - Patterns:
           - advanced/patterns/index.md

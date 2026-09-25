@@ -461,6 +461,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex 设备登录**与 Discord 机器人 |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | 已配置 **Discord 机器人** |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | 已配置 **Telegram 机器人** |
+| [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | 通过 Pub/Sub pull 订阅配置 **Google Chat 机器人**，服务账户 JSON 通过 `extraVolumes` 挂载 |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | : |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | : |
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini | : |
