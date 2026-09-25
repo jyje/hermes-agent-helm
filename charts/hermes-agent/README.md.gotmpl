@@ -437,8 +437,14 @@ the full upstream config (which would drift across Hermes versions).
 - **`config.yaml`**: set only override keys under `.Values.config`. It is
   rendered into a ConfigMap and **seeded into `HERMES_HOME`** (the persistent
   volume) by an init container, because Hermes also writes to its home at
-  runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=true`
-  (default) re-seeds on every deploy; set `false` to seed only when absent.
+  runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=false`
+  (default) seeds only when absent, preserving runtime edits; set `true` to
+  replace the file with chart content on every deploy.
+  After seeding, the init container runs Hermes' non-interactive config
+  migration. It backs up `config.yaml` and `.env` before changes and restores
+  them if migration fails. An unversioned config is migrated as a fresh
+  partial config. An explicitly versioned config below the upstream support
+  floor (currently v12) is left untouched; follow the recovery steps below.
 - **`SOUL.md` identity**: set `.Values.soul.text` to seed a persistent agent
   identity into `HERMES_HOME/SOUL.md`. Leave it empty to let Hermes create its
   own starter file on first run. Its seed decision is independent from
@@ -449,6 +455,20 @@ the full upstream config (which would drift across Hermes versions).
   for identity content and scope.
 - **Secrets / API keys**: set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
+
+#### Recovering a config older than the migration floor
+
+Hermes deliberately refuses to auto-migrate a config that explicitly declares
+an unsupported schema version. Back up `HERMES_HOME/config.yaml` before
+editing it. Review the upstream migration history first; if the file's keys
+are compatible with the supported floor, set `_config_version: 12` at its root
+and restart the workload. Hermes then runs the supported migrations and keeps
+a pre-migration backup under `HERMES_HOME/backups/config/`. Otherwise use
+`hermes setup` to generate a current config, then restore the settings you need
+from the backup. With `bootstrap.overwrite=false`, the chart preserves the
+existing file by default so you can perform this recovery. With
+`bootstrap.overwrite=true`, the chart replaces it with the values-rendered
+config before migration.
 
 ### Secret provisioning strategies
 

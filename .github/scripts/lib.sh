@@ -8,6 +8,25 @@ set -euo pipefail
 
 NS="${NS:-test-hermes-chart}"
 
+wait_for_hermes_startup() {
+  local pod logs
+  echo "[$NS] waiting for Hermes stage2 startup to finish"
+  for _ in $(seq 1 90); do
+    pod="$(pod_name 2>/dev/null || true)"
+    if [ -n "$pod" ]; then
+      logs="$(kubectl logs -n "$NS" "$pod" --tail=100 2>/dev/null || true)"
+      if printf '%s\n' "$logs" | grep -Fq '[stage2] Setup complete; starting user services'; then
+        echo "[$NS] Hermes startup complete on $pod"
+        return 0
+      fi
+    fi
+    sleep 2
+  done
+  echo "::error::[$NS] Hermes did not finish stage2 startup within 180 seconds"
+  [ -z "${pod:-}" ] || kubectl logs -n "$NS" "$pod" --tail=100 || true
+  return 1
+}
+
 # install_release [extra helm --set flags...]
 # Installs with NVIDIA NIM when a key is available, else a doctor-only
 # placeholder.
@@ -33,6 +52,7 @@ install_release() {
       "$@" \
       --wait --timeout 5m
   fi
+  wait_for_hermes_startup
 }
 
 # run_hook_test

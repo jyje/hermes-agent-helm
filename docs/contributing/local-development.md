@@ -85,7 +85,7 @@ make docs
 ## Running the CI test scenarios locally
 
 [validate-chart.yaml](../../.github/workflows/validate-chart.yaml)'s `test` job
-runs five scenarios as a **matrix** - each on its own ephemeral kind cluster.
+runs six scenarios as a **matrix** - each on its own ephemeral kind cluster.
 The scenario logic itself lives in
 [.github/scripts](../../.github/scripts) (`lib.sh` + one script per scenario), so
 you can reproduce exactly what CI does, scenario by scenario, against a local

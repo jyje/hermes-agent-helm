@@ -59,11 +59,12 @@ result.
 
 ### `test`
 
-Five scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
+Six scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
 (a separate runner) - fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
 separately: `test (message)`, `test (existing-claim)`, `test (team)`,
-`test (security-hardened)`, and `test (bootstrap-overwrite)`.
+`test (security-hardened)`, `test (bootstrap-overwrite)`, and
+`test (config-migration)`.
 Scenario logic lives in [.github/scripts](../../.github/scripts) (`lib.sh` +
 one script per scenario) rather than inline in the workflow.
 
@@ -114,6 +115,12 @@ installs with `bootstrap.overwrite=false`, writes a marker into the running
 pod's `config.yaml`, and then upgrades with a harmless Pod annotation to force
 the seed init container to run again. The marker must still exist in the new
 pod, proving that runtime edits survive an upgrade.
+
+The `config-migration` scenario uses Hermes `v2026.9.21` and a persistent PVC.
+It checks first boot, replacement with `bootstrap.overwrite=true`, preservation
+and migration with `false`, a safe refusal for an explicitly unsupported
+version, and the documented operator migration-floor step. It verifies the
+resulting schema version and the pre-migration backup.
 
 ### Fork PRs
 

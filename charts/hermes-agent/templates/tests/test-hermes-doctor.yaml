@@ -51,6 +51,14 @@ spec:
               if [ -f /seed/SOUL.md ]; then
                 cp /seed/SOUL.md {{ .Values.persistence.mountPath }}/SOUL.md
               fi
+              {{- include "hermes-agent.migrateConfig" . | nindent 14 }}
+          env:
+            - name: HERMES_HOME
+              value: {{ .Values.persistence.mountPath | quote }}
+            - name: HERMES_MIGRATION_UID
+              value: {{ include "hermes-agent.migrationUID" . | quote }}
+            - name: HERMES_MIGRATION_GID
+              value: {{ include "hermes-agent.migrationGID" . | quote }}
           volumeMounts:
             - name: config
               mountPath: /seed

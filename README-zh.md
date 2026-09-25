@@ -82,7 +82,7 @@
 | 出站流量控制 | `networkPolicy.enabled=true` | CI 检查渲染后的策略 |
 | 内核隔离 | `runtimeClassName: gvisor` 或其他沙箱运行时 | 取决于集群，仅有文档说明 |
 | 密钥管理 | [Bitwarden 示例](charts/hermes-agent/values-bitwarden.yaml)或 [SealedSecret 指南](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) | Bitwarden：CI 的 values 示例冒烟测试；SealedSecret：仅有文档说明 |
-| 升级安全 | `bootstrap.overwrite=false` 保留运行时编辑 | 已有行为说明，尚未经 CI 验证（[#235](https://github.com/jyje/hermes-agent-helm/issues/235)） |
+| 升级安全 | `bootstrap.overwrite=false` 为默认值，迁移前备份持久配置 | Kind CI 验证迁移、备份、覆盖和保留路径 |
 
 ## 完整安装
 

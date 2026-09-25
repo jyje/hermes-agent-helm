@@ -110,7 +110,7 @@
 | Egress 제어 | `networkPolicy.enabled=true` | CI의 렌더링된 정책 assertion |
 | 커널 격리 | `runtimeClassName: gvisor` (또는 다른 샌드박스 런타임) | 클러스터에 따라 다름 - 문서화만 되어 있음 |
 | 시크릿 관리 | [Bitwarden 예제](charts/hermes-agent/values-bitwarden.yaml) 또는 [SealedSecret 예제](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) | Bitwarden: CI의 values 예제 스모크 테스트에서 렌더링 확인 · SealedSecret: 문서화만 되어 있음 |
-| 업그레이드 안전성 | `bootstrap.overwrite=false`가 런타임 수정 내용을 보존 | 문서화된 동작 - 아직 CI로 검증되지 않음 ([#235](https://github.com/jyje/hermes-agent-helm/issues/235)) |
+| 업그레이드 안전성 | `bootstrap.overwrite=false`가 기본값이며 마이그레이션 전 영속 설정을 백업 | Kind CI에서 마이그레이션, 백업, 덮어쓰기 및 보존 경로 검증 |
 
 ## 전체 설치
 

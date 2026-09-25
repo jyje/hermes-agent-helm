@@ -82,7 +82,7 @@
 | 外向き通信の制御 | `networkPolicy.enabled=true` | CI で生成済みポリシーを検査 |
 | カーネルの分離 | `runtimeClassName: gvisor` などのサンドボックスランタイム | クラスター依存。文書化のみ |
 | シークレット管理 | [Bitwarden の例](charts/hermes-agent/values-bitwarden.yaml)または [SealedSecret ガイド](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) | Bitwarden: CI の values サンプルのスモークテスト。SealedSecret: 文書化のみ |
-| アップグレードの安全性 | `bootstrap.overwrite=false` で実行時の編集を保持 | 文書化済み。CI 検証は未完了（[#235](https://github.com/jyje/hermes-agent-helm/issues/235)） |
+| アップグレードの安全性 | `bootstrap.overwrite=false` がデフォルト。マイグレーション前に永続設定をバックアップ | Kind CI でマイグレーション、バックアップ、上書き、保持を検証 |
 
 ## インストールの詳細
 

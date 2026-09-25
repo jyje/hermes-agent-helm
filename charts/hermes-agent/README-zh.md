@@ -299,7 +299,7 @@ Hermes 将 `$HERMES_HOME/config.yaml` 和环境中的密钥作为对各版本内
 
 > **透传原则。** `.Values.config` **原样**生成 `config.yaml`，每一层均允许任意附加键（见 `values.schema.json`）。Hermes 官方[配置指南](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)或[环境变量参考](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)中支持的配置，都可以通过 `config.<path>`、`env` / `extraEnv` 设置，**无需修改 Chart**。此 README 聚焦安装时常用的提供商、消息平台和团队拓扑，其他配置的查找方式见 [FAQ](#faq)。
 
-- **`config.yaml`**：只在 `.Values.config` 下设置需要覆盖的键，渲染为 ConfigMap，由初始化容器**写入持久卷中的 `HERMES_HOME`**。Hermes 运行时也会写入技能、`auth.json` 和自我改进内容。`bootstrap.overwrite=true`（默认）在每次部署时重新写入，设为 `false` 则只在文件不存在时写入。
+- **`config.yaml`**：只在 `.Values.config` 下设置需要覆盖的键，渲染为 ConfigMap，由初始化容器**写入持久卷中的 `HERMES_HOME`**。Hermes 运行时也会写入技能、`auth.json` 和自我改进内容。`bootstrap.overwrite=false`（默认）仅在文件不存在时写入，以保留运行时修改；设为 `true` 则每次部署都用 chart 配置替换。写入后，初始化容器会运行 Hermes 的非交互配置迁移，并在修改前备份 `config.yaml` 和 `.env`。没有显式版本的配置会执行迁移；显式版本低于上游支持下限的配置保持不变，需按 README 中的恢复步骤处理。
 - **`SOUL.md` 身份**：设置 `.Values.soul.text`，将持久化的智能体身份写入 `HERMES_HOME/SOUL.md`。留空时由 Hermes 在首次运行时创建初始文件。写入判断独立于 `config.yaml`：`bootstrap.overwrite=false` 保留已有身份，`true` 则在每次部署时替换。此值保存在 ConfigMap 中，**不要放入密钥**。内容和范围见上游 [SOUL.md 指南](https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes)。
 - **密钥与 API 密钥**：放在 `.Values.env` 下，渲染为 Secret，通过 `envFrom` 注入环境变量，环境变量优先于 `config.yaml`。
 
@@ -517,7 +517,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
 | auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. By default this init    container inherits the login image's own user (root for the Python    image below) so it can write to any storage class reliably, then    chowns the token to this owner. Set it to the Hermes runtime uid; the    upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
-| bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
+| bootstrap.overwrite | bool | false: seed config.yaml and configured SOUL.md only if absent, preserving    runtime edits across upgrades. Set true to replace both files with chart    content on every deploy. | `false` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
