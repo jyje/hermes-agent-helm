@@ -51,10 +51,7 @@ spec:
               if [ -f /seed/SOUL.md ]; then
                 cp /seed/SOUL.md {{ .Values.persistence.mountPath }}/SOUL.md
               fi
-              /opt/hermes/.venv/bin/python /seed/migrate-config.py
-              if [ "$(id -u)" != "$HERMES_MIGRATION_UID" ] || [ "$(id -g)" != "$HERMES_MIGRATION_GID" ]; then
-                chown -R --no-dereference "$HERMES_MIGRATION_UID:$HERMES_MIGRATION_GID" "$HERMES_HOME"
-              fi
+              {{- include "hermes-agent.migrateConfig" . | nindent 14 }}
           env:
             - name: HERMES_HOME
               value: {{ .Values.persistence.mountPath | quote }}

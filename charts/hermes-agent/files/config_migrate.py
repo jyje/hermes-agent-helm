@@ -9,12 +9,13 @@ run through the migration ladder; an explicitly old version is left untouched.
 
 This wrapper preserves that distinction and snapshots mutable files before
 calling the upstream migration API. It runs from the chart's seed init
-container, after the chart config has been copied to HERMES_HOME.
+container, after the chart config has been copied to HERMES_HOME, as the
+runtime user (see the hermes-agent.migrateConfig helper), so every file it or
+Hermes creates here is already owned by the user the gateway runs as.
 """
 
 from __future__ import annotations
 
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -46,43 +47,6 @@ def _restore_backups(backups: dict[Path, Path]) -> list[Path]:
     return restored
 
 
-def _ensure_runtime_ownership(
-    paths: Iterable[Path], extra_files: Iterable[Path] = ()
-) -> None:
-    """Hand chart-touched config, env, identity, and backups to Hermes."""
-    from hermes_cli.config_backups import backups_dir, list_config_backups
-
-    try:
-        runtime_uid = int(os.environ.get("HERMES_MIGRATION_UID", "10000"))
-        runtime_gid = int(os.environ.get("HERMES_MIGRATION_GID", "10000"))
-    except ValueError as exc:
-        raise RuntimeError("Hermes migration UID and GID must be numeric") from exc
-    if not 1 <= runtime_uid <= 65534 or not 1 <= runtime_gid <= 65534:
-        raise RuntimeError("Hermes migration UID and GID must be between 1 and 65534")
-
-    config_paths = tuple(paths)
-    for path in (*config_paths, *extra_files):
-        if path.is_symlink():
-            raise RuntimeError(f"Refusing to change ownership of symlink {path}")
-        if path.is_file():
-            os.chown(path, runtime_uid, runtime_gid, follow_symlinks=False)
-
-    for config_path in config_paths:
-        root = backups_dir(config_path)
-        for directory in (root.parent, root):
-            if directory.is_symlink():
-                raise RuntimeError(f"Refusing to change ownership through symlink {directory}")
-            if directory.exists():
-                if not directory.is_dir():
-                    raise RuntimeError(f"Expected backup directory at {directory}")
-                os.chown(directory, runtime_uid, runtime_gid, follow_symlinks=False)
-
-        for backup in list_config_backups(config_path, "pre-chart-migrate"):
-            if backup.is_symlink():
-                raise RuntimeError(f"Refusing to change ownership of symlink {backup}")
-            os.chown(backup, runtime_uid, runtime_gid, follow_symlinks=False)
-
-
 def main() -> int:
     from hermes_cli.config import (
         check_config_version,
@@ -95,8 +59,6 @@ def main() -> int:
 
     config_path = get_config_path()
     env_path = get_env_path()
-    soul_path = config_path.parent / "SOUL.md"
-    _ensure_runtime_ownership((config_path, env_path), (soul_path,))
     if not config_path.is_file():
         return 0
 
@@ -147,7 +109,6 @@ def main() -> int:
             f"Migration did not advance config version to {latest_version} "
             f"(still {migrated_version}); restored: {restored_text}"
         )
-    _ensure_runtime_ownership((config_path, env_path), (soul_path,))
     return 0
 
 

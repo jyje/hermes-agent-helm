@@ -79,6 +79,42 @@ Service account name.
 {{- end }}
 
 {{/*
+Shell snippet shared by the seed-config and test-Job init containers: run
+Hermes' config migration as the runtime user. The image's `hermes` command is
+a shim that drops root to the hermes user; the migration calls Python
+directly, so it must drop privileges the same way. Run as root it would create
+logs/, sessions/, skills/ and the rest of the HERMES_HOME skeleton as root, which
+the gateway (and the test Job's `hermes` shim) then cannot write. When the init
+container starts as root, hand over only the top-level HERMES_HOME and the
+files the chart itself wrote (non-recursive, the same scope the image's own
+stage2 first-boot fix uses); a non-root init container (hardened profile)
+already creates everything as the runtime user.
+*/}}
+{{- define "hermes-agent.migrateConfig" -}}
+echo "Migrating persisted Hermes config when supported"
+case "$HERMES_MIGRATION_UID:$HERMES_MIGRATION_GID" in
+  *[!0-9:]*|:*|*:) echo "HERMES_MIGRATION_UID/GID must be numeric" >&2; exit 1 ;;
+esac
+if [ "$(id -u)" = 0 ]; then
+  if [ -L "$HERMES_HOME" ]; then
+    echo "Refusing to change ownership through symlink $HERMES_HOME" >&2; exit 1
+  fi
+  chown "$HERMES_MIGRATION_UID:$HERMES_MIGRATION_GID" "$HERMES_HOME"
+  for name in config.yaml .env SOUL.md; do
+    path="$HERMES_HOME/$name"
+    if [ -f "$path" ] && [ ! -L "$path" ]; then
+      chown "$HERMES_MIGRATION_UID:$HERMES_MIGRATION_GID" "$path"
+    fi
+  done
+  HOME="$HERMES_HOME" setpriv --reuid="$HERMES_MIGRATION_UID" \
+    --regid="$HERMES_MIGRATION_GID" --clear-groups \
+    /opt/hermes/.venv/bin/python /seed/migrate-config.py
+else
+  /opt/hermes/.venv/bin/python /seed/migrate-config.py
+fi
+{{- end }}
+
+{{/*
 Headless service name used for StatefulSet governance.
 */}}
 {{- define "hermes-agent.headlessServiceName" -}}
@@ -231,8 +267,7 @@ spec:
           if [ -f /seed/SOUL.md ]; then
             seed "{{ .Values.persistence.mountPath }}/SOUL.md" /seed/SOUL.md
           fi
-          echo "Migrating persisted Hermes config when supported"
-          /opt/hermes/.venv/bin/python /seed/migrate-config.py
+          {{- include "hermes-agent.migrateConfig" . | nindent 10 }}
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
