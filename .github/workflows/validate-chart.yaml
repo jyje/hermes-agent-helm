@@ -86,6 +86,9 @@ jobs:
             helm template example charts/hermes-agent -f "$values_file" > /dev/null
           done
 
+      - name: validate Telegram team examples
+        run: bash .github/scripts/validate-telegram-team-examples.sh
+
       - name: validate paused replica count
         run: |
           # This exact scalar check stays with grep. Use yq for future
