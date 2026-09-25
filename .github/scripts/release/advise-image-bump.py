@@ -28,9 +28,17 @@ NIM_MODEL = os.environ.get("NIM_MODEL", "nvidia/nemotron-3-ultra-550b-a55b")
 API_KEY = os.environ.get("NVIDIA_API_KEY", "").strip()
 TIMEOUT = int(os.environ.get("NIM_TIMEOUT", "300"))
 MAX_RETRIES = int(os.environ.get("NIM_MAX_RETRIES", "2"))
-MAX_TOKENS = int(os.environ.get("NIM_MAX_TOKENS", "8192"))
+# Complete details (#299) need more output room than the old 240-char ones.
+MAX_TOKENS = int(os.environ.get("NIM_MAX_TOKENS", "16384"))
 
 PRIORITIES = ("high", "medium", "low")
+
+# The detail becomes the whole explanation of a filed issue (see
+# file-image-bump-issues.py), so it must keep its final action and source
+# links. It used to be cut at 240 chars, which filed half-sentences (#299).
+# The bound only guards against a runaway model; hitting it is made explicit
+# in the text rather than passed off as a complete review.
+MAX_DETAIL_CHARS = 4000
 
 SYSTEM_PROMPT = """\
 You are the maintainer of "hermes-agent", a Helm chart that packages the \
@@ -67,7 +75,9 @@ busywork either; if truly nothing applies, return an empty list.
 
 Respond with ONLY a JSON object, no prose, no markdown fence:
 {"items":[{"priority":"high|medium|low","title":"<=80 chars",\
-"detail":"<=240 chars, what to change in the chart and why",\
+"detail":"what to change in the chart and why, as complete sentences: \
+the concrete action, the affected values/templates/docs, and source links. \
+Under 1500 chars; never end mid-sentence",\
 "upstream_ref":"<PR number(s) or section title from the release notes, optional>"}]}"""
 
 
@@ -91,8 +101,13 @@ def sanitize_items(raw) -> list[dict]:
             continue
         if len(title) > 80:
             title = title[:77].rstrip() + "..."
-        if len(detail) > 240:
-            detail = detail[:237].rstrip() + "..."
+        if len(detail) > MAX_DETAIL_CHARS:
+            omitted = len(detail) - MAX_DETAIL_CHARS
+            detail = (
+                detail[:MAX_DETAIL_CHARS].rstrip()
+                + f"\n\n_[Truncated by the advisor: {omitted} more characters were omitted. "
+                "Check the upstream release notes before acting on this item.]_"
+            )
         out.append({
             "priority": priority,
             "title": title,
