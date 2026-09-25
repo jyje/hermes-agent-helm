@@ -61,15 +61,6 @@ def _ensure_runtime_ownership(
         raise RuntimeError("Hermes migration UID and GID must be between 1 and 65534")
 
     config_paths = tuple(paths)
-    home = config_paths[0].parent if config_paths else None
-    if home is not None:
-        if home.is_symlink():
-            raise RuntimeError(f"Refusing to change ownership through symlink {home}")
-        if home.exists():
-            if not home.is_dir():
-                raise RuntimeError(f"Expected Hermes home directory at {home}")
-            os.chown(home, runtime_uid, runtime_gid, follow_symlinks=False)
-
     for path in (*config_paths, *extra_files):
         if path.is_symlink():
             raise RuntimeError(f"Refusing to change ownership of symlink {path}")
