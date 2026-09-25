@@ -722,6 +722,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device 로그인** + Discord 봇 |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord 봇** 연결됨 |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram 봇** 연결됨 |
+| [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | Pub/Sub pull 구독으로 **Google Chat 봇** 연결, 서비스 계정 JSON은 `extraVolumes`로 마운트 |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) |: |
 | [`values-gemini.yaml`](values-gemini.yaml) | Google Gemini |: |
