@@ -9,10 +9,10 @@ description: Shared Telegram assistants and multi-bot Hermes teams.
 
 This chart supports two different Telegram setups: one bot shared by several
 authorized people, and a multi-release team where each Hermes identity has its
-own bot. Start with the [shared assistant values](../../../charts/hermes-agent/values-telegram-team-assistant.yaml)
-for one bot, or the [leader](../../../charts/hermes-agent/values-telegram-team-leader.yaml)
-and [member](../../../charts/hermes-agent/values-telegram-team-member.yaml)
-values plus the [ApplicationSet example](../../../examples/argocd/hermes-team-telegram.yaml)
+own bot. Start with the [shared assistant values](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-telegram-team-assistant.yaml)
+for one bot, or the [leader](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-telegram-team-leader.yaml)
+and [member](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-telegram-team-member.yaml)
+values plus the [ApplicationSet example](https://github.com/jyje/hermes-agent-helm/blob/main/examples/argocd/hermes-team-telegram.yaml)
 for multiple bots.
 
 ## One bot shared by several people
