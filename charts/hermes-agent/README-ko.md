@@ -429,9 +429,14 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
 - **`config.yaml`**: `.Values.config` 아래 오버라이드할 키만 설정하세요.
   ConfigMap으로 렌더링되어 init 컨테이너에 의해 **`HERMES_HOME`에 시드**됩니다
   (영속 볼륨), Hermes가 런타임에도 자신의 home에 쓰기 때문입니다(skills,
-  `auth.json`, self-improvement). `bootstrap.overwrite=true`(기본값)는 매
-  배포마다 다시 시드하고, `false`로 설정하면 없을 때만 시드합니다(런타임
-  수정 보존).
+  `auth.json`, self-improvement). `bootstrap.overwrite=false`(기본값)는 파일이
+  없을 때만 시드해 업그레이드 중 런타임 수정을 보존합니다. `true`로 설정하면
+  배포마다 차트 설정으로 파일을 교체합니다.
+  시드 후 init 컨테이너가 Hermes의 비대화형 설정 마이그레이션을 실행합니다.
+  변경 전에 `config.yaml`과 `.env`를 백업하고, 마이그레이션이 실패하면 복원합니다.
+  버전 표기가 없는 설정은 새 부분 설정으로 마이그레이션합니다. 업스트림 지원
+  기준(현재 v12)보다 낮은 버전을 명시한 설정은 수정하지 않으므로 아래 복구 절차를
+  따르세요.
 - **`SOUL.md` 정체성**: `.Values.soul.text`를 설정하면 영속 에이전트 정체성을
   `HERMES_HOME/SOUL.md`에 시드합니다. 비워 두면 Hermes가 첫 실행에서 자체
   시작 파일을 만듭니다. `config.yaml`과는 독립적으로 처리하므로
@@ -442,6 +447,18 @@ Hermes는 `$HERMES_HOME/config.yaml`과 환경의 시크릿을 버전별 내장 
   참고하세요.
 - **시크릿 / API 키**: `.Values.env` 아래 설정하세요. Secret으로 렌더링되어
   `envFrom`을 통해 환경변수로 주입됩니다(env가 `config.yaml`보다 우선).
+
+#### 마이그레이션 지원 기준보다 오래된 설정 복구
+
+Hermes는 지원하지 않는 설정 스키마 버전을 명시한 파일을 자동 마이그레이션하지
+않습니다. 편집 전에 `HERMES_HOME/config.yaml`을 백업하고 업스트림 마이그레이션
+기록을 검토하세요. 파일의 키가 지원 기준과 호환됨을 확인한 경우에만 최상위에
+`_config_version: 12`를 설정하고 워크로드를 재시작하세요. Hermes가 지원되는
+마이그레이션을 실행하고 `HERMES_HOME/backups/config/`에 마이그레이션 전 백업을
+남깁니다. 호환성을 확인할 수 없다면 `hermes setup`으로 최신 설정을 만든 뒤 백업에서
+필요한 항목을 복원하세요. 기본값인 `bootstrap.overwrite=false`는 기존 파일을
+보존하므로 이 복구를 수행할 수 있습니다. `true`이면 마이그레이션 전에 차트
+values의 설정으로 파일을 교체합니다.
 
 ### 시크릿 공급 전략
 
@@ -763,7 +780,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
 | auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. By default this init    container inherits the login image's own user (root for the Python    image below) so it can write to any storage class reliably, then    chowns the token to this owner. Set it to the Hermes runtime uid; the    upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
-| bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
+| bootstrap.overwrite | bool | false: seed config.yaml and configured SOUL.md only if absent, preserving    runtime edits across upgrades. Set true to replace both files with chart    content on every deploy. | `false` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |

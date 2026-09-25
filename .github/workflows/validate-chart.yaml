@@ -298,7 +298,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite]
+        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite, config-migration]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
@@ -322,7 +322,7 @@ jobs:
 
       - name: Run ${{ matrix.scenario }} scenario
         timeout-minutes: 12
-        run: .github/scripts/scenario-${{ matrix.scenario }}.sh
+        run: bash .github/scripts/scenario-${{ matrix.scenario }}.sh
 
       - name: Notify Discord and verify delivery (message scenario, trusted runs with a token)
         # Full live round-trip: send a "message scenario verified" notice via `hermes send`

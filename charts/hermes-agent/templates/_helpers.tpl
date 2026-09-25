@@ -212,6 +212,11 @@ spec:
           if [ -f /seed/SOUL.md ]; then
             seed "{{ .Values.persistence.mountPath }}/SOUL.md" /seed/SOUL.md
           fi
+          echo "Migrating persisted Hermes config when supported"
+          /opt/hermes/.venv/bin/python /seed/migrate-config.py
+      env:
+        - name: HERMES_HOME
+          value: {{ .Values.persistence.mountPath | quote }}
       volumeMounts:
         - name: config
           mountPath: /seed

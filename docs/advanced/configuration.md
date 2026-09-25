@@ -9,7 +9,7 @@ Hermes merges partial chart configuration with its built-in version-specific def
 
 ## Why configuration is seeded
 
-The chart seeds `config.yaml` into `$HERMES_HOME` with an init container. It is not mounted read-only: Hermes writes runtime state in its home directory. Set `bootstrap.overwrite: true` to reseed on each rollout, or keep the default seed-if-absent behavior to preserve edits.
+The chart seeds `config.yaml` into `$HERMES_HOME` with an init container. It is not mounted read-only: Hermes writes runtime state in its home directory. The default `bootstrap.overwrite: false` seeds only when the file is absent, preserving runtime edits across upgrades. Set it to `true` to replace the file with chart values on every rollout. After seeding or preserving the file, the init container runs Hermes' non-interactive config migration and backs up `config.yaml` and `.env` before changing them. Configs with no explicit version are migrated; configs that explicitly declare a version below Hermes' support floor are left untouched and require the operator recovery documented in the [chart README](../../charts/hermes-agent/README.md#recovering-a-config-older-than-the-migration-floor).
 
 ## Controller choice
 

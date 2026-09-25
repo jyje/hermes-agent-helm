@@ -114,7 +114,7 @@ actually backs the claim, so you can judge it yourself instead of taking a
 | Egress control | `networkPolicy.enabled=true` | rendered-policy assertion in CI |
 | Kernel isolation | `runtimeClassName: gvisor` (or another sandboxed runtime) | cluster-dependent - documented only |
 | Secret management | the [Bitwarden example](charts/hermes-agent/values-bitwarden.yaml) or [SealedSecret walkthrough](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord) | Bitwarden: CI's values-examples smoke test · SealedSecret: documented only |
-| Upgrade safety | `bootstrap.overwrite=false` preserves runtime edits | documented behavior - not yet CI-verified ([#235](https://github.com/jyje/hermes-agent-helm/issues/235)) |
+| Upgrade safety | `bootstrap.overwrite=false` is the default; migrations back up the persistent config | Kind CI verifies migration, backup, overwrite and preserve paths |
 
 ## Full Installation
 

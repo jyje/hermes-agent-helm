@@ -85,7 +85,7 @@ make docs
 ## CI 테스트 시나리오를 로컬에서 실행하기
 
 [validate-chart.yaml](../../../.github/workflows/validate-chart.yaml)의
-`test` job은 시나리오 다섯 개를 **매트릭스**로 실행하며, 각각 자기만의 임시
+`test` job은 시나리오 여섯 개를 **매트릭스**로 실행하며, 각각 자기만의 임시
 kind 클러스터에서 돕니다. 시나리오 로직 자체는
 [.github/scripts](../../../.github/scripts)(`lib.sh` + 시나리오별 스크립트)에
 있으므로, CI가 하는 일을 시나리오 단위로 로컬 kind 클러스터에서 그대로

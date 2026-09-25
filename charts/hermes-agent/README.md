@@ -437,8 +437,14 @@ the full upstream config (which would drift across Hermes versions).
 - **`config.yaml`**: set only override keys under `.Values.config`. It is
   rendered into a ConfigMap and **seeded into `HERMES_HOME`** (the persistent
   volume) by an init container, because Hermes also writes to its home at
-  runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=true`
-  (default) re-seeds on every deploy; set `false` to seed only when absent.
+  runtime (skills, `auth.json`, self-improvement). `bootstrap.overwrite=false`
+  (default) seeds only when absent, preserving runtime edits; set `true` to
+  replace the file with chart content on every deploy.
+  After seeding, the init container runs Hermes' non-interactive config
+  migration. It backs up `config.yaml` and `.env` before changes and restores
+  them if migration fails. An unversioned config is migrated as a fresh
+  partial config. An explicitly versioned config below the upstream support
+  floor (currently v12) is left untouched; follow the recovery steps below.
 - **`SOUL.md` identity**: set `.Values.soul.text` to seed a persistent agent
   identity into `HERMES_HOME/SOUL.md`. Leave it empty to let Hermes create its
   own starter file on first run. Its seed decision is independent from
@@ -449,6 +455,20 @@ the full upstream config (which would drift across Hermes versions).
   for identity content and scope.
 - **Secrets / API keys**: set under `.Values.env`. Rendered into a Secret and
   injected via `envFrom` as environment variables (env wins over `config.yaml`).
+
+#### Recovering a config older than the migration floor
+
+Hermes deliberately refuses to auto-migrate a config that explicitly declares
+an unsupported schema version. Back up `HERMES_HOME/config.yaml` before
+editing it. Review the upstream migration history first; if the file's keys
+are compatible with the supported floor, set `_config_version: 12` at its root
+and restart the workload. Hermes then runs the supported migrations and keeps
+a pre-migration backup under `HERMES_HOME/backups/config/`. Otherwise use
+`hermes setup` to generate a current config, then restore the settings you need
+from the backup. With `bootstrap.overwrite=false`, the chart preserves the
+existing file by default so you can perform this recovery. With
+`bootstrap.overwrite=true`, the chart replaces it with the values-rendered
+config before migration.
 
 ### Secret provisioning strategies
 
@@ -813,7 +833,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | auth.deviceFlow.timeoutSeconds | int | Seconds to wait for the human to authorize before the init container    fails (and retries). Keep below the provider's device-code validity. | `870` |
 | auth.deviceFlow.tokenOwner | object | uid/gid that should own the written token file. By default this init    container inherits the login image's own user (root for the Python    image below) so it can write to any storage class reliably, then    chowns the token to this owner. Set it to the Hermes runtime uid; the    upstream image's s6-overlay runs the agent as uid/gid 10000: so the    non-root agent can read the credential. | `{"gid":10000,"uid":10000}` |
 | bootstrap.enabled | bool | Seed chart-managed files into HERMES_HOME via an init container. | `true` |
-| bootstrap.overwrite | bool | true: overwrite config.yaml and configured SOUL.md with chart content on    every deploy (declarative). false: seed each file only if it does not    already exist (preserve runtime edits). | `true` |
+| bootstrap.overwrite | bool | false: seed config.yaml and configured SOUL.md only if absent, preserving    runtime edits across upgrades. Set true to replace both files with chart    content on every deploy. | `false` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |

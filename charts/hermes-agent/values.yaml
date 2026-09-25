@@ -127,10 +127,10 @@ soul:
 bootstrap:
   # -- Seed chart-managed files into HERMES_HOME via an init container.
   enabled: true
-  # -- true: overwrite config.yaml and configured SOUL.md with chart content on
-  #    every deploy (declarative). false: seed each file only if it does not
-  #    already exist (preserve runtime edits).
-  overwrite: true
+  # -- false: seed config.yaml and configured SOUL.md only if absent, preserving
+  #    runtime edits across upgrades. Set true to replace both files with chart
+  #    content on every deploy.
+  overwrite: false
 
 # ---------------------------------------------------------------------------
 # Team mode -> one chart release still runs one independent Hermes identity,
