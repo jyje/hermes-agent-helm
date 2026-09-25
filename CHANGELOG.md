@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.16.0
+
+### Features
+
+- [#310](https://github.com/jyje/hermes-agent-helm/pull/310) [`b57d192`](https://github.com/jyje/hermes-agent-helm/commit/b57d192325b285710bf742853fc2badb31ac43ed) - Feature(examples): Add a Google Chat Pub/Sub example
+
+  Add `values-google-chat.yaml`, which runs Hermes as a Google Chat bot over a Cloud Pub/Sub pull subscription: outbound-only, no Service or Ingress, the Google Chat settings as plain env vars, an explicit `GOOGLE_CHAT_ALLOWED_USERS` allowlist, and the service-account JSON mounted read-only from an existing Secret. Its guide explains which IAM binding goes on the topic and which on the subscription, how the runtime user reads the key, and that native attachments need a separate per-user OAuth setup. Requires `v2026.9.14` or newer, whose image ships the Google Chat dependencies. English and Korean guides and every chart README's examples table are updated.
+
+### Fixes
+
+- [#305](https://github.com/jyje/hermes-agent-helm/pull/305) [`66ce9e6`](https://github.com/jyje/hermes-agent-helm/commit/66ce9e67acbb964463108daa404d8c27408802e7) - Fix(persistence): Migrate persisted Hermes config
+
+  Run Hermes' non-interactive config migration after chart seeding, with backups and a documented recovery path for configs below the upstream migration floor.
+
+### Documentation
+
+- [#309](https://github.com/jyje/hermes-agent-helm/pull/309) [`45e4d5a`](https://github.com/jyje/hermes-agent-helm/commit/45e4d5adcde2357bf01f5ca3777f6a5752353065) - Documentation(providers): Sign in to OpenRouter from a running pod
+
+  Document `hermes auth add openrouter --type oauth` (new in `v2026.9.14`) as an explicit, interactive procedure: install without a static key, sign in through `kubectl exec -it` with `SSH_TTY` set so Hermes uses OpenRouter's paste-the-code flow instead of an unreachable in-pod browser callback, and confirm with `hermes auth list`. Explain that this is an OAuth authorization-code flow rather than a device-code flow, so `auth.deviceFlow` does not automate it; that the result is a plain API key stored in `auth.json` on the persistent volume; and how priority, expiry and rotation behave. English and Korean OpenRouter guides are updated together.
+
+- [#294](https://github.com/jyje/hermes-agent-helm/pull/294) [`ee644f5`](https://github.com/jyje/hermes-agent-helm/commit/ee644f543e2d7ae0da73f0a1249cd2f9dbf6299d) - Documentation(readme): Nav row line break
+
+  Separate the language-switcher row from the repository nav row (Hermes Team, Chart docs, CONTRIBUTING, SECURITY, AGENTS) with a line break in all four root README files, instead of running both on one long line.
+
+- [#308](https://github.com/jyje/hermes-agent-helm/pull/308) [`6992f40`](https://github.com/jyje/hermes-agent-helm/commit/6992f40fc33fbe706939fd30d5c9aca7796d5d62) - Documentation(storage): Explain which filesystems suit HERMES_HOME's SQLite databases
+
+  Explain that a PVC access mode does not establish the file locking and shared memory that SQLite WAL needs, and how to check the filesystem actually mounted at `persistence.mountPath`. Describe what Hermes detects since `v2026.9.14` (virtiofs and 9p: fresh databases fall back to `delete` journaling, existing WAL databases are never downgraded live, WAL-required paths fail explicitly) and what it does not (NFS, CIFS), with `config.database.journal_mode: delete` for network filesystems set before the first start and an offline, scaled-to-zero conversion for existing databases. English and Korean storage guides and the `persistence` values comment are updated together.
+
+### Other
+
+- [#295](https://github.com/jyje/hermes-agent-helm/pull/295) [`27a0401`](https://github.com/jyje/hermes-agent-helm/commit/27a04015a020905642b3464a2480a8d76f24ae82) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Update the default Hermes Agent image to v2026.9.14.
+
+- [#300](https://github.com/jyje/hermes-agent-helm/pull/300) [`12c50ee`](https://github.com/jyje/hermes-agent-helm/commit/12c50eee8de8605eba1621ee3dfe2e9198c35f87) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Update the default Hermes Agent image to v2026.9.21.
+
 ## 1.15.0
 
 ### Features
