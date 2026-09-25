@@ -76,6 +76,33 @@ run_hook_test() {
   echo "[$NS] hook test: timed out"; return 1
 }
 
+# run_doctor <pod>
+# Runs `hermes doctor` in the pod the way the chart's Helm test does: its
+# findings are always printed, but they fail the scenario only when
+# DOCTOR_STRICT=true, mirroring `tests.doctorStrict` (default false). Upstream
+# doctor exits 1 on any finding, including optional ones that say nothing
+# about the chart (a missing ~/.local/bin/hermes symlink, unset optional
+# tool/API keys), so an unconditional call made every image bump that added
+# such a check fail (#303). A doctor that never ran (exec error, pod gone)
+# still fails regardless of strictness: its banner must be in the output.
+run_doctor() {
+  local pod="$1" out rc=0
+  out="$(kubectl exec -n "$NS" "$pod" -- hermes doctor 2>&1)" || rc=$?
+  printf '%s\n' "$out"
+  if ! printf '%s\n' "$out" | grep -Fq 'Hermes Doctor'; then
+    echo "::error::[$NS] hermes doctor did not run in $pod (exit $rc)"
+    return 1
+  fi
+  if [ "$rc" -ne 0 ]; then
+    if [ "${DOCTOR_STRICT:-false}" = "true" ]; then
+      echo "::error::[$NS] hermes doctor reported issues (exit $rc) and DOCTOR_STRICT=true"
+      return "$rc"
+    fi
+    echo "::warning::[$NS] hermes doctor reported issues (exit $rc); non-fatal because DOCTOR_STRICT is not true (tests.doctorStrict default)"
+  fi
+  return 0
+}
+
 pod_name() {
   kubectl get pod -n "$NS" -l app.kubernetes.io/name=hermes-agent \
     -o jsonpath='{.items[0].metadata.name}'

@@ -43,5 +43,5 @@ kubectl exec -n "$NS" "$new_pod" -- sh -c '
 '
 
 echo "[$NS] verifying the upgraded workload remains healthy"
-kubectl exec -n "$NS" "$new_pod" -- hermes doctor
+run_doctor "$new_pod"
 echo "[$NS] bootstrap-overwrite scenario passed"

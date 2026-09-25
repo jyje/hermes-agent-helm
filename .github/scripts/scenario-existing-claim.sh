@@ -33,4 +33,4 @@ kubectl exec -n "$NS" "$pod" -- sh -c '
   cat "${HERMES_HOME:-/opt/data}/ci-claim-probe.txt"
 '
 echo "[$NS] hermes doctor on the existingClaim release"
-kubectl exec -n "$NS" "$pod" -- hermes doctor
+run_doctor "$pod"
