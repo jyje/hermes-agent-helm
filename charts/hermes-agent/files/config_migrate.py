@@ -46,8 +46,8 @@ def _restore_backups(backups: dict[Path, Path]) -> list[Path]:
     return restored
 
 
-def _ensure_runtime_backup_ownership(paths: Iterable[Path]) -> None:
-    """Make chart-created backups writable by Hermes after the init container exits."""
+def _ensure_runtime_ownership(paths: Iterable[Path]) -> None:
+    """Hand chart-touched config, env, and backups to Hermes after init exits."""
     from hermes_cli.config_backups import backups_dir, list_config_backups
 
     try:
@@ -59,6 +59,11 @@ def _ensure_runtime_backup_ownership(paths: Iterable[Path]) -> None:
         raise RuntimeError("Hermes migration UID and GID must be between 1 and 65534")
 
     for config_path in paths:
+        if config_path.is_symlink():
+            raise RuntimeError(f"Refusing to change ownership of symlink {config_path}")
+        if config_path.is_file():
+            os.chown(config_path, runtime_uid, runtime_gid, follow_symlinks=False)
+
         root = backups_dir(config_path)
         for directory in (root.parent, root):
             if directory.is_symlink():
@@ -86,7 +91,7 @@ def main() -> int:
 
     config_path = get_config_path()
     env_path = get_env_path()
-    _ensure_runtime_backup_ownership((config_path, env_path))
+    _ensure_runtime_ownership((config_path, env_path))
     if not config_path.is_file():
         return 0
 
@@ -137,7 +142,7 @@ def main() -> int:
             f"Migration did not advance config version to {latest_version} "
             f"(still {migrated_version}); restored: {restored_text}"
         )
-    _ensure_runtime_backup_ownership((config_path, env_path))
+    _ensure_runtime_ownership((config_path, env_path))
     return 0
 
 

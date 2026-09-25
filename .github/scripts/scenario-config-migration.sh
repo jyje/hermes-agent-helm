@@ -43,6 +43,10 @@ kubectl exec -n "$NS" "$pod" -- \
 kubectl exec -n "$NS" "$pod" -- \
   /command/s6-setuidgid hermes sh -eu -c \
   'path="${HERMES_HOME:-/opt/data}/backups/config/.chart-runtime-write-check"; touch "$path"; rm "$path"'
+# shellcheck disable=SC2016  # HERMES_HOME expands inside the pod's shell
+kubectl exec -n "$NS" "$pod" -- \
+  /command/s6-setuidgid hermes sh -eu -c \
+  'for name in config.yaml .env; do path="${HERMES_HOME:-/opt/data}/$name"; if [ -e "$path" ]; then test -r "$path"; fi; done'
 
 echo "[$NS] testing a chart-managed replacement on an existing PVC"
 # shellcheck disable=SC2016  # HERMES_HOME expands in the pod's shell
