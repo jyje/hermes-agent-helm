@@ -1,3 +1,4 @@
+<!-- translation_source: charts/hermes-agent/README.md @ 878ec63124de696150f957ad2992ea871f839b2e -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -10,7 +11,7 @@
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) - 멀티 제공자 LLM 에이전트 프레임워크 - 를 Kubernetes에서 실행하세요. Hermes가 지원하는 모든 제공자(OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, 또는 LiteLLM/vLLM 같은 OpenAI 호환 프록시)를 `values.yaml`만으로 설정할 수 있고, 내장된 `helm test` 헬스체크도 함께 제공됩니다.
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.15.0](https://img.shields.io/badge/Version-1.15.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.11](https://img.shields.io/badge/AppVersion-v2026.9.11-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.15.0](https://img.shields.io/badge/Version-1.15.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.21](https://img.shields.io/badge/AppVersion-v2026.9.21-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -339,6 +340,12 @@ Discord 스레드에 남깁니다. 별도로 미리 준비한 RWX PVC에는 영�
 리더는 읽기/쓰기, 멤버는 읽기 전용으로 마운트합니다.
 `file`과 `memory` toolset은 각 에이전트의 자체 작업에 계속 사용할 수 있으며,
 파일·메모리·hook·백그라운드 작업을 통한 에이전트 간 핸드오프만 금지합니다.
+
+Telegram 팀에는 `team.platform: telegram`과 역할별 values 예제를 사용하세요.
+단일 공유 봇, BotFather 설정, 릴리스별 Secret, mention 라우팅과 루프 방지책은
+[Telegram 팀 가이드](../../docs/ko/advanced/teams/telegram.md)에 정리했습니다.
+예제 렌더는 CI에서 검사하지만 실제 Telegram 전달은 운영자가 자격 증명을 제공한
+라이브 환경에서 따로 확인해야 합니다.
 
 > Upstream은 현재 Hermes 봇 대 봇 Discord 대화를 내장 circuit breaker가 없는
 > 미지원 토폴로지로 문서화합니다. 이 예시는 실험적입니다. 전용 신뢰 채널과 수동
@@ -722,6 +729,9 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex device 로그인** + Discord 봇 |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord 봇** 연결됨 |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram 봇** 연결됨 |
+| [`values-telegram-team-assistant.yaml`](values-telegram-team-assistant.yaml) | OpenAI (`openai-api`) | **여러 사용자가 함께 쓰는 Telegram 봇 1개** |
+| [`values-telegram-team-leader.yaml`](values-telegram-team-leader.yaml) + [`values-telegram-team-member.yaml`](values-telegram-team-member.yaml) | NVIDIA NIM | **Telegram 리더/멤버 팀**, mention gate와 루프 방지 포함 |
+| [`examples/argocd/hermes-team-telegram.yaml`](../../examples/argocd/hermes-team-telegram.yaml) | any | **ArgoCD ApplicationSet**: 리더 1명, Telegram 멤버 여러 명, 릴리스별 Secret |
 | [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | Pub/Sub pull 구독으로 **Google Chat 봇** 연결, 서비스 계정 JSON은 `extraVolumes`로 마운트 |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) |: |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) |: |
@@ -849,13 +859,15 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | serviceAccount.create | bool | Create a ServiceAccount for the pod. | `true` |
 | serviceAccount.name | string | Name to use; generated from fullname when empty. | `""` |
 | soul | object | Contents of SOUL.md, seeded into HERMES_HOME alongside config.yaml. It    defines the agent's persistent identity. Empty means the chart seeds    nothing, so Hermes writes its own starter file on first run. | `{"text":""}` |
-| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":""},"members":[],"name":"","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.38","securityContext":{"runAsGroup":0,"runAsUser":0},"uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
+| team | object | ------------------------------------------------------------------------- | `{"enabled":false,"identity":"","leader":{"mentionEnv":"","name":"","username":""},"members":[],"name":"","platform":"discord","protocol":{"maxHandoffs":6},"role":"member","sharedVolume":{"accessModes":["ReadWriteMany"],"claimName":"","create":false,"enabled":true,"mountPath":"/opt/data/team-knowledge","permissions":{"enabled":false,"gid":10000,"image":"busybox:1.38","securityContext":{"runAsGroup":0,"runAsUser":0},"uid":10000},"retain":true,"size":"10Gi","storageClass":""},"skill":{"configMapName":"","create":false,"enabled":true,"extraInstructions":"","name":""}}` |
 | team.enabled | bool | Enable the chart-native leader/member team protocol, roster skill, and shared knowledge volume mount for this release. | `false` |
 | team.identity | string | This release's identity. For a leader it must equal `leader.name`; for a member it must match one entry under `members`. | `""` |
 | team.leader.mentionEnv | string | Environment variable containing the leader's Discord user ID. Supply it through a Secret/SealedSecret; the ID is expanded by Hermes at runtime. | `""` |
 | team.leader.name | string | Leader identity shared by every release in the team. | `""` |
+| team.leader.username | string | Telegram only: the leader bot's @username, without the `@`. | `""` |
 | team.members | list | Configured members. ApplicationSet users define this once in the common template so every generated release receives the same complete roster. | `[]` |
 | team.name | string | Stable team identifier used in the generated skill and default names. | `""` |
+| team.platform | string | Chat platform the team coordinates on: `discord` or `telegram`. It picks the mention format and the gates team mode enforces (see the chart README, "Agent team"). Every release in one team must use the same platform. | `"discord"` |
 | team.protocol.maxHandoffs | int | Maximum serial leader-to-member handoffs before escalating to a human. | `6` |
 | team.role | string | This release's team role. | `"member"` |
 | team.sharedVolume.accessModes | list | RWX access modes used only when `create=true`. | `["ReadWriteMany"]` |
