@@ -1,4 +1,4 @@
-name: Test Hermes image compatibility
+name: Compare Hermes chart/image compatibility
 
 on:
   push:
@@ -10,22 +10,44 @@ permissions:
 
 jobs:
   persisted-config:
-    name: ${{ matrix.image-tag }} / persisted config
+    name: ${{ matrix.chart-line }} / ${{ matrix.image-tag }}
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 20
+    # v1.15.0 is the artifact under investigation. Keep its observed failures
+    # visible in the job steps, but do not let an experimental legacy result
+    # prevent the post-#305 comparison jobs from completing.
+    continue-on-error: ${{ matrix.chart-line == 'published-v1.15.0' }}
     strategy:
       fail-fast: false
       matrix:
-        image-tag: [v2026.9.11, v2026.9.14, v2026.9.21]
+        include:
+          - chart-line: published-v1.15.0
+            chart-ref: 88447359f5c967b1a03a42b42dccf5746066dc4a
+            image-tag: v2026.9.11
+          - chart-line: published-v1.15.0
+            chart-ref: 88447359f5c967b1a03a42b42dccf5746066dc4a
+            image-tag: v2026.9.14
+          - chart-line: published-v1.15.0
+            chart-ref: 88447359f5c967b1a03a42b42dccf5746066dc4a
+            image-tag: v2026.9.21
+          - chart-line: post-305-main
+            chart-ref: b57d192325b285710bf742853fc2badb31ac43ed
+            image-tag: v2026.9.11
+          - chart-line: post-305-main
+            chart-ref: b57d192325b285710bf742853fc2badb31ac43ed
+            image-tag: v2026.9.14
+          - chart-line: post-305-main
+            chart-ref: b57d192325b285710bf742853fc2badb31ac43ed
+            image-tag: v2026.9.21
     steps:
       - name: Checkout test harness
         uses: actions/checkout@v7
 
-      - name: Checkout pinned chart implementation
+      - name: Checkout ${{ matrix.chart-line }} chart source
         uses: actions/checkout@v7
         with:
           repository: jyje/hermes-agent-helm
-          ref: b57d192325b285710bf742853fc2badb31ac43ed
+          ref: ${{ matrix.chart-ref }}
           path: chart-source
 
       - uses: azure/setup-helm@v5
@@ -77,7 +99,7 @@ jobs:
           kubectl wait -n "$NS" --for=jsonpath='{.status.phase}'=Succeeded pod/seed-existing-home --timeout=180s
           kubectl logs -n "$NS" seed-existing-home
 
-      - name: Install pinned chart with selected upstream image
+      - name: Install pinned chart and selected upstream image
         env:
           NS: compat-${{ strategy.job-index }}
           IMAGE_TAG: ${{ matrix.image-tag }}
@@ -95,13 +117,14 @@ jobs:
         env:
           NS: compat-${{ strategy.job-index }}
           IMAGE_TAG: ${{ matrix.image-tag }}
+          CHART_LINE: ${{ matrix.chart-line }}
         run: |
           set -euo pipefail
           pod="$(kubectl get pod -n "$NS" -l app.kubernetes.io/name=hermes-agent \
             -o jsonpath='{.items[0].metadata.name}')"
           echo "Testing image $IMAGE_TAG in pod $pod"
           # shellcheck disable=SC2016 # Variables expand inside the workload pod, not on the runner.
-          kubectl exec -n "$NS" "$pod" -- sh -ec '
+          kubectl exec -n "$NS" "$pod" -- env CHART_LINE="$CHART_LINE" sh -ec '
             config="${HERMES_HOME:-/opt/data}/config.yaml"
             test -s "$config"
             echo "Persisted config after startup migration:"
@@ -117,10 +140,14 @@ jobs:
             if ! grep -Fq "$marker" "$env_file"; then
               backup="$(find "${HERMES_HOME:-/opt/data}/backups/config" -maxdepth 1 \
                 -type f -name ".env.pre-chart-migrate.*" -print -quit 2>/dev/null || true)"
-              if [ -z "$backup" ] || ! grep -Fq "$marker" "$backup"; then
+              if [ "$CHART_LINE" = "post-305-main" ] && { [ -z "$backup" ] || ! grep -Fq "$marker" "$backup"; }; then
                 echo "::error::.env marker is missing from both active config and migration backup"; exit 1
               fi
-              echo "Unknown .env marker was retained in backup: $backup"
+              if [ -n "$backup" ] && grep -Fq "$marker" "$backup"; then
+                echo "Unknown .env marker was retained in backup: $backup"
+              else
+                echo "::warning::Legacy chart did not retain the synthetic .env marker in an active file or chart migration backup"
+              fi
             fi
             echo "Persisted config migrated; user model and .env marker preserved"
           '
