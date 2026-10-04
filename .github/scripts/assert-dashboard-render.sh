@@ -66,4 +66,16 @@ render "${basic[@]}" --set probes.readiness.httpGet.path=/x --set probes.readine
 render "${basic[@]}" --set dashboard.readinessProbe.enabled=false | container \
   | yq -e '.readinessProbe == null' | grep -q true
 
+echo "release notes warn about a missing trusted proxy behind HTTPS only"
+notes() { helm install t "$chart" --dry-run=client "${base[@]}" "$@" 2>&1 | sed -n '/^NOTES:/,$p'; }
+tls=(--set 'ingress.tls[0].secretName=tls')
+notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" | grep -q 'no trusted proxy is set' \
+  || fail "no warning for https without a trusted proxy"
+notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'dashboard.trustedProxies[0]=10.244.0.0/16' | grep -q 'no trusted proxy' \
+  && fail "warning despite dashboard.trustedProxies"
+notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'config.dashboard.trusted_proxies[0]=10.244.0.0/16' | grep -q 'no trusted proxy' \
+  && fail "warning despite config.dashboard.trusted_proxies"
+notes "${basic[@]}" "${ingress[@]}" | grep -q 'no trusted proxy' && fail "warning for plain http"
+notes | grep -q 'no trusted proxy' && fail "warning while the dashboard is off"
+
 echo "dashboard render assertions passed"

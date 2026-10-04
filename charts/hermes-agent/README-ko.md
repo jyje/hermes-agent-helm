@@ -503,7 +503,8 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
   유도, `ingress.tls`가 있으면 `https`), `dashboard.trustedProxies`가
   `config.dashboard.trusted_proxies`에 반영됩니다(정확한 IP 또는 제한된 CIDR;
   `0.0.0.0/0`은 거부됨). 그렇지 않으면 `X-Forwarded-Proto`가 무시되어 쿠키에
-  `Secure`가 붙지 않습니다. `config.dashboard`에 이미 지정한 값이 우선합니다.
+  `Secure`가 붙지 않습니다(로그인은 그대로 되므로 눈에 띄지 않습니다. 대시보드를
+  `https`로 제공하면서 신뢰 프록시가 없으면 릴리스 노트에 경고가 출력됩니다). `config.dashboard`에 이미 지정한 값이 우선합니다.
   대시보드가 켜져 있는 동안에는 `service.port`에 대한 TCP readiness probe도
   렌더링됩니다(`dashboard.readinessProbe`). 첫 시작 때 번들 스킬이 볼륨에
   동기화되는 동안 몇 분이 걸릴 수 있고, 그동안 Ingress가 502를 내기
