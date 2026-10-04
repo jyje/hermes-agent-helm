@@ -11,9 +11,12 @@
 # username/password provider. The deprecated `--insecure` /
 # HERMES_DASHBOARD_INSECURE escape hatch is a no-op upstream.
 #
-# The dashboard shows API keys to whoever is logged in. Keep it on a private
-# network, or add a second auth layer at the proxy (oauth2-proxy, an
-# ingress basic-auth annotation, ...) as defence in depth.
+# The dashboard shows API keys to whoever is logged in. Upstream says the
+# username/password provider is for a trusted network or a VPN, NOT for public
+# internet exposure. For a public host use values-ingress-oauth.yaml (Nous
+# Portal) or values-ingress-oidc.yaml (your own identity provider) instead; on
+# a private network you can still add a second auth layer at the proxy
+# (oauth2-proxy, an ingress basic-auth annotation, ...) as defence in depth.
 #
 # Dummy values: override at install time. Never commit real credentials.
 #

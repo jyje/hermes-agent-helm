@@ -22,6 +22,21 @@
 #     -f charts/hermes-agent/values-ingress-oidc.yaml \
 #     --set-string env.OPENAI_API_KEY='sk-<real>' --wait
 #
+# ACCESS CONTROL IS YOURS TO SET. The dashboard has no allowlist of its own:
+# every identity your provider issues a token to for this client can sign in,
+# and the dashboard shows API keys to whoever is signed in. Restrict the
+# application or client at the identity provider (a group or policy binding)
+# to the people who should reach the dashboard.
+#
+# Troubleshooting, as observed behind ingress-nginx:
+#   - A wrong issuer makes GET /auth/login answer 503. The dashboard's own body
+#     names the reason ("Provider unreachable: OIDC discovery returned 404 for
+#     ..."), but a proxy with custom error pages can replace it with a generic
+#     503, so query the Service directly or read the response body to see it.
+#     A trailing-slash difference in the issuer is tolerated.
+#   - A redirect URI that is not registered fails at the identity provider (for
+#     example "Unregistered redirect_uri"), not on the dashboard.
+#
 # The external origin must match the registered redirect URI exactly. It is
 # derived from the first Ingress host (https once `ingress.tls` is set); set
 # `dashboard.publicUrl` explicitly when it differs. Dummy values below: replace
