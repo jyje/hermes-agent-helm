@@ -1,14 +1,22 @@
 # Mirrors charts/hermes-agent/values-ingress.yaml: OpenAI (api.openai.com)
-# with the management dashboard exposed via Ingress, behind nginx basic-auth.
+# with the management dashboard exposed via Ingress and signed in with the
+# dashboard's own username/password provider.
 #
-# Before applying, create:
-#   1. The Secret this Application references for the API key:
-#        kubectl create secret generic hermes-agent-ingress-secrets -n hermes-agent \
-#          --from-literal=OPENAI_API_KEY='sk-<real>'
-#   2. The basic-auth Secret used by the ingress.annotations below:
-#        htpasswd -cb /tmp/auth admin '<your-password>'
-#        kubectl create secret generic hermes-agent-dashboard-auth -n hermes-agent \
-#          --from-file=auth=/tmp/auth
+# The dashboard fails closed without an auth provider, so the credentials are
+# part of the release, not an nginx layer in front of it. Upstream recommends
+# the password provider only for a trusted network or a VPN. For a public host
+# use values-ingress-oauth.yaml or values-ingress-oidc.yaml instead (see the
+# README, "Expose the dashboard").
+#
+# Needs a chart release that has the `dashboard` values (after 1.16.0).
+#
+# Before applying, create the Secret this Application references. It holds the
+# API key and the dashboard credentials, so none of them is committed:
+#   kubectl create secret generic hermes-agent-ingress-secrets -n hermes-agent \
+#     --from-literal=OPENAI_API_KEY='sk-<real>' \
+#     --from-literal=HERMES_DASHBOARD_BASIC_AUTH_USERNAME='admin' \
+#     --from-literal=HERMES_DASHBOARD_BASIC_AUTH_PASSWORD='<your-password>' \
+#     --from-literal=HERMES_DASHBOARD_BASIC_AUTH_SECRET="$(openssl rand -base64 32)"
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -41,6 +49,17 @@ spec:
         extraEnvFrom:
           - secretRef:
               name: hermes-agent-ingress-secrets
+        dashboard:
+          enabled: true
+          auth:
+            # The credentials come from the Secret through extraEnvFrom, which
+            # the chart cannot inspect at render time, hence "external".
+            provider: external
+          # Behind a TLS-terminating Ingress also list the controller here (and
+          # set ingress.tls below), or the session cookies lose Secure. List the
+          # node network and the pod network for a host-network controller.
+          # trustedProxies:
+          #   - "10.244.0.0/16"
         service:
           enabled: true
           type: ClusterIP
@@ -48,10 +67,7 @@ spec:
         ingress:
           enabled: true
           className: nginx
-          annotations:
-            nginx.ingress.kubernetes.io/auth-type: basic
-            nginx.ingress.kubernetes.io/auth-secret: hermes-agent-dashboard-auth
-            nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Hermes Agent Dashboard"
+          annotations: {}
           hosts:
             - host: hermes-agent.example.com
               paths:

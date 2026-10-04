@@ -63,10 +63,15 @@
   클러스터 내에서는 지원하지 않습니다.
 - **기본적으로 인바운드 API가 없습니다.** 에이전트는 아웃바운드 연결만
   만듭니다. 유일한 HTTP 표면은 선택적 관리 **대시보드**(포트 9119)이며,
-  `127.0.0.1`에 바인딩되고 **API 키를 노출**합니다. 차트는
-  `service.enabled: false`, `ingress.enabled: false`로 배포되며, 대시보드
-  노출은 명시적 옵트인과 업스트림의 `--insecure` 플래그가 필요합니다.
-  반드시 앞단에 인증을 두세요(`values-ingress.yaml` 참고).
+  로그인한 사람에게 **API 키를 노출**합니다. 차트는 `dashboard.enabled: false`,
+  `service.enabled: false`, `ingress.enabled: false`로 배포됩니다. 켜면 대시보드는
+  컨테이너 안에서 `0.0.0.0`에 바인딩하고 업스트림의 인증 gate가 필수여서, 인증
+  provider가 없으면 fail-closed되어 아예 리슨하지 않습니다(`--insecure`는 deprecated
+  no-op입니다). 로그인 방식은 `dashboard.auth.provider`로 고르세요. 업스트림은
+  비밀번호 provider를 신뢰된 네트워크나 VPN에서만 쓰라고 하며, 공개 호스트에는 Nous
+  Portal OAuth나 자체 OIDC provider를 쓰세요. OIDC에서는 identity provider에서
+  접근을 제한해야 합니다(`values-ingress.yaml`, `values-ingress-oauth.yaml`,
+  `values-ingress-oidc.yaml`과 README의 "대시보드 노출하기" 참고).
 - **시크릿은 `envFrom`으로 주입**되며 Kubernetes `Secret`으로 렌더링됩니다.
   ConfigMap에는 절대 들어가지 않습니다. GitOps에서는 실제 시크릿을 커밋하지
   말고 [`examples/argocd/`](examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord)의

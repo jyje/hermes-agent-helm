@@ -24,7 +24,7 @@
 | [`hermes-agent-nvidia-nim-and-discord.yaml`](hermes-agent-nvidia-nim-and-discord.yaml) | `values-nvidia-nim-and-discord.yaml` | `hermes-agent-nim-discord-secrets` (`NVIDIA_API_KEY`, `DISCORD_BOT_TOKEN`) |
 | [`hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml`](hermes-agent-nvidia-nim-and-discord-sealedsecret.yaml) | `values-nvidia-nim-and-discord.yaml` + GitOps | **SealedSecret**을 통한 `hermes-agent-nim-discord-sealedsecret-secrets` (`extraResources`, `NVIDIA_API_KEY` + `DISCORD_BOT_TOKEN`) |
 | [`hermes-agent-github-copilot.yaml`](hermes-agent-github-copilot.yaml) | `values-github-copilot.yaml` + GitOps | **SealedSecret**을 통한 `hermes-agent-copilot-secrets`(`DISCORD_BOT_TOKEN`만: Copilot 토큰은 **OAuth 기기 흐름**으로 런타임에 발급) |
-| [`hermes-agent-ingress.yaml`](hermes-agent-ingress.yaml) | `values-ingress.yaml` | `hermes-agent-ingress-secrets` (`OPENAI_API_KEY`) + `hermes-agent-dashboard-auth`(nginx basic-auth) |
+| [`hermes-agent-ingress.yaml`](hermes-agent-ingress.yaml) | `values-ingress.yaml` | `hermes-agent-ingress-secrets` (`OPENAI_API_KEY`와 대시보드 사용자 이름, 비밀번호, 세션 secret. 대시보드 자체 비밀번호 provider이며 신뢰된 네트워크나 VPN용) |
 | [`hermes-collab-pair.yaml`](hermes-collab-pair.yaml) | `values-multi-agent-collab.yaml`(×2: planner+builder) | `hermes-planner-discord-secrets` + `hermes-builder-discord-secrets`: `@멘션`으로 핸드오프하는 **협업 페어**. [Hermes 협업](../../docs/ko/advanced/teams/collaboration.md) 참고 |
 | [`hermes-team.yaml`](hermes-team.yaml) | `values-team-leader.yaml` + `values-team-member.yaml` | `hermes-august-discord-secrets` + `hermes-may-discord-secrets` + `hermes-march-discord-secrets` + 미리 준비된 `hermes-team-knowledge` RWX PVC: **리더 주도 팀**(직렬화된 명시적 멘션, 리더 쓰기/멤버 읽기 전용 공유 지식, 파일 기반 작업 핸드오프 없음). [Hermes 팀](../../docs/ko/advanced/teams/reference.md) 참고 |
 
