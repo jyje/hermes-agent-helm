@@ -4,7 +4,7 @@
 # Ingress.
 #
 # The dashboard is an s6 service inside the image and stays DOWN until
-# HERMES_DASHBOARD=1 is set. In-container it binds 0.0.0.0, and on any
+# `dashboard.enabled` (HERMES_DASHBOARD=1) is set. In-container it binds 0.0.0.0, and on any
 # non-loopback bind upstream's auth gate is mandatory: without an auth
 # provider the dashboard fails closed and never listens, so an Ingress in
 # front of it would answer 502/503. This example uses the bundled
@@ -35,22 +35,21 @@ config:
     default: gpt-4o-mini
   terminal:
     backend: local
-  dashboard:
-    # External origin the dashboard is reached at. Drives OAuth callbacks and
-    # is accepted as an exact Host / WebSocket Origin behind the proxy.
-    public_url: "https://hermes-agent.example.com"
-    # Only listed peers may supply X-Forwarded-Proto / X-Forwarded-For. Put
-    # your ingress controller's pod CIDR (or its exact pod IP) here; Hermes
-    # rejects unbounded entries such as 0.0.0.0/0. Without this, a
-    # TLS-terminating ingress is not trusted and cookies are not marked
-    # Secure.
-    trusted_proxies:
-      - "10.244.0.0/16"
 
-# Non-secret switch: start the supervised dashboard service.
-extraEnv:
-  - name: HERMES_DASHBOARD
-    value: "1"
+dashboard:
+  enabled: true
+  # External origin the dashboard is reached at. Left empty it is derived from
+  # the first ingress host below (https once ingress.tls is set).
+  # publicUrl: "https://hermes-agent.example.com"
+  # Only listed peers may supply X-Forwarded-Proto / X-Forwarded-For. Put your
+  # ingress controller's pod CIDR (or its exact pod IP) here; Hermes rejects
+  # unbounded entries such as 0.0.0.0/0. Without this, a TLS-terminating
+  # ingress is not trusted and cookies are not marked Secure.
+  trustedProxies:
+    - "10.244.0.0/16"
+  auth:
+    # The template fails when this provider's keys are missing from env.
+    provider: basic
 
 # Secrets rendered into the chart's env Secret.
 env:

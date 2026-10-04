@@ -407,6 +407,31 @@
       }
     },
 
+    "dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "publicUrl": { "type": "string" },
+        "trustedProxies": { "type": "array", "items": { "type": "string" } },
+        "readinessProbe": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "periodSeconds": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": { "type": "string", "enum": ["basic", "oauth", "oidc", "external"] }
+          }
+        }
+      }
+    },
+
     "apiServer": {
       "type": "object",
       "additionalProperties": false,

@@ -474,6 +474,39 @@ persistence:
 # gate. Behind a TLS-terminating Ingress also set `config.dashboard.public_url`
 # and `config.dashboard.trusted_proxies`; see values-ingress.yaml.
 # ---------------------------------------------------------------------------
+dashboard:
+  # -- Start the supervised management dashboard (renders `HERMES_DASHBOARD=1`).
+  #    Exposing it also needs `service.enabled` plus an `ingress` or `httpRoute`.
+  enabled: false
+  # -- External origin the dashboard is reached at, for example
+  #    `https://hermes.example.com`. Feeds `config.dashboard.public_url`. When
+  #    empty and `ingress.enabled`, it is derived from the first Ingress host
+  #    (`https` when `ingress.tls` is set). Set it explicitly for an HTTPRoute.
+  #    A value already set under `config.dashboard` wins.
+  publicUrl: ""
+  # -- Peers allowed to supply X-Forwarded-Proto / X-Forwarded-For, usually the
+  #    ingress controller's pod CIDR. Feeds `config.dashboard.trusted_proxies`;
+  #    upstream rejects unbounded entries such as 0.0.0.0/0.
+  trustedProxies: []
+  readinessProbe:
+    # -- Render a TCP readiness probe on `service.port` while the dashboard is
+    #    enabled, so the pod only joins the Service once the dashboard
+    #    listens. The first start can take minutes (bundled skills sync onto
+    #    the volume), during which an Ingress would otherwise answer 502. An
+    #    explicit `probes.readiness` wins. Readiness never restarts the pod.
+    enabled: true
+    # -- Seconds between readiness checks.
+    periodSeconds: 10
+  auth:
+    # -- Upstream auth provider the credentials below are for. The template
+    #    fails when the provider's required keys are missing from `env` or
+    #    `extraEnv`: `basic` (HERMES_DASHBOARD_BASIC_AUTH_USERNAME + _PASSWORD
+    #    or _PASSWORD_HASH), `oauth` (HERMES_DASHBOARD_OAUTH_CLIENT_ID) or
+    #    `oidc` (HERMES_DASHBOARD_OIDC_ISSUER + _CLIENT_ID). Use `external`
+    #    when credentials arrive through `extraEnvFrom` or an ExternalSecret,
+    #    which the chart cannot inspect.
+    provider: basic
+
 apiServer:
   # -- Enable Hermes' OpenAI-compatible HTTP API server.
   enabled: false
