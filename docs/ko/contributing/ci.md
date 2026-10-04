@@ -53,18 +53,19 @@ flowchart LR
 
 ### `lint`
 
-`helm lint`, `helm template`, 그리고 **helm-docs 드리프트 체크** - `charts/hermes-agent/README.md`가
+`helm lint`, `helm template`, `dashboard` 블록의 렌더링 전용 검증
+(`.github/scripts/assert-dashboard-render.sh`), 그리고 **helm-docs 드리프트 체크** - `charts/hermes-agent/README.md`가
 `README.md.gotmpl` 대비 오래됐으면 job이 실패합니다. `values.yaml`을 수정한
 뒤에는 항상 `make docs`를 실행하고 결과를 커밋하세요.
 
 ### `test`
 
-시나리오 여섯 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
+시나리오 일곱 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
 클러스터**(별도 러너)에서 돕니다 - 완전히 격리되어 있고, 하나로 뭉친 로그
 대신 job별로 고유한 상태·타임아웃·실패 진단을 갖습니다. PR 체크 목록에는
 `test (message)`, `test (existing-claim)`, `test (team)`,
 `test (security-hardened)`, `test (bootstrap-overwrite)`,
-`test (config-migration)`으로 따로 표시됩니다.
+`test (config-migration)`, `test (dashboard-ingress)`로 따로 표시됩니다.
 시나리오 로직은 workflow에 인라인으로 있지 않고
 [.github/scripts](../../../.github/scripts)(`lib.sh` + 시나리오별 스크립트)에
 있습니다.
@@ -123,6 +124,18 @@ flowchart LR
 첫 실행, `bootstrap.overwrite=true` 교체, `false` 보존 및 마이그레이션, 지원하지 않는
 버전의 안전한 거부, 문서화된 운영자 migration-floor 절차를 확인합니다. 완료된 스키마
 버전과 마이그레이션 전 백업도 검증합니다.
+
+`dashboard-ingress` 시나리오는 자체 kind 클러스터에 버전을 고정한 ingress-nginx 컨트롤러를
+설치하고 TLS Ingress를 통해 대시보드에 접근합니다. 파드는 대시보드가 리슨한 뒤에야 Ready가
+되어야 하므로(readiness probe) `helm --wait` 직후 Ingress가 응답해야 합니다. 인증 게이트는
+인증 없는 요청과 틀린 비밀번호를 거부해야 하고, 로그인하면 컨트롤러 파드가
+`dashboard.trustedProxies`에 들어 있으므로 `Secure`, `HttpOnly`인 `__Host-` 세션 쿠키가
+설정되어야 합니다. 신뢰 프록시 없이 업그레이드한 대조군에서는 쿠키에 `Secure`가 붙지
+않는지 확인하며, 이것이 해당 값을 설정해야 하는 문서화된 이유입니다. 호스트는 `curl
+--resolve`로 해석하는 예약 `.test` 이름이고 인증서는 자체 서명이라 DNS나 공인 인증서가
+필요 없습니다. 업스트림이 loopback 호스트를 개발 환경으로 보고 `Secure`를 설정하지
+않으므로 여기서는 `*.localhost` 호스트를 쓰지 마세요. 실제 DNS와 Let's Encrypt 발급은
+실제 클러스터에서 수동으로 검증합니다.
 
 ### Fork PR
 

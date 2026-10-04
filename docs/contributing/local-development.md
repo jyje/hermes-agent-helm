@@ -104,6 +104,7 @@ export NVIDIA_API_KEY='nvapi-...'   # omit for a doctor-only run (no live chat)
 # .github/scripts/scenario-team.sh
 # .github/scripts/scenario-security-hardened.sh
 # .github/scripts/scenario-bootstrap-overwrite.sh
+# .github/scripts/scenario-dashboard-ingress.sh
 
 kind delete cluster --name hermes-verify
 ```

@@ -52,19 +52,20 @@ Two jobs run on every functional change:
 
 ### `lint`
 
-`helm lint`, `helm template`, and a **helm-docs drift check** - if
+`helm lint`, `helm template`, render-only assertions for the `dashboard`
+block (`.github/scripts/assert-dashboard-render.sh`), and a **helm-docs drift check** - if
 `charts/hermes-agent/README.md` is out of date relative to `README.md.gotmpl`,
 the job fails. Always run `make docs` after editing `values.yaml` and commit the
 result.
 
 ### `test`
 
-Six scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
+Seven scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
 (a separate runner) - fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
 separately: `test (message)`, `test (existing-claim)`, `test (team)`,
-`test (security-hardened)`, `test (bootstrap-overwrite)`, and
-`test (config-migration)`.
+`test (security-hardened)`, `test (bootstrap-overwrite)`,
+`test (config-migration)`, and `test (dashboard-ingress)`.
 Scenario logic lives in [.github/scripts](../../.github/scripts) (`lib.sh` +
 one script per scenario) rather than inline in the workflow.
 
@@ -121,6 +122,20 @@ It checks first boot, replacement with `bootstrap.overwrite=true`, preservation
 and migration with `false`, a safe refusal for an explicitly unsupported
 version, and the documented operator migration-floor step. It verifies the
 resulting schema version and the pre-migration backup.
+
+The `dashboard-ingress` scenario installs a pinned ingress-nginx controller in
+its own kind cluster and reaches the dashboard through a TLS Ingress. The
+pod must turn Ready only once the dashboard listens (the readiness probe), so
+the Ingress answers right after `helm --wait`; the auth gate must reject
+unauthenticated and wrong-password requests; and sign-in must set `Secure`,
+`HttpOnly` `__Host-` session cookies because the controller pod is listed in
+`dashboard.trustedProxies`. A control upgrade without a trusted proxy checks
+that the cookies are not `Secure`, which is the documented reason to set it.
+The host is a reserved `.test` name resolved with `curl --resolve` and the
+certificate is self-signed, so no DNS or public certificate is involved; never
+use a `*.localhost` host here, because upstream treats loopback hosts as a
+development setup and does not set `Secure` for them. Real DNS and Let's
+Encrypt issuance are verified by hand on a real cluster.
 
 ### Fork PRs
 
