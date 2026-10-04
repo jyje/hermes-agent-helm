@@ -531,7 +531,10 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
   모든 신원이 로그인할 수 있으므로 identity provider에서 애플리케이션 접근을
   제한하세요. 발급자가 틀리면 `/auth/login`이 503을 내며 원인은 응답 본문에
   있습니다(커스텀 오류 페이지를 쓰는 프록시는 이를 가릴 수 있습니다). 등록되지
-  않은 리다이렉트 URI는 대시보드가 아니라 identity provider가 거부합니다.
+  않은 리다이렉트 URI는 대시보드가 아니라 identity provider가 거부합니다. Nous
+  Portal OAuth에서는 대시보드의 외부 origin이 클라이언트에 등록한 Base URL과
+  다르면 포털이 `redirect_uri_mismatch`를 보여 주고, 개인 계정으로 등록하면
+  로그인이 그 소유자로 제한됩니다.
 
 ### API server와 webhook 리스너
 

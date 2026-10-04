@@ -544,7 +544,10 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   restrict the application at the identity provider. A wrong issuer makes
   `/auth/login` answer 503 with the reason in the response body (a proxy with
   custom error pages may hide it), and an unregistered redirect URI is
-  rejected by the identity provider, not by the dashboard.
+  rejected by the identity provider, not by the dashboard. With Nous Portal
+  OAuth the portal shows `redirect_uri_mismatch` when the dashboard's external
+  origin differs from the Base URL registered for the client, and a
+  personal-account registration limits sign-in to its owner.
 
 ### API server and webhook listeners
 
