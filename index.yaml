@@ -4,6 +4,56 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "fixed"
+          description: "Documentation(readme): Star prompt on the chart README Show the \"Found this useful?\" GitHub star prompt, with a link to the repository, at the top of the cha..."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Sign-in guidance State that the password provider is not for public internet exposure, that the OIDC provider has no user allowlist..."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Prefer dashboard.enabled Explain that setting `HERMES_DASHBOARD=1` yourself in `extraEnv` or `env` skips the readiness probe, the d..."
+        - kind: "added"
+          description: "Feature(values): Dashboard NetworkPolicy example and docs page Add `values-networkpolicy-dashboard.yaml` for exposing the dashboard through an Ingress while..."
+        - kind: "added"
+          description: "Feature(values): OAuth and OIDC dashboard examples Add `values-ingress-oauth.yaml` (Nous Portal OAuth) and `values-ingress-oidc.yaml` (your own OpenID Connec..."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Expose the dashboard section Split the dense dashboard paragraph into a step-by-step \"Expose the dashboard\" section: choose a sign-..."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Fix stale dashboard guidance Rewrite the ArgoCD ingress example so it actually enables the dashboard with its own password provider..."
+        - kind: "fixed"
+          description: "Feature(dashboard): Trusted proxy warning Print a warning in the release notes when the dashboard is served over HTTPS but no trusted proxy is set, because s..."
+        - kind: "added"
+          description: "Feature(dashboard): First-class dashboard values Add a `dashboard` values block that starts the management dashboard, derives `config.dashboard.public_url` f..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.9.24
+    created: "2026-10-04T14:12:25.92690742Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 5da7996a097bd88a68445cbb0703153d2e1931902608982b6778b9a74c5616b0
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.17.0.tgz
+    version: 1.17.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "added"
           description: "Fix(persistence): Migrate persisted Hermes config Run Hermes' non-interactive config migration after chart seeding, with backups and a documented recovery pa..."
         - kind: "added"
@@ -1551,4 +1601,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-09-25T16:50:19.577077483Z"
+generated: "2026-10-04T14:12:25.922320721Z"
