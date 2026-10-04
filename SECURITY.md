@@ -64,10 +64,17 @@ Facts worth knowing before deploying:
   would require a Docker daemon/socket.
 - **No inbound API by default.** The agent makes outbound connections only.
   The single HTTP surface is the optional management **dashboard** (port 9119),
-  which binds to `127.0.0.1` and **exposes API keys**. The chart ships with
-  `service.enabled: false` and `ingress.enabled: false`; exposing the
-  dashboard requires an explicit opt-in and upstream's `--insecure` flag;
-  put authentication in front of it (see `values-ingress.yaml`).
+  which **exposes API keys** to whoever is signed in. The chart ships with
+  `dashboard.enabled: false`, `service.enabled: false` and
+  `ingress.enabled: false`. Once enabled, the dashboard binds `0.0.0.0` inside
+  the container and upstream's auth gate is mandatory: without an auth provider
+  it fails closed and never listens (`--insecure` is a deprecated no-op).
+  Choose the sign-in method with `dashboard.auth.provider`. Upstream recommends
+  the password provider only for a trusted network or a VPN; use Nous Portal
+  OAuth or your own OIDC provider for a public host, and note that with OIDC
+  access must be restricted at the identity provider (see
+  `values-ingress.yaml`, `values-ingress-oauth.yaml`,
+  `values-ingress-oidc.yaml` and the README section "Expose the dashboard").
 - **Secrets are injected via `envFrom`**, rendered into a Kubernetes `Secret`
   - never into the ConfigMap. For GitOps, don't commit real secrets; use the
   SealedSecret pattern in
