@@ -464,7 +464,14 @@ persistence:
 # below.
 #
 # The dashboard is an s6 service inside the image, off by default: set
-# `HERMES_DASHBOARD=1` (via `extraEnv`) to start it. In-container it binds
+# `dashboard.enabled: true` to start it (see the `dashboard` block below).
+# Prefer that over putting `HERMES_DASHBOARD=1` in `extraEnv`/`env`: the image
+# honors the bare variable, but the chart cannot see it, so none of the
+# dashboard wiring applies (no readiness probe, so an Ingress answers 502 during
+# the first start; no derived `public_url`/`trusted_proxies`; no auth check; no
+# trusted-proxy warning). If you must keep the variable, add your own
+# `probes.readiness`, for example a `tcpSocket` probe on `service.port`.
+# In-container it binds
 # `0.0.0.0:9119` (`HERMES_DASHBOARD_HOST` / `_PORT`), and on any non-loopback
 # bind upstream's auth gate is mandatory: provide the bundled password
 # provider (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD`, secrets, so

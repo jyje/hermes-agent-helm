@@ -38,6 +38,12 @@ render --set dashboard.enabled=true --set dashboard.auth.provider=oidc \
   --set-string env.HERMES_DASHBOARD_OIDC_ISSUER=https://issuer.example \
   --set-string env.HERMES_DASHBOARD_OIDC_CLIENT_ID=client >/dev/null
 render --set dashboard.enabled=true --set dashboard.auth.provider=external >/dev/null
+echo "oauth and oidc keys under config.dashboard.oauth satisfy the check"
+render --set dashboard.enabled=true --set dashboard.auth.provider=oauth \
+  --set-string config.dashboard.oauth.client_id=agent:1 >/dev/null
+render --set dashboard.enabled=true --set dashboard.auth.provider=oidc \
+  --set-string config.dashboard.oauth.self_hosted.issuer=https://issuer.example \
+  --set-string config.dashboard.oauth.self_hosted.client_id=client >/dev/null
 
 echo "HERMES_DASHBOARD=1 is set"
 render "${basic[@]}" | container \
