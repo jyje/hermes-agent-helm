@@ -35,6 +35,9 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
+- **웹 대시보드**: 브라우저에서 에이전트와 채팅하고, 세션을 둘러보고, 모델, 스킬, 설정을
+  관리합니다. 비밀번호, Nous Portal OAuth, 또는 자체 OpenID Connect 로그인으로
+  보호됩니다: [대시보드 노출하기](#대시보드-노출하기).
 - **ArgoCD**: 제공자/메신저 조합별로 바로 적용 가능한 `Application` 매니페스트:
   [`examples/argocd/`](../../examples/argocd/).
 - **실제 시크릿을 커밋하지 않는 GitOps**: SealedSecret + `extraEnvFrom` 가이드:
@@ -490,6 +493,21 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 - **대시보드 라우팅**: [대시보드 노출하기](#대시보드-노출하기)를 참고하세요.
 
 ### 대시보드 노출하기
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: 브라우저에서 전체 Hermes 터미널 UI를 그대로 사용합니다.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: 33개 채널 목록에서 Telegram, Discord, Slack 등을 연결합니다.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: 에이전트 설정을 폼으로, 또는 YAML로 편집합니다.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: Nous가 승인한 MCP 서버 65개 카탈로그에서 설치합니다.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: 기본 제공 스킬 53개를 켜고 끄거나 직접 추가합니다.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: 에이전트의 영구 볼륨 파일을 탐색하고 업로드합니다.</sub></td>
+</tr>
+</table>
 
 관리 대시보드(`service.port`, 기본값 9119)는 이미지 안의 s6 서비스이자 유일한 내장
 웹 UI입니다. 로그인한 사람에게 API 키를 보여 주므로 아래 순서대로 진행하세요.

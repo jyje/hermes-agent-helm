@@ -33,6 +33,27 @@ Just as easily, group several instances into a full [**Hermes Team**](docs/advan
 on the same cluster. A **community-powered** chart, not an official Nous
 Research release.
 
+Prefer a browser? Switch on the **web dashboard** and you can chat with your
+agent in the full terminal UI, browse past sessions, and manage its models,
+skills, cron jobs and settings at a URL of your own, behind a password, Nous
+Portal OAuth, or your own OpenID Connect sign-in. See
+[Dashboard sign-in and Ingress](docs/advanced/integrations/dashboard.md).
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: The full Hermes terminal UI in the browser.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: Connect Telegram, Discord, Slack and more from a list of 33 channels.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: Edit the agent's settings in a form, or as YAML.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: Install from a catalog of 65 Nous-approved MCP servers.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: Switch the 53 bundled skills on and off, or add your own.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: Browse and upload files on the agent's persistent volume.</sub></td>
+</tr>
+</table>
+
 ## Quick Start
 
 1. **OCI (recommended)** — install directly from the registry, no `helm repo add` needed:

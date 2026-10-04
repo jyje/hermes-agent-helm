@@ -39,6 +39,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
+- **Web ダッシュボード**: ブラウザでエージェントとチャットし、セッションを閲覧し、モデル、スキル、設定を管理します。パスワード、Nous Portal OAuth、または独自の OpenID Connect ログインで保護されます。詳細は[ダッシュボード](../../docs/advanced/integrations/dashboard.md)を参照してください。
 - **ArgoCD**: プロバイダーとメッセンジャーの組み合わせごとに、適用可能な `Application` マニフェストを用意しています。[`examples/argocd/`](../../examples/argocd/) を参照してください。
 - **実際のシークレットをコミットしない GitOps**: SealedSecret と `extraEnvFrom` の手順は [SealedSecret ガイド](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord)を参照してください。
 - **エージェントチーム**: 共通の Discord チャンネルで `@mention` によって引き継ぐ複数インスタンスを実行できます。[`hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)、[チーム](../../docs/advanced/teams/reference.md)、[連携ガイド](../../docs/advanced/teams/collaboration.md)を参照してください。
