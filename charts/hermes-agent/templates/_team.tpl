@@ -112,6 +112,17 @@ so it always merges rather than only filling a gap.
 {{- define "hermes-agent.effectiveConfig" -}}
 {{- include "hermes-agent.team.validate" . -}}
 {{- $config := deepCopy .Values.config -}}
+{{- if .Values.dashboard.enabled -}}
+  {{- $dash := deepCopy (default (dict) (get $config "dashboard")) -}}
+  {{- $url := include "hermes-agent.dashboard.publicUrl" . -}}
+  {{- if $url -}}
+    {{- $_ := include "hermes-agent.setConfigDefault" (list $dash "public_url" $url) -}}
+  {{- end -}}
+  {{- if .Values.dashboard.trustedProxies -}}
+    {{- $_ := include "hermes-agent.setConfigDefault" (list $dash "trusted_proxies" .Values.dashboard.trustedProxies) -}}
+  {{- end -}}
+  {{- $_ := set $config "dashboard" $dash -}}
+{{- end -}}
 {{- if .Values.team.enabled -}}
   {{- $_ := include "hermes-agent.setConfigDefault" (list $config "group_sessions_per_user" false) -}}
   {{- $discord := deepCopy (default (dict) (get $config "discord")) -}}

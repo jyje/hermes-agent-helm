@@ -488,18 +488,25 @@ Kubernetes Secret에 넣고 `extraEnvFrom`으로 참조하세요.
 Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 
 - **대시보드 라우팅**: 관리 대시보드(`service.port`, 기본값 9119)는 이미지
-  안의 s6 서비스로, `HERMES_DASHBOARD=1`을 설정하기 전까지는 내려가 있습니다.
-  컨테이너 안에서는 `0.0.0.0`으로 바인딩하며, non-loopback 바인드에서는
-  업스트림의 auth gate가 필수입니다: 내장 비밀번호 provider
-  (`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD`), OAuth 또는 OIDC를
-  설정하지 않으면 대시보드는 **fail-closed되어 아예 리슨하지 않습니다**. 예전의
-  `--insecure` / `HERMES_DASHBOARD_INSECURE` 우회는 업스트림에서 deprecated
-  no-op입니다. TLS를 종단하는 Ingress 뒤라면 `config.dashboard.public_url`에
-  외부 origin을, `config.dashboard.trusted_proxies`에 ingress 컨트롤러(정확한
-  IP 또는 제한된 CIDR; `0.0.0.0/0`은 거부됨)를 지정하세요. 그렇지 않으면
-  `X-Forwarded-Proto`가 무시되어 쿠키에 `Secure`가 붙지 않습니다. 대시보드는
-  로그인한 사람에게 API 키를 보여주므로 사설 네트워크에 두거나 프록시 단에
-  두 번째 인증 계층을 더하세요.
+  안의 s6 서비스로, `dashboard.enabled: true`(`HERMES_DASHBOARD=1`로
+  렌더링됨)를 설정하기 전까지는 내려가 있습니다. 컨테이너 안에서는
+  `0.0.0.0`으로 바인딩하며, non-loopback 바인드에서는 업스트림의 auth gate가
+  필수라서 인증 provider가 없으면 대시보드는 **fail-closed되어 아예 리슨하지
+  않습니다**. `dashboard.auth.provider`에 provider(`basic`, `oauth`, `oidc`,
+  또는 자격증명을 `extraEnvFrom`/ExternalSecret으로 주입할 때 `external`)를
+  지정하면, 해당 provider의 키가 `env`/`extraEnv`에 없을 때 Ingress가
+  502/503만 내는 대신 렌더링 단계에서 실패합니다. `basic`은
+  `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD`(또는 `_PASSWORD_HASH`)가
+  필요하며, 인터넷에 공개하는 대시보드에는 업스트림이 OAuth를 권장합니다.
+  TLS를 종단하는 Ingress 뒤라면 `dashboard.publicUrl`이
+  `config.dashboard.public_url`에 반영되고(비어 있으면 첫 번째 Ingress host에서
+  유도, `ingress.tls`가 있으면 `https`), `dashboard.trustedProxies`가
+  `config.dashboard.trusted_proxies`에 반영됩니다(정확한 IP 또는 제한된 CIDR;
+  `0.0.0.0/0`은 거부됨). 그렇지 않으면 `X-Forwarded-Proto`가 무시되어 쿠키에
+  `Secure`가 붙지 않습니다. `config.dashboard`에 이미 지정한 값이 우선합니다.
+  예전의 `--insecure` / `HERMES_DASHBOARD_INSECURE` 우회는 업스트림에서
+  deprecated no-op입니다. 대시보드는 로그인한 사람에게 API 키를 보여주므로
+  사설 네트워크에 두거나 프록시 단에 두 번째 인증 계층을 더하세요.
   [`values-ingress.yaml`](values-ingress.yaml)을 참고하세요.
 
 ### API server와 webhook 리스너

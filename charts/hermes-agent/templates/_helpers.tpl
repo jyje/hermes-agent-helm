@@ -195,11 +195,72 @@ list for another Kubernetes port shape, such as containerPorts.
 {{- end }}
 
 {{/*
+Public URL the dashboard is reached at. An explicit dashboard.publicUrl wins;
+otherwise it is derived from the first Ingress host (https when the Ingress
+has TLS entries). Empty when neither is available.
+*/}}
+{{- define "hermes-agent.dashboard.publicUrl" -}}
+{{- if .Values.dashboard.publicUrl -}}
+{{- .Values.dashboard.publicUrl -}}
+{{- else if and .Values.ingress.enabled .Values.ingress.hosts -}}
+{{- $scheme := ternary "https" "http" (not (empty .Values.ingress.tls)) -}}
+{{- printf "%s://%s" $scheme (index .Values.ingress.hosts 0).host -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+True (non-empty) when an env var name is provided through `env` or `extraEnv`.
+Call as: include "hermes-agent.dashboard.hasEnv" (list . "NAME")
+*/}}
+{{- define "hermes-agent.dashboard.hasEnv" -}}
+{{- $root := index . 0 -}}
+{{- $name := index . 1 -}}
+{{- if hasKey (default (dict) $root.Values.env) $name -}}true
+{{- else -}}
+{{- range $root.Values.extraEnv -}}{{- if eq .name $name -}}true{{- end -}}{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Fail early when the dashboard is enabled but no upstream auth provider would be
+configured: on a non-loopback bind the dashboard fails closed and stays down,
+so an Ingress in front of it only answers 502/503. dashboard.auth.provider
+"external" skips the check for credentials injected through extraEnvFrom or an
+ExternalSecret, which the chart cannot inspect.
+*/}}
+{{- define "hermes-agent.dashboard.validate" -}}
+{{- if .Values.dashboard.enabled -}}
+{{- $provider := .Values.dashboard.auth.provider -}}
+{{- $cfgDash := default (dict) (get (default (dict) .Values.config) "dashboard") -}}
+{{- $cfgOauth := default (dict) (get $cfgDash "oauth") -}}
+{{- if eq $provider "basic" -}}
+  {{- $user := include "hermes-agent.dashboard.hasEnv" (list . "HERMES_DASHBOARD_BASIC_AUTH_USERNAME") -}}
+  {{- $pass := or (include "hermes-agent.dashboard.hasEnv" (list . "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD")) (include "hermes-agent.dashboard.hasEnv" (list . "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH")) -}}
+  {{- if not (and $user $pass) -}}
+    {{- fail "dashboard.enabled with auth.provider=basic needs env.HERMES_DASHBOARD_BASIC_AUTH_USERNAME and env.HERMES_DASHBOARD_BASIC_AUTH_PASSWORD (or _PASSWORD_HASH); set them, or set dashboard.auth.provider=external when the credentials come from extraEnvFrom or an ExternalSecret" -}}
+  {{- end -}}
+{{- else if eq $provider "oauth" -}}
+  {{- if not (or (include "hermes-agent.dashboard.hasEnv" (list . "HERMES_DASHBOARD_OAUTH_CLIENT_ID")) (get $cfgOauth "client_id")) -}}
+    {{- fail "dashboard.enabled with auth.provider=oauth needs env.HERMES_DASHBOARD_OAUTH_CLIENT_ID or config.dashboard.oauth.client_id; set it, or set dashboard.auth.provider=external when it comes from extraEnvFrom or an ExternalSecret" -}}
+  {{- end -}}
+{{- else if eq $provider "oidc" -}}
+  {{- $sh := default (dict) (get $cfgOauth "self_hosted") -}}
+  {{- $issuer := or (include "hermes-agent.dashboard.hasEnv" (list . "HERMES_DASHBOARD_OIDC_ISSUER")) (get $sh "issuer") -}}
+  {{- $client := or (include "hermes-agent.dashboard.hasEnv" (list . "HERMES_DASHBOARD_OIDC_CLIENT_ID")) (get $sh "client_id") -}}
+  {{- if not (and $issuer $client) -}}
+    {{- fail "dashboard.enabled with auth.provider=oidc needs HERMES_DASHBOARD_OIDC_ISSUER and HERMES_DASHBOARD_OIDC_CLIENT_ID (env/extraEnv) or config.dashboard.oauth.self_hosted.issuer/client_id; set them, or set dashboard.auth.provider=external when they come from extraEnvFrom or an ExternalSecret" -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Pod template (metadata + spec), shared by the StatefulSet and Deployment
 controllers. Caller is expected to nest this under `template:` with `nindent 4`.
 */}}
 {{- define "hermes-agent.podTemplate" -}}
 {{- include "hermes-agent.team.validate" . -}}
+{{- include "hermes-agent.dashboard.validate" . -}}
 metadata:
   annotations:
     # Roll pods when config/secret content changes.
@@ -394,6 +455,10 @@ spec:
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
+        {{- if .Values.dashboard.enabled }}
+        - name: HERMES_DASHBOARD
+          value: "1"
+        {{- end }}
         {{- if .Values.apiServer.enabled }}
         - name: API_SERVER_ENABLED
           value: "true"

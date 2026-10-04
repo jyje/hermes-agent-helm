@@ -407,6 +407,23 @@
       }
     },
 
+    "dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "publicUrl": { "type": "string" },
+        "trustedProxies": { "type": "array", "items": { "type": "string" } },
+        "auth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": { "type": "string", "enum": ["basic", "oauth", "oidc", "external"] }
+          }
+        }
+      }
+    },
+
     "apiServer": {
       "type": "object",
       "additionalProperties": false,
