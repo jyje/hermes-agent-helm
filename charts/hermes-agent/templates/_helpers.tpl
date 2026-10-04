@@ -505,9 +505,18 @@ spec:
       livenessProbe:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.probes.readiness }}
+      {{- if .Values.probes.readiness }}
       readinessProbe:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.probes.readiness | nindent 8 }}
+      {{- else if and .Values.dashboard.enabled .Values.dashboard.readinessProbe.enabled }}
+      # Dashboard-aware readiness: the pod only joins the Service once the
+      # dashboard listens (first start can take minutes while bundled skills
+      # sync onto the volume). Readiness never restarts the container.
+      readinessProbe:
+        tcpSocket:
+          port: {{ .Values.service.port }}
+        periodSeconds: {{ .Values.dashboard.readinessProbe.periodSeconds }}
+        failureThreshold: 3
       {{- end }}
       resources:
         {{- toYaml .Values.resources | nindent 8 }}

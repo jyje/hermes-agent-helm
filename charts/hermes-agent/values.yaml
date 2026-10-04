@@ -488,6 +488,15 @@ dashboard:
   #    ingress controller's pod CIDR. Feeds `config.dashboard.trusted_proxies`;
   #    upstream rejects unbounded entries such as 0.0.0.0/0.
   trustedProxies: []
+  readinessProbe:
+    # -- Render a TCP readiness probe on `service.port` while the dashboard is
+    #    enabled, so the pod only joins the Service once the dashboard
+    #    listens. The first start can take minutes (bundled skills sync onto
+    #    the volume), during which an Ingress would otherwise answer 502. An
+    #    explicit `probes.readiness` wins. Readiness never restarts the pod.
+    enabled: true
+    # -- Seconds between readiness checks.
+    periodSeconds: 10
   auth:
     # -- Upstream auth provider the credentials below are for. The template
     #    fails when the provider's required keys are missing from `env` or

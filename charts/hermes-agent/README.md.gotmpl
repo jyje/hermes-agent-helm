@@ -514,7 +514,12 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   empty, `https` if `ingress.tls` is set) and `dashboard.trustedProxies` feeds
   `config.dashboard.trusted_proxies` (exact IP or a bounded CIDR; `0.0.0.0/0`
   is rejected), otherwise its `X-Forwarded-Proto` is ignored and cookies are
-  not marked `Secure`. Values already set under `config.dashboard` win. The old
+  not marked `Secure`. Values already set under `config.dashboard` win. While
+  the dashboard is enabled the chart also renders a TCP readiness probe on
+  `service.port` (`dashboard.readinessProbe`), because the first start can
+  take minutes while bundled skills sync onto the volume and an Ingress would
+  answer 502 in the meantime; an explicit `probes.readiness` wins and
+  readiness never restarts the pod. The old
   `--insecure` / `HERMES_DASHBOARD_INSECURE` escape hatch is a deprecated
   no-op upstream. The dashboard still shows API keys to whoever is logged in,
   so keep it on a private network or add a second auth layer at the proxy. See

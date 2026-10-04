@@ -514,7 +514,12 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   empty, `https` if `ingress.tls` is set) and `dashboard.trustedProxies` feeds
   `config.dashboard.trusted_proxies` (exact IP or a bounded CIDR; `0.0.0.0/0`
   is rejected), otherwise its `X-Forwarded-Proto` is ignored and cookies are
-  not marked `Secure`. Values already set under `config.dashboard` win. The old
+  not marked `Secure`. Values already set under `config.dashboard` win. While
+  the dashboard is enabled the chart also renders a TCP readiness probe on
+  `service.port` (`dashboard.readinessProbe`), because the first start can
+  take minutes while bundled skills sync onto the volume and an Ingress would
+  answer 502 in the meantime; an explicit `probes.readiness` wins and
+  readiness never restarts the pod. The old
   `--insecure` / `HERMES_DASHBOARD_INSECURE` escape hatch is a deprecated
   no-op upstream. The dashboard still shows API keys to whoever is logged in,
   so keep it on a private network or add a second auth layer at the proxy. See
@@ -847,10 +852,12 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
-| dashboard | object | ------------------------------------------------------------------------- | `{"auth":{"provider":"basic"},"enabled":false,"publicUrl":"","trustedProxies":[]}` |
+| dashboard | object | ------------------------------------------------------------------------- | `{"auth":{"provider":"basic"},"enabled":false,"publicUrl":"","readinessProbe":{"enabled":true,"periodSeconds":10},"trustedProxies":[]}` |
 | dashboard.auth.provider | string | Upstream auth provider the credentials below are for. The template    fails when the provider's required keys are missing from `env` or    `extraEnv`: `basic` (HERMES_DASHBOARD_BASIC_AUTH_USERNAME + _PASSWORD    or _PASSWORD_HASH), `oauth` (HERMES_DASHBOARD_OAUTH_CLIENT_ID) or    `oidc` (HERMES_DASHBOARD_OIDC_ISSUER + _CLIENT_ID). Use `external`    when credentials arrive through `extraEnvFrom` or an ExternalSecret,    which the chart cannot inspect. | `"basic"` |
 | dashboard.enabled | bool | Start the supervised management dashboard (renders `HERMES_DASHBOARD=1`).    Exposing it also needs `service.enabled` plus an `ingress` or `httpRoute`. | `false` |
 | dashboard.publicUrl | string | External origin the dashboard is reached at, for example    `https://hermes.example.com`. Feeds `config.dashboard.public_url`. When    empty and `ingress.enabled`, it is derived from the first Ingress host    (`https` when `ingress.tls` is set). Set it explicitly for an HTTPRoute.    A value already set under `config.dashboard` wins. | `""` |
+| dashboard.readinessProbe.enabled | bool | Render a TCP readiness probe on `service.port` while the dashboard is    enabled, so the pod only joins the Service once the dashboard    listens. The first start can take minutes (bundled skills sync onto    the volume), during which an Ingress would otherwise answer 502. An    explicit `probes.readiness` wins. Readiness never restarts the pod. | `true` |
+| dashboard.readinessProbe.periodSeconds | int | Seconds between readiness checks. | `10` |
 | dashboard.trustedProxies | list | Peers allowed to supply X-Forwarded-Proto / X-Forwarded-For, usually the    ingress controller's pod CIDR. Feeds `config.dashboard.trusted_proxies`;    upstream rejects unbounded entries such as 0.0.0.0/0. | `[]` |
 | deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
