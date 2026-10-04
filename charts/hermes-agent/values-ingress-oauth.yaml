@@ -1,0 +1,69 @@
+# values-ingress-oauth.yaml
+#
+# Exposes the Hermes management dashboard through an Ingress and signs users in
+# with Nous Portal OAuth. Upstream recommends this provider for a dashboard that
+# is reachable over the public internet; the bundled username/password provider
+# (values-ingress.yaml) is meant for a trusted network or a VPN.
+#
+# 1. Register the dashboard in the Nous Portal ("Local Dashboards" page, or
+#    `hermes dashboard register` where a Nous login exists) with the redirect URI
+#      https://hermes-agent.example.com/auth/callback
+#    and copy the client id it returns (shape `agent:<id>`).
+# 2. Put that client id in `config.dashboard.oauth.client_id` below. The client
+#    id is not a secret. The template fails at render time when it is missing;
+#    if you register from inside the pod instead (the CLI writes
+#    HERMES_DASHBOARD_OAUTH_CLIENT_ID into the persistent .env), set
+#    `dashboard.auth.provider: external` so the render-time check is skipped.
+# 3. Install, using your own host and ingress controller CIDR:
+#
+#      helm upgrade --install hermes-agent ./charts/hermes-agent \
+#        --namespace hermes-agent --create-namespace \
+#        -f charts/hermes-agent/values-ingress-oauth.yaml \
+#        --set-string env.OPENAI_API_KEY='sk-<real>' --wait
+#
+# The external origin must match the registered redirect URI exactly. It is
+# derived from the first Ingress host (https once `ingress.tls` is set); set
+# `dashboard.publicUrl` explicitly when it differs. Dummy values below: replace
+# them, and never commit real credentials.
+
+config:
+  model:
+    provider: openai-api
+    default: gpt-4o-mini
+  terminal:
+    backend: local
+  dashboard:
+    oauth:
+      # Client id issued by the Nous Portal for this dashboard.
+      client_id: "agent:REPLACE_ME"
+
+dashboard:
+  enabled: true
+  # Only listed peers may supply X-Forwarded-Proto / X-Forwarded-For. Put your
+  # ingress controller's pod CIDR (or its exact pod IP) here; without it the
+  # session cookies are not marked Secure behind a TLS-terminating Ingress.
+  trustedProxies:
+    - "10.244.0.0/16"
+  auth:
+    provider: oauth
+
+env:
+  OPENAI_API_KEY: "sk-DUMMY_replace_me_000000000000000000000000"
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  #  cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: hermes-agent.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: hermes-agent-tls
+      hosts:
+        - hermes-agent.example.com

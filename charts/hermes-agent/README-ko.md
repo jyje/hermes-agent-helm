@@ -513,7 +513,11 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
   예전의 `--insecure` / `HERMES_DASHBOARD_INSECURE` 우회는 업스트림에서
   deprecated no-op입니다. 대시보드는 로그인한 사람에게 API 키를 보여주므로
   사설 네트워크에 두거나 프록시 단에 두 번째 인증 계층을 더하세요.
-  [`values-ingress.yaml`](values-ingress.yaml)을 참고하세요.
+  비밀번호 provider는 [`values-ingress.yaml`](values-ingress.yaml), Nous Portal OAuth는
+  [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml), 자체 OpenID Connect
+  제공자는 [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml)을 참고하세요.
+  클라이언트 ID와 issuer는 비밀이 아니므로 OAuth와 OIDC 예시는 이를
+  `config.dashboard.oauth` 아래에 둡니다.
 
 ### API server와 webhook 리스너
 
@@ -751,6 +755,8 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (대시보드 활성화, 업스트림 비밀번호 gate, trusted proxy) |
+| [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Nous Portal OAuth를 쓰는 대시보드 Ingress**, 인터넷에 공개하는 대시보드에 업스트림이 권장하는 로그인 방식 |
+| [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **자체 OpenID Connect 제공자를 쓰는 대시보드 Ingress** (public PKCE 클라이언트, Nous Portal 불필요) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook**: 명시적 Service port와 외부 listener secret |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**: config.yaml passthrough + 명시적 Service port로 다른 A2A 에이전트가 발견·구동 가능 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 리스너 라우팅**: `/v1` API와 webhook host가 별도 Service port 사용 |

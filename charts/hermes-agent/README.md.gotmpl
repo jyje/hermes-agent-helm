@@ -525,7 +525,11 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   `--insecure` / `HERMES_DASHBOARD_INSECURE` escape hatch is a deprecated
   no-op upstream. The dashboard still shows API keys to whoever is logged in,
   so keep it on a private network or add a second auth layer at the proxy. See
-  [`values-ingress.yaml`](values-ingress.yaml).
+  [`values-ingress.yaml`](values-ingress.yaml) for the password provider,
+  [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) for Nous Portal
+  OAuth, and [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) for your own
+  OpenID Connect provider. The client id and the issuer are not secrets, so the
+  OAuth and OIDC examples keep them under `config.dashboard.oauth`.
 
 ### API server and webhook listeners
 
@@ -805,6 +809,8 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (dashboard enabled, upstream password gate, trusted proxy) |
+| [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with Nous Portal OAuth**, the upstream-recommended sign-in for an internet-facing dashboard |
+| [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with your own OpenID Connect provider** (public PKCE client, no Nous Portal) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**, config.yaml passthrough + explicit Service port, so other A2A agents can discover and drive this one |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
