@@ -38,17 +38,38 @@ trap diagnostics ERR
 
 echo "[$NS] installing ingress-nginx $INGRESS_NGINX_REF"
 kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/${INGRESS_NGINX_REF}/deploy/static/provider/baremetal/deploy.yaml"
-# The admission webhook must be serving before an Ingress can be created. Do
-# not wait on its Jobs: they are cleaned up as soon as they finish. The
-# controller turns Ready once its certificate exists, and the patch Job's work
-# shows up as a caBundle on the webhook configuration.
+# The admission webhook must be serving before an Ingress can be created, and
+# neither the controller's Ready condition nor its Jobs say so reliably (the
+# Jobs are removed as soon as they finish, and Ready can precede the webhook
+# listener). Ask the webhook itself: a server-side dry-run of an Ingress goes
+# through it, so it succeeds only once the webhook answers.
 kubectl -n ingress-nginx wait --for=condition=Ready pod --selector=app.kubernetes.io/component=controller --timeout=180s
+webhook_ready=false
 for _ in $(seq 1 90); do
-  [ -n "$(kubectl get validatingwebhookconfiguration ingress-nginx-admission -o jsonpath='{.webhooks[0].clientConfig.caBundle}')" ] && break
+  if kubectl apply --dry-run=server -f - >/dev/null 2>&1 <<'MANIFEST'
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webhook-probe
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: webhook-probe.ci.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webhook-probe
+                port:
+                  number: 80
+MANIFEST
+  then webhook_ready=true; break; fi
   sleep 2
 done
-[ -n "$(kubectl get validatingwebhookconfiguration ingress-nginx-admission -o jsonpath='{.webhooks[0].clientConfig.caBundle}')" ] \
-  || { echo "::error::[$NS] ingress-nginx admission webhook never received its caBundle"; exit 1; }
+[ "$webhook_ready" = true ] || { echo "::error::[$NS] ingress-nginx admission webhook never started answering"; exit 1; }
 controller_ip="$(kubectl -n ingress-nginx get pod -l app.kubernetes.io/component=controller -o jsonpath='{.items[0].status.podIP}')"
 controller_svc="$(kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')"
 echo "[$NS] controller pod $controller_ip, Service $controller_svc"
