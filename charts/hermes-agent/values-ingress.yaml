@@ -11,7 +11,9 @@
 # username/password provider. The deprecated `--insecure` /
 # HERMES_DASHBOARD_INSECURE escape hatch is a no-op upstream.
 #
-# The dashboard shows API keys to whoever is logged in. Upstream says the
+# The dashboard shows API keys to whoever is logged in, and a logged-in user
+# can also create shell hooks and use the Chat tab (shell access to the pod).
+# Upstream says the
 # username/password provider is for a trusted network or a VPN, NOT for public
 # internet exposure. For a public host use values-ingress-oauth.yaml (Nous
 # Portal) or values-ingress-oidc.yaml (your own identity provider) instead; on

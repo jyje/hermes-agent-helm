@@ -12,7 +12,11 @@ description: Expose the management dashboard through an Ingress with a password,
 ## When to use it
 
 Use this when the management dashboard should be reachable at a URL. It shows API
-keys to whoever is signed in, so choose the sign-in method first. On a
+keys to whoever is signed in, and a signed-in user can also edit the
+configuration, create shell hooks (upstream documents that they run arbitrary
+commands), and use the Chat tab, which is the agent itself with its tools
+inside the pod. Treat sign-in as shell access to the pod, so choose the
+method first. On a
 non-loopback bind upstream's auth gate is mandatory: without a provider the
 dashboard fails closed and never listens.
 
