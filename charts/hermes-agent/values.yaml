@@ -484,6 +484,10 @@ persistence:
 dashboard:
   # -- Start the supervised management dashboard (renders `HERMES_DASHBOARD=1`).
   #    Exposing it also needs `service.enabled` plus an `ingress` or `httpRoute`.
+  #    `public_url` and `trusted_proxies` are written into `config.yaml` when the
+  #    volume is first seeded, so changing the host or `dashboard.*` later needs
+  #    `--set bootstrap.overwrite=true` for that upgrade (see the README, "Expose the
+  #    dashboard").
   enabled: false
   # -- External origin the dashboard is reached at, for example
   #    `https://hermes.example.com`. Feeds `config.dashboard.public_url`. When

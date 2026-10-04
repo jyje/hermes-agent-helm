@@ -487,54 +487,84 @@ Kubernetes Secret에 넣고 `extraEnvFrom`으로 참조하세요.
 시 checksum 검증된 `bws` CLI를 `HERMES_HOME`에 내려받으므로, Pod에는
 Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 
-- **대시보드 라우팅**: 관리 대시보드(`service.port`, 기본값 9119)는 이미지
-  안의 s6 서비스로, `dashboard.enabled: true`(`HERMES_DASHBOARD=1`로
-  렌더링됨)를 설정하기 전까지는 내려가 있습니다. 컨테이너 안에서는
-  `0.0.0.0`으로 바인딩하며, non-loopback 바인드에서는 업스트림의 auth gate가
-  필수라서 인증 provider가 없으면 대시보드는 **fail-closed되어 아예 리슨하지
-  않습니다**. `dashboard.auth.provider`에 provider(`basic`, `oauth`, `oidc`,
-  또는 자격증명을 `extraEnvFrom`/ExternalSecret으로 주입할 때 `external`)를
-  지정하면, 해당 provider의 키가 `env`/`extraEnv`에 없을 때 Ingress가
-  502/503만 내는 대신 렌더링 단계에서 실패합니다. `basic`은
-  `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD`(또는 `_PASSWORD_HASH`)가
-  필요하며, 인터넷에 공개하는 대시보드에는 업스트림이 OAuth를 권장합니다.
-  TLS를 종단하는 Ingress 뒤라면 `dashboard.publicUrl`이
-  `config.dashboard.public_url`에 반영되고(비어 있으면 첫 번째 Ingress host에서
-  유도, `ingress.tls`가 있으면 `https`), `dashboard.trustedProxies`가
-  `config.dashboard.trusted_proxies`에 반영됩니다(정확한 IP 또는 제한된 CIDR;
-  `0.0.0.0/0`은 거부됨). 그렇지 않으면 `X-Forwarded-Proto`가 무시되어 쿠키에
-  `Secure`가 붙지 않습니다(로그인은 그대로 되므로 눈에 띄지 않습니다. 대시보드를
-  `https`로 제공하면서 신뢰 프록시가 없으면 릴리스 노트에 경고가 출력됩니다). `config.dashboard`에 이미 지정한 값이 우선합니다.
-  대시보드가 켜져 있는 동안에는 `service.port`에 대한 TCP readiness probe도
-  렌더링됩니다(`dashboard.readinessProbe`). 첫 시작 때 번들 스킬이 볼륨에
-  동기화되는 동안 몇 분이 걸릴 수 있고, 그동안 Ingress가 502를 내기
-  때문입니다. 명시적인 `probes.readiness`가 우선하며 readiness는 파드를
-  재시작하지 않습니다.
-  예전의 `--insecure` / `HERMES_DASHBOARD_INSECURE` 우회는 업스트림에서
-  deprecated no-op입니다. 대시보드는 로그인한 사람에게 API 키를 보여주므로
-  사설 네트워크에 두거나 프록시 단에 두 번째 인증 계층을 더하세요.
-  `extraEnv`나 `env`에 `HERMES_DASHBOARD=1`을 직접 넣는 것보다
-  `dashboard.enabled`를 쓰세요. 이미지는 그 변수를 인식하지만 차트는 볼 수
-  없어서 readiness probe, 유도되는 `public_url`과 `trusted_proxies`, 인증
-  provider 확인, 신뢰 프록시 경고가 모두 적용되지 않습니다. 변수를 그대로
-  쓴다면 직접 `probes.readiness`(예: `service.port`에 대한 `tcpSocket` probe)를
-  추가하세요. 그렇지 않으면 첫 시작에서 번들 스킬을 동기화하는 동안 Ingress가
-  502를 냅니다.
-  비밀번호 provider는 [`values-ingress.yaml`](values-ingress.yaml), Nous Portal OAuth는
-  [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml), 자체 OpenID Connect
-  제공자는 [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml)을 참고하세요.
-  클라이언트 ID와 issuer는 비밀이 아니므로 OAuth와 OIDC 예시는 이를
-  `config.dashboard.oauth` 아래에 둡니다. 업스트림은 비밀번호 provider를 신뢰된
-  네트워크나 VPN에서만 쓰라고 하며 공개 인터넷 노출에는 적합하지 않다고
-  문서화합니다. 공개 호스트에는 OAuth나 OIDC를 쓰세요. OIDC에서는 대시보드가
-  자체 사용자 허용 목록을 갖지 않아, 제공자가 해당 클라이언트에 토큰을 발급하는
-  모든 신원이 로그인할 수 있으므로 identity provider에서 애플리케이션 접근을
-  제한하세요. 발급자가 틀리면 `/auth/login`이 503을 내며 원인은 응답 본문에
-  있습니다(커스텀 오류 페이지를 쓰는 프록시는 이를 가릴 수 있습니다). 등록되지
-  않은 리다이렉트 URI는 대시보드가 아니라 identity provider가 거부합니다. Nous
-  Portal OAuth에서는 대시보드의 외부 origin이 클라이언트에 등록한 Base URL과
-  다르면 포털이 `redirect_uri_mismatch`를 보여 주고, 개인 계정으로 등록하면
-  로그인이 그 소유자로 제한됩니다.
+- **대시보드 라우팅**: [대시보드 노출하기](#대시보드-노출하기)를 참고하세요.
+
+### 대시보드 노출하기
+
+관리 대시보드(`service.port`, 기본값 9119)는 이미지 안의 s6 서비스이자 유일한 내장
+웹 UI입니다. 로그인한 사람에게 API 키를 보여 주므로 아래 순서대로 진행하세요.
+
+**1. 로그인 방식을 고릅니다.** non-loopback 바인드에서는 업스트림의 인증 gate가
+필수라서, provider가 없으면 대시보드는 **fail-closed되어 아예 리슨하지 않습니다**.
+`--insecure`와 `HERMES_DASHBOARD_INSECURE`는 업스트림에서 deprecated no-op입니다.
+
+| 방식 | `dashboard.auth.provider` | 용도 | 예시 |
+| --- | --- | --- | --- |
+| 사용자 이름과 비밀번호 | `basic` | 신뢰된 네트워크나 VPN. 업스트림은 공개 인터넷 노출에는 권장하지 않습니다. | [`values-ingress.yaml`](values-ingress.yaml) |
+| Nous Portal OAuth | `oauth` | 공개 호스트. 포털에서 **Base URL**을 외부 origin으로 설정합니다(`/auth/callback`은 포털이 붙입니다). 개인 계정 클라이언트는 로그인이 소유자로 제한됩니다. | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) |
+| 자체 OpenID Connect 제공자 | `oidc` | 자체 identity provider를 쓰는 공개 호스트(비밀 없는 public PKCE 클라이언트). 대시보드에는 사용자 허용 목록이 없어서, 제공자가 해당 클라이언트에 토큰을 발급하는 모든 신원이 로그인할 수 있으므로 제공자에서 애플리케이션 접근을 제한하세요. | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) |
+
+자격증명을 `extraEnvFrom`이나 ExternalSecret으로 주입한다면 `external`을 쓰세요.
+그렇지 않으면 provider의 키가 `env`나 `extraEnv`(OAuth와 OIDC는
+`config.dashboard.oauth` 포함)에 없을 때 Ingress가 502/503만 내는 대신 렌더링
+단계에서 실패합니다. `basic`에는 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`과
+`_PASSWORD`(또는 `_PASSWORD_HASH`)가 필요합니다. OAuth 클라이언트 ID와 OIDC
+issuer는 비밀이 아니므로 예시는 이를 `config.dashboard.oauth` 아래에 둡니다.
+
+**2. 켜고 라우팅합니다.** `dashboard.enabled: true`(`HERMES_DASHBOARD=1`로
+렌더링됨), `service.enabled: true`, 그리고 `ingress`나 `httpRoute`를 설정하세요.
+`dashboard.publicUrl`은 `config.dashboard.public_url`에 반영되며, 비어 있으면 첫
+번째 Ingress host에서 유도됩니다(`ingress.tls`가 있으면 `https`). HTTPRoute에서는
+명시적으로 지정하세요. 값은 identity provider에 등록한 외부 origin과 같아야 합니다.
+`config.dashboard`에 이미 지정한 값이 우선합니다.
+
+`extraEnv`나 `env`에 `HERMES_DASHBOARD=1`을 직접 넣는 것보다 `dashboard.enabled`를
+쓰세요. 이미지는 그 변수를 인식하지만 차트는 볼 수 없어서 readiness probe, 유도되는
+`public_url`과 `trusted_proxies`, 인증 provider 확인, 신뢰 프록시 경고가 모두
+적용되지 않습니다. 변수를 그대로 쓴다면 직접 `probes.readiness`(예: `service.port`에
+대한 `tcpSocket` probe)를 추가하세요.
+
+**3. 신뢰 프록시를 지정합니다.** TLS를 종단하는 Ingress 뒤라면 컨트롤러를
+`dashboard.trustedProxies`에 넣으세요(`config.dashboard.trusted_proxies`에 반영되며
+정확한 IP 또는 제한된 CIDR이고 `0.0.0.0/0`은 거부됩니다). 없으면 업스트림이
+`X-Forwarded-Proto`를 무시해서 로그인은 되지만 세션 쿠키에 `Secure`가 붙지 않습니다.
+눈에 띄지 않으므로 대시보드를 `https`로 제공하면서 신뢰 프록시가 없으면 릴리스
+노트에 경고가 출력됩니다. 넣을 값은 대시보드가 상대 peer로 보는 주소이며 컨트롤러
+종류에 따라 다릅니다.
+
+- 일반 컨트롤러 파드: 파드 IP나 파드 CIDR. `kubectl get pods -n <컨트롤러 네임스페이스> -o wide`로
+  확인합니다.
+- host-network 컨트롤러(예: MicroK8s ingress): 컨트롤러가 떠 있는 노드의 주소이므로
+  노드 네트워크를 쓰세요.
+
+정확한 IP는 컨트롤러 파드가 재생성되면 더 이상 맞지 않으므로, 테스트가 아니라면
+제한된 CIDR을 권합니다.
+
+**4. 나중에 바꿀 때.** `public_url`과 `trusted_proxies`는 볼륨을 처음 시드할 때
+`config.yaml`에 기록되고 `bootstrap.overwrite`의 기본값은 `false`입니다. 따라서
+host나 `dashboard.*` 값을 바꾼 뒤의 `helm upgrade`는 파드에 **반영되지 않으며**,
+낡은 `public_url`은 OAuth와 OIDC 콜백을 깨뜨립니다. 그 업그레이드에는
+`--set bootstrap.overwrite=true`를 주세요. `config.yaml`(과 설정한 `SOUL.md`)이 차트가
+렌더링한 내용으로 교체되므로 런타임 편집은 먼저 백업하고, 이후 `false`로 되돌리세요.
+
+**5. 첫 시작이 느립니다.** 첫 시작은 번들 스킬이 볼륨에 동기화되는 동안 몇 분
+걸릴 수 있습니다(네트워크 스토리지에서는 더 오래). 대시보드가 켜져 있는 동안
+차트는 `service.port`에 대한 TCP readiness probe를 렌더링하므로(`dashboard.readinessProbe`),
+대시보드가 리슨하기 전에는 파드가 NotReady이고 Ingress도 라우팅하지 않습니다.
+`helm --wait`는 이를 기다립니다. 명시적인 `probes.readiness`가 우선하며 readiness는
+파드를 재시작하지 않습니다.
+
+**6. 확인합니다.** 세션이 없으면 `GET /`는 로그인 페이지로 리다이렉트되고 `/api/env`와
+`/api/config`는 401입니다. 로그인 후 `GET /api/auth/me`가 provider를 보여 주고 세션
+쿠키는 `__Host-`, `Secure`, `HttpOnly`입니다.
+
+| 증상 | 가능한 원인 |
+| --- | --- |
+| 설치 직후 Ingress가 502 | 첫 시작이 진행 중이며, 대시보드가 리슨하기 전까지 파드는 NotReady입니다. |
+| 대시보드가 리슨하지 않음 | 인증 provider가 없어 gate가 fail-closed 상태입니다. |
+| OIDC에서 `/auth/login`이 503 | issuer가 틀렸습니다. 응답 본문에 원인(`OIDC discovery returned 404 for ...`)이 있으며, 커스텀 오류 페이지를 쓰는 프록시는 이를 가릴 수 있으니 Service에 직접 요청하세요. issuer 끝 `/` 차이는 허용됩니다. |
+| identity provider가 `Unregistered redirect_uri`(OIDC), 포털이 `redirect_uri_mismatch`(OAuth) | 외부 origin이 등록한 값과 다릅니다. host를 바꿨다면 4단계를 보세요. |
+| 로그인은 되는데 쿠키에 `Secure`가 없음 | 신뢰 프록시가 없거나 주소가 틀렸거나 `*.localhost` host입니다(업스트림은 loopback 호스트를 개발 환경으로 봅니다). |
 
 ### API server와 webhook 리스너
 
