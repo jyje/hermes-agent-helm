@@ -84,4 +84,12 @@ notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'config.dashboard.trusted_
 notes "${basic[@]}" "${ingress[@]}" | grep -q 'no trusted proxy' && fail "warning for plain http"
 notes | grep -q 'no trusted proxy' && fail "warning while the dashboard is off"
 
+echo "the dashboard NetworkPolicy overlay allows port 9119 from both networks and trusts the same two"
+overlay=charts/hermes-agent/values-networkpolicy-dashboard.yaml
+helm template t "$chart" -f "$overlay" --show-only templates/networkpolicy.yaml \
+  | yq -e '.spec.ingress[0].ports[0].port == 9119 and (.spec.ingress[0].from | length) == 2' | grep -q true \
+  || fail "the dashboard NetworkPolicy overlay does not allow port 9119 from two networks"
+helm template t "$chart" -f "$overlay" | config '(.dashboard.trusted_proxies | length) == 2' | grep -q true \
+  || fail "the dashboard NetworkPolicy overlay does not trust two proxies"
+
 echo "dashboard render assertions passed"

@@ -534,8 +534,14 @@ issuer는 비밀이 아니므로 예시는 이를 `config.dashboard.oauth` 아�
 
 - 일반 컨트롤러 파드: 파드 IP나 파드 CIDR. `kubectl get pods -n <컨트롤러 네임스페이스> -o wide`로
   확인합니다.
-- host-network 컨트롤러(예: MicroK8s ingress): 컨트롤러가 떠 있는 노드의 주소이므로
-  노드 네트워크를 쓰세요.
+- host-network 컨트롤러(예: MicroK8s ingress): 컨트롤러가 떠 있는 노드의 주소입니다.
+  Calico VXLAN 같은 overlay CNI에서는 대시보드 파드와 **같은 노드**의 컨트롤러에만
+  해당합니다. 다른 노드의 컨트롤러는 그 노드의 터널 주소로 접근하며, 이 주소는 파드
+  네트워크 안에 있습니다. 노드마다 컨트롤러가 하나씩 있는 MicroK8s에서 측정한 결과,
+  노드 네트워크만 넣으면 다른 노드를 통한 로그인은 되지만 쿠키에서 `Secure`가
+  빠졌습니다. 노드 네트워크와 파드 네트워크를 모두 넣으세요(예: `10.0.4.0/24`와
+  `10.1.0.0/16`). 파드 네트워크는 `kubectl get ippools.crd.projectcalico.org`(Calico)나
+  `kubectl get nodes -o jsonpath='{.items[*].spec.podCIDR}'`로 확인합니다.
 
 정확한 IP는 컨트롤러 파드가 재생성되면 더 이상 맞지 않으므로, 테스트가 아니라면
 제한된 CIDR을 권합니다.
@@ -564,7 +570,17 @@ host나 `dashboard.*` 값을 바꾼 뒤의 `helm upgrade`는 파드에 **반영�
 | 대시보드가 리슨하지 않음 | 인증 provider가 없어 gate가 fail-closed 상태입니다. |
 | OIDC에서 `/auth/login`이 503 | issuer가 틀렸습니다. 응답 본문에 원인(`OIDC discovery returned 404 for ...`)이 있으며, 커스텀 오류 페이지를 쓰는 프록시는 이를 가릴 수 있으니 Service에 직접 요청하세요. issuer 끝 `/` 차이는 허용됩니다. |
 | identity provider가 `Unregistered redirect_uri`(OIDC), 포털이 `redirect_uri_mismatch`(OAuth) | 외부 origin이 등록한 값과 다릅니다. host를 바꿨다면 4단계를 보세요. |
-| 로그인은 되는데 쿠키에 `Secure`가 없음 | 신뢰 프록시가 없거나 주소가 틀렸거나 `*.localhost` host입니다(업스트림은 loopback 호스트를 개발 환경으로 봅니다). |
+| 로그인은 되는데 쿠키에 `Secure`가 없음 | 신뢰 프록시가 없거나 주소가 틀렸거나 `*.localhost` host입니다(업스트림은 loopback 호스트를 개발 환경으로 봅니다). overlay CNI의 host-network 컨트롤러 뒤에서는 요청이 들어온 노드에 따라 달라질 수 있으니 파드 네트워크도 넣으세요(3단계). |
+| `networkPolicy`를 켠 뒤 Ingress가 타임아웃되고, 일부 컨트롤러에서만 그럴 수도 있음 | 정책이 인바운드를 모두 막고 컨트롤러가 허용되지 않았습니다. 7단계를 보세요. |
+
+**7. NetworkPolicy와 함께 쓸 때.** `networkPolicy.enabled`는 인바운드를 모두 막기
+때문에, 파드는 Ready인 채로(kubelet probe는 영향을 받지 않습니다) Ingress가 대시보드에
+닿지 못하게 조용히 끊어 버립니다. `networkPolicy.extraIngress`에 9119 포트 규칙을
+추가하세요. host-network 컨트롤러는 pod나 namespace 선택자로 매칭되지 않습니다.
+overlay CNI(Calico VXLAN에서 측정)에서는 노드 네트워크와 파드 네트워크를 모두 허용하고
+`dashboard.trustedProxies`에도 같은 두 CIDR을 쓰세요. 측정한 규칙과 바로 쓸 수 있는
+오버레이는 [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml)에
+있습니다.
 
 ### API server와 webhook 리스너
 
@@ -809,6 +825,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 리스너 라우팅**: `/v1` API와 webhook host가 별도 Service port 사용 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 사전에 만든 Gateway를 통한 리스너 라우팅 |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM proxy (in-cluster) | **Egress 제한 NetworkPolicy**: RFC1918과 클라우드 metadata endpoint 차단, LiteLLM Service만 정확히 허용 |
+| [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml) | OpenAI (`openai-api`) | **NetworkPolicy를 켠 대시보드 Ingress**: 9119 포트 인바운드 규칙과 그에 맞는 trusted proxy, Calico VXLAN의 host-network 컨트롤러에서 측정 |
 | [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **Pod Security Standards `restricted`**: non-root, read-only rootfs, capability 전부 drop - `restricted`를 강제하는 namespace에서 CI 검증됨 |
 | [`values-soul.yaml`](values-soul.yaml) | any | **영속 정체성**: 실용적인 엔지니어링 말투, 런타임 편집 보존 |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **협업 페어**: 공유 Discord 채널에서 @mention으로 핸드오프하는 두 에이전트 |

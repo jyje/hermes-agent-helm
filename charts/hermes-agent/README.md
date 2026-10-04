@@ -549,7 +549,15 @@ depends on the controller:
 - A regular controller pod: its pod IP or the pod CIDR. Look it up with
   `kubectl get pods -n <controller namespace> -o wide`.
 - A host-network controller (for example the MicroK8s ingress): the address of
-  the node it runs on, so use the node network.
+  the node it runs on. On an overlay CNI such as Calico VXLAN this only holds
+  for a controller on the **same node** as the dashboard pod; a controller on
+  another node reaches it from that node's tunnel address, which lies inside the
+  pod network. Measured on MicroK8s with one controller per node: with only the
+  node network listed, sign-in through the other nodes worked but the cookies
+  lost `Secure`. List both the node network and the pod network (for example
+  `10.0.4.0/24` and `10.1.0.0/16`). Find the pod network with
+  `kubectl get ippools.crd.projectcalico.org` (Calico) or
+  `kubectl get nodes -o jsonpath='{.items[*].spec.podCIDR}'`.
 
 An exact IP stops matching when the controller pod is recreated; prefer a
 bounded CIDR outside of tests.
@@ -581,7 +589,17 @@ reports the provider and the session cookies are `__Host-`, `Secure` and
 | The dashboard never listens | No auth provider is configured, so the gate fails closed. |
 | OIDC: `/auth/login` answers 503 | The issuer is wrong. The response body names the reason (`OIDC discovery returned 404 for ...`); a proxy with custom error pages can hide it, so query the Service directly. A trailing-slash difference in the issuer is tolerated. |
 | The identity provider says `Unregistered redirect_uri` (OIDC) or the portal says `redirect_uri_mismatch` (OAuth) | The external origin differs from what is registered. If you changed the host, see step 4. |
-| Sign-in works but the cookies are not `Secure` | No trusted proxy, a wrong address, or a `*.localhost` host (upstream treats loopback hosts as a development setup). |
+| Sign-in works but the cookies are not `Secure` | No trusted proxy, a wrong address, or a `*.localhost` host (upstream treats loopback hosts as a development setup). Behind a host-network controller on an overlay CNI it can depend on which node the request enters: list the pod network as well (step 3). |
+| After enabling `networkPolicy` the Ingress times out, possibly only through some controllers | The policy denies all inbound traffic and the controller is not allowed. See step 7. |
+
+**7. With a NetworkPolicy.** `networkPolicy.enabled` denies all inbound traffic,
+so it silently cuts the Ingress off from the dashboard while the pod stays Ready
+(the kubelet probe is not affected). Add a rule for port 9119 to
+`networkPolicy.extraIngress`. A host-network controller is not matched by a pod or
+namespace selector. On an overlay CNI (Calico VXLAN measured) allow both the node
+network and the pod network, and use the same two CIDRs in
+`dashboard.trustedProxies`. The measured rules and a ready overlay are in
+[`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml).
 
 ### API server and webhook listeners
 
@@ -868,6 +886,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: listener routing through a pre-existing Gateway |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM proxy (in-cluster) | **Egress-locked NetworkPolicy**: blocks RFC1918 and the cloud metadata endpoint, with a precise allowlist for the LiteLLM Service |
+| [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with NetworkPolicy on**: the inbound rule for port 9119 and the matching trusted proxies, measured on a host-network controller with Calico VXLAN |
 | [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **Pod Security Standards `restricted`**: non-root, read-only rootfs, dropped capabilities - CI-verified in a `restricted`-enforcing namespace |
 | [`values-soul.yaml`](values-soul.yaml) | any | **Persistent identity**: pragmatic engineering style, with runtime edits preserved |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | any | **Collaborating pair**: two agents handing off by @mention in a shared Discord channel |
