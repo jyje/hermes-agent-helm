@@ -6,9 +6,14 @@
 # (values-ingress.yaml) is meant for a trusted network or a VPN.
 #
 # 1. Register the dashboard in the Nous Portal ("Local Dashboards" page, or
-#    `hermes dashboard register` where a Nous login exists) with the redirect URI
-#      https://hermes-agent.example.com/auth/callback
-#    and copy the client id it returns (shape `agent:<id>`).
+#    `hermes dashboard register` where a Nous login exists) and copy the client
+#    id it returns (shape `agent:<id>`). In the portal, set Base URL to the
+#    dashboard's external origin, https://hermes-agent.example.com, with no path:
+#    the portal appends /auth/callback itself. (`hermes dashboard register` takes
+#    the full `--redirect-uri https://hermes-agent.example.com/auth/callback`.)
+#    A personal-account registration limits sign-in to its owner ("Only you" in
+#    the portal), so, unlike the OIDC example, no extra access control is needed
+#    for that case.
 # 2. Put that client id in `config.dashboard.oauth.client_id` below. The client
 #    id is not a secret. The template fails at render time when it is missing;
 #    if you register from inside the pod instead (the CLI writes
@@ -21,7 +26,17 @@
 #        -f charts/hermes-agent/values-ingress-oauth.yaml \
 #        --set-string env.OPENAI_API_KEY='sk-<real>' --wait
 #
-# The external origin must match the registered redirect URI exactly. It is
+# After sign-in `GET /api/auth/me` reports `provider: nous`. Observed with a
+# personal account: `email` and `display_name` come back empty.
+#
+# Troubleshooting, as observed against the portal: a dashboard whose external
+# origin differs from the registered Base URL is rejected by the PORTAL, not by
+# the dashboard, with "Authorization failed ... Error: redirect_uri_mismatch:
+# redirect_uri does not match the agent's canonical URL or localhost carve-out".
+# The portal also requires PKCE; the dashboard sends it, so a hand-built
+# authorize request without a code_challenge fails with "invalid_request".
+#
+# The external origin must match the registered Base URL exactly. It is
 # derived from the first Ingress host (https once `ingress.tls` is set); set
 # `dashboard.publicUrl` explicitly when it differs. Dummy values below: replace
 # them, and never commit real credentials.

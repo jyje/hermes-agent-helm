@@ -524,7 +524,17 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
   [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml), 자체 OpenID Connect
   제공자는 [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml)을 참고하세요.
   클라이언트 ID와 issuer는 비밀이 아니므로 OAuth와 OIDC 예시는 이를
-  `config.dashboard.oauth` 아래에 둡니다.
+  `config.dashboard.oauth` 아래에 둡니다. 업스트림은 비밀번호 provider를 신뢰된
+  네트워크나 VPN에서만 쓰라고 하며 공개 인터넷 노출에는 적합하지 않다고
+  문서화합니다. 공개 호스트에는 OAuth나 OIDC를 쓰세요. OIDC에서는 대시보드가
+  자체 사용자 허용 목록을 갖지 않아, 제공자가 해당 클라이언트에 토큰을 발급하는
+  모든 신원이 로그인할 수 있으므로 identity provider에서 애플리케이션 접근을
+  제한하세요. 발급자가 틀리면 `/auth/login`이 503을 내며 원인은 응답 본문에
+  있습니다(커스텀 오류 페이지를 쓰는 프록시는 이를 가릴 수 있습니다). 등록되지
+  않은 리다이렉트 URI는 대시보드가 아니라 identity provider가 거부합니다. Nous
+  Portal OAuth에서는 대시보드의 외부 origin이 클라이언트에 등록한 Base URL과
+  다르면 포털이 `redirect_uri_mismatch`를 보여 주고, 개인 계정으로 등록하면
+  로그인이 그 소유자로 제한됩니다.
 
 ### API server와 webhook 리스너
 

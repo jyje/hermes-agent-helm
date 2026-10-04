@@ -536,7 +536,18 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) for Nous Portal
   OAuth, and [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) for your own
   OpenID Connect provider. The client id and the issuer are not secrets, so the
-  OAuth and OIDC examples keep them under `config.dashboard.oauth`.
+  OAuth and OIDC examples keep them under `config.dashboard.oauth`. Upstream
+  documents the username/password provider as suitable only for a trusted
+  network or a VPN and not for public internet exposure; use OAuth or OIDC for
+  a public host. With OIDC the dashboard has no user allowlist of its own:
+  every identity the provider issues a token to for the client can sign in, so
+  restrict the application at the identity provider. A wrong issuer makes
+  `/auth/login` answer 503 with the reason in the response body (a proxy with
+  custom error pages may hide it), and an unregistered redirect URI is
+  rejected by the identity provider, not by the dashboard. With Nous Portal
+  OAuth the portal shows `redirect_uri_mismatch` when the dashboard's external
+  origin differs from the Base URL registered for the client, and a
+  personal-account registration limits sign-in to its owner.
 
 ### API server and webhook listeners
 
