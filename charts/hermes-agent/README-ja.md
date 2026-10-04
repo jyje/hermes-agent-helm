@@ -16,6 +16,8 @@
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
+**役に立ったら [GitHub で ⭐](https://github.com/jyje/hermes-agent-helm) をお願いします。ほかの方がこのプロジェクトを見つける助けになります。**
+
 > 日本語版は入門ページを翻訳しています。未翻訳のセクションは英語で表示されます。翻訳の修正提案を歓迎します。生成済みの `## Values` 表は英語のまま掲載しています。
 
 ## TL;DR
