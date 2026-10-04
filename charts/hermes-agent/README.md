@@ -362,10 +362,12 @@ timestamped [team evidence](../../docs/advanced/teams/reference.md#leader-orches
 > **Alternative: one pod, many profiles.** If what you actually need is
 > routing different Discord guilds/channels/threads to different agent
 > *profiles* from a **single bot token** - rather than several bots sharing
-> one channel - set `config.gateway.multiplex_profiles: true` (env override:
-> `GATEWAY_MULTIPLEX_PROFILES=1`). That's one pod instead of one-per-teammate;
-> it solves a different problem than the hand-off pattern above (routing, not
-> collaboration), so pick based on which shape your use case actually needs.
+> one channel - use gateway profile multiplexing. Upstream turns it on by
+> default (`gateway.multiplex_profiles` defaults to `true`, and `true` is the
+> only valid value; the old `false` is retired), so no chart setting is needed.
+> That's one pod instead of one-per-teammate; it solves a different problem
+> than the hand-off pattern above (routing, not collaboration), so pick based
+> on which shape your use case actually needs.
 
 ## Advanced testing
 
@@ -521,7 +523,8 @@ so the pod needs egress to Bitwarden and GitHub Releases.
 
 The management dashboard (`service.port`, default 9119) is an s6 service inside
 the image and the only built-in web UI. It shows API keys to whoever is signed
-in, so work through these steps in order.
+in, and a signed-in user can also create shell hooks and use the Chat tab, so
+treat sign-in as shell access to the pod and work through these steps in order.
 
 **1. Choose a sign-in method.** On a non-loopback bind upstream's auth gate is
 mandatory: without a provider the dashboard **fails closed and never listens**.

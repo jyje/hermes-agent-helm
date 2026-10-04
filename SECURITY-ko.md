@@ -63,7 +63,8 @@
   클러스터 내에서는 지원하지 않습니다.
 - **기본적으로 인바운드 API가 없습니다.** 에이전트는 아웃바운드 연결만
   만듭니다. 유일한 HTTP 표면은 선택적 관리 **대시보드**(포트 9119)이며,
-  로그인한 사람에게 **API 키를 노출**합니다. 차트는 `dashboard.enabled: false`,
+  로그인한 사람에게 **API 키를 노출**합니다. 로그인한 사용자는 설정 편집, shell hook
+  생성, Chat 탭 사용도 할 수 있으므로 로그인을 pod 셸 접근 권한으로 여기세요. 차트는 `dashboard.enabled: false`,
   `service.enabled: false`, `ingress.enabled: false`로 배포됩니다. 켜면 대시보드는
   컨테이너 안에서 `0.0.0.0`에 바인딩하고 업스트림의 인증 gate가 필수여서, 인증
   provider가 없으면 fail-closed되어 아예 리슨하지 않습니다(`--insecure`는 deprecated
