@@ -32,6 +32,16 @@ Backend:   terminal.backend={{ .Values.config.terminal.backend }} (commands run 
 3. Run the install test (doctor-style Job):
    helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
 {{- end }}
+{{- $cfgDash := default (dict) (get (default (dict) .Values.config) "dashboard") }}
+{{- $dashURL := include "hermes-agent.dashboard.publicUrl" . | default (get $cfgDash "public_url") }}
+{{- if and .Values.dashboard.enabled (hasPrefix "https://" (toString $dashURL)) (not .Values.dashboard.trustedProxies) (not (get $cfgDash "trusted_proxies")) }}
+
+WARNING: the dashboard is served at {{ $dashURL }} but no trusted proxy is set.
+Behind a TLS-terminating proxy, upstream ignores X-Forwarded-Proto from peers it
+does not trust, so sign-in still works but the session cookies are NOT marked
+Secure. Set dashboard.trustedProxies to your ingress controller's pod CIDR or
+exact pod IP (upstream rejects 0.0.0.0/0).
+{{- end }}
 
 Logs:
    kubectl logs {{ .Values.controller.type }}/{{ include "hermes-agent.fullname" . }} -n {{ .Release.Namespace }} -f

@@ -514,7 +514,9 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   empty, `https` if `ingress.tls` is set) and `dashboard.trustedProxies` feeds
   `config.dashboard.trusted_proxies` (exact IP or a bounded CIDR; `0.0.0.0/0`
   is rejected), otherwise its `X-Forwarded-Proto` is ignored and cookies are
-  not marked `Secure`. Values already set under `config.dashboard` win. While
+  not marked `Secure` (sign-in still works, so the gap is silent: the release
+  notes print a warning when the dashboard is served over `https` with no
+  trusted proxy). Values already set under `config.dashboard` win. While
   the dashboard is enabled the chart also renders a TCP readiness probe on
   `service.port` (`dashboard.readinessProbe`), because the first start can
   take minutes while bundled skills sync onto the volume and an Ingress would
