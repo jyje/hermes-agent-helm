@@ -241,6 +241,12 @@ jobs:
             exit 1
           fi
 
+      - name: validate dashboard values render
+        # Render-only, no cluster: derivation, auth validation and readiness
+        # probe for the `dashboard` block. The live Ingress path runs in the
+        # dashboard-ingress kind scenario below.
+        run: bash .github/scripts/assert-dashboard-render.sh
+
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
@@ -298,7 +304,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite, config-migration]
+        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite, config-migration, dashboard-ingress]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
