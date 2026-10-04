@@ -140,7 +140,17 @@ expect "authenticated GET /api/env" "$(status_of -b /tmp/jar-good "https://$HOST
 echo "[$NS] --- control: without a trusted proxy the same sign-in yields non-Secure cookies"
 helm upgrade hermes-agent charts/hermes-agent --namespace "$NS" --reuse-values \
   --set bootstrap.overwrite=true --set-json 'dashboard.trustedProxies=[]' --wait --timeout 5m
-untrusted="$(login "$PASSWORD" /tmp/jar-untrusted)"
+# The new pod is Ready, but the controller needs a moment to move its upstream
+# over from the old pod, during which it answers 502/503/504. Only that window
+# is retried; any other status is the real answer.
+untrusted=""
+for _ in $(seq 1 30); do
+  untrusted="$(login "$PASSWORD" /tmp/jar-untrusted)"
+  case "$(printf '%s\n' "$untrusted" | head -1 | tr -d '\r' | awk '{print $2}')" in
+    502|503|504) sleep 2 ;;
+    *) break ;;
+  esac
+done
 expect "sign-in still succeeds" "$(printf '%s\n' "$untrusted" | head -1 | tr -d '\r' | awk '{print $2}')" 200
 if printf '%s\n' "$untrusted" | cookies | grep -qi '; *secure'; then
   # Informational: upstream may one day mark the cookie Secure on its own. The
