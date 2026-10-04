@@ -11,8 +11,9 @@ description: Route selected Hermes listeners through an Ingress controller.
 
 Use this when the cluster has an Ingress controller. An API key, listener
 secrets, and a controller configuration appropriate for the selected hosts are
-required. The dashboard remains sensitive: protect it with authentication if
-you route it at all.
+required. To route the management dashboard, see
+[Dashboard sign-in and Ingress](dashboard.md): it shows API keys to whoever is
+signed in, so choose the sign-in method first.
 
 ## Install
 

@@ -67,6 +67,7 @@ plugins:
             # page) - matched to the term readers actually see.
             Providers: 제공자
             Integrations: 통합
+            Dashboard sign-in: 대시보드 로그인
             Configuration model: 설정 모델
             Secrets and persistence: Secret과 영속성
             Operations and testing: 운영과 테스트
@@ -178,6 +179,7 @@ nav:
           - advanced/integrations/index.md
           - Anthropic + Discord: advanced/integrations/anthropic-and-discord.md
           - Ingress: advanced/integrations/ingress.md
+          - Dashboard sign-in: advanced/integrations/dashboard.md
           - HTTPRoute: advanced/integrations/httproute.md
           - LiteLLM: advanced/integrations/litellm.md
           - LiteLLM (in-cluster): advanced/integrations/litellm-k8s.md

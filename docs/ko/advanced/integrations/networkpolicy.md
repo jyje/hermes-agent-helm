@@ -53,3 +53,37 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 ```yaml title="charts/hermes-agent/values-networkpolicy-litellm.yaml"
 --8<-- "charts/hermes-agent/values-networkpolicy-litellm.yaml"
 ```
+
+## Ingress 뒤의 대시보드
+
+정책을 켜면 Ingress가 대시보드에 닿지 못하도록 조용히 끊깁니다. 파드는 Ready인 채로
+유지되지만(kubelet probe는 영향을 받지 않습니다) 컨트롤러가 접근하지 못합니다.
+`networkPolicy.extraIngress`에 9119 포트 규칙을 추가하세요. 무엇을 허용할지는 컨트롤러가
+파드에 접근하는 방식에 따라 다릅니다. 노드마다 컨트롤러가 하나씩 있고 대시보드 파드가 그중
+한 노드에 있는 MicroK8s(Calico VXLAN, host-network ingress-nginx)에서 측정했습니다.
+
+| 규칙 | 같은 노드의 컨트롤러 | 다른 노드의 컨트롤러 |
+| --- | --- | --- |
+| 없음 | 허용 | 차단 |
+| ingress의 pod·namespace 선택자 | 허용 | 차단 |
+| 노드 네트워크만 `ipBlock` | 허용 | 차단 |
+| 노드 네트워크와 파드 네트워크 `ipBlock` | 허용 | 허용 |
+
+host-network 컨트롤러는 정책 관점에서 파드가 아니므로 선택자로 매칭되지 않고, 이 테스트에서 Calico는
+파드가 있는 같은 노드의 트래픽을 항상 허용했습니다. 다른 노드의 트래픽은 그 노드의 터널
+주소로 대시보드에 도착하며, 이 주소는 파드 네트워크 안에 있습니다. 두 네트워크를 모두
+허용하고 `dashboard.trustedProxies`에도 같은 두 CIDR을 넣으세요. 그렇지 않으면 로그인은
+되지만 요청이 들어온 노드에 따라 세션 쿠키에서 `Secure`가 빠집니다. 일반 파드로 실행되는
+컨트롤러는 namespace와 pod 선택자로 매칭할 수 있어 더 좁게 열 수 있지만, 그 방식은
+측정하지 않았습니다. 컨트롤러 파드가 재생성되면 바뀌는 파드 IP 대신 제한된 CIDR을
+쓰세요.
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-networkpolicy-dashboard.yaml --wait
+```
+
+```yaml title="charts/hermes-agent/values-networkpolicy-dashboard.yaml"
+--8<-- "charts/hermes-agent/values-networkpolicy-dashboard.yaml"
+```

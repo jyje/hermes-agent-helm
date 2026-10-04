@@ -10,8 +10,9 @@ description: 선택한 Hermes 리스너를 Ingress controller로 라우팅하는
 ## 언제 사용하나요?
 
 클러스터에 Ingress controller가 있을 때 사용하세요. API key, listener secret,
-선택한 host에 맞는 controller 설정이 필요합니다. dashboard를 라우팅한다면 민감한
-API key가 노출될 수 있으므로 반드시 인증으로 보호하세요.
+선택한 host에 맞는 controller 설정이 필요합니다. 관리 대시보드를 라우팅하려면
+[대시보드 로그인과 Ingress](dashboard.md)를 참고하세요. 로그인한 사람에게 API 키를
+보여 주므로 로그인 방식을 먼저 고르세요.
 
 ## 설치
 
