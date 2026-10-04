@@ -497,57 +497,91 @@ credential in an externally managed Kubernetes Secret referenced through
 first startup downloads the checksum-verified `bws` CLI into `HERMES_HOME`,
 so the pod needs egress to Bitwarden and GitHub Releases.
 
-- **Dashboard routing**: the management dashboard (`service.port`, default
-  9119) is an s6 service inside the image that stays down until
-  `dashboard.enabled: true` (which renders `HERMES_DASHBOARD=1`). It binds
-  `0.0.0.0` in-container, and on any non-loopback bind upstream's auth gate is
-  mandatory, so the dashboard **fails closed and never listens** without an
-  auth provider. Name the provider in `dashboard.auth.provider` (`basic`,
-  `oauth`, `oidc`, or `external` when credentials come from `extraEnvFrom` or
-  an ExternalSecret); the template then fails at render time if that
-  provider's keys are missing from `env`/`extraEnv`, instead of leaving an
-  Ingress that answers 502/503. `basic` needs
-  `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` + `_PASSWORD` (or `_PASSWORD_HASH`);
-  upstream recommends OAuth for an internet-facing dashboard. Behind a
-  TLS-terminating Ingress, `dashboard.publicUrl` feeds
-  `config.dashboard.public_url` (derived from the first Ingress host when
-  empty, `https` if `ingress.tls` is set) and `dashboard.trustedProxies` feeds
-  `config.dashboard.trusted_proxies` (exact IP or a bounded CIDR; `0.0.0.0/0`
-  is rejected), otherwise its `X-Forwarded-Proto` is ignored and cookies are
-  not marked `Secure` (sign-in still works, so the gap is silent: the release
-  notes print a warning when the dashboard is served over `https` with no
-  trusted proxy). Values already set under `config.dashboard` win. While
-  the dashboard is enabled the chart also renders a TCP readiness probe on
-  `service.port` (`dashboard.readinessProbe`), because the first start can
-  take minutes while bundled skills sync onto the volume and an Ingress would
-  answer 502 in the meantime; an explicit `probes.readiness` wins and
-  readiness never restarts the pod. The old
-  `--insecure` / `HERMES_DASHBOARD_INSECURE` escape hatch is a deprecated
-  no-op upstream. The dashboard still shows API keys to whoever is logged in,
-  so keep it on a private network or add a second auth layer at the proxy.
-  Prefer `dashboard.enabled` over setting `HERMES_DASHBOARD=1` yourself in
-  `extraEnv` or `env`: the image honors the bare variable, but the chart cannot
-  see it, so the readiness probe, the derived `public_url` and
-  `trusted_proxies`, the auth-provider check, and the trusted-proxy warning
-  are all skipped. If you keep the variable, add your own `probes.readiness`
-  (for example a `tcpSocket` probe on `service.port`), otherwise an Ingress
-  answers 502 while the first start syncs bundled skills. See
-  [`values-ingress.yaml`](values-ingress.yaml) for the password provider,
-  [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) for Nous Portal
-  OAuth, and [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) for your own
-  OpenID Connect provider. The client id and the issuer are not secrets, so the
-  OAuth and OIDC examples keep them under `config.dashboard.oauth`. Upstream
-  documents the username/password provider as suitable only for a trusted
-  network or a VPN and not for public internet exposure; use OAuth or OIDC for
-  a public host. With OIDC the dashboard has no user allowlist of its own:
-  every identity the provider issues a token to for the client can sign in, so
-  restrict the application at the identity provider. A wrong issuer makes
-  `/auth/login` answer 503 with the reason in the response body (a proxy with
-  custom error pages may hide it), and an unregistered redirect URI is
-  rejected by the identity provider, not by the dashboard. With Nous Portal
-  OAuth the portal shows `redirect_uri_mismatch` when the dashboard's external
-  origin differs from the Base URL registered for the client, and a
-  personal-account registration limits sign-in to its owner.
+- **Dashboard routing**: see [Expose the dashboard](#expose-the-dashboard).
+
+### Expose the dashboard
+
+The management dashboard (`service.port`, default 9119) is an s6 service inside
+the image and the only built-in web UI. It shows API keys to whoever is signed
+in, so work through these steps in order.
+
+**1. Choose a sign-in method.** On a non-loopback bind upstream's auth gate is
+mandatory: without a provider the dashboard **fails closed and never listens**.
+`--insecure` and `HERMES_DASHBOARD_INSECURE` are deprecated no-ops upstream.
+
+| Method | `dashboard.auth.provider` | Use it for | Example |
+| --- | --- | --- | --- |
+| Username and password | `basic` | A trusted network or a VPN. Upstream does not recommend it for public internet exposure. | [`values-ingress.yaml`](values-ingress.yaml) |
+| Nous Portal OAuth | `oauth` | A public host. In the portal set **Base URL** to the external origin (it appends `/auth/callback`). A personal-account client limits sign-in to its owner. | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) |
+| Your own OpenID Connect provider | `oidc` | A public host with your own identity provider (a public PKCE client, no secret). The dashboard has no user allowlist: every identity the provider issues a token to for the client can sign in, so restrict the application at the provider. | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) |
+
+Use `external` when the credentials come from `extraEnvFrom` or an
+ExternalSecret. Otherwise the template fails at render time when the provider's
+keys are missing from `env` or `extraEnv` (for OAuth and OIDC, from
+`config.dashboard.oauth` as well), instead of leaving an Ingress that answers
+502/503. `basic` needs `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` plus `_PASSWORD`
+or `_PASSWORD_HASH`. The OAuth client id and the OIDC issuer are not secrets, so
+the examples keep them under `config.dashboard.oauth`.
+
+**2. Turn it on and route it.** Set `dashboard.enabled: true` (it renders
+`HERMES_DASHBOARD=1`), `service.enabled: true`, and an `ingress` or `httpRoute`.
+`dashboard.publicUrl` feeds `config.dashboard.public_url`. When empty it is
+derived from the first Ingress host (`https` once `ingress.tls` is set); set it
+explicitly for an HTTPRoute. It must equal the external origin registered with
+the identity provider. A value already set under `config.dashboard` wins.
+
+Prefer `dashboard.enabled` over putting `HERMES_DASHBOARD=1` in `extraEnv` or
+`env`. The image honors the bare variable, but the chart cannot see it, so the
+readiness probe, the derived `public_url` and `trusted_proxies`, the
+auth-provider check, and the trusted-proxy warning are all skipped. If you keep
+the variable, add your own `probes.readiness`, for example a `tcpSocket` probe on
+`service.port`.
+
+**3. Set a trusted proxy.** Behind a TLS-terminating Ingress, list the
+controller in `dashboard.trustedProxies` (it feeds
+`config.dashboard.trusted_proxies`; an exact IP or a bounded CIDR, and
+`0.0.0.0/0` is rejected). Without it upstream ignores `X-Forwarded-Proto`,
+sign-in still works, and the session cookies are not marked `Secure`. The gap is
+silent, so the release notes print a warning when the dashboard is served over
+`https` without one. List the address the dashboard sees as its peer, which
+depends on the controller:
+
+- A regular controller pod: its pod IP or the pod CIDR. Look it up with
+  `kubectl get pods -n <controller namespace> -o wide`.
+- A host-network controller (for example the MicroK8s ingress): the address of
+  the node it runs on, so use the node network.
+
+An exact IP stops matching when the controller pod is recreated; prefer a
+bounded CIDR outside of tests.
+
+**4. Changing it later.** `public_url` and `trusted_proxies` are written into
+`config.yaml` when the volume is first seeded, and `bootstrap.overwrite`
+defaults to `false`. A later `helm upgrade` that changes the host or any
+`dashboard.*` value therefore does **not** reach the pod, and a stale
+`public_url` breaks the OAuth and OIDC callback. For that upgrade pass
+`--set bootstrap.overwrite=true`, which replaces `config.yaml` (and a configured
+`SOUL.md`) with the chart-rendered content, so back up runtime edits first, then
+go back to `false`.
+
+**5. Expect a slow first start.** The first start can take minutes while bundled
+skills sync onto the volume (longer on network storage). While the dashboard is
+enabled the chart renders a TCP readiness probe on `service.port`
+(`dashboard.readinessProbe`), so the pod stays NotReady, and the Ingress does not
+route to it, until the dashboard listens. `helm --wait` waits for that. An
+explicit `probes.readiness` wins, and readiness never restarts the pod.
+
+**6. Check it.** Without a session `GET /` redirects to the sign-in page and
+`/api/env` and `/api/config` return 401. After signing in, `GET /api/auth/me`
+reports the provider and the session cookies are `__Host-`, `Secure` and
+`HttpOnly`.
+
+| Symptom | Likely cause |
+| --- | --- |
+| The Ingress answers 502 right after install | The first start is still running; the pod is NotReady until the dashboard listens. |
+| The dashboard never listens | No auth provider is configured, so the gate fails closed. |
+| OIDC: `/auth/login` answers 503 | The issuer is wrong. The response body names the reason (`OIDC discovery returned 404 for ...`); a proxy with custom error pages can hide it, so query the Service directly. A trailing-slash difference in the issuer is tolerated. |
+| The identity provider says `Unregistered redirect_uri` (OIDC) or the portal says `redirect_uri_mismatch` (OAuth) | The external origin differs from what is registered. If you changed the host, see step 4. |
+| Sign-in works but the cookies are not `Secure` | No trusted proxy, a wrong address, or a `*.localhost` host (upstream treats loopback hosts as a development setup). |
 
 ### API server and webhook listeners
 
@@ -880,7 +914,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
 | dashboard | object | ------------------------------------------------------------------------- | `{"auth":{"provider":"basic"},"enabled":false,"publicUrl":"","readinessProbe":{"enabled":true,"periodSeconds":10},"trustedProxies":[]}` |
 | dashboard.auth.provider | string | Upstream auth provider the credentials below are for. The template    fails when the provider's required keys are missing from `env` or    `extraEnv`: `basic` (HERMES_DASHBOARD_BASIC_AUTH_USERNAME + _PASSWORD    or _PASSWORD_HASH), `oauth` (HERMES_DASHBOARD_OAUTH_CLIENT_ID) or    `oidc` (HERMES_DASHBOARD_OIDC_ISSUER + _CLIENT_ID). Use `external`    when credentials arrive through `extraEnvFrom` or an ExternalSecret,    which the chart cannot inspect. | `"basic"` |
-| dashboard.enabled | bool | Start the supervised management dashboard (renders `HERMES_DASHBOARD=1`).    Exposing it also needs `service.enabled` plus an `ingress` or `httpRoute`. | `false` |
+| dashboard.enabled | bool | Start the supervised management dashboard (renders `HERMES_DASHBOARD=1`).    Exposing it also needs `service.enabled` plus an `ingress` or `httpRoute`.    `public_url` and `trusted_proxies` are written into `config.yaml` when the    volume is first seeded, so changing the host or `dashboard.*` later needs    `--set bootstrap.overwrite=true` for that upgrade (see the README, "Expose the    dashboard"). | `false` |
 | dashboard.publicUrl | string | External origin the dashboard is reached at, for example    `https://hermes.example.com`. Feeds `config.dashboard.public_url`. When    empty and `ingress.enabled`, it is derived from the first Ingress host    (`https` when `ingress.tls` is set). Set it explicitly for an HTTPRoute.    A value already set under `config.dashboard` wins. | `""` |
 | dashboard.readinessProbe.enabled | bool | Render a TCP readiness probe on `service.port` while the dashboard is    enabled, so the pod only joins the Service once the dashboard    listens. The first start can take minutes (bundled skills sync onto    the volume), during which an Ingress would otherwise answer 502. An    explicit `probes.readiness` wins. Readiness never restarts the pod. | `true` |
 | dashboard.readinessProbe.periodSeconds | int | Seconds between readiness checks. | `10` |
