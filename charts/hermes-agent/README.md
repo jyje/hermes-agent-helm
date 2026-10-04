@@ -524,7 +524,14 @@ so the pod needs egress to Bitwarden and GitHub Releases.
   readiness never restarts the pod. The old
   `--insecure` / `HERMES_DASHBOARD_INSECURE` escape hatch is a deprecated
   no-op upstream. The dashboard still shows API keys to whoever is logged in,
-  so keep it on a private network or add a second auth layer at the proxy. See
+  so keep it on a private network or add a second auth layer at the proxy.
+  Prefer `dashboard.enabled` over setting `HERMES_DASHBOARD=1` yourself in
+  `extraEnv` or `env`: the image honors the bare variable, but the chart cannot
+  see it, so the readiness probe, the derived `public_url` and
+  `trusted_proxies`, the auth-provider check, and the trusted-proxy warning
+  are all skipped. If you keep the variable, add your own `probes.readiness`
+  (for example a `tcpSocket` probe on `service.port`), otherwise an Ingress
+  answers 502 while the first start syncs bundled skills. See
   [`values-ingress.yaml`](values-ingress.yaml) for the password provider,
   [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) for Nous Portal
   OAuth, and [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) for your own
