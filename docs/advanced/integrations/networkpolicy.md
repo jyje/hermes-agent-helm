@@ -53,3 +53,39 @@ until you opt in. Once enabled:
 ```yaml title="charts/hermes-agent/values-networkpolicy-litellm.yaml"
 --8<-- "charts/hermes-agent/values-networkpolicy-litellm.yaml"
 ```
+
+## Dashboard behind an Ingress
+
+Turning the policy on silently cuts an Ingress off from the dashboard: the pod
+stays Ready (the kubelet probe is not affected) but the controller cannot reach
+it. Add a rule for port 9119 to `networkPolicy.extraIngress`. What to allow depends
+on how the controller reaches the pod. Measured on MicroK8s with Calico (VXLAN) and
+a host-network ingress-nginx with one controller per node, the dashboard pod on one
+of them:
+
+| Rule | Controller on the same node | Controller on another node |
+| --- | --- | --- |
+| None | Allowed | Blocked |
+| Pod and namespace selector of the ingress | Allowed | Blocked |
+| `ipBlock` of the node network only | Allowed | Blocked |
+| `ipBlock` of the node network and the pod network | Allowed | Allowed |
+
+A host-network controller is not a pod as far as the policy is concerned, so a
+selector never matches it, and Calico always admitted traffic from the pod's own node
+in this test. Traffic from another node reaches the dashboard from that node's tunnel
+address, which lies inside the pod network. Allow both networks and set the same two
+CIDRs in `dashboard.trustedProxies`; otherwise sign-in works but the session cookies
+lose `Secure` depending on which node the request enters. A controller that runs as
+an ordinary pod can be matched with a namespace and pod selector instead, which is
+narrower; that variant was not measured. Use bounded CIDRs rather than a pod IP,
+which changes when the controller pod is recreated.
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent --create-namespace \
+  -f charts/hermes-agent/values-networkpolicy-dashboard.yaml --wait
+```
+
+```yaml title="charts/hermes-agent/values-networkpolicy-dashboard.yaml"
+--8<-- "charts/hermes-agent/values-networkpolicy-dashboard.yaml"
+```
