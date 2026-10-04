@@ -32,6 +32,23 @@
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) を Kubernetes 上で、1 回の `helm install` で実行できます。Hermes が対応するすべての LLM プロバイダーを利用でき、小規模な単一ノードでも動作し、テンプレート生成だけでなく実際の稼働も検証しています。同じクラスターで複数のインスタンスを [**Hermes チーム**](docs/advanced/teams/reference.md) にまとめることもできます。これは **コミュニティが開発するチャート**であり、Nous Research の公式リリースではありません。
 
+ブラウザで使いたい場合は、**Web ダッシュボード**を有効にしてください。ターミナル UI そのままでエージェントとチャットし、過去のセッションを閲覧し、モデル、スキル、cron、設定を管理できます。独自の URL で、パスワード、Nous Portal OAuth、または独自の OpenID Connect ログインによって保護されます。詳しくは[ダッシュボードのドキュメント](docs/advanced/integrations/dashboard.md)を参照してください。
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: ブラウザで Hermes のターミナル UI をそのまま使えます。</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: 33 のチャンネル一覧から Telegram、Discord、Slack などを接続できます。</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: エージェントの設定をフォームまたは YAML で編集できます。</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: Nous が承認した 65 の MCP サーバーのカタログからインストールできます。</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: 同梱の 53 スキルをオン/オフしたり、独自に追加したりできます。</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: エージェントの永続ボリューム上のファイルを閲覧・アップロードできます。</sub></td>
+</tr>
+</table>
+
 ## クイックスタート
 
 1. **OCI（推奨）**: レジストリから直接インストールします。`helm repo add` は不要です。

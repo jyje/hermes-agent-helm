@@ -39,6 +39,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
+- **Web 仪表盘**：在浏览器中与智能体对话、浏览会话，并管理模型、技能和设置，通过密码、Nous Portal OAuth 或你自己的 OpenID Connect 登录加以保护。详见[仪表盘文档](../../docs/advanced/integrations/dashboard.md)。
 - **ArgoCD**：按提供商和消息平台组合提供可直接应用的 `Application` 清单，见 [`examples/argocd/`](../../examples/argocd/)。
 - **无需提交真实密钥的 GitOps**：参阅 [SealedSecret 与 `extraEnvFrom` 指南](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord)。
 - **智能体团队**：运行多个实例，通过共同 Discord 频道中的 `@mention` 交接任务。参阅 [`hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)、[团队指南](../../docs/advanced/teams/reference.md)及[协作指南](../../docs/advanced/teams/collaboration.md)。

@@ -33,6 +33,26 @@
 만드는 것도 그만큼 쉽습니다. **커뮤니티 기반** 차트이며, Nous Research 공식
 릴리즈가 아닙니다.
 
+브라우저가 편하다면 **웹 대시보드**를 켜 보세요. 전체 터미널 UI 그대로 에이전트와
+채팅하고, 지난 세션을 둘러보고, 모델, 스킬, cron, 설정을 관리할 수 있습니다. 나만의
+URL에서 비밀번호, Nous Portal OAuth, 또는 자체 OpenID Connect 로그인으로 보호됩니다.
+[대시보드 로그인과 Ingress](docs/ko/advanced/integrations/dashboard.md)를 참고하세요.
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: 브라우저에서 전체 Hermes 터미널 UI를 그대로 사용합니다.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: 33개 채널 목록에서 Telegram, Discord, Slack 등을 연결합니다.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: 에이전트 설정을 폼으로, 또는 YAML로 편집합니다.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: Nous가 승인한 MCP 서버 65개 카탈로그에서 설치합니다.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: 기본 제공 스킬 53개를 켜고 끄거나 직접 추가합니다.</sub></td>
+<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: 에이전트의 영구 볼륨 파일을 탐색하고 업로드합니다.</sub></td>
+</tr>
+</table>
+
 ## 빠른 시작
 
 1. **OCI (권장)** — `helm repo add` 없이 레지스트리에서 바로 설치합니다:
