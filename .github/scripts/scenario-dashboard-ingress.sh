@@ -38,9 +38,17 @@ trap diagnostics ERR
 
 echo "[$NS] installing ingress-nginx $INGRESS_NGINX_REF"
 kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/${INGRESS_NGINX_REF}/deploy/static/provider/baremetal/deploy.yaml"
-# The admission webhook must be serving before an Ingress can be created.
-kubectl -n ingress-nginx wait --for=condition=complete job --selector=app.kubernetes.io/component=admission-webhook --timeout=180s
-kubectl -n ingress-nginx rollout status deployment/ingress-nginx-controller --timeout=180s
+# The admission webhook must be serving before an Ingress can be created. Do
+# not wait on its Jobs: they are cleaned up as soon as they finish. The
+# controller turns Ready once its certificate exists, and the patch Job's work
+# shows up as a caBundle on the webhook configuration.
+kubectl -n ingress-nginx wait --for=condition=Ready pod --selector=app.kubernetes.io/component=controller --timeout=180s
+for _ in $(seq 1 90); do
+  [ -n "$(kubectl get validatingwebhookconfiguration ingress-nginx-admission -o jsonpath='{.webhooks[0].clientConfig.caBundle}')" ] && break
+  sleep 2
+done
+[ -n "$(kubectl get validatingwebhookconfiguration ingress-nginx-admission -o jsonpath='{.webhooks[0].clientConfig.caBundle}')" ] \
+  || { echo "::error::[$NS] ingress-nginx admission webhook never received its caBundle"; exit 1; }
 controller_ip="$(kubectl -n ingress-nginx get pod -l app.kubernetes.io/component=controller -o jsonpath='{.items[0].status.podIP}')"
 controller_svc="$(kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')"
 echo "[$NS] controller pod $controller_ip, Service $controller_svc"
