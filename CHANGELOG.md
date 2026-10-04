@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.17.0
+
+### Features
+
+- [#335](https://github.com/jyje/hermes-agent-helm/pull/335) [`501de40`](https://github.com/jyje/hermes-agent-helm/commit/501de4044053018cbacc745c85807cb55f7bad42) - Feature(values): Dashboard NetworkPolicy example and docs page
+
+  Add `values-networkpolicy-dashboard.yaml` for exposing the dashboard through an Ingress while `networkPolicy.enabled` is on (the policy otherwise cuts the Ingress off from the dashboard), with the rules measured on a host-network controller with Calico VXLAN. Add a "Dashboard sign-in and Ingress" docs page, a dashboard section on the NetworkPolicy page, and README guidance that on an overlay CNI the pod network must be listed as a trusted proxy as well as the node network.
+
+- [#330](https://github.com/jyje/hermes-agent-helm/pull/330) [`4a4b072`](https://github.com/jyje/hermes-agent-helm/commit/4a4b0720585630b416b936807a099904a69fe9c1) - Feature(values): OAuth and OIDC dashboard examples
+
+  Add `values-ingress-oauth.yaml` (Nous Portal OAuth) and `values-ingress-oidc.yaml` (your own OpenID Connect provider) for exposing the dashboard through an Ingress without the shared password, the sign-in upstream recommends for an internet-facing dashboard.
+
+- [#320](https://github.com/jyje/hermes-agent-helm/pull/320) [`f45bb5c`](https://github.com/jyje/hermes-agent-helm/commit/f45bb5c133637587a99a4eeed563cc77faf95454) - Feature(dashboard): First-class dashboard values
+
+  Add a `dashboard` values block that starts the management dashboard, derives `config.dashboard.public_url` from the Ingress host, sets `trusted_proxies`, and fails at render time when the selected auth provider (`basic`, `oauth`, `oidc`) has no credentials, instead of leaving an Ingress that answers 502/503. Use `dashboard.auth.provider: external` when credentials come from `extraEnvFrom` or an ExternalSecret. While the dashboard is enabled the chart also renders a TCP readiness probe on `service.port` (`dashboard.readinessProbe`, an explicit `probes.readiness` wins), so the pod only joins the Service once the dashboard listens instead of answering 502 during the first start.
+
+- [#325](https://github.com/jyje/hermes-agent-helm/pull/325) [`ea552db`](https://github.com/jyje/hermes-agent-helm/commit/ea552db58e5a1c5ddcb126b6ede817954e071126) - Feature(dashboard): Trusted proxy warning
+
+  Print a warning in the release notes when the dashboard is served over HTTPS but no trusted proxy is set, because sign-in still works while the session cookies are not marked Secure.
+
+### Documentation
+
+- [#318](https://github.com/jyje/hermes-agent-helm/pull/318) [`fedde57`](https://github.com/jyje/hermes-agent-helm/commit/fedde579b506b06e6d8138a23a31aa1381ad5cf6) - Documentation(readme): Star prompt on the chart README
+
+  Show the "Found this useful?" GitHub star prompt, with a link to the repository, at the top of the chart README so it also appears on Artifact Hub.
+
+- [#331](https://github.com/jyje/hermes-agent-helm/pull/331) [`3afb0b0`](https://github.com/jyje/hermes-agent-helm/commit/3afb0b0f38bc329e17c0de0598581affd0f7f132) - Documentation(dashboard): Sign-in guidance
+
+  State that the password provider is not for public internet exposure, that the OIDC provider has no user allowlist so access must be restricted at the identity provider, how a wrong issuer and an unregistered redirect URI show up, and that Nous Portal OAuth is registered with a Base URL and limits a personal-account client to its owner.
+
+- [#330](https://github.com/jyje/hermes-agent-helm/pull/330) [`4a4b072`](https://github.com/jyje/hermes-agent-helm/commit/4a4b0720585630b416b936807a099904a69fe9c1) - Documentation(dashboard): Prefer dashboard.enabled
+
+  Explain that setting `HERMES_DASHBOARD=1` yourself in `extraEnv` or `env` skips the readiness probe, the derived `public_url` and `trusted_proxies`, the auth-provider check, and the trusted-proxy warning, and how to add your own readiness probe if you keep the variable.
+
+- [#333](https://github.com/jyje/hermes-agent-helm/pull/333) [`a211bdd`](https://github.com/jyje/hermes-agent-helm/commit/a211bdd6c7d35de973f5ca0381c7afce32015e52) - Documentation(dashboard): Expose the dashboard section
+
+  Split the dense dashboard paragraph into a step-by-step "Expose the dashboard" section: choose a sign-in method, turn it on and route it, set a trusted proxy and find its address, change settings later with `bootstrap.overwrite=true` (the seeded `config.yaml` is not updated otherwise), expect a slow first start, and a symptom table.
+
+- [#338](https://github.com/jyje/hermes-agent-helm/pull/338) [`706f4d9`](https://github.com/jyje/hermes-agent-helm/commit/706f4d94965cf2a3cd21cba2d894ebf37e074379) - Documentation(dashboard): Fix stale dashboard guidance
+
+  Rewrite the ArgoCD ingress example so it actually enables the dashboard with its own password provider (credentials from a Secret), and correct the security docs: the dashboard binds all interfaces inside the container, an auth provider is mandatory, and `--insecure` is a deprecated no-op.
+
 ## 1.16.0
 
 ### Features
