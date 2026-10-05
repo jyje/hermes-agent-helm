@@ -284,6 +284,16 @@ Notes:
   `TELEGRAM_HOME_CHANNEL` on every release that runs a device login. Each
   prompt names the release (the team identity, or the release name outside team
   mode), so parallel logins can be told apart.
+- **Ready message**: "login complete" only means the credential is stored. A
+  first start can still take minutes (skill sync, model warm-up), and Hermes
+  announces a *restart* but not a fresh start. Set `readyNotify.enabled=true` to
+  post one line to the same Discord or Telegram home channel when the gateway is
+  up (`readyNotify.notify` picks the channel, or follows `auth.deviceFlow.notify`
+  when the device flow is on). The chart seeds a `gateway:startup` hook into
+  `HERMES_HOME/hooks/ready-notify` that reuses the bot credentials already in
+  `env`/`extraEnvFrom`. On a live first start the message arrived together with
+  Hermes' own `Gateway running` log line, a few seconds before the first turn was
+  warm.
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.
@@ -1014,6 +1024,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | probes.liveness | object | Liveness probe spec. Empty = no liveness probe. | `{}` |
 | probes.readiness | object | Readiness probe spec. Empty = no readiness probe. | `{}` |
 | probes.startup | object | Startup probe spec. Empty = no startup probe. Use this when first start takes longer than the liveness probe allows. | `{}` |
+| readyNotify.enabled | bool | Seed the hook and enable it. Off by default. | `false` |
+| readyNotify.notify | string | Where to post: `discord` (DISCORD_BOT_TOKEN + DISCORD_HOME_CHANNEL) or    `telegram` (TELEGRAM_BOT_TOKEN + TELEGRAM_HOME_CHANNEL). Required when    enabled, unless `auth.deviceFlow.enabled` is true: then empty follows    `auth.deviceFlow.notify`. | `""` |
 | replicaCount | int | Set to 0 to prepare GitOps resources (Secret, ConfigMap, PVC, ...)    without starting an agent Pod, then scale to 1 after credentials and    optional device login are ready. The gateway and device-login init    container do not run while paused. Hermes Agent is a single-writer    workload bound to one HERMES_HOME (ReadWriteOnce PVC), so values above 1    are unsupported: Deployment replicas contend for the same volume and    StatefulSet replicas are disconnected agent identities. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
 | runtimeClassName | string | RuntimeClass for the Pod. Set to a sandboxed runtime (gVisor: "gvisor",    Kata: "kata-containers") to add a kernel isolation boundary around the    agent's shell execution. Empty by default: the cluster's default runtime. | `""` |

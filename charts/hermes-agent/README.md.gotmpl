@@ -284,6 +284,16 @@ Notes:
   `TELEGRAM_HOME_CHANNEL` on every release that runs a device login. Each
   prompt names the release (the team identity, or the release name outside team
   mode), so parallel logins can be told apart.
+- **Ready message**: "login complete" only means the credential is stored. A
+  first start can still take minutes (skill sync, model warm-up), and Hermes
+  announces a *restart* but not a fresh start. Set `readyNotify.enabled=true` to
+  post one line to the same Discord or Telegram home channel when the gateway is
+  up (`readyNotify.notify` picks the channel, or follows `auth.deviceFlow.notify`
+  when the device flow is on). The chart seeds a `gateway:startup` hook into
+  `HERMES_HOME/hooks/ready-notify` that reuses the bot credentials already in
+  `env`/`extraEnvFrom`. On a live first start the message arrived together with
+  Hermes' own `Gateway running` log line, a few seconds before the first turn was
+  warm.
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.

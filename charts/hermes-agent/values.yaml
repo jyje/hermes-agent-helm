@@ -121,6 +121,20 @@ config:
 soul:
   text: ""
 
+# Post a one-line message when the gateway has started, so you know when to
+# talk to the agent. A first boot can take minutes (skill sync, model warm-up),
+# and Hermes itself only announces a *restart*, not a fresh start. The chart
+# seeds a `gateway:startup` hook into HERMES_HOME/hooks/ready-notify that reuses
+# the bot credentials already in `env`/`extraEnvFrom`.
+readyNotify:
+  # -- Seed the hook and enable it. Off by default.
+  enabled: false
+  # -- Where to post: `discord` (DISCORD_BOT_TOKEN + DISCORD_HOME_CHANNEL) or
+  #    `telegram` (TELEGRAM_BOT_TOKEN + TELEGRAM_HOME_CHANNEL). Required when
+  #    enabled, unless `auth.deviceFlow.enabled` is true: then empty follows
+  #    `auth.deviceFlow.notify`.
+  notify: ""
+
 # Seeding of config.yaml into HERMES_HOME (the persistent volume). Hermes writes
 # to its home at runtime (skills, auth.json, self-improvement), so config lives
 # in the writable volume rather than a read-only mount.
