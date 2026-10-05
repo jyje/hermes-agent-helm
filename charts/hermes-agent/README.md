@@ -281,7 +281,9 @@ Notes:
   (verification prompt printed to the init container logs only). With
   `telegram` the message is sent with `sendMessage` only, so it does not
   conflict with the agent polling the same bot. In a multi-release team, set
-  `TELEGRAM_HOME_CHANNEL` on every release that runs a device login.
+  `TELEGRAM_HOME_CHANNEL` on every release that runs a device login. Each
+  prompt names the release (the team identity, or the release name outside team
+  mode), so parallel logins can be told apart.
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.

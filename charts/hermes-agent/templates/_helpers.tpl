@@ -381,6 +381,8 @@ spec:
           value: {{ $p.issuer | default "https://auth.openai.com" | quote }}
         - name: NOTIFY
           value: {{ $df.notify | quote }}
+        - name: LOGIN_LABEL
+          value: {{ ternary (.Values.team.identity | default (include "hermes-agent.fullname" .)) (include "hermes-agent.fullname" .) (and .Values.team.enabled true) | quote }}
         - name: LOGIN_TIMEOUT_SECONDS
           value: {{ $df.timeoutSeconds | quote }}
         - name: FORCE_RELOGIN

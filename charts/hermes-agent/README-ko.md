@@ -281,7 +281,8 @@ kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
   `TELEGRAM_HOME_CHANNEL` 재사용), 또는 `logs`(init container 로그에만 표시)입니다.
   `telegram`은 `sendMessage`만 쓰므로 같은 봇을 폴링하는 에이전트와 충돌하지
   않습니다. 여러 릴리스로 구성한 팀에서는 device login을 하는 모든 릴리스에
-  `TELEGRAM_HOME_CHANNEL`을 설정하세요.
+  `TELEGRAM_HOME_CHANNEL`을 설정하세요. 각 안내 메시지에 릴리스 이름(팀 신원,
+  팀 모드가 아니면 릴리스 이름)이 표시되므로 병렬 로그인도 구분할 수 있습니다.
 - init container는 스토리지 클래스와 관계없이 쓸 수 있도록 **root**로 실행한
   뒤, 자격증명 파일의 소유자를 `auth.deviceFlow.tokenOwner`(기본 uid/gid
   `10000`)로 변경합니다.

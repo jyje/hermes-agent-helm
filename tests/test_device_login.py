@@ -92,6 +92,43 @@ class OpenAICodexFlowTests(unittest.TestCase):
         ):
             self.assertNotIn(secret, output)
 
+    def test_prompt_names_the_release_so_parallel_logins_are_distinguishable(self):
+        module = load_script()
+        module.NOTIFY = "logs"
+        module.LOGIN_LABEL = "may"
+        module._codex_native = mock.Mock(
+            return_value=(
+                "client-id",
+                "https://issuer.example/oauth/token",
+                mock.Mock(),
+                mock.Mock(side_effect=FakeAuthError("codex_auth_missing", relogin_required=True)),
+            )
+        )
+        module._post_json_status = mock.Mock(
+            side_effect=[
+                (200, {"user_code": "ABCD-EFGH", "device_auth_id": "id", "interval": 3}, {}),
+                (200, {"authorization_code": "code", "code_verifier": "verifier"}, {}),
+            ]
+        )
+        module._post_form_status = mock.Mock(
+            return_value=(200, {"access_token": "a", "refresh_token": "r"}, {})
+        )
+        module.notify_post = mock.Mock()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            module.HERMES_HOME = Path(tmpdir)
+            with mock.patch.object(module.time, "sleep"), contextlib.redirect_stdout(io.StringIO()):
+                module.run_openai_codex_flow()
+        prompts = [call.args[0] for call in module.notify_post.call_args_list]
+        self.assertIn("for may", prompts[0])
+        self.assertTrue(all("may" in prompt for prompt in prompts))
+
+    def test_prompt_without_a_label_keeps_the_original_wording(self):
+        module = load_script()
+        module.LOGIN_LABEL = ""
+        self.assertEqual(module._for_label(), "")
+        module.LOGIN_LABEL = "august"
+        self.assertEqual(module._for_label(), " for august")
+
     def test_existing_usable_credential_skips_network(self):
         module = load_script()
         resolve = mock.Mock(return_value={"api_key": "secret-existing-token"})

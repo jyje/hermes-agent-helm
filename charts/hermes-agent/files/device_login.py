@@ -37,6 +37,7 @@ VALIDATE_URL = os.getenv("VALIDATE_URL", "").strip()
 NOTIFY = os.getenv("NOTIFY", "discord").strip().lower()
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 CHANNEL_ID = os.getenv("DISCORD_HOME_CHANNEL", "").strip()
+LOGIN_LABEL = os.getenv("LOGIN_LABEL", "").strip()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_HOME_CHANNEL", "").strip()
 HERMES_HOME = Path(os.getenv("HERMES_HOME", "/opt/data"))
@@ -186,6 +187,11 @@ def telegram_post(content: str) -> None:
         print(f"  [telegram] post FAILED: {type(exc).__name__}")
 
 
+def _for_label() -> str:
+    """Name the release in a prompt, so parallel logins can be told apart."""
+    return f" for {LOGIN_LABEL}" if LOGIN_LABEL else ""
+
+
 def notify_post(content: str) -> None:
     """Deliver a verification message through the configured notify channel."""
     if NOTIFY == "discord":
@@ -282,7 +288,7 @@ def run_github_device_flow() -> int:
 
     print(f"  user_code={user_code}  verify={verification_uri}  expires_in={expires_in}s")
     notify_post(
-        f"{TOKEN_ENV} login required:\n"
+        f"{TOKEN_ENV} login required{_for_label()}:\n"
         f"1. Open: {verification_uri}\n"
         f"2. Enter code: {user_code}\n"
         f"(valid ~{expires_in // 60} min; phone-friendly)"
@@ -319,17 +325,17 @@ def run_github_device_flow() -> int:
             continue
         if err in ("expired_token", "access_denied"):
             print(f"  ERROR: {err}")
-            notify_post(f"Login failed: {err}. The pod will retry.")
+            notify_post(f"Login failed{_for_label()}: {err}. The pod will retry.")
             return 1
         print(f"  poll returned error: {err or 'unknown response'}")
 
     if not token:
         print("  ERROR: timed out waiting for authorization")
-        notify_post("Login timed out. The pod will retry.")
+        notify_post(f"Login timed out{_for_label()}. The pod will retry.")
         return 1
 
     write_env_token(token)
-    notify_post("Login complete. The agent is starting.")
+    notify_post(f"Login complete{_for_label()}. The agent is starting.")
     return 0
 
 
@@ -432,7 +438,7 @@ def run_openai_codex_flow() -> int:
 
     print(f"  user_code={user_code}  verify={verification_url}")
     notify_post(
-        "OpenAI Codex login required:\n"
+        f"OpenAI Codex login required{_for_label()}:\n"
         f"1. Open: {verification_url}\n"
         f"2. Enter code: {user_code}\n"
         "(valid for about 15 minutes; phone-friendly)"
@@ -461,7 +467,7 @@ def run_openai_codex_flow() -> int:
 
     if exchange is None:
         print("ERROR: OpenAI Codex login timed out.")
-        notify_post("OpenAI Codex login timed out. The pod will retry.")
+        notify_post(f"OpenAI Codex login timed out{_for_label()}. The pod will retry.")
         return 1
 
     authorization_code = str(exchange.get("authorization_code", "") or "")
@@ -508,7 +514,7 @@ def run_openai_codex_flow() -> int:
     if auth_path.exists():
         _chown(auth_path)
     print(f"  wrote OpenAI Codex credentials to {auth_path}")
-    notify_post("OpenAI Codex login complete. The agent is starting.")
+    notify_post(f"OpenAI Codex login complete{_for_label()}. The agent is starting.")
     return 0
 
 
