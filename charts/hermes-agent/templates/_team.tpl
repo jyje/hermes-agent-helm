@@ -143,6 +143,7 @@ Configured members and their exact {{ $label }} mentions:
 - {{ .name }}: {{ include "hermes-agent.team.mention" (list $platform .) }} - {{ .role }}
 {{- end }}
 Only explicit {{ $label }} messages following the team skill are cross-agent handoffs.
+To delegate, write your normal reply with the member's exact mention and a [TEAM run=<id> step=<n> TASK] marker. That reply is the handoff: no tool is needed, and not having a messaging tool does not mean you cannot delegate.
 {{- else }}
 Accept team work only from the configured leader and return the complete result to that leader according to the team skill.
 A message from the leader that carries a [TEAM run=<id> step=<n> TASK] marker is a handoff: before answering it, load /{{ include "hermes-agent.team.skillName" . }}, then reply as its member workflow says (one complete response that begins with the leader's exact mention and ends with the matching RESULT marker). Do not add greetings, introductions, or profile questions to that reply.

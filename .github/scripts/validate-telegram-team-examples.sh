@@ -45,6 +45,20 @@ assert_result_returns_to_leader() {
   grep -q "leader's exact mention, $leader_mention:" <<<"$skill"
 }
 
+# A leader that has no messaging tool must still delegate: the handoff is its own
+# reply. A live run on a Codex model told the human that delegation was "not
+# connected" until the hint and skill said no tool is needed.
+assert_leader_delegates_without_a_tool() {
+  local leader_values=$1
+  local hint skill
+  hint=$(helm template leader-hint "$CHART" -f "$leader_values" --show-only templates/configmap.yaml \
+    | yq -r '.data."config.yaml" | from_yaml | .agent.environment_hint')
+  grep -q "That reply is the handoff: no tool is needed" <<<"$hint"
+  skill=$(helm template leader-skill "$CHART" -f "$leader_values" --show-only templates/team-skill-configmap.yaml \
+    | yq -r '.data."SKILL.md"')
+  grep -q "No tool is" <<<"$skill"
+}
+
 echo "[telegram-team] validating the shared assistant example"
 helm template telegram-assistant "$CHART" \
   -f "$CHART/values-telegram-team-assistant.yaml" > "$TMP/telegram-assistant.yaml"
@@ -61,6 +75,7 @@ assert_telegram_team telegram-leader "$CHART/values-telegram-team-leader.yaml"
 assert_telegram_team telegram-member "$CHART/values-telegram-team-member.yaml"
 assert_result_returns_to_leader "$CHART/values-telegram-team-member.yaml" \
   "$CHART/values-telegram-team-leader.yaml" '@hermes_august_bot'
+assert_leader_delegates_without_a_tool "$CHART/values-telegram-team-leader.yaml"
 
 echo "[telegram-team] rejecting operator overrides of enforced routing gates"
 if helm template invalid-telegram-team "$CHART" \

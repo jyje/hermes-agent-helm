@@ -44,6 +44,10 @@ to perform and review a task.
 
    `[TEAM run=<short-id> step=<n> TASK]`
 
+   That message is your own normal reply, and it is the handoff. No tool is
+   needed or exists for delegating. Not having a messaging tool does not mean
+   you cannot delegate, so never tell the human that the capability is missing.
+
 3. Wait for that member's matching `RESULT` or `BLOCKED` response. Do not infer
    progress from typing state and do not mention another member while waiting.
 4. Review the result. Request one concrete revision from the same member when
