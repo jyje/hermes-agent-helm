@@ -251,8 +251,8 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 ## Device flow 로그인(GitHub Copilot과 OpenAI Codex)
 
 `auth.deviceFlow.enabled=true`로 **`auth-device-login` init container**를
-추가할 수 있습니다. 이 컨테이너는 검증 URL과 일회용 코드를 Discord 홈 채널
-(또는 로그)로 보내고, 사용자의 승인을 기다린 뒤 자격증명을 `HERMES_HOME`
+추가할 수 있습니다. 이 컨테이너는 검증 URL과 일회용 코드를 Discord 또는
+Telegram 홈 채널(또는 로그)로 보내고, 사용자의 승인을 기다린 뒤 자격증명을 `HERMES_HOME`
 볼륨에 저장합니다.
 
 - `github-copilot`은 GitHub OAuth 2.0 device grant를 수행하고
@@ -277,7 +277,12 @@ kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 - **`persistence.enabled=true`가 필요합니다.** 영속 볼륨이 없으면 재시작할
   때 자격증명이 사라져 매번 다시 승인해야 합니다.
 - **`notify`**는 `discord`(`DISCORD_BOT_TOKEN`과
-  `DISCORD_HOME_CHANNEL` 재사용) 또는 `logs`(init container 로그에만 표시)입니다.
+  `DISCORD_HOME_CHANNEL` 재사용), `telegram`(`TELEGRAM_BOT_TOKEN`과
+  `TELEGRAM_HOME_CHANNEL` 재사용), 또는 `logs`(init container 로그에만 표시)입니다.
+  `telegram`은 `sendMessage`만 쓰므로 같은 봇을 폴링하는 에이전트와 충돌하지
+  않습니다. 여러 릴리스로 구성한 팀에서는 device login을 하는 모든 릴리스에
+  `TELEGRAM_HOME_CHANNEL`을 설정하세요. 각 안내 메시지에 릴리스 이름(팀 신원,
+  팀 모드가 아니면 릴리스 이름)이 표시되므로 병렬 로그인도 구분할 수 있습니다.
 - init container는 스토리지 클래스와 관계없이 쓸 수 있도록 **root**로 실행한
   뒤, 자격증명 파일의 소유자를 `auth.deviceFlow.tokenOwner`(기본 uid/gid
   `10000`)로 변경합니다.
