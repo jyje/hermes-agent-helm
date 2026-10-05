@@ -122,6 +122,35 @@ Headless service name used for StatefulSet governance.
 {{- end }}
 
 {{/*
+Name that device-login and ready messages use for this release: the team
+identity in team mode, the release name otherwise.
+*/}}
+{{- define "hermes-agent.loginLabel" -}}
+{{- if and .Values.team.enabled .Values.team.identity -}}
+{{- .Values.team.identity -}}
+{{- else -}}
+{{- include "hermes-agent.fullname" . -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Channel the ready message goes to. readyNotify.notify wins; empty follows
+auth.deviceFlow.notify when the device flow is enabled. Only discord and
+telegram can carry a message, so any other result fails the render when
+readyNotify is enabled.
+*/}}
+{{- define "hermes-agent.readyNotify.channel" -}}
+{{- $channel := .Values.readyNotify.notify -}}
+{{- if and (not $channel) .Values.auth.deviceFlow.enabled -}}
+{{- $channel = .Values.auth.deviceFlow.notify -}}
+{{- end -}}
+{{- if not (has $channel (list "discord" "telegram")) -}}
+{{- fail (printf "readyNotify.enabled needs readyNotify.notify set to discord or telegram (got %q). It follows auth.deviceFlow.notify only when auth.deviceFlow.enabled is true and that is discord or telegram" $channel) -}}
+{{- end -}}
+{{- $channel -}}
+{{- end }}
+
+{{/*
 Name of the env Secret referenced by every chart-owned envFrom (main
 container, auth-device-login init container, helm test Job). Normally the
 chart's own Secret (secret.yaml); when externalSecret.enabled, secret.yaml
@@ -328,6 +357,12 @@ spec:
           if [ -f /seed/SOUL.md ]; then
             seed "{{ .Values.persistence.mountPath }}/SOUL.md" /seed/SOUL.md
           fi
+          {{- if .Values.readyNotify.enabled }}
+          # Chart-owned gateway:startup hook: always refreshed, never user-edited.
+          mkdir -p "{{ .Values.persistence.mountPath }}/hooks/ready-notify"
+          cp /seed/ready-notify-HOOK.yaml "{{ .Values.persistence.mountPath }}/hooks/ready-notify/HOOK.yaml"
+          cp /seed/ready-notify-handler.py "{{ .Values.persistence.mountPath }}/hooks/ready-notify/handler.py"
+          {{- end }}
           {{- include "hermes-agent.migrateConfig" . | nindent 10 }}
       env:
         - name: HERMES_HOME
@@ -382,7 +417,7 @@ spec:
         - name: NOTIFY
           value: {{ $df.notify | quote }}
         - name: LOGIN_LABEL
-          value: {{ ternary (.Values.team.identity | default (include "hermes-agent.fullname" .)) (include "hermes-agent.fullname" .) (and .Values.team.enabled true) | quote }}
+          value: {{ include "hermes-agent.loginLabel" . | quote }}
         - name: LOGIN_TIMEOUT_SECONDS
           value: {{ $df.timeoutSeconds | quote }}
         - name: FORCE_RELOGIN
@@ -457,6 +492,12 @@ spec:
       env:
         - name: HERMES_HOME
           value: {{ .Values.persistence.mountPath | quote }}
+        {{- if .Values.readyNotify.enabled }}
+        - name: READY_NOTIFY
+          value: {{ include "hermes-agent.readyNotify.channel" . | quote }}
+        - name: READY_NOTIFY_LABEL
+          value: {{ include "hermes-agent.loginLabel" . | quote }}
+        {{- end }}
         {{- if .Values.dashboard.enabled }}
         - name: HERMES_DASHBOARD
           value: "1"

@@ -283,6 +283,14 @@ kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
   않습니다. 여러 릴리스로 구성한 팀에서는 device login을 하는 모든 릴리스에
   `TELEGRAM_HOME_CHANNEL`을 설정하세요. 각 안내 메시지에 릴리스 이름(팀 신원,
   팀 모드가 아니면 릴리스 이름)이 표시되므로 병렬 로그인도 구분할 수 있습니다.
+- **준비 완료 메시지**: "login complete"는 자격증명이 저장됐다는 뜻일 뿐입니다. 첫 시작은
+  스킬 동기화와 모델 준비로 몇 분이 더 걸릴 수 있고, Hermes는 *재시작*은 알리지만 새로
+  시작한 것은 알리지 않습니다. `readyNotify.enabled=true`로 게이트웨이가 올라오면 같은
+  Discord 또는 Telegram 홈 채널에 한 줄을 보낼 수 있습니다(`readyNotify.notify`로 채널을
+  고르고, device flow가 켜져 있으면 비워 두면 `auth.deviceFlow.notify`를 따릅니다). 차트가
+  `HERMES_HOME/hooks/ready-notify`에 `gateway:startup` 훅을 심고, `env`/`extraEnvFrom`에
+  이미 있는 봇 자격증명을 재사용합니다. 실제 첫 시작에서 이 메시지는 Hermes의
+  `Gateway running` 로그와 거의 동시에 도착했고, 첫 턴이 준비되기 몇 초 전이었습니다.
 - init container는 스토리지 클래스와 관계없이 쓸 수 있도록 **root**로 실행한
   뒤, 자격증명 파일의 소유자를 `auth.deviceFlow.tokenOwner`(기본 uid/gid
   `10000`)로 변경합니다.

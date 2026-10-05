@@ -103,6 +103,14 @@
         "text": { "type": "string" }
       }
     },
+    "readyNotify": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "notify": { "type": "string", "enum": ["", "discord", "telegram"] }
+      }
+    },
 
     "bootstrap": {
       "type": "object",
