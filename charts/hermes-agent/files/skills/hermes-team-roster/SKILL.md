@@ -72,7 +72,9 @@ team member: it creates an anonymous child, not one of the rostered agents.
    another configured member and do not use the shared volume as a message bus.
    For an independent review, choose your own method without relying on an
    earlier member's trace; if one was included, explicitly ignore it.
-3. Return exactly one complete response to the leader. Include evidence,
+3. Return exactly one complete response to the leader. Begin it with the
+   leader's exact mention, {{ include "hermes-agent.team.mention" (list (.Values.team.platform | default "discord") .Values.team.leader) }}: the leader only sees a response that mentions it,
+   so a response without the mention is lost. Include evidence,
    assumptions, and caveats, then finish with the matching marker:
 
    `[TEAM run=<same-id> step=<same-n> RESULT]`

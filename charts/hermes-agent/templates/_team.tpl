@@ -145,6 +145,7 @@ Configured members and their exact {{ $label }} mentions:
 Only explicit {{ $label }} messages following the team skill are cross-agent handoffs.
 {{- else }}
 Accept team work only from the configured leader and return the complete result to that leader according to the team skill.
+A message from the leader that carries a [TEAM run=<id> step=<n> TASK] marker is a handoff: before answering it, load /{{ include "hermes-agent.team.skillName" . }}, then reply as its member workflow says (one complete response that begins with the leader's exact mention and ends with the matching RESULT marker). Do not add greetings, introductions, or profile questions to that reply.
 {{- end }}
 {{ $label }}'s typing indicator is display state, not authoritative evidence that a member is online or working.
 Durable accepted team knowledge is mounted at {{ .Values.team.sharedVolume.mountPath }}; it is not a task queue or completion signal.

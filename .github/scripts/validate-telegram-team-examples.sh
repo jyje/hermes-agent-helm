@@ -30,6 +30,21 @@ assert_telegram_team() {
   yq -e '.telegram.mention_patterns | length == 0' <<<"$config" >/dev/null
 }
 
+# A member's result only reaches the leader when it starts with the leader's
+# exact mention (another bot's message without it is ignored by design), so the
+# member hint and the roster skill must both say so.
+assert_result_returns_to_leader() {
+  local member_values=$1 leader_values=$2 leader_mention=$3
+  local hint skill
+  hint=$(helm template member-hint "$CHART" -f "$member_values" --show-only templates/configmap.yaml \
+    | yq -r '.data."config.yaml" | from_yaml | .agent.environment_hint')
+  grep -q "begins with the leader's exact mention" <<<"$hint"
+  skill=$(helm template leader-skill "$CHART" -f "$leader_values" --show-only templates/team-skill-configmap.yaml \
+    | yq -r '.data."SKILL.md"')
+  grep -q "Begin it with the" <<<"$skill"
+  grep -q "leader's exact mention, $leader_mention:" <<<"$skill"
+}
+
 echo "[telegram-team] validating the shared assistant example"
 helm template telegram-assistant "$CHART" \
   -f "$CHART/values-telegram-team-assistant.yaml" > "$TMP/telegram-assistant.yaml"
@@ -44,6 +59,8 @@ assert_env "$TMP/telegram-assistant.yaml" TELEGRAM_GROUP_ALLOWED_CHATS '-1001234
 echo "[telegram-team] validating leader and member values examples"
 assert_telegram_team telegram-leader "$CHART/values-telegram-team-leader.yaml"
 assert_telegram_team telegram-member "$CHART/values-telegram-team-member.yaml"
+assert_result_returns_to_leader "$CHART/values-telegram-team-member.yaml" \
+  "$CHART/values-telegram-team-leader.yaml" '@hermes_august_bot'
 
 echo "[telegram-team] rejecting operator overrides of enforced routing gates"
 if helm template invalid-telegram-team "$CHART" \
