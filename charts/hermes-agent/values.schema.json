@@ -103,6 +103,14 @@
         "text": { "type": "string" }
       }
     },
+    "readyNotify": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "notify": { "type": "string", "enum": ["", "discord", "telegram"] }
+      }
+    },
 
     "bootstrap": {
       "type": "object",
@@ -338,7 +346,7 @@
           "properties": {
             "enabled": { "type": "boolean" },
             "provider": { "type": "string" },
-            "notify": { "type": "string", "enum": ["discord", "logs"] },
+            "notify": { "type": "string", "enum": ["discord", "telegram", "logs"] },
             "timeoutSeconds": { "type": "integer", "minimum": 1 },
             "forceRelogin": { "type": "boolean" },
             "securityContext": { "type": "object" },
