@@ -362,8 +362,55 @@ Discord 스레드에 남깁니다. 별도로 미리 준비한 RWX PVC에는 영�
 Telegram 팀에는 `team.platform: telegram`과 역할별 values 예제를 사용하세요.
 단일 공유 봇, BotFather 설정, 릴리스별 Secret, mention 라우팅과 루프 방지책은
 [Telegram 팀 가이드](../../docs/ko/advanced/teams/telegram.md)에 정리했습니다.
-예제 렌더는 CI에서 검사하지만 실제 Telegram 전달은 운영자가 자격 증명을 제공한
-라이브 환경에서 따로 확인해야 합니다.
+예제 렌더는 CI에서 검사합니다. 실제 Telegram 그룹에서 라이브로 두 모델(`nemotron-3-ultra-550b`,
+`gpt-6-luna`)의 리더, 멤버, 리더 핸드오프를 끝까지 확인했고, 증거는
+[#311](https://github.com/jyje/hermes-agent-helm/pull/311)의 댓글에 있습니다. 리더 모델이
+중요합니다. 30B 모델은 위임하지 않고 스스로 답했습니다. 다른 사람 계정 차단, 루프 가드 임계값,
+연속 핸드오프는 시험하지 않았습니다.
+
+**예제: 모든 봇이 OpenAI Codex에 로그인하는 Telegram 팀.** 릴리스마다 독립적으로 로그인하므로
+외부 자격증명 프록시나 공유 토큰이 필요 없습니다. 봇 토큰 3개를 Secret(`tg-august`, `tg-may`,
+`tg-march`, 각각 `TELEGRAM_BOT_TOKEN` 키)에 넣고, 역할별 values 파일 위에 overlay 하나를 겹칩니다.
+
+```yaml
+# codex-overlay.yaml
+config:
+  model:
+    provider: openai-codex
+    default: gpt-6-luna            # 더 큰 창은 gpt-6-luna-900k
+auth:
+  deviceFlow:
+    enabled: true
+    provider: openai-codex
+    notify: telegram               # 코드가 팀 그룹으로 옵니다
+readyNotify:
+  enabled: true                    # 봇이 준비되면 "ready" 한 줄
+```
+
+```bash
+# 세 개를 한 번에 설치합니다. 각 봇이 자기 코드를 그룹에 보냅니다.
+# 예: "OpenAI Codex login required for may"
+for r in august may march; do
+  role=member; [ "$r" = august ] && role=leader
+  helm upgrade --install "hermes-$r" ./charts/hermes-agent \
+    --namespace hermes-team --create-namespace \
+    -f "charts/hermes-agent/values-telegram-team-$role.yaml" -f codex-overlay.yaml \
+    --set-string "fullnameOverride=hermes-$r" --set-string "team.identity=$r" \
+    --set-json "extraEnvFrom=[{\"secretRef\":{\"name\":\"tg-$r\"}}]" &
+done; wait
+```
+
+`https://auth.openai.com/codex/device`에서 코드 3개를 승인하세요. 아직 팀에 메시지를 보내지 마세요.
+"login complete" 뒤에도 첫 시작에 몇 분이 걸리고(실제로 약 7분), 그 사이에 보낸 메시지는
+유실됩니다. 각 봇의 "is ready" 한 줄이 올 때까지 기다린 뒤 리더를 멘션하세요.
+
+- member values 파일처럼 **모든** 릴리스에 `TELEGRAM_HOME_CHANNEL`을 설정하세요. 로그인과
+  준비 완료 메시지가 그곳으로 갑니다.
+- 한 ChatGPT 계정으로 3번 로그인해도 갱신은 정상이었지만, 업스트림은 같은 계정으로 다시 로그인하면
+  이전 로그인이 폐기된다고 설명합니다. 팀에서는 봇마다 계정을 따로 쓰는 것을 권하며, 확인한 것과 하지
+  않은 것은 [OpenAI Codex](../../docs/ko/advanced/providers/openai-codex.md)를 참고하세요.
+- 각 봇의 첫 답변에 Hermes의 "caps context at 272K" 안내가 한 번 붙을 수 있습니다.
+  `compression.codex_gpt55_autoraise_notice: false`로 끌 수 있습니다.
 
 > Upstream은 현재 Hermes 봇 대 봇 Discord 대화를 내장 circuit breaker가 없는
 > 미지원 토폴로지로 문서화합니다. 이 예시는 실험적입니다. 전용 신뢰 채널과 수동

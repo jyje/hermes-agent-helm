@@ -371,8 +371,63 @@ For Telegram teams, set `team.platform: telegram`, use the per-role Telegram
 values files, and follow the [Telegram teams guide](../../docs/advanced/teams/telegram.md).
 It covers the one-bot shared assistant pattern, BotFather setup, per-release
 Secrets, mention routing, loop safeguards, and the ArgoCD ApplicationSet.
-Telegram team examples are render-checked in CI; live Telegram delivery still
-needs a real deployment before relying on the handoff behavior.
+Telegram team examples are render-checked in CI. A live run on a real Telegram
+group completed a full leader, member, leader handoff on two models
+(`nemotron-3-ultra-550b` and `gpt-6-luna`); the evidence is in the comments on
+[#311](https://github.com/jyje/hermes-agent-helm/pull/311). The leader model
+matters: a 30B model answered by itself instead of delegating. Another human
+account being blocked, the loop guard threshold, and several consecutive
+handoffs were not tested.
+
+**Example: a Telegram team where every bot signs in to OpenAI Codex.** Each
+release logs in on its own, so no external credential proxy or shared token is
+involved. Put the three bot tokens in Secrets (`tg-august`, `tg-may`, `tg-march`,
+each with a `TELEGRAM_BOT_TOKEN` key), then layer one overlay on the per-role
+values files:
+
+```yaml
+# codex-overlay.yaml
+config:
+  model:
+    provider: openai-codex
+    default: gpt-6-luna            # gpt-6-luna-900k for the larger window
+auth:
+  deviceFlow:
+    enabled: true
+    provider: openai-codex
+    notify: telegram               # each code arrives in the team group
+readyNotify:
+  enabled: true                    # one "ready" line per bot when it is up
+```
+
+```bash
+# Install all three at once. Each bot posts its own code to the group,
+# for example "OpenAI Codex login required for may".
+for r in august may march; do
+  role=member; [ "$r" = august ] && role=leader
+  helm upgrade --install "hermes-$r" ./charts/hermes-agent \
+    --namespace hermes-team --create-namespace \
+    -f "charts/hermes-agent/values-telegram-team-$role.yaml" -f codex-overlay.yaml \
+    --set-string "fullnameOverride=hermes-$r" --set-string "team.identity=$r" \
+    --set-json "extraEnvFrom=[{\"secretRef\":{\"name\":\"tg-$r\"}}]" &
+done; wait
+```
+
+Approve the three codes at `https://auth.openai.com/codex/device`. Do not message
+the team yet: after "login complete" a first start still takes a few minutes (it
+took about seven in a live run), and a message sent in that window is lost. Wait
+for each bot's "is ready" line, then mention the leader.
+
+- Set `TELEGRAM_HOME_CHANNEL` on **every** release, as the member values file
+  does: the login and ready messages go there.
+- Three logins on one ChatGPT account refreshed fine in a live check, but
+  upstream says a second login of the same account revokes the older one. Prefer
+  one account per bot for a team, and see
+  [OpenAI Codex](../../docs/advanced/providers/openai-codex.md) for what was and
+  was not checked.
+- Each bot's first reply in the group may include Hermes' one-time
+  "caps context at 272K" notice. Set `compression.codex_gpt55_autoraise_notice:
+  false` to silence it.
 
 > Upstream currently documents Hermes bot-to-bot Discord conversation as an
 > unsupported topology with no built-in circuit breaker. The example is
