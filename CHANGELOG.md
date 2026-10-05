@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.18.0
+
+### Features
+
+- [#311](https://github.com/jyje/hermes-agent-helm/pull/311) [`e584932`](https://github.com/jyje/hermes-agent-helm/commit/e5849321039d8754a185bc692895f1e1eddbdaaa) - Feature(team): Telegram team collaboration
+
+  Support Telegram-specific team routing with per-bot examples, a shared-assistant example, and an ArgoCD ApplicationSet.
+
+- [#343](https://github.com/jyje/hermes-agent-helm/pull/343) [`a901677`](https://github.com/jyje/hermes-agent-helm/commit/a901677dfa0a4dde22b7e5c299663dd673339743) - Feature(auth): Telegram delivery for device-flow login
+
+  Add `auth.deviceFlow.notify: telegram`. The `auth-device-login` init container now posts the verification URL and one-time code to the Telegram home channel, reusing `TELEGRAM_BOT_TOKEN` and `TELEGRAM_HOME_CHANNEL`, so a Telegram-only agent no longer has to read the code from the init container logs. The message is sent with `sendMessage` only and never polls, so it does not conflict with the running agent. The code is still printed to the init container logs as before. Login prompts now also name the release (the team identity, or the release name outside team mode), so several parallel logins can be told apart.
+
+- [#345](https://github.com/jyje/hermes-agent-helm/pull/345) [`03edab3`](https://github.com/jyje/hermes-agent-helm/commit/03edab30270a376902902c7fc83ae069f98ab270) - Feature(auth): Ready message when the gateway starts
+
+  Add `readyNotify.enabled` (off by default) and `readyNotify.notify` (`discord` or `telegram`, or follow `auth.deviceFlow.notify`). The chart seeds a `gateway:startup` hook that posts one line to the home channel when the gateway is up, so you know when to talk to the agent after a first start that can take minutes. Hermes itself only announces restarts. The hook reuses the bot credentials already configured, never logs the token, and does nothing unless enabled.
+
+### Documentation
+
+- [#344](https://github.com/jyje/hermes-agent-helm/pull/344) [`959738a`](https://github.com/jyje/hermes-agent-helm/commit/959738a16d54098ba16b3e3786f2878d4c6cd624) - Documentation(values): OpenAI Codex context window, login expiry, and shared accounts
+
+  Explain in `values-openai-codex.yaml` how to opt in to Hermes' `-900k` model variant (for example `gpt-6-luna-900k`) and why `compression.threshold_tokens` must be raised with it. The comments say the suffix is a Hermes alias, not an OpenAI model name, that it uses subscription quota faster, and that upstream is still refining it. The Codex docs page (English and Korean) also explains that a login code expires after about 15 minutes and is replaced automatically, and what to know when several releases log in to the same ChatGPT account.
+
+- [#339](https://github.com/jyje/hermes-agent-helm/pull/339) [`137a709`](https://github.com/jyje/hermes-agent-helm/commit/137a709d171a286ab6194c1f017c4bda6b5a6730) - Documentation(readme): Introduce the web dashboard
+
+  Mention the web dashboard where users first look: the Summary of the root README, the TL;DR of the chart README (so it shows on Artifact Hub), and the Getting Started page. A six-screenshot gallery (Chat, Channels, Config, MCP, Skills, Files) sits under the root README paragraph and at the top of the "Expose the dashboard" section. You can chat with the agent in the browser, browse sessions, and manage its settings behind a password, Nous Portal OAuth, or your own OIDC sign-in.
+
+- [#341](https://github.com/jyje/hermes-agent-helm/pull/341) [`9078f86`](https://github.com/jyje/hermes-agent-helm/commit/9078f861a77b7f91e8e20aeb0c3db3675c5de3ea) - Documentation(dashboard): Sign-in is shell access, profile multiplexing is on by default
+
+  State that a signed-in dashboard user can also create shell hooks and use the Chat tab, so sign-in should be treated as shell access to the pod (dashboard page, chart README, `values-ingress.yaml`, SECURITY). Also drop the stale instruction to set `config.gateway.multiplex_profiles: true`: upstream enables profile multiplexing by default and `true` is its only valid value.
+
+- [#346](https://github.com/jyje/hermes-agent-helm/pull/346) [`ac9d8af`](https://github.com/jyje/hermes-agent-helm/commit/ac9d8af8fbb14fb636d2e0282c42d4fd083389d5) - Documentation(team): Codex Telegram team example in the README
+
+  Add a README example for a Telegram team where every bot signs in to OpenAI Codex on its own, with the overlay, the install loop, and the notes that matter (home channel on every release, wait for the ready message, one account per bot). The README also states what the live Telegram run did and did not cover. The Telegram member values file now sets `TELEGRAM_HOME_CHANNEL`, which stops Hermes' "no home channel" notice and gives the login and ready messages somewhere to go.
+
+- [#340](https://github.com/jyje/hermes-agent-helm/pull/340) [`1caacf2`](https://github.com/jyje/hermes-agent-helm/commit/1caacf212cd6e49532fd0d11b869c78b6805c718) - Documentation(roadmap): Web dashboard on the roadmap
+
+  Add the web dashboard (sign-in, Ingress, NetworkPolicy, readiness probe, and its CI scenario) to the project roadmap in English and Korean, and mention the `dashboard-ingress` scenario in the v1.0 readiness table.
+
 ## 1.17.0
 
 ### Features
