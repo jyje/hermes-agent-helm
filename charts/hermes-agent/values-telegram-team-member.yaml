@@ -106,6 +106,12 @@ extraEnv:
   # The shared team group.
   - name: TELEGRAM_GROUP_ALLOWED_CHATS
     value: "-1001234567890"
+  # Same group as the home channel. Without it Hermes posts a "no home channel
+  # is set" notice into the group on the member's first message, and the device
+  # login and ready messages (auth.deviceFlow.notify / readyNotify) have nowhere
+  # to go.
+  - name: TELEGRAM_HOME_CHANNEL
+    value: "-1001234567890"
 
 persistence:
   enabled: true
