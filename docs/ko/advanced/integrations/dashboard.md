@@ -12,7 +12,9 @@ description: 비밀번호, Nous Portal OAuth, 자체 OpenID Connect 제공자 �
 ## 언제 사용하나요?
 
 관리 대시보드를 URL로 접근할 수 있게 하고 싶을 때 사용하세요. 대시보드는 로그인한
-사람에게 API 키를 보여 주므로 로그인 방식을 먼저 고르세요. non-loopback 바인드에서는
+사람에게 API 키를 보여 주고, 로그인한 사용자는 설정 편집, shell hook 생성(업스트림
+문서상 임의 명령을 실행합니다), Chat 탭(pod 안에서 도구를 쓰는 에이전트 자체) 사용도
+할 수 있습니다. 로그인을 pod 셸 접근 권한으로 여기고 방식을 먼저 고르세요. non-loopback 바인드에서는
 업스트림의 인증 gate가 필수라서, provider가 없으면 대시보드는 fail-closed되어 아예
 리슨하지 않습니다.
 

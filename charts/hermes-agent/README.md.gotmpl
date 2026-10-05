@@ -253,8 +253,8 @@ See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ## Login via device flow (GitHub Copilot and OpenAI Codex)
 
 Set `auth.deviceFlow.enabled=true` to add an **`auth-device-login` init
-container**. It sends the verification URL + one-time code to the Discord home
-channel (or logs), waits for human approval, and persists the resulting
+container**. It sends the verification URL + one-time code to the Discord or
+Telegram home channel (or logs), waits for human approval, and persists the resulting
 credential on the `HERMES_HOME` volume.
 
 - `github-copilot` performs GitHub's OAuth 2.0 device grant and writes
@@ -276,8 +276,24 @@ Notes:
 
 - **Requires `persistence.enabled=true`**: without a volume the token is lost
   on restart and you would re-approve every time.
-- **`notify`** is `discord` (reuses `DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL`)
-  or `logs` (verification prompt printed to the init container logs only).
+- **`notify`** is `discord` (reuses `DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL`),
+  `telegram` (reuses `TELEGRAM_BOT_TOKEN` + `TELEGRAM_HOME_CHANNEL`), or `logs`
+  (verification prompt printed to the init container logs only). With
+  `telegram` the message is sent with `sendMessage` only, so it does not
+  conflict with the agent polling the same bot. In a multi-release team, set
+  `TELEGRAM_HOME_CHANNEL` on every release that runs a device login. Each
+  prompt names the release (the team identity, or the release name outside team
+  mode), so parallel logins can be told apart.
+- **Ready message**: "login complete" only means the credential is stored. A
+  first start can still take minutes (skill sync, model warm-up), and Hermes
+  announces a *restart* but not a fresh start. Set `readyNotify.enabled=true` to
+  post one line to the same Discord or Telegram home channel when the gateway is
+  up (`readyNotify.notify` picks the channel, or follows `auth.deviceFlow.notify`
+  when the device flow is on). The chart seeds a `gateway:startup` hook into
+  `HERMES_HOME/hooks/ready-notify` that reuses the bot credentials already in
+  `env`/`extraEnvFrom`. On a live first start the message arrived together with
+  Hermes' own `Gateway running` log line, a few seconds before the first turn was
+  warm.
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.
@@ -369,10 +385,12 @@ timestamped [team evidence](../../docs/advanced/teams/reference.md#leader-orches
 > **Alternative: one pod, many profiles.** If what you actually need is
 > routing different Discord guilds/channels/threads to different agent
 > *profiles* from a **single bot token** - rather than several bots sharing
-> one channel - set `config.gateway.multiplex_profiles: true` (env override:
-> `GATEWAY_MULTIPLEX_PROFILES=1`). That's one pod instead of one-per-teammate;
-> it solves a different problem than the hand-off pattern above (routing, not
-> collaboration), so pick based on which shape your use case actually needs.
+> one channel - use gateway profile multiplexing. Upstream turns it on by
+> default (`gateway.multiplex_profiles` defaults to `true`, and `true` is the
+> only valid value; the old `false` is retired), so no chart setting is needed.
+> That's one pod instead of one-per-teammate; it solves a different problem
+> than the hand-off pattern above (routing, not collaboration), so pick based
+> on which shape your use case actually needs.
 
 ## Advanced testing
 
@@ -528,7 +546,8 @@ so the pod needs egress to Bitwarden and GitHub Releases.
 
 The management dashboard (`service.port`, default 9119) is an s6 service inside
 the image and the only built-in web UI. It shows API keys to whoever is signed
-in, so work through these steps in order.
+in, and a signed-in user can also create shell hooks and use the Chat tab, so
+treat sign-in as shell access to the pod and work through these steps in order.
 
 **1. Choose a sign-in method.** On a non-loopback bind upstream's auth gate is
 mandatory: without a provider the dashboard **fails closed and never listens**.

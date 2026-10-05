@@ -64,7 +64,9 @@ Facts worth knowing before deploying:
   would require a Docker daemon/socket.
 - **No inbound API by default.** The agent makes outbound connections only.
   The single HTTP surface is the optional management **dashboard** (port 9119),
-  which **exposes API keys** to whoever is signed in. The chart ships with
+  which **exposes API keys** to whoever is signed in. A signed-in user can also
+  edit the configuration, create shell hooks and use the Chat tab, so treat
+  sign-in as shell access to the pod. The chart ships with
   `dashboard.enabled: false`, `service.enabled: false` and
   `ingress.enabled: false`. Once enabled, the dashboard binds `0.0.0.0` inside
   the container and upstream's auth gate is mandatory: without an auth provider
