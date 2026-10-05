@@ -253,8 +253,8 @@ See `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml` in
 ## Login via device flow (GitHub Copilot and OpenAI Codex)
 
 Set `auth.deviceFlow.enabled=true` to add an **`auth-device-login` init
-container**. It sends the verification URL + one-time code to the Discord home
-channel (or logs), waits for human approval, and persists the resulting
+container**. It sends the verification URL + one-time code to the Discord or
+Telegram home channel (or logs), waits for human approval, and persists the resulting
 credential on the `HERMES_HOME` volume.
 
 - `github-copilot` performs GitHub's OAuth 2.0 device grant and writes
@@ -276,8 +276,12 @@ Notes:
 
 - **Requires `persistence.enabled=true`**: without a volume the token is lost
   on restart and you would re-approve every time.
-- **`notify`** is `discord` (reuses `DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL`)
-  or `logs` (verification prompt printed to the init container logs only).
+- **`notify`** is `discord` (reuses `DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL`),
+  `telegram` (reuses `TELEGRAM_BOT_TOKEN` + `TELEGRAM_HOME_CHANNEL`), or `logs`
+  (verification prompt printed to the init container logs only). With
+  `telegram` the message is sent with `sendMessage` only, so it does not
+  conflict with the agent polling the same bot. In a multi-release team, set
+  `TELEGRAM_HOME_CHANNEL` on every release that runs a device login.
 - The init container runs as **root** so it can write to any storage class, then
   **chowns** the token file to `auth.deviceFlow.tokenOwner` (default uid/gid
   `10000` - the upstream image's runtime user) so the non-root agent can read it.
@@ -932,7 +936,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | auth.deviceFlow.enabled | bool | Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from `env`/`extraEnvFrom`. | `false` |
 | auth.deviceFlow.forceRelogin | bool | Force a fresh login even if a token already exists on the volume. | `false` |
 | auth.deviceFlow.image | object | Login image for GitHub-style profiles. OpenAI Codex uses the pinned    Hermes image so auth.json persistence and refresh stay version-aligned. | `{"repository":"python","tag":"3.13-slim"}` |
-| auth.deviceFlow.notify | string | Where to deliver the verification URL + user code for human approval.    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`). The code is always    also printed to the init container logs as a fallback. | `"discord"` |
+| auth.deviceFlow.notify | string | Where to deliver the verification URL + user code for human approval.    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`); `telegram` reuses    TELEGRAM_BOT_TOKEN + TELEGRAM_HOME_CHANNEL the same way. The code is    always also printed to the init container logs as a fallback. | `"discord"` |
 | auth.deviceFlow.provider | string | Which provider profile to authenticate. Must be a key under    `providers` below. Only one device-flow login runs at a time. | `"github-copilot"` |
 | auth.deviceFlow.providers.github-copilot.authHost | string | Host serving the device-code + token endpoints (GitHub-style paths). | `"github.com"` |
 | auth.deviceFlow.providers.github-copilot.clientId | string | OAuth client id for the device grant. The shared opencode/Copilot-CLI    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py). | `"Ov23li8tweQw6odWQebz"` |

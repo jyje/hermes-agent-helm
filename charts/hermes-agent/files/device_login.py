@@ -11,7 +11,7 @@ Two flow kinds are supported:
   the credential pool and refresh-token chain.
 
 Both flows print the verification URL and user code to the init-container logs
-and can additionally deliver them to Discord. Authorization codes, PKCE
+and can additionally deliver them to Discord or Telegram. Authorization codes, PKCE
 verifiers, access tokens, refresh tokens, and API keys are never printed.
 """
 
@@ -37,6 +37,8 @@ VALIDATE_URL = os.getenv("VALIDATE_URL", "").strip()
 NOTIFY = os.getenv("NOTIFY", "discord").strip().lower()
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 CHANNEL_ID = os.getenv("DISCORD_HOME_CHANNEL", "").strip()
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_HOME_CHANNEL", "").strip()
 HERMES_HOME = Path(os.getenv("HERMES_HOME", "/opt/data"))
 TIMEOUT = int(os.getenv("LOGIN_TIMEOUT_SECONDS", "870"))
 FORCE_RELOGIN = os.getenv("FORCE_RELOGIN", "false").strip().lower() == "true"
@@ -46,6 +48,7 @@ CHOWN_GID = int(os.getenv("CHOWN_GID", "-1"))
 DEVICE_CODE_URL = f"https://{AUTH_HOST}/login/device/code"
 ACCESS_TOKEN_URL = f"https://{AUTH_HOST}/login/oauth/access_token"
 DISCORD_API = "https://discord.com/api/v10"
+TELEGRAM_API = "https://api.telegram.org"
 OPENAI_CODEX_ISSUER = os.getenv(
     "OPENAI_CODEX_ISSUER", "https://auth.openai.com"
 ).strip().rstrip("/")
@@ -147,9 +150,56 @@ def discord_post(content: str) -> None:
         print(f"  [discord] post FAILED: {exc}")
 
 
+def telegram_post(content: str) -> None:
+    """Best-effort delivery of a verification message to Telegram.
+
+    Uses sendMessage only (never getUpdates), so it cannot conflict with the
+    agent's own long polling on the same bot token. The token is part of the
+    request URL, so failures log the error class only, never the URL.
+    """
+    if NOTIFY != "telegram":
+        return
+    if not (TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID):
+        print("  [telegram] bot token / home channel not set - skipping post")
+        return
+    req = urllib.request.Request(
+        f"{TELEGRAM_API}/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+        data=json.dumps(
+            {
+                "chat_id": TELEGRAM_CHAT_ID,
+                "text": content,
+                "disable_web_page_preview": True,
+            }
+        ).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "hermes-device-login/2.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            print(f"  [telegram] posted message (HTTP {resp.status})")
+    except urllib.error.HTTPError as exc:
+        print(f"  [telegram] post FAILED HTTP {exc.code}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"  [telegram] post FAILED: {type(exc).__name__}")
+
+
+def notify_post(content: str) -> None:
+    """Deliver a verification message through the configured notify channel."""
+    if NOTIFY == "discord":
+        discord_post(content)
+    elif NOTIFY == "telegram":
+        telegram_post(content)
+
+
 def _notification_ready() -> bool:
     if NOTIFY == "discord" and not (BOT_TOKEN and CHANNEL_ID):
         print("ERROR: NOTIFY=discord requires DISCORD_BOT_TOKEN and DISCORD_HOME_CHANNEL.")
+        return False
+    if NOTIFY == "telegram" and not (TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID):
+        print("ERROR: NOTIFY=telegram requires TELEGRAM_BOT_TOKEN and TELEGRAM_HOME_CHANNEL.")
         return False
     return True
 
@@ -231,7 +281,7 @@ def run_github_device_flow() -> int:
         return 1
 
     print(f"  user_code={user_code}  verify={verification_uri}  expires_in={expires_in}s")
-    discord_post(
+    notify_post(
         f"{TOKEN_ENV} login required:\n"
         f"1. Open: {verification_uri}\n"
         f"2. Enter code: {user_code}\n"
@@ -269,17 +319,17 @@ def run_github_device_flow() -> int:
             continue
         if err in ("expired_token", "access_denied"):
             print(f"  ERROR: {err}")
-            discord_post(f"Login failed: {err}. The pod will retry.")
+            notify_post(f"Login failed: {err}. The pod will retry.")
             return 1
         print(f"  poll returned error: {err or 'unknown response'}")
 
     if not token:
         print("  ERROR: timed out waiting for authorization")
-        discord_post("Login timed out. The pod will retry.")
+        notify_post("Login timed out. The pod will retry.")
         return 1
 
     write_env_token(token)
-    discord_post("Login complete. The agent is starting.")
+    notify_post("Login complete. The agent is starting.")
     return 0
 
 
@@ -381,7 +431,7 @@ def run_openai_codex_flow() -> int:
         return 1
 
     print(f"  user_code={user_code}  verify={verification_url}")
-    discord_post(
+    notify_post(
         "OpenAI Codex login required:\n"
         f"1. Open: {verification_url}\n"
         f"2. Enter code: {user_code}\n"
@@ -411,7 +461,7 @@ def run_openai_codex_flow() -> int:
 
     if exchange is None:
         print("ERROR: OpenAI Codex login timed out.")
-        discord_post("OpenAI Codex login timed out. The pod will retry.")
+        notify_post("OpenAI Codex login timed out. The pod will retry.")
         return 1
 
     authorization_code = str(exchange.get("authorization_code", "") or "")
@@ -458,7 +508,7 @@ def run_openai_codex_flow() -> int:
     if auth_path.exists():
         _chown(auth_path)
     print(f"  wrote OpenAI Codex credentials to {auth_path}")
-    discord_post("OpenAI Codex login complete. The agent is starting.")
+    notify_post("OpenAI Codex login complete. The agent is starting.")
     return 0
 
 

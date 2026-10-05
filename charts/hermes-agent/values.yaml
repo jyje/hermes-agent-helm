@@ -370,8 +370,9 @@ auth:
     provider: github-copilot
     # -- Where to deliver the verification URL + user code for human approval.
     #    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +
-    #    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`). The code is always
-    #    also printed to the init container logs as a fallback.
+    #    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`); `telegram` reuses
+    #    TELEGRAM_BOT_TOKEN + TELEGRAM_HOME_CHANNEL the same way. The code is
+    #    always also printed to the init container logs as a fallback.
     notify: discord
     # -- Seconds to wait for the human to authorize before the init container
     #    fails (and retries). Keep below the provider's device-code validity.
