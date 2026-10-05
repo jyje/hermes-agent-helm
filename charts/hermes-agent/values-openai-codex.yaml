@@ -21,7 +21,8 @@
 config:
   model:
     provider: openai-codex
-    # Available in the pinned Hermes Codex catalog and verified by this chart.
+    # Listed in the pinned Hermes Codex catalog. Your plan decides whether the
+    # account can use it.
     # Use /model in Discord to select another model available to your account.
     default: gpt-5.6-terra
     # Optional larger context window. The Codex route advertises 272K for these
