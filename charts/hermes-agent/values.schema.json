@@ -127,6 +127,7 @@
       "required": ["enabled", "role", "leader", "members", "protocol", "skill", "sharedVolume"],
       "properties": {
         "enabled": { "type": "boolean" },
+        "platform": { "type": "string", "enum": ["discord", "telegram"] },
         "name": {
           "type": "string",
           "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$|^$"
@@ -139,7 +140,7 @@
         "leader": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["name", "mentionEnv"],
+          "required": ["name"],
           "properties": {
             "name": {
               "type": "string",
@@ -148,6 +149,10 @@
             "mentionEnv": {
               "type": "string",
               "pattern": "^[A-Z_][A-Z0-9_]*$|^$"
+            },
+            "username": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_]{3,31}$|^$"
             }
           }
         },
@@ -156,7 +161,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["name", "role", "mentionEnv"],
+            "required": ["name", "role"],
             "properties": {
               "name": {
                 "type": "string",
@@ -166,6 +171,10 @@
               "mentionEnv": {
                 "type": "string",
                 "pattern": "^[A-Z_][A-Z0-9_]*$"
+              },
+              "username": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]{3,31}$"
               },
               "capabilities": {
                 "type": "array",
