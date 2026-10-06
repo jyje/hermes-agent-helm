@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.17.0
+version: 1.18.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -34,21 +34,19 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
-    - kind: "fixed"
-      description: "Documentation(readme): Star prompt on the chart README Show the \"Found this useful?\" GitHub star prompt, with a link to the repository, at the top of the cha..."
-    - kind: "fixed"
-      description: "Documentation(dashboard): Sign-in guidance State that the password provider is not for public internet exposure, that the OIDC provider has no user allowlist..."
-    - kind: "fixed"
-      description: "Documentation(dashboard): Prefer dashboard.enabled Explain that setting `HERMES_DASHBOARD=1` yourself in `extraEnv` or `env` skips the readiness probe, the d..."
     - kind: "added"
-      description: "Feature(values): Dashboard NetworkPolicy example and docs page Add `values-networkpolicy-dashboard.yaml` for exposing the dashboard through an Ingress while..."
+      description: "Feature(team): Telegram team collaboration Support Telegram-specific team routing with per-bot examples, a shared-assistant example, and an ArgoCD Applicatio..."
+    - kind: "fixed"
+      description: "Documentation(values): OpenAI Codex context window, login expiry, and shared accounts Explain in `values-openai-codex.yaml` how to opt in to Hermes' `-900k`..."
+    - kind: "fixed"
+      description: "Documentation(readme): Introduce the web dashboard Mention the web dashboard where users first look: the Summary of the root README, the TL;DR of the chart R..."
     - kind: "added"
-      description: "Feature(values): OAuth and OIDC dashboard examples Add `values-ingress-oauth.yaml` (Nous Portal OAuth) and `values-ingress-oidc.yaml` (your own OpenID Connec..."
+      description: "Feature(auth): Telegram delivery for device-flow login Add `auth.deviceFlow.notify: telegram`. The `auth-device-login` init container now posts the verificat..."
     - kind: "fixed"
-      description: "Documentation(dashboard): Expose the dashboard section Split the dense dashboard paragraph into a step-by-step \"Expose the dashboard\" section: choose a sign-..."
+      description: "Documentation(dashboard): Sign-in is shell access, profile multiplexing is on by default State that a signed-in dashboard user can also create shell hooks an..."
     - kind: "fixed"
-      description: "Documentation(dashboard): Fix stale dashboard guidance Rewrite the ArgoCD ingress example so it actually enables the dashboard with its own password provider..."
-    - kind: "fixed"
-      description: "Feature(dashboard): Trusted proxy warning Print a warning in the release notes when the dashboard is served over HTTPS but no trusted proxy is set, because s..."
+      description: "Documentation(team): Codex Telegram team example in the README Add a README example for a Telegram team where every bot signs in to OpenAI Codex on its own,..."
     - kind: "added"
-      description: "Feature(dashboard): First-class dashboard values Add a `dashboard` values block that starts the management dashboard, derives `config.dashboard.public_url` f..."
+      description: "Feature(auth): Ready message when the gateway starts Add `readyNotify.enabled` (off by default) and `readyNotify.notify` (`discord` or `telegram`, or follow..."
+    - kind: "fixed"
+      description: "Documentation(roadmap): Web dashboard on the roadmap Add the web dashboard (sign-in, Ingress, NetworkPolicy, readiness probe, and its CI scenario) to the pro..."
