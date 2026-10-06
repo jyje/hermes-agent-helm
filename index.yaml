@@ -4,6 +4,54 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "added"
+          description: "Feature(team): Telegram team collaboration Support Telegram-specific team routing with per-bot examples, a shared-assistant example, and an ArgoCD Applicatio..."
+        - kind: "fixed"
+          description: "Documentation(values): OpenAI Codex context window, login expiry, and shared accounts Explain in `values-openai-codex.yaml` how to opt in to Hermes' `-900k`..."
+        - kind: "fixed"
+          description: "Documentation(readme): Introduce the web dashboard Mention the web dashboard where users first look: the Summary of the root README, the TL;DR of the chart R..."
+        - kind: "added"
+          description: "Feature(auth): Telegram delivery for device-flow login Add `auth.deviceFlow.notify: telegram`. The `auth-device-login` init container now posts the verificat..."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Sign-in is shell access, profile multiplexing is on by default State that a signed-in dashboard user can also create shell hooks an..."
+        - kind: "fixed"
+          description: "Documentation(team): Codex Telegram team example in the README Add a README example for a Telegram team where every bot signs in to OpenAI Codex on its own,..."
+        - kind: "added"
+          description: "Feature(auth): Ready message when the gateway starts Add `readyNotify.enabled` (off by default) and `readyNotify.notify` (`discord` or `telegram`, or follow..."
+        - kind: "fixed"
+          description: "Documentation(roadmap): Web dashboard on the roadmap Add the web dashboard (sign-in, Ingress, NetworkPolicy, readiness probe, and its CI scenario) to the pro..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.9.24
+    created: "2026-10-06T14:17:33.061980877Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: e54e971700aa072cc1b75db44345bb38003e6bdd87972e8398a6f7c0829c7c6b
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.18.0.tgz
+    version: 1.18.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "fixed"
           description: "Documentation(readme): Star prompt on the chart README Show the \"Found this useful?\" GitHub star prompt, with a link to the repository, at the top of the cha..."
         - kind: "fixed"
@@ -1601,4 +1649,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-10-04T14:12:25.922320721Z"
+generated: "2026-10-06T14:17:33.05706546Z"
