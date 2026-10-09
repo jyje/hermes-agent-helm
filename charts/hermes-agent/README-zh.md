@@ -39,7 +39,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
-- **Web 仪表盘**：在浏览器中与智能体对话、浏览会话，并管理模型、技能和设置，通过密码、Nous Portal OAuth 或你自己的 OpenID Connect 登录加以保护。详见[仪表盘文档](../../docs/advanced/integrations/dashboard.md)。
+- **Web 仪表盘**：在浏览器中与智能体对话、浏览会话，并管理模型、技能和设置，通过密码、Nous Portal OAuth 或你自己的 OpenID Connect 登录加以保护。详见[公开仪表盘](#公开仪表盘)。
 - **ArgoCD**：按提供商和消息平台组合提供可直接应用的 `Application` 清单，见 [`examples/argocd/`](../../examples/argocd/)。
 - **无需提交真实密钥的 GitOps**：参阅 [SealedSecret 与 `extraEnvFrom` 指南](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord)。
 - **智能体团队**：运行多个实例，通过共同 Discord 频道中的 `@mention` 交接任务。参阅 [`hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)、[团队指南](../../docs/advanced/teams/reference.md)及[协作指南](../../docs/advanced/teams/collaboration.md)。
@@ -321,7 +321,49 @@ GitOps 中不要在 `env` 内提交真实密钥。通过 `extraResources` 部署
 
 Bitwarden Secrets Manager 在启动时通过 `config.secrets.bitwarden` 解析提供商密钥。仅将引导凭据 `BWS_ACCESS_TOKEN` 保存到外部管理的 Kubernetes Secret 中，并通过 `extraEnvFrom` 引用，详见 [`values-bitwarden.yaml`](values-bitwarden.yaml)。首次启动会将经过校验和验证的 `bws` CLI 下载到 `HERMES_HOME`，因此 Pod 需要访问 Bitwarden 与 GitHub Releases。
 
-- **仪表板路由**：管理仪表板（`service.port`，默认 9119）是镜像中的 s6 服务，设置 `HERMES_DASHBOARD=1` 后才启动。它在容器内绑定 `0.0.0.0`，任何非回环绑定都必须经过上游认证。请配置内置密码认证（`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` 和 `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`）、OAuth 或 OIDC；否则仪表板会**安全拒绝启动，不监听端口**。旧的 `--insecure` / `HERMES_DASHBOARD_INSECURE` 在上游已弃用且不再生效。位于终止 TLS 的 Ingress 后时，将 `config.dashboard.public_url` 设为外部来源地址，并在 `config.dashboard.trusted_proxies` 中列出 Ingress 控制器的准确 IP 或受限 CIDR；`0.0.0.0/0` 会被拒绝。否则 `X-Forwarded-Proto` 将被忽略，Cookie 不会标记为 `Secure`。**登录者仍能看到 API 密钥**，因此应保持私有网络访问，或在代理层再增加认证。参阅 [`values-ingress.yaml`](values-ingress.yaml)。
+### 公开仪表盘
+
+<p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="架构：浏览器经 Ingress、Service 9119 端口到达 hermes dashboard 进程；它与 hermes gateway run 运行在同一个 Pod 中，并共享 HERMES_HOME 卷" width="900"></a></p>
+
+管理仪表盘（`service.port`，默认 9119）是镜像内的一个 s6 服务，也是唯一内置的 Web 界面。仪表盘本身属于上游 Hermes，本 Chart 只负责启用并公开它。已登录的用户能看到 API 密钥，还可以创建 shell hook 并使用 Chat 标签页，因此请把登录视为对 Pod 的 shell 访问，并按顺序完成以下步骤。
+
+**1. 选择登录方式。** 绑定到非回环地址时，上游的认证网关是必需的：没有认证提供方时，仪表盘会**安全失败，不会开始监听**。`--insecure` 和 `HERMES_DASHBOARD_INSECURE` 已被上游弃用，不再生效。
+
+| 方式 | `dashboard.auth.provider` | 适用场景 | 示例 |
+| --- | --- | --- | --- |
+| 用户名和密码 | `basic` | 可信网络或 VPN。上游不建议用于公网暴露。 | [`values-ingress.yaml`](values-ingress.yaml) |
+| Nous Portal OAuth | `oauth` | 公网主机。在门户中把 **Base URL** 设为外部源（会自动追加 `/auth/callback`）。个人账号的客户端只允许其所有者登录。 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) |
+| 你自己的 OpenID Connect 提供方 | `oidc` | 使用自有身份提供方的公网主机（无密钥的 public PKCE 客户端）。仪表盘没有用户白名单：提供方为该客户端签发令牌的任何身份都能登录，因此请在提供方侧限制应用。 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) |
+
+凭据来自 `extraEnvFrom` 或 ExternalSecret 时，请使用 `external`。否则，当提供方所需的键不在 `env` 或 `extraEnv` 中（OAuth 和 OIDC 也包括 `config.dashboard.oauth`）时，模板会在渲染阶段失败，而不是留下一个返回 502/503 的 Ingress。`basic` 需要 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`，以及 `_PASSWORD` 或 `_PASSWORD_HASH`。OAuth 客户端 ID 和 OIDC issuer 不是密钥，所以示例把它们放在 `config.dashboard.oauth` 下。
+
+**2. 启用并配置路由。** 设置 `dashboard.enabled: true`（会渲染 `HERMES_DASHBOARD=1`）、`service.enabled: true`，以及 `ingress` 或 `httpRoute`。`dashboard.publicUrl` 会写入 `config.dashboard.public_url`。为空时从第一个 Ingress 主机推导（设置 `ingress.tls` 后为 `https`）；使用 HTTPRoute 时请显式设置。它必须与在身份提供方注册的外部源一致。`config.dashboard` 下已设置的值优先。
+
+请使用 `dashboard.enabled`，而不是直接在 `extraEnv` 或 `env` 中写 `HERMES_DASHBOARD=1`。镜像也认这个变量，但 Chart 看不到它，因此 readiness 探针、推导出的 `public_url` 和 `trusted_proxies`、认证提供方检查以及可信代理警告都会被跳过。如果保留该变量，请自行添加 `probes.readiness`，例如对 `service.port` 的 `tcpSocket` 探针。
+
+**3. 设置可信代理。** 在终止 TLS 的 Ingress 之后，把控制器列入 `dashboard.trustedProxies`（会写入 `config.dashboard.trusted_proxies`；填写确切 IP 或有界 CIDR，`0.0.0.0/0` 会被拒绝）。不设置时，上游会忽略 `X-Forwarded-Proto`，登录仍可成功，但会话 Cookie 不会带 `Secure`。这个缺口不会报错，所以在没有可信代理却通过 `https` 提供仪表盘时，发布说明会打印警告。请填写仪表盘看到的对端地址，它取决于控制器：
+
+- 普通控制器 Pod：它的 Pod IP 或 Pod CIDR。用 `kubectl get pods -n <控制器命名空间> -o wide` 查看。
+- 使用主机网络的控制器（例如 MicroK8s 的 ingress）：它所在节点的地址。在 Calico VXLAN 这类覆盖网络 CNI 上，这只适用于与仪表盘 Pod **位于同一节点**的控制器；其他节点上的控制器会从该节点的隧道地址连接，而这个地址位于 Pod 网络内。在每个节点各有一个控制器的 MicroK8s 上实测：只列出节点网络时，经其他节点登录能成功，但 Cookie 失去了 `Secure`。请同时列出节点网络和 Pod 网络（例如 `10.0.4.0/24` 和 `10.1.0.0/16`）。用 `kubectl get ippools.crd.projectcalico.org`（Calico）或 `kubectl get nodes -o jsonpath='{.items[*].spec.podCIDR}'` 查看 Pod 网络。
+
+控制器 Pod 重建后，确切 IP 就不再匹配；测试以外的场景建议使用有界 CIDR。
+
+**4. 之后修改。** `public_url` 和 `trusted_proxies` 在卷首次初始化时写入 `config.yaml`，而 `bootstrap.overwrite` 默认为 `false`。因此，之后修改主机或任何 `dashboard.*` 值的 `helm upgrade` **不会**传到 Pod，过期的 `public_url` 会破坏 OAuth 和 OIDC 回调。执行那次升级时请加上 `--set bootstrap.overwrite=true`，它会用 Chart 渲染的内容替换 `config.yaml`（以及已配置的 `SOUL.md`），所以请先备份运行时的修改，之后再改回 `false`。
+
+**5. 首次启动较慢。** 首次启动时内置技能会同步到卷上，可能需要几分钟（网络存储上更久）。仪表盘启用期间，Chart 会在 `service.port` 上渲染 TCP readiness 探针（`dashboard.readinessProbe`），因此在仪表盘开始监听之前 Pod 一直是 NotReady，Ingress 也不会路由到它。`helm --wait` 会等待这一点。显式的 `probes.readiness` 优先，readiness 永远不会重启 Pod。
+
+**6. 检查。** 没有会话时，`GET /` 会重定向到登录页，`/api/env` 和 `/api/config` 返回 401。登录后，`GET /api/auth/me` 会报告提供方，会话 Cookie 带有 `__Host-`、`Secure` 和 `HttpOnly`。
+
+| 现象 | 可能原因 |
+| --- | --- |
+| 安装后 Ingress 立即返回 502 | 首次启动仍在进行；仪表盘开始监听前 Pod 为 NotReady。 |
+| 仪表盘一直不监听 | 没有配置认证提供方，网关安全失败。 |
+| OIDC：`/auth/login` 返回 503 | issuer 错误。响应正文会写明原因（`OIDC discovery returned 404 for ...`）；带自定义错误页的代理可能会隐藏它，请直接访问 Service。issuer 末尾斜杠的差异可以容忍。 |
+| 身份提供方提示 `Unregistered redirect_uri`（OIDC），或门户提示 `redirect_uri_mismatch`（OAuth） | 外部源与注册内容不一致。如果修改过主机，请参见第 4 步。 |
+| 能登录但 Cookie 没有 `Secure` | 没有可信代理、地址错误，或使用了 `*.localhost` 主机（上游把回环主机视为开发环境）。在覆盖网络 CNI 上使用主机网络控制器时，结果可能取决于请求从哪个节点进入：请同时列出 Pod 网络（第 3 步）。 |
+| 启用 `networkPolicy` 后 Ingress 超时，可能只在经过部分控制器时出现 | 策略拒绝所有入站流量，而控制器未被允许。请参见第 7 步。 |
+
+**7. 配合 NetworkPolicy 使用。** `networkPolicy.enabled` 会拒绝所有入站流量，因此在 Pod 仍为 Ready 的情况下（kubelet 探针不受影响），会悄无声息地切断 Ingress 到仪表盘的连接。请在 `networkPolicy.extraIngress` 中为 9119 端口添加规则。使用主机网络的控制器不会被 Pod 或命名空间选择器匹配。在覆盖网络 CNI 上（Calico VXLAN 实测），请同时放行节点网络和 Pod 网络，并在 `dashboard.trustedProxies` 中使用相同的两个 CIDR。实测的规则和可直接使用的覆盖文件见 [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml)。
 
 ### API 服务器与 webhook 监听器
 
@@ -478,11 +520,14 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 代理（远程/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 代理（集群内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**：启用仪表板、上游密码认证及可信代理 |
+| [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **使用 Nous Portal OAuth 的仪表盘 Ingress**，上游推荐用于公网仪表盘的登录方式 |
+| [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **使用你自己的 OpenID Connect 提供方的仪表盘 Ingress**（public PKCE 客户端，无需 Nous Portal） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API 服务器与 webhook**：显式 Service 端口和外部监听器密钥 |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A（Agent-to-Agent）**：config.yaml 透传与显式 Service 端口，供其他 A2A 智能体发现并调用 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 监听器路由**：`/v1` API 与 webhook 主机使用不同 Service 端口 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**：通过已有 Gateway 路由监听器流量 |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM 代理（集群内） | **限制出站流量的 NetworkPolicy**：阻止 RFC1918 和云元数据端点，仅精确放行 LiteLLM Service |
+| [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml) | OpenAI (`openai-api`) | **启用 NetworkPolicy 的仪表盘 Ingress**：9119 端口的入站规则与对应的可信代理，在 Calico VXLAN 上的主机网络控制器上实测 |
 | [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **PSS `restricted`**：非 root、只读 rootfs、移除 capabilities，已在强制 `restricted` 的命名空间中通过 CI 验证 |
 | [`values-soul.yaml`](values-soul.yaml) | 任意 | **持久化身份**：实用工程风格，保留运行时编辑 |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | 任意 | **协作双智能体**：在共享 Discord 频道中通过 @mention 交接 |

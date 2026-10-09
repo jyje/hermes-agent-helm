@@ -39,7 +39,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
 
-- **Web ダッシュボード**: ブラウザでエージェントとチャットし、セッションを閲覧し、モデル、スキル、設定を管理します。パスワード、Nous Portal OAuth、または独自の OpenID Connect ログインで保護されます。詳細は[ダッシュボード](../../docs/advanced/integrations/dashboard.md)を参照してください。
+- **Web ダッシュボード**: ブラウザでエージェントとチャットし、セッションを閲覧し、モデル、スキル、設定を管理します。パスワード、Nous Portal OAuth、または独自の OpenID Connect ログインで保護されます。詳細は[ダッシュボード](#ダッシュボードの公開)を参照してください。
 - **ArgoCD**: プロバイダーとメッセンジャーの組み合わせごとに、適用可能な `Application` マニフェストを用意しています。[`examples/argocd/`](../../examples/argocd/) を参照してください。
 - **実際のシークレットをコミットしない GitOps**: SealedSecret と `extraEnvFrom` の手順は [SealedSecret ガイド](../../examples/argocd/#sealedsecret-walkthrough-nvidia-nim--discord)を参照してください。
 - **エージェントチーム**: 共通の Discord チャンネルで `@mention` によって引き継ぐ複数インスタンスを実行できます。[`hermes-collab-pair.yaml`](../../examples/argocd/hermes-collab-pair.yaml)、[チーム](../../docs/advanced/teams/reference.md)、[連携ガイド](../../docs/advanced/teams/collaboration.md)を参照してください。
@@ -321,7 +321,49 @@ GitOps では実際のキーを `env` に入れてコミットしないでくだ
 
 Bitwarden Secrets Manager は起動時に `config.secrets.bitwarden` からプロバイダーのキーを解決します。初期認証情報 `BWS_ACCESS_TOKEN` だけを外部管理の Kubernetes Secret に置き、`extraEnvFrom` で参照します。[`values-bitwarden.yaml`](values-bitwarden.yaml) を参照してください。初回起動ではチェックサムを検証した `bws` CLI を `HERMES_HOME` にダウンロードするため、Pod から Bitwarden と GitHub Releases への外向き通信が必要です。
 
-- **ダッシュボードのルーティング**: 管理ダッシュボード（`service.port`、デフォルト 9119）はイメージ内の s6 サービスで、`HERMES_DASHBOARD=1` を設定するまで停止しています。コンテナー内で `0.0.0.0` にバインドし、ループバック以外では上流の認証が必須です。組み込みのパスワード認証（`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` と `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`）、OAuth、OIDC のいずれかを設定しないと、**安全側に停止し、待ち受けを開始しません**。以前の `--insecure` / `HERMES_DASHBOARD_INSECURE` は上流で非推奨となり、効果がありません。TLS を終端する Ingress の背後では、`config.dashboard.public_url` に外部オリジンを設定し、`config.dashboard.trusted_proxies` に Ingress コントローラーの正確な IP または限定した CIDR を指定します。`0.0.0.0/0` は拒否されます。この設定がないと `X-Forwarded-Proto` は無視され、Cookie に `Secure` が付きません。**ログイン済みユーザーには API キーが表示される**ため、プライベートネットワークに配置するか、プロキシ側にも認証層を追加してください。[`values-ingress.yaml`](values-ingress.yaml) を参照してください。
+### ダッシュボードの公開
+
+<p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="アーキテクチャ: ブラウザから Ingress、Service のポート 9119 を経て hermes dashboard プロセスへ。同じ Pod で hermes gateway run と HERMES_HOME ボリュームを共有します" width="900"></a></p>
+
+管理ダッシュボード（`service.port`、デフォルト 9119）はイメージ内の s6 サービスで、唯一の組み込み Web UI です。ダッシュボード自体は上流の Hermes のもので、このチャートは有効化して公開するだけです。ログインしたユーザーには API キーが表示され、シェルフックの作成や Chat タブの利用もできるため、ログインは Pod へのシェルアクセスとして扱い、次の手順を順番に進めてください。
+
+**1. ログイン方式を選ぶ。** ループバック以外にバインドする場合、上流の認証ゲートは必須です。プロバイダーがないとダッシュボードは**安全側に停止し、待ち受けを開始しません**。`--insecure` と `HERMES_DASHBOARD_INSECURE` は上流で非推奨となり、効果がありません。
+
+| 方式 | `dashboard.auth.provider` | 用途 | サンプル |
+| --- | --- | --- | --- |
+| ユーザー名とパスワード | `basic` | 信頼できるネットワークまたは VPN。上流はインターネットへの公開には推奨していません。 | [`values-ingress.yaml`](values-ingress.yaml) |
+| Nous Portal OAuth | `oauth` | 公開ホスト。ポータルで **Base URL** に外部オリジンを設定します（`/auth/callback` が付加されます）。個人アカウントのクライアントでは、ログインは所有者に限られます。 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) |
+| 独自の OpenID Connect プロバイダー | `oidc` | 独自の ID プロバイダーを使う公開ホスト（シークレットなしの public PKCE クライアント）。ダッシュボードにはユーザー許可リストがなく、プロバイダーがこのクライアント向けにトークンを発行するすべての ID がログインできるため、アプリケーションの制限はプロバイダー側で行います。 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) |
+
+認証情報を `extraEnvFrom` や ExternalSecret から渡す場合は `external` を使います。それ以外では、プロバイダーのキーが `env` または `extraEnv`（OAuth と OIDC は `config.dashboard.oauth` も）にない場合、502/503 を返す Ingress を残す代わりにレンダリング時にテンプレートが失敗します。`basic` には `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` と、`_PASSWORD` または `_PASSWORD_HASH` が必要です。OAuth のクライアント ID と OIDC の issuer はシークレットではないため、サンプルでは `config.dashboard.oauth` に置いています。
+
+**2. 有効化してルーティングする。** `dashboard.enabled: true`（`HERMES_DASHBOARD=1` をレンダリングします）、`service.enabled: true`、そして `ingress` または `httpRoute` を設定します。`dashboard.publicUrl` は `config.dashboard.public_url` になります。空の場合は最初の Ingress ホストから導出され（`ingress.tls` を設定すると `https`）、HTTPRoute では明示的に設定します。ID プロバイダーに登録した外部オリジンと一致させる必要があります。`config.dashboard` に既に設定した値が優先されます。
+
+`HERMES_DASHBOARD=1` を `extraEnv` や `env` に直接書くより `dashboard.enabled` を使ってください。イメージは変数だけでも動作しますが、チャートからは見えないため、readiness プローブ、導出される `public_url` と `trusted_proxies`、認証プロバイダーの確認、信頼するプロキシの警告がすべて省略されます。変数を使い続ける場合は、`service.port` への `tcpSocket` プローブなど、独自の `probes.readiness` を追加してください。
+
+**3. 信頼するプロキシを設定する。** TLS を終端する Ingress の背後では、`dashboard.trustedProxies` にコントローラーを指定します（`config.dashboard.trusted_proxies` になります。正確な IP または限定した CIDR で、`0.0.0.0/0` は拒否されます）。指定がないと上流は `X-Forwarded-Proto` を無視し、ログインはできてもセッション Cookie に `Secure` が付きません。この欠落は表面化しないため、信頼するプロキシなしで `https` で公開するとリリースノートに警告が表示されます。ダッシュボードから見たピアのアドレスを指定します。これはコントローラーによって異なります。
+
+- 通常のコントローラー Pod: その Pod IP または Pod CIDR。`kubectl get pods -n <コントローラーの namespace> -o wide` で確認します。
+- ホストネットワークのコントローラー（MicroK8s の ingress など）: それが動くノードのアドレス。Calico VXLAN のようなオーバーレイ CNI では、これはダッシュボード Pod と**同じノード**のコントローラーにしか当てはまりません。別のノードのコントローラーは、Pod ネットワーク内にあるそのノードのトンネルアドレスから接続します。ノードごとにコントローラーがある MicroK8s での実測では、ノードネットワークだけを指定すると、他のノード経由のログインは成功しても Cookie の `Secure` が失われました。ノードネットワークと Pod ネットワークの両方を指定してください（例: `10.0.4.0/24` と `10.1.0.0/16`）。Pod ネットワークは `kubectl get ippools.crd.projectcalico.org`（Calico）または `kubectl get nodes -o jsonpath='{.items[*].spec.podCIDR}'` で確認します。
+
+正確な IP はコントローラー Pod が再作成されると一致しなくなります。テスト以外では限定した CIDR を推奨します。
+
+**4. 後から変更する場合。** `public_url` と `trusted_proxies` はボリュームの初回シード時に `config.yaml` へ書き込まれ、`bootstrap.overwrite` のデフォルトは `false` です。そのため、ホストや `dashboard.*` の値を変える後続の `helm upgrade` は Pod に**反映されず**、古い `public_url` は OAuth と OIDC のコールバックを壊します。そのアップグレードでは `--set bootstrap.overwrite=true` を指定します。これは `config.yaml`（と設定した `SOUL.md`）をチャートのレンダリング内容で置き換えるため、先に実行時の変更をバックアップし、その後 `false` に戻してください。
+
+**5. 初回起動は遅い。** 初回起動では同梱スキルがボリュームに同期されるため、数分かかることがあります（ネットワークストレージではさらに長くなります）。ダッシュボードが有効な間、チャートは `service.port` への TCP readiness プローブ（`dashboard.readinessProbe`）をレンダリングするため、ダッシュボードが待ち受けを始めるまで Pod は NotReady のままで、Ingress もルーティングしません。`helm --wait` はこれを待ちます。明示的な `probes.readiness` が優先され、readiness が Pod を再起動することはありません。
+
+**6. 確認する。** セッションなしでは `GET /` はログインページへリダイレクトし、`/api/env` と `/api/config` は 401 を返します。ログイン後、`GET /api/auth/me` はプロバイダーを報告し、セッション Cookie は `__Host-`、`Secure`、`HttpOnly` になります。
+
+| 症状 | 考えられる原因 |
+| --- | --- |
+| インストール直後に Ingress が 502 を返す | 初回起動がまだ続いています。ダッシュボードが待ち受けるまで Pod は NotReady です。 |
+| ダッシュボードが待ち受けを始めない | 認証プロバイダーが設定されていないため、ゲートが安全側に停止しています。 |
+| OIDC: `/auth/login` が 503 を返す | issuer が誤っています。レスポンス本文に理由（`OIDC discovery returned 404 for ...`）が含まれます。独自のエラーページを持つプロキシでは隠れることがあるため、Service に直接問い合わせてください。issuer の末尾スラッシュの違いは許容されます。 |
+| ID プロバイダーが `Unregistered redirect_uri`（OIDC）、またはポータルが `redirect_uri_mismatch`（OAuth）を表示する | 外部オリジンが登録内容と異なります。ホストを変更した場合は手順 4 を参照してください。 |
+| ログインはできるが Cookie が `Secure` にならない | 信頼するプロキシがない、アドレスが誤っている、または `*.localhost` ホスト（上流はループバックのホストを開発環境として扱います）。オーバーレイ CNI 上のホストネットワークのコントローラーの背後では、リクエストが入るノードによって変わることがあります。Pod ネットワークも指定してください（手順 3）。 |
+| `networkPolicy` を有効にすると Ingress がタイムアウトする（一部のコントローラー経由のみの場合もある） | ポリシーがすべての受信を拒否し、コントローラーが許可されていません。手順 7 を参照してください。 |
+
+**7. NetworkPolicy を使う場合。** `networkPolicy.enabled` はすべての受信通信を拒否するため、Pod が Ready のまま（kubelet のプローブは影響を受けません）、Ingress からダッシュボードへの通信が気付かないうちに遮断されます。`networkPolicy.extraIngress` にポート 9119 のルールを追加してください。ホストネットワークのコントローラーは Pod や namespace のセレクターに一致しません。オーバーレイ CNI（Calico VXLAN で実測）ではノードネットワークと Pod ネットワークの両方を許可し、同じ 2 つの CIDR を `dashboard.trustedProxies` にも指定します。実測したルールとすぐに使えるオーバーレイは [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml) にあります。
 
 ### API サーバーと webhook リスナー
 
@@ -478,11 +520,14 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM プロキシ（外部/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM プロキシ（クラスター内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**（dashboard 有効化、上流のパスワード認証、信頼するプロキシ） |
+| [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Nous Portal OAuth を使うダッシュボード Ingress**。インターネットに公開するダッシュボードに上流が推奨するログイン方式 |
+| [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **独自の OpenID Connect プロバイダーを使うダッシュボード Ingress**（public PKCE クライアント、Nous Portal 不要） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API サーバーと webhook**。明示的な Service ポートと外部 Secret |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A（Agent-to-Agent）**。config.yaml パススルーと明示的な Service ポートで、ほかの A2A エージェントから検出・操作可能 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress のリスナールーティング**: `/v1` API と webhook のホストを別の Service ポートへ接続 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 既存の Gateway を経由するリスナールーティング |
 | [`values-networkpolicy-litellm.yaml`](values-networkpolicy-litellm.yaml) | LiteLLM プロキシ（クラスター内） | **外向き通信を制限する NetworkPolicy**: RFC1918 とクラウドのメタデータエンドポイントを遮断し、LiteLLM Service だけを明示的に許可 |
+| [`values-networkpolicy-dashboard.yaml`](values-networkpolicy-dashboard.yaml) | OpenAI (`openai-api`) | **NetworkPolicy を有効にしたダッシュボード Ingress**: ポート 9119 の受信ルールと対応する信頼するプロキシ。Calico VXLAN 上のホストネットワークのコントローラーで実測 |
 | [`values-hardened.yaml`](values-hardened.yaml) | OpenAI (`openai-api`) | **PSS `restricted`**: 非 root、読み取り専用 rootfs、ケーパビリティ削除。`restricted` 強制の名前空間で CI 検証済み |
 | [`values-soul.yaml`](values-soul.yaml) | 任意 | **永続的なアイデンティティ**: 実践的なエンジニアリング方針と実行時の編集保持 |
 | [`values-multi-agent-collab.yaml`](values-multi-agent-collab.yaml) | 任意 | **連携するペア**: 共有 Discord チャンネルで @mention によって引き継ぐ 2 体のエージェント |
