@@ -32,22 +32,9 @@
 
 只需一次 `helm install`，即可在 Kubernetes 上运行 [Hermes Agent](https://github.com/NousResearch/hermes-agent)。支持 Hermes 可用的所有 LLM 提供商，可在小型单节点上运行，并经过实际运行验证。同一集群中的多个实例也可以组成 [**Hermes 团队**](docs/advanced/teams/reference.md)。这是一个**社区维护的 Chart**，并非 Nous Research 的官方发行版。
 
-如果更习惯用浏览器，可以启用 **Web 仪表盘**：在完整的终端界面中与智能体对话、浏览历史会话，并管理模型、技能、cron 和设置。它运行在你自己的 URL 上，并通过密码、Nous Portal OAuth 或你自己的 OpenID Connect 登录加以保护。详见[仪表盘文档](docs/advanced/integrations/dashboard.md)。
+如果更习惯用浏览器，Hermes 自带 **Web 仪表盘**（完整终端界面中的对话、历史会话、模型、技能、cron 和设置）。本 Chart 可以启用它，并通过 Ingress 或 HTTPRoute 发布到你自己的 URL，用密码、Nous Portal OAuth 或你自己的 OpenID Connect 登录加以保护。各组件如何连接见下图，配置方法详见[仪表盘文档](docs/advanced/integrations/dashboard.md)。
 
-<table>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: 在浏览器中直接使用完整的 Hermes 终端界面。</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: 从 33 个渠道列表中连接 Telegram、Discord、Slack 等。</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: 通过表单或 YAML 编辑智能体设置。</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: 从 Nous 审核的 65 个 MCP 服务器目录中一键安装。</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: 开启或关闭 53 个内置技能，也可以自行添加。</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: 浏览并上传智能体持久卷上的文件。</sub></td>
-</tr>
-</table>
+<p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="架构：浏览器经 Ingress、Service 9119 端口到达 hermes dashboard 进程；它与 hermes gateway run 运行在同一个 Pod 中，并共享 HERMES_HOME 卷" width="900"></a></p>
 
 ## 快速开始
 
