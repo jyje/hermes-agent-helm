@@ -9,6 +9,8 @@ description: 비밀번호, Nous Portal OAuth, 자체 OpenID Connect 제공자 �
 | Nous Portal OAuth | `OPENAI_API_KEY` (클라이언트 ID는 비밀이 아닙니다) | `values-ingress-oauth.yaml` |
 | 자체 OpenID Connect 제공자 | `OPENAI_API_KEY` (issuer와 클라이언트 ID는 비밀이 아닙니다) | `values-ingress-oidc.yaml` |
 
+![차트가 업스트림 대시보드를 연결하는 방식: Ingress 또는 HTTPRoute, 9119 포트의 Service, 그리고 한 Pod 안에서 게이트웨이와 함께 실행되며 HERMES_HOME을 공유하는 대시보드 프로세스.](../../../images/dashboard-architecture.png)
+
 ## 언제 사용하나요?
 
 관리 대시보드를 URL로 접근할 수 있게 하고 싶을 때 사용하세요. 대시보드는 로그인한

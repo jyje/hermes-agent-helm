@@ -584,20 +584,7 @@ so the pod needs egress to Bitwarden and GitHub Releases.
 
 ### Expose the dashboard
 
-<table>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: The full Hermes terminal UI in the browser.</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: Connect Telegram, Discord, Slack and more from a list of 33 channels.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: Edit the agent's settings in a form, or as YAML.</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: Install from a catalog of 65 Nous-approved MCP servers.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: Switch the 53 bundled skills on and off, or add your own.</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: Browse and upload files on the agent's persistent volume.</sub></td>
-</tr>
-</table>
+<p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="Architecture: Browser to Ingress to Service port 9119 to the hermes dashboard process, which runs next to hermes gateway run in one pod and shares the HERMES_HOME volume" width="900"></a></p>
 
 The management dashboard (`service.port`, default 9119) is an s6 service inside
 the image and the only built-in web UI. It shows API keys to whoever is signed

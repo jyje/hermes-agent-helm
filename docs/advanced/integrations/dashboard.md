@@ -9,6 +9,8 @@ description: Expose the management dashboard through an Ingress with a password,
 | Nous Portal OAuth | `OPENAI_API_KEY` (the client id is not a secret) | `values-ingress-oauth.yaml` |
 | Your own OpenID Connect provider | `OPENAI_API_KEY` (the issuer and client id are not secrets) | `values-ingress-oidc.yaml` |
 
+![How the chart wires the upstream dashboard: Ingress or HTTPRoute, a Service on port 9119, and the dashboard process running next to the gateway in one pod, sharing HERMES_HOME.](../../images/dashboard-architecture.png)
+
 ## When to use it
 
 Use this when the management dashboard should be reachable at a URL. It shows API

@@ -563,20 +563,7 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 
 ### 대시보드 노출하기
 
-<table>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-chat.png" alt="Web dashboard: Chat"></a><br><sub><b>Chat</b>: 브라우저에서 전체 Hermes 터미널 UI를 그대로 사용합니다.</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-channels.png" alt="Web dashboard: Channels"></a><br><sub><b>Channels</b>: 33개 채널 목록에서 Telegram, Discord, Slack 등을 연결합니다.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-config.png" alt="Web dashboard: Config"></a><br><sub><b>Config</b>: 에이전트 설정을 폼으로, 또는 YAML로 편집합니다.</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-mcp.png" alt="Web dashboard: MCP"></a><br><sub><b>MCP</b>: Nous가 승인한 MCP 서버 65개 카탈로그에서 설치합니다.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-skills.png" alt="Web dashboard: Skills"></a><br><sub><b>Skills</b>: 기본 제공 스킬 53개를 켜고 끄거나 직접 추가합니다.</sub></td>
-<td width="50%" align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-files.png" alt="Web dashboard: Files"></a><br><sub><b>Files</b>: 에이전트의 영구 볼륨 파일을 탐색하고 업로드합니다.</sub></td>
-</tr>
-</table>
+<p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="아키텍처: 브라우저에서 Ingress, Service 9119 포트를 거쳐 hermes dashboard 프로세스로 이어지며, 이 프로세스는 같은 Pod에서 hermes gateway run과 함께 HERMES_HOME 볼륨을 공유합니다" width="900"></a></p>
 
 관리 대시보드(`service.port`, 기본값 9119)는 이미지 안의 s6 서비스이자 유일한 내장
 웹 UI입니다. 로그인한 사람에게 API 키를 보여 주고, 로그인한 사용자는 shell hook 생성과
