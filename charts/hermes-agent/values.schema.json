@@ -538,6 +538,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
+        "annotations": { "type": "object" },
         "parentRefs": {
           "type": "array",
           "items": {

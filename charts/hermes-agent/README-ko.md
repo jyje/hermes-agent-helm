@@ -990,6 +990,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var: e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
+| httpRoute.annotations | object | Annotations to add to the HTTPRoute (e.g. external-dns, cert-manager,    or Gateway implementation-specific policies). | `{}` |
 | httpRoute.enabled | bool | Create a Gateway API HTTPRoute. The cluster must already provide the    Gateway API CRD and a Gateway selected by `parentRefs`. | `false` |
 | httpRoute.hostnames | list | HTTP hostnames accepted by this route. | `[]` |
 | httpRoute.parentRefs | list | Gateway API parent references. | `[]` |
