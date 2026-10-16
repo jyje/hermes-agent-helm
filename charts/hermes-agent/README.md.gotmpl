@@ -272,6 +272,32 @@ helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --crea
 kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 ```
 
+**Which provider and channel combinations work.** One release logs in to one
+provider (`auth.deviceFlow.provider`), and the code and the ready message go to
+one channel (`notify`). All four combinations of the two providers and the two
+messengers were run on a real cluster (image `v2026.9.24`, October 2026). Each
+run covered the code arriving in the channel, approval, the stored credential,
+the completion message, the ready message, and a model reply to a mention.
+
+| Provider | Discord | Telegram |
+| --- | --- | --- |
+| `openai-codex` | Verified (`gpt-6-luna`) | Verified (`gpt-6-luna`) |
+| `github-copilot` | Verified (`gpt-4o`, Copilot Free account) | Verified (`gpt-4o`, Copilot Free account) |
+
+The Copilot runs used a Free account, so the models your plan can use follow
+GitHub's rules, and Discord also needs your own user id in
+`DISCORD_ALLOWED_USERS` (a message from an account that is not listed is
+ignored without a log line).
+
+```bash
+# Same flow with Telegram instead of Discord (Copilot shown).
+helm upgrade --install hermes-copilot ./charts/hermes-agent -n hermes-copilot --create-namespace \
+  -f charts/hermes-agent/values-github-copilot.yaml \
+  --set auth.deviceFlow.notify=telegram \
+  --set-string env.TELEGRAM_BOT_TOKEN='<bot-token>' \
+  --set-json 'extraEnv=[{"name":"TELEGRAM_HOME_CHANNEL","value":"<chat-id>"},{"name":"TELEGRAM_ALLOWED_USERS","value":"<user-id>"}]'
+```
+
 Notes:
 
 - **Requires `persistence.enabled=true`**: without a volume the token is lost

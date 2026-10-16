@@ -273,6 +273,30 @@ helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --crea
 kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 ```
 
+**어떤 provider와 채널 조합이 되는가.** 릴리스 하나는 provider 하나(`auth.deviceFlow.provider`)에
+로그인하고, 코드와 준비 완료 메시지는 채널 하나(`notify`)로 갑니다. 두 provider와 두 메신저의
+네 조합을 모두 실제 클러스터에서 실행해 확인했습니다(이미지 `v2026.9.24`, 2026년 10월). 각
+실행은 채널에 코드가 오는 것, 승인, 저장된 자격증명, 완료 메시지, 준비 완료 메시지, 멘션에 대한
+모델 응답까지 확인했습니다.
+
+| provider | Discord | Telegram |
+| --- | --- | --- |
+| `openai-codex` | 확인됨 (`gpt-6-luna`) | 확인됨 (`gpt-6-luna`) |
+| `github-copilot` | 확인됨 (`gpt-4o`, Copilot Free 계정) | 확인됨 (`gpt-4o`, Copilot Free 계정) |
+
+Copilot 실행은 Free 계정이었으므로 쓸 수 있는 모델은 GitHub 플랜 규칙을 따르고, Discord는
+`DISCORD_ALLOWED_USERS`에 본인 사용자 id도 넣어야 합니다(목록에 없는 계정의 메시지는 로그 없이
+무시됩니다).
+
+```bash
+# Discord 대신 Telegram으로 같은 흐름 (Copilot 예시).
+helm upgrade --install hermes-copilot ./charts/hermes-agent -n hermes-copilot --create-namespace \
+  -f charts/hermes-agent/values-github-copilot.yaml \
+  --set auth.deviceFlow.notify=telegram \
+  --set-string env.TELEGRAM_BOT_TOKEN='<bot-token>' \
+  --set-json 'extraEnv=[{"name":"TELEGRAM_HOME_CHANNEL","value":"<chat-id>"},{"name":"TELEGRAM_ALLOWED_USERS","value":"<user-id>"}]'
+```
+
 참고 사항:
 
 - **`persistence.enabled=true`가 필요합니다.** 영속 볼륨이 없으면 재시작할
