@@ -442,7 +442,11 @@ auth:
         tokenEnv: COPILOT_GITHUB_TOKEN
         # -- Optional endpoint to verify an existing token is still live; on
         #    401/403 the init container re-runs the login. Empty = skip the check.
-        validateUrl: https://api.github.com/copilot_internal/v2/token
+        #    `/user` answers 401 for a revoked token and does not depend on the
+        #    Copilot plan. The old `copilot_internal/v2/token` exchange endpoint
+        #    returned 403 for a valid token on a Copilot Free account, which made
+        #    every restart ask for a new login.
+        validateUrl: https://api.github.com/user
       openai-codex:
         # -- Use the OpenAI Codex device-code flow bundled with the pinned
         #    Hermes version and persist refreshable credentials in auth.json.

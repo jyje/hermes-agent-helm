@@ -1,6 +1,7 @@
 import contextlib
 import importlib.util
 import io
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -248,3 +249,37 @@ class TelegramNotifyTests(unittest.TestCase):
         with mock.patch.object(module.urllib.request, "urlopen") as urlopen:
             module.notify_post("hello")
         urlopen.assert_not_called()
+
+
+class ValuesDefaultsTests(unittest.TestCase):
+    def test_copilot_validation_does_not_use_the_token_exchange_endpoint(self):
+        # A valid token on a Copilot Free account got 403 from the exchange
+        # endpoint, and the init container treats 403 as "invalid", so every
+        # restart asked for a new login.
+        # Plain text on purpose: the CI step has no PyYAML guarantee.
+        text = (Path(__file__).parents[1] / "charts/hermes-agent/values.yaml").read_text()
+        urls = re.findall(r"^\s+validateUrl: (\S+)\s*$", text, flags=re.M)
+        self.assertEqual(len(urls), 1)
+        url = urls[0]
+        self.assertNotIn("copilot_internal", url)
+        self.assertEqual(url, "https://api.github.com/user")
+
+
+class TokenValidationTests(unittest.TestCase):
+    def _module(self):
+        module = load_script()
+        module.VALIDATE_URL = "https://api.github.com/user"
+        return module
+
+    def test_revoked_token_is_invalid(self):
+        module = self._module()
+        error = module.urllib.error.HTTPError(module.VALIDATE_URL, 401, "Unauthorized", {}, None)
+        with mock.patch.object(module.urllib.request, "urlopen", side_effect=error):
+            self.assertFalse(module.token_is_valid("gho_revoked"))
+
+    def test_live_token_is_valid(self):
+        module = self._module()
+        response = mock.MagicMock()
+        response.__enter__.return_value.status = 200
+        with mock.patch.object(module.urllib.request, "urlopen", return_value=response):
+            self.assertTrue(module.token_is_valid("gho_live"))
