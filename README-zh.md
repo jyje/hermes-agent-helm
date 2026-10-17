@@ -28,6 +28,7 @@
 ## 概述
 
 > 简体中文版翻译入门页面。未翻译的章节使用英语。本译文尚未经中文母语维护者审核，欢迎提出修正建议。
+> 维护者并非中文母语者，本译文尚未经过中文母语者审核。如有表述不清，请以英语原文为准。
 
 ![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
 

@@ -79,8 +79,15 @@ chart behavior is unchanged).
 1. Install with chart-managed storage.
 2. Run the chart's `hermes doctor` test hook (the same Job as `helm test`, but
    invoked directly so it can't stall on the hook watch).
-3. **Only on trusted runs** (an `NVIDIA_API_KEY` secret is present): inject a
-   skill onto the PVC, then do one `hermes chat` round-trip through NVIDIA NIM.
+3. **Only on trusted chart/image/live-harness changes** (an `NVIDIA_API_KEY` secret is present): inject a
+   `skills/ci-ping/SKILL.md` onto the PVC, confirm it is discoverable, then do one
+   `hermes chat` round-trip through NVIDIA NIM with an explicit skill request.
+
+Documentation and release-tooling changes keep any structural chart installs
+selected by the functional matrix, but skip the external model and Discord
+delivery checks. `requires-live-chat.py` makes that narrower decision from the
+actual diff. Chart inputs, image changes and live-test harness changes retain
+the external checks; missing base history keeps them enabled.
 
 The `CI_MODELS` pool is **failover only** - the round-trip passes on the first
 model that answers, not every model. The chat invocation mirrors the chart's own
