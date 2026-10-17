@@ -14,7 +14,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) - a multi-provi
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
-**Found this useful? Please give it a [⭐ on GitHub](https://github.com/jyje/hermes-agent-helm) - it helps others find it.**
+**Found [this project](https://github.com/jyje/hermes-agent-helm) useful? Please give it a [⭐ on GitHub](https://github.com/jyje/hermes-agent-helm) - it helps others find it.**
 
 ## TL;DR
 

@@ -1,3 +1,5 @@
+<!-- translation_source: README.md @ 848f559741ab9f5b080ed9e9e1334575903196d8 -->
+
 <div align="center" markdown="1">
 
 # jyje/hermes-agent-helm
@@ -11,6 +13,7 @@
 [![Helm](https://img.shields.io/badge/Helm-3%2B-0F1689?logo=helm&logoColor=white)](https://helm.sh)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hermes-agent)](https://artifacthub.io/packages/search?repo=hermes-agent)
+[![Hermes Agent appVersion](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fjyje.github.io%2Fhermes-agent-helm%2Findex.yaml&query=%24.entries%5B%22hermes-agent%22%5D%5B0%5D.appVersion&label=Hermes%20Agent&color=blue)](https://github.com/jyje/hermes-agent-helm/releases/latest)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -18,7 +21,7 @@
 
 ---
 
-**이 프로젝트가 도움이 되셨나요? 별(⭐)을 눌러주세요 - 다른 분들이 찾는 데 도움이 됩니다.**
+**[이 프로젝트](https://github.com/jyje/hermes-agent-helm)가 도움이 되셨나요? [GitHub에서 별(⭐)](https://github.com/jyje/hermes-agent-helm)을 눌러주세요 - 다른 분들이 찾는 데 도움이 됩니다.**
 
 </div>
 

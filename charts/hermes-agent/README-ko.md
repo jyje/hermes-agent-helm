@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 660d7ca1915a0bb390f4a00fec76af566ed82f6f -->
+<!-- translation_source: charts/hermes-agent/README.md @ dfee2e4b165f1307c6762b6e2d5a07134c689bc1 -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -15,7 +15,7 @@
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
-**이 프로젝트가 도움이 되셨나요? [GitHub에서 별(⭐)](https://github.com/jyje/hermes-agent-helm)을 눌러주세요 - 다른 분들이 찾는 데 도움이 됩니다.**
+**[이 프로젝트](https://github.com/jyje/hermes-agent-helm)가 도움이 되셨나요? [GitHub에서 별(⭐)](https://github.com/jyje/hermes-agent-helm)을 눌러주세요 - 다른 분들이 찾는 데 도움이 됩니다.**
 
 ## TL;DR
 
