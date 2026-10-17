@@ -29,12 +29,17 @@ if [ -n "${NVIDIA_API_KEY:-}" ]; then
   echo "[$NS] === skill injection ==="
   # shellcheck disable=SC2016  # $HERMES_HOME/$skill_dir expand in the pod's shell, not the runner
   kubectl exec -n "$NS" "$pod" -- sh -c '
-    skill_dir="${HERMES_HOME:-/opt/data}/skills"
+    skill_dir="${HERMES_HOME:-/opt/data}/skills/ci-ping"
     mkdir -p "$skill_dir"
-    printf "# CI Ping\n\nWhen the user says \"ci-ping\", reply with exactly: CI_PONG\n" \
-      > "$skill_dir/ci-test.md"
-    echo "Skill written:"; cat "$skill_dir/ci-test.md"
+    printf "%s\n" "---" "name: ci-ping" \
+      "description: Reply with CI_PONG when asked for a CI ping." "---" \
+      "# CI Ping" "" "Reply with exactly CI_PONG. Do not call other tools." \
+      > "$skill_dir/SKILL.md"
+    echo "Skill written:"; cat "$skill_dir/SKILL.md"
   '
+  # A flat Markdown file is not included in the current upstream skill index.
+  # Confirm discovery before spending a model request.
+  kubectl exec -n "$NS" "$pod" -- hermes skills list | grep -F 'ci-ping' >/dev/null
   echo "[$NS] === chat with injected skill ==="
   chat_round_trip "$pod" \
     || { echo "::error::[$NS] all models failed chat round-trip"; exit 1; }

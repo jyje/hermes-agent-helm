@@ -268,7 +268,7 @@ jobs:
             ".changeset/image-${TARGET_VERSION#v}.md"
           git commit \
             -m "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
-            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it), sync the OAuth init-container Python version from the upstream Dockerfile, and regenerate the README badge." \
+            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it), sync the OAuth init-container Python version from tagged pm/lock.json, and regenerate the README badge." \
             --allow-empty
           git push origin "image/${TARGET_VERSION}"
 

@@ -126,7 +126,7 @@ chat_round_trip() {
     if timeout -k 15 "${chat_timeout_secs}" \
       kubectl exec -n "$NS" "$pod" -- \
         hermes chat -m "$model" --provider nvidia \
-          -q "ci-ping" --max-turns 2; then
+          -q "Use the installed ci-ping skill. Reply only with its response; do not run shell or search tools." --max-turns 2; then
       ok=true; break
     fi
     echo "[$NS] model $model failed or timed out after ${chat_timeout_secs}s, trying next"
