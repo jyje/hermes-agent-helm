@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ acccd84696f466447c0f84b957288819c332416e -->
+<!-- translation_source: charts/hermes-agent/README.md @ 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9 -->
 
 <div align="center" markdown="1">
 
@@ -318,7 +318,7 @@ done; wait
 
 ## 高级测试
 
-[`helm test`](#测试) Job（钩子 `helm.sh/hook: test`）执行 `hermes --version`、检查初始化的 `config.yaml`、检查 docker 可用性，并运行 `hermes doctor`。由于后端是 `local`，docker 检查只提供信息。通过 `--set tests.enabled=false` 禁用测试，或用 `--set tests.doctorStrict=true` 将 doctor 问题视为测试失败。
+[`helm test`](#测试) Job（钩子 `helm.sh/hook: test`）执行 `hermes --version`、检查初始化的 `config.yaml`、检查 docker 可用性，并运行 `hermes doctor`。由于后端是 `local`，docker 检查只提供信息。另有两项检查仅在对应功能开启时运行，用于保护 Chart 在 Hermes 镜像内执行的代码，防止镜像更新破坏兼容性：启用 OpenAI Codex 设备登录时，确认镜像仍提供登录过程导入的 Hermes 辅助函数；启用 `readyNotify.enabled` 时，确认 Hermes 能发现并触发初始化的 `gateway:startup` 钩子。通过 `--set tests.enabled=false` 禁用 Job，或用 `--set tests.doctorStrict=true` 将 doctor 问题视为测试失败。
 
 ### 提供商端到端验证（`tests.chat.enabled`）
 
@@ -521,7 +521,7 @@ config:
 
 随 Hermes 发布持续更新的完整参考见 **[环境变量文档](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**。
 
-截至镜像 `v2026.8.31`，其他常用变量如下：
+截至镜像 `v0.22.2`，其他常用变量如下：
 
 | 变量 | 用途 |
 | --- | --- |

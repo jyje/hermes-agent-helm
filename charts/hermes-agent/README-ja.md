@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ acccd84696f466447c0f84b957288819c332416e -->
+<!-- translation_source: charts/hermes-agent/README.md @ 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9 -->
 
 <div align="center" markdown="1">
 
@@ -318,7 +318,7 @@ done; wait
 
 ## 詳細なテスト
 
-[`helm test`](#テスト) Job（フック `helm.sh/hook: test`）は `hermes --version`、初期配置した `config.yaml` の確認、docker の利用可否の確認、`hermes doctor` を実行します。バックエンドは `local` なので docker の確認は情報表示のみです。`--set tests.enabled=false` で無効にでき、`--set tests.doctorStrict=true` で doctor の問題をテスト失敗として扱えます。
+[`helm test`](#テスト) Job（フック `helm.sh/hook: test`）は `hermes --version`、初期配置した `config.yaml` の確認、docker の利用可否の確認、`hermes doctor` を実行します。バックエンドは `local` なので docker の確認は情報表示のみです。さらに、チャートが Hermes イメージ内で実行するコードをイメージ更新時の非互換から守るため、対応する機能が有効な場合だけ 2 つの検査を実行します。OpenAI Codex デバイスログインではログイン処理がインポートする Hermes ヘルパーの存在を確認し、`readyNotify.enabled` では初期配置した `gateway:startup` フックを Hermes が検出して実行することを確認します。`--set tests.enabled=false` で Job を無効にでき、`--set tests.doctorStrict=true` で doctor の問題をテスト失敗として扱えます。
 
 ### プロバイダーのエンドツーエンド検証（`tests.chat.enabled`）
 
@@ -521,7 +521,7 @@ config:
 
 各 Hermes リリースに合わせて更新される完全な一覧は、**[環境変数リファレンス](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**を参照してください。
 
-イメージ `v2026.8.31` 時点でよく使われる追加の変数:
+イメージ `v0.22.2` 時点でよく使われる追加の変数:
 
 | 変数 | 用途 |
 | --- | --- |

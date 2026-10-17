@@ -3,7 +3,7 @@ title: "安装 Hermes Agent"
 description: "使用提供商密钥安装 Chart，再验证工作负载。"
 translation_source:
   path: docs/getting-started/install.md
-  commit: 4c00dee9830393c8829109453d698bb1eb0ef3f3
+  commit: 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9
 ---
 
 ## 安装 OCI 制品（推荐）

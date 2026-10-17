@@ -3,7 +3,7 @@ title: "高度な使い方"
 description: "Hermes Agent の設定、連携、運用、拡張。"
 translation_source:
   path: docs/advanced/index.md
-  commit: 4c00dee9830393c8829109453d698bb1eb0ef3f3
+  commit: 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9
 ---
 
 基本の `values.yaml` に部分的なオーバーレイを適用して構成します。Hermes がバージョン固有のデフォルトを提供し、シークレットは環境から別途注入します。
