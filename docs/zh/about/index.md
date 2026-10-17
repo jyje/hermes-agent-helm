@@ -3,7 +3,7 @@ title: "关于"
 description: "仓库信息、项目政策和源文档。"
 translation_source:
   path: docs/about/index.md
-  commit: 4c00dee9830393c8829109453d698bb1eb0ef3f3
+  commit: 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9
 ---
 
 本节提供仓库信息、项目政策和源文档。Chart values 和 Chart README 位于 [Chart](../chart/index.md) 章节。

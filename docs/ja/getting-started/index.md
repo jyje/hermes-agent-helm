@@ -3,7 +3,7 @@ title: "はじめに"
 description: "Hermes Agent をインストールし、プロバイダーと連携に合う values を選択します。"
 translation_source:
   path: docs/getting-started/index.md
-  commit: 4c00dee9830393c8829109453d698bb1eb0ef3f3
+  commit: 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9
 ---
 
 [インストールガイド](install.md)から始め、利用するプロバイダーと連携に合った values オーバーレイを選択してください。

@@ -1,4 +1,4 @@
-<!-- translation_source: README.md @ 848f559741ab9f5b080ed9e9e1334575903196d8 -->
+<!-- translation_source: README.md @ 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9 -->
 
 <div align="center" markdown="1">
 

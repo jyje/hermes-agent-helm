@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ acccd84696f466447c0f84b957288819c332416e -->
+<!-- translation_source: charts/hermes-agent/README.md @ 7ed24f70b11e37d9b2317d6a9fd863c96c2cf4d9 -->
 
 <div align="center" markdown="1">
 
