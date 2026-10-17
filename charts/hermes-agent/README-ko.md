@@ -66,7 +66,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 디바이스 로그인(API 키 불필요) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 프리셋의 reference/aggregator 모델에 따라 다름 | [`values-moa.yaml`](values-moa.yaml) |
 | 커스텀 (LiteLLM / vLLM / LM Studio) | `config.providers` 아래 직접 정의한 id | 프록시마다 다름 | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 무료 티어 (`nous/welcome`) | `nous` | 없음: 부팅 시 `HERMES_GUEST_ONBOARDING=1`로 익명 identity 발급 | [`values-nous.yaml`](values-nous.yaml) |
+| Nous 무료 티어 (`nous/welcome`) | `nous` | 키는 없지만 `v0.21.6`까지의 이미지에서만: `v0.22`부터는 부팅 시 identity 발급이 없어져 Nous Portal에 로그인합니다(아래 변수 설명 참고) | [`values-nous.yaml`](values-nous.yaml) |
 
 > `openai`(접미사 없음)는 **유효하지 않은** 제공자 키입니다 - OpenRouter의
 > 별칭으로 처리됩니다. `openai-api`를 사용하세요.
@@ -884,7 +884,7 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 대시보드 auth gate용 내장 사용자명/비밀번호 제공자 (업스트림은 non-loopback 바인드에서 항상 이 gate를 켬); `HERMES_DASHBOARD_PUBLIC_URL`은 Ingress 뒤의 외부 origin 선언 |
-| `HERMES_GUEST_ONBOARDING` | `1`로 설정하면 부팅 시 익명 Nous identity를 발급합니다(무료 `nous/welcome` 추론과 웹 검색, 브라우저, Gmail, Linear 등의 커넥터 도구). 제공자 키가 이미 설정되어 있으면 커넥터 도구용 identity만 발급하고 `active_provider`는 바꾸지 않습니다. 미설정(기본값)이면 v2026.9.11 이전과 동일하게 동작합니다. 외부 키 없는 오버레이는 `values-nous.yaml`을 참고하세요 |
+| `HERMES_GUEST_ONBOARDING` | `1`로 설정하면 부팅 시 익명 Nous identity를 발급합니다(무료 `nous/welcome` 추론과 웹 검색, 브라우저, Gmail, Linear 등의 커넥터 도구). `v2026.9.24`와 `v0.21.6`까지의 이미지에서 동작합니다. **Hermes `v0.22.0`부터는 이 변수를 무시합니다.** 그 이후에는 명시적인 동작(첫 호스팅 커넥터 사용, 데스크톱 앱의 welcome claim)만 게스트 identity를 만들고, `config.nous.guest: false`로 게스트를 끌 수 있습니다. `v0.22.2`에서 확인한 결과, `values-nous.yaml`로 띄운 headless 파드는 `Hermes is not logged into Nous Portal`이라고 답하므로 `hermes model`로 로그인하세요. [#385](https://github.com/jyje/hermes-agent-helm/issues/385) 참고 |
 | `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (기본값: 500, 소진 시 마무리용 grace call 1회); 하드 캡은 `config.agent.max_turns`로, 업스트림 기본은 무제한이며 이 차트도 더 이상 시드하지 않음 |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
@@ -925,6 +925,11 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 - **하나의 gateway가 모든 profile을 처리합니다.** upstream은 profile별 gateway를
   머신당 하나의 multiplexed gateway로 합칩니다. 차트 릴리스는 각각 gateway 하나를
   가진 별도 pod이므로 [에이전트 팀](#에이전트-팀) 배포에는 영향이 없습니다.
+- **Nous 무료 티어 예제가 동작하지 않습니다.** `HERMES_GUEST_ONBOARDING`을 더 이상
+  읽지 않고 부팅 시 identity를 만드는 것도 없어서, 이 이미지에서 `values-nous.yaml`은
+  `Hermes is not logged into Nous Portal`이라고 답합니다(`v0.22.2`에서 확인).
+  `hermes model`로 로그인하세요. 업스트림은 `v0.21.6`까지는 이 변수를 읽지만 여기서
+  다시 시험하지는 않았습니다. [환경변수](#환경변수)의 `HERMES_GUEST_ONBOARDING` 설명을 참고하세요.
 - **이미지 태그는 semver입니다.** 앞으로 `image.tag`는 `vX.Y.Z` 형식으로
   고정하세요([개요](#개요) 참고).
 - **보안 수정.** 새 이미지에는 v0.21.6의 dashboard 인증 강화가 들어 있습니다.
@@ -1000,7 +1005,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | reference 모델들이 병렬로 실행되고, aggregator 모델이 결과를 종합 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager**가 시작 시 제공자 키 제공 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 무료 티어 (`nous`) | **외부 API 키 0개**: 부팅 시 익명 identity를 발급(`HERMES_GUEST_ONBOARDING=1`)해 `nous/welcome` 추론과 커넥터 도구 사용 |
+| [`values-nous.yaml`](values-nous.yaml) | Nous 무료 티어 (`nous`) | **`v0.21.6`까지의 이미지에서 외부 API 키 0개**: 부팅 시 익명 identity를 발급(`HERMES_GUEST_ONBOARDING=1`)해 `nous/welcome` 추론과 커넥터 도구 사용. 이 차트의 기본 이미지인 Hermes `v0.22` 이후에서는 동작하지 않습니다(변수 설명 참고) |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (대시보드 활성화, 업스트림 비밀번호 gate, trusted proxy) |

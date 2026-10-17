@@ -63,7 +63,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 设备登录（无需 API 密钥） | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 取决于预设中的参考模型和聚合模型 | [`values-moa.yaml`](values-moa.yaml) |
 | 自定义（LiteLLM / vLLM / LM Studio） | `config.providers` 下的自定义 ID | 取决于代理 | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 免费额度（`nous/welcome`） | `nous` | 无需密钥：启动时通过 `HERMES_GUEST_ONBOARDING=1` 签发匿名身份 | [`values-nous.yaml`](values-nous.yaml) |
+| Nous 免费额度（`nous/welcome`） | `nous` | 无需密钥，但仅限 `v0.21.6` 及更早的镜像：从 `v0.22` 起启动时不再签发身份，需要登录 Nous Portal（见下方变量说明） | [`values-nous.yaml`](values-nous.yaml) |
 
 > 不带后缀的 `openai` **不是有效的提供商标识符**，它是 OpenRouter 的别名。请使用 **`openai-api`**。
 
@@ -535,7 +535,7 @@ config:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 主服务器集成 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 仪表盘内置用户名和密码认证，上游在非回环绑定时强制启用；`HERMES_DASHBOARD_PUBLIC_URL` 声明 Ingress 后的外部来源地址 |
-| `HERMES_GUEST_ONBOARDING` | 设为 `1` 时在启动时签发匿名 Nous 身份（免费的 `nous/welcome` 推理，以及网页搜索、浏览器、Gmail、Linear 等连接器工具）。如果已配置提供商密钥，则只签发连接器工具用的身份，`active_provider` 保持不变。未设置（默认）时与 v2026.9.11 之前的行为一致。零外部密钥的覆盖文件见 `values-nous.yaml` |
+| `HERMES_GUEST_ONBOARDING` | 设为 `1` 时在启动时签发匿名 Nous 身份（免费的 `nous/welcome` 推理，以及网页搜索、浏览器、Gmail、Linear 等连接器工具），适用于 `v2026.9.24` 和 `v0.21.6` 及更早的镜像。**Hermes `v0.22.0` 及更高版本会忽略该变量。** 之后只有显式操作（首次使用托管连接器、桌面应用的 welcome claim）才会创建访客身份，可用 `config.nous.guest: false` 关闭访客。在 `v0.22.2` 上实测：用 `values-nous.yaml` 启动的无界面 Pod 会回答 `Hermes is not logged into Nous Portal`，请改用 `hermes model` 登录。参见 [#385](https://github.com/jyje/hermes-agent-helm/issues/385) |
 | `HERMES_MAX_ITERATIONS` | 每次会话的工具调用迭代预算（默认 500 次，之后允许一次收尾调用）；硬上限为 `config.agent.max_turns`，上游默认不限，Chart 已不再初始化该值 |
 | `HERMES_AGENT_TIMEOUT` | 网关无活动超时（默认 1800 秒 / 30 分钟） |
 | `HERMES_TIMEZONE` | 覆盖 IANA 时区 |
@@ -559,6 +559,7 @@ Chart 1.20.0 将默认镜像从 `v2026.9.24`（Hermes v0.21.5）更新为 `v0.22
   在默认的 `bootstrap.overwrite: false` 下，卷上已有的 `config.yaml` 不会被替换，因此该值只对新安装生效。对已有的 release，请在升级前运行 `kubectl exec <pod> -- hermes config set sessions.auto_prune false`，或使用 `bootstrap.overwrite: true` 部署一次（参阅[配置模型](#配置模型)）。
 - **空闲/每日会话重置已废弃。** 对话不再按计时器重置，`SESSION_IDLE_MINUTES` 和 `session_reset` 的 idle/daily 模式不再生效（仍设置时会记录警告）。如需重新开始，请在对话中使用 `/new` 或 `/reset`。
 - **一个 gateway 服务所有配置档案。** upstream 将每个配置档案的 gateway 合并为每台机器一个 multiplexed gateway。每个 Chart release 都是只有一个 gateway 的独立 Pod，因此[智能体团队](#智能体团队)部署不受影响。
+- **Nous 免费额度示例不再可用。** `HERMES_GUEST_ONBOARDING` 不再被读取，启动时也没有任何机制创建身份，因此在该镜像上使用 `values-nous.yaml` 会回答 `Hermes is not logged into Nous Portal`（已在 `v0.22.2` 上确认）。请改用 `hermes model` 登录。上游在 `v0.21.6` 及更早版本仍读取该变量，但这里没有重新测试。参见[环境变量](#环境变量)中关于 `HERMES_GUEST_ONBOARDING` 的说明。
 - **镜像标签使用 semver。** 今后请以 `vX.Y.Z` 形式固定 `image.tag`（参阅[概述](#概述)）。
 - **安全修复。** 新镜像包含 v0.21.6 的 dashboard 认证加固。如果你[公开了仪表盘](#公开仪表盘)，请尽快升级。
 
@@ -606,7 +607,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | 通过 `UPSTAGE_BASE_URL` 覆盖端点 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | 并行运行参考模型，由聚合模型综合结果 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | 任意 | **Bitwarden Secrets Manager** 在启动时提供密钥 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 免费额度（`nous`） | **零外部 API 密钥**：启动时签发匿名身份（`HERMES_GUEST_ONBOARDING=1`），用于 `nous/welcome` 推理和连接器工具 |
+| [`values-nous.yaml`](values-nous.yaml) | Nous 免费额度（`nous`） | **在 `v0.21.6` 及更早的镜像上零外部 API 密钥**：启动时签发匿名身份（`HERMES_GUEST_ONBOARDING=1`），用于 `nous/welcome` 推理和连接器工具。在本 Chart 的默认镜像即 Hermes `v0.22` 及更高版本上不可用（见变量说明） |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 代理（远程/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 代理（集群内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**：启用仪表盘、上游密码认证及可信代理 |

@@ -63,7 +63,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex デバイスログイン（API キー不要） | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | プリセットの参照モデルと集約モデルによる | [`values-moa.yaml`](values-moa.yaml) |
 | カスタム（LiteLLM / vLLM / LM Studio） | `config.providers` 配下の独自 ID | プロキシによる | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 無料枠（`nous/welcome`） | `nous` | 不要。起動時に `HERMES_GUEST_ONBOARDING=1` で匿名 ID を発行 | [`values-nous.yaml`](values-nous.yaml) |
+| Nous 無料枠（`nous/welcome`） | `nous` | キーは不要ですが `v0.21.6` までのイメージのみ。`v0.22` 以降は起動時の ID 発行がなくなり、Nous Portal にサインインします（下の変数の説明を参照） | [`values-nous.yaml`](values-nous.yaml) |
 
 > 接尾辞のない `openai` は有効なプロバイダー識別子ではありません。OpenRouter の別名として扱われます。**`openai-api` を使用してください。**
 
@@ -535,7 +535,7 @@ config:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix ホームサーバー連携 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | ループバック以外で必須となる dashboard の組み込みユーザー名・パスワード認証。`HERMES_DASHBOARD_PUBLIC_URL` は Ingress の背後の外部オリジンを宣言 |
-| `HERMES_GUEST_ONBOARDING` | `1` にすると起動時に匿名の Nous ID を発行します（無料の `nous/welcome` 推論と、Web 検索、ブラウザー、Gmail、Linear などのコネクターツール）。プロバイダーのキーが既に設定されている場合はコネクターツール用の ID だけを発行し、`active_provider` は変更しません。未設定（デフォルト）では v2026.9.11 より前と同じ動作です。外部キーなしのオーバーレイは `values-nous.yaml` を参照してください |
+| `HERMES_GUEST_ONBOARDING` | `1` にすると起動時に匿名の Nous ID を発行します（無料の `nous/welcome` 推論と、Web 検索、ブラウザー、Gmail、Linear などのコネクターツール）。`v2026.9.24` と `v0.21.6` までのイメージで動作します。**Hermes `v0.22.0` 以降はこの変数を無視します。** それ以降は明示的な操作（最初のホスト型コネクターの利用、デスクトップアプリの welcome claim）だけがゲスト ID を作り、`config.nous.guest: false` でゲストを無効にできます。`v0.22.2` で確認したところ、`values-nous.yaml` で起動したヘッドレスの Pod は `Hermes is not logged into Nous Portal` と答えるため、代わりに `hermes model` でサインインしてください。[#385](https://github.com/jyje/hermes-agent-helm/issues/385) を参照 |
 | `HERMES_MAX_ITERATIONS` | 会話ごとのツール呼び出し反復数（デフォルト 500 回と終了処理 1 回）。厳密な上限は `config.agent.max_turns`。上流では標準で無制限で、このチャートでは初期配置しない |
 | `HERMES_AGENT_TIMEOUT` | ゲートウェイの無活動タイムアウト（デフォルト 1800 秒 / 30 分） |
 | `HERMES_TIMEZONE` | IANA タイムゾーンの上書き |
@@ -559,6 +559,7 @@ config:
   デフォルトの `bootstrap.overwrite: false` では、ボリューム上の既存の `config.yaml` は置き換えられないため、この値は新規インストールにのみ反映されます。既存のリリースでは、アップグレード前に `kubectl exec <pod> -- hermes config set sessions.auto_prune false` を実行するか、`bootstrap.overwrite: true` で一度デプロイしてください（[設定モデル](#設定モデル)を参照）。
 - **アイドル／日次のセッションリセットは廃止されました。** 会話がタイマーでリセットされることはなくなり、`SESSION_IDLE_MINUTES` と `session_reset` の idle/daily モードは効果がありません（設定が残っていると警告が記録されます）。新しく始めるには会話で `/new` または `/reset` を使ってください。
 - **1 つの gateway がすべてのプロファイルを処理します。** upstream はプロファイルごとの gateway をマシンごとに 1 つの multiplexed gateway にまとめます。チャートのリリースはそれぞれ gateway を 1 つ持つ別の Pod なので、[エージェントチーム](#エージェントチーム)のデプロイには影響しません。
+- **Nous 無料枠のサンプルが動作しなくなります。** `HERMES_GUEST_ONBOARDING` はもう読まれず、起動時に ID を作るものもないため、このイメージで `values-nous.yaml` を使うと `Hermes is not logged into Nous Portal` と答えます（`v0.22.2` で確認）。`hermes model` でサインインしてください。アップストリームは `v0.21.6` まではこの変数を読みますが、ここでは再検証していません。[環境変数](#環境変数)の `HERMES_GUEST_ONBOARDING` の説明を参照してください。
 - **イメージタグは semver です。** 今後 `image.tag` は `vX.Y.Z` 形式で固定してください（[概要](#概要)を参照）。
 - **セキュリティ修正。** 新しいイメージには v0.21.6 の dashboard 認証強化が含まれています。[ダッシュボードを公開](#ダッシュボードの公開)している場合は早めにアップグレードしてください。
 
@@ -606,7 +607,7 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL` でエンドポイントを上書き |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | 参照モデルを並列実行し、集約モデルが結果を統合 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | 任意 | **Bitwarden Secrets Manager** が起動時にプロバイダーキーを供給 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 無料枠（`nous`） | **外部 API キー不要**: 起動時に匿名 ID を発行（`HERMES_GUEST_ONBOARDING=1`）し、`nous/welcome` の推論とコネクターツールを利用 |
+| [`values-nous.yaml`](values-nous.yaml) | Nous 無料枠（`nous`） | **`v0.21.6` までのイメージでは外部 API キー不要**: 起動時に匿名 ID を発行（`HERMES_GUEST_ONBOARDING=1`）し、`nous/welcome` の推論とコネクターツールを利用。このチャートの既定イメージである Hermes `v0.22` 以降では動作しません（変数の説明を参照） |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM プロキシ（外部/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM プロキシ（クラスター内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**（dashboard 有効化、上流のパスワード認証、信頼するプロキシ） |

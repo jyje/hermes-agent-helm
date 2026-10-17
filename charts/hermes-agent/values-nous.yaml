@@ -6,6 +6,13 @@
 # connector tools (web search, browser, Gmail, Linear, and other third-party
 # integrations). No sign-up, no provider key.
 #
+# WARNING: this only works on Hermes images up to v0.21.6 (and v2026.9.24).
+# Hermes v0.22.0 and later, which includes this chart's default image, no longer
+# read HERMES_GUEST_ONBOARDING and create no identity at boot. Checked on
+# v0.22.2: a pod installed from this file answered "Hermes is not logged into
+# Nous Portal" to a chat with nous/welcome. On those images sign in with
+# `hermes model` instead, or pin an older image. See issue #385.
+#
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
 #     -f charts/hermes-agent/values-nous.yaml --wait
