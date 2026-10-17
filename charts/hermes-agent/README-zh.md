@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 4c00dee9830393c8829109453d698bb1eb0ef3f3 -->
+<!-- translation_source: charts/hermes-agent/README.md @ 848f559741ab9f5b080ed9e9e1334575903196d8 -->
 
 <div align="center" markdown="1">
 
@@ -16,7 +16,7 @@
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
-**如果本项目对你有帮助，请在 [GitHub 上点亮 ⭐](https://github.com/jyje/hermes-agent-helm)，让更多人发现它。**
+**如果[本项目](https://github.com/jyje/hermes-agent-helm)对你有帮助，请在 [GitHub 上点亮 ⭐](https://github.com/jyje/hermes-agent-helm)，让更多人发现它。**
 
 > 简体中文版翻译入门页面，未翻译的章节使用英语。欢迎提出翻译修正建议。自动生成的 `## Values` 表保留英语。
 

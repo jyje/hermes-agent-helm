@@ -1,4 +1,4 @@
-<!-- translation_source: README.md @ 997530277802a90e11b3d334a4cb5923b81b8484 -->
+<!-- translation_source: README.md @ 848f559741ab9f5b080ed9e9e1334575903196d8 -->
 
 <div align="center" markdown="1">
 
@@ -21,7 +21,7 @@
 
 ---
 
-**役に立ったら ⭐ をお願いします。ほかの方がこのプロジェクトを見つける助けになります。**
+**[このプロジェクト](https://github.com/jyje/hermes-agent-helm)が役に立ったら [GitHub で ⭐](https://github.com/jyje/hermes-agent-helm) をお願いします。ほかの方がこのプロジェクトを見つける助けになります。**
 
 </div>
 

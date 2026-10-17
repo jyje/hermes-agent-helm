@@ -1,4 +1,4 @@
-<!-- translation_source: README.md @ 997530277802a90e11b3d334a4cb5923b81b8484 -->
+<!-- translation_source: README.md @ 848f559741ab9f5b080ed9e9e1334575903196d8 -->
 
 <div align="center" markdown="1">
 
@@ -21,7 +21,7 @@
 
 ---
 
-**如果本项目对你有帮助，请点亮 ⭐，让更多人发现它。**
+**如果[本项目](https://github.com/jyje/hermes-agent-helm)对你有帮助，请在 [GitHub 上点亮 ⭐](https://github.com/jyje/hermes-agent-helm)，让更多人发现它。**
 
 </div>
 
