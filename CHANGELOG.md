@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.19.0
+
+### Features
+
+- [#353](https://github.com/jyje/hermes-agent-helm/pull/353) [`0c41750`](https://github.com/jyje/hermes-agent-helm/commit/0c41750bf0252fcd638fd1cb3b46568784306dd6) - thanks [@kaiehrhardt](https://github.com/kaiehrhardt)! - Feature(values): HTTPRoute annotations
+
+  Set `httpRoute.annotations` to add annotations to the HTTPRoute, for example for external-dns or Gateway implementation-specific settings. The default `{}` renders no annotations.
+
+### Fixes
+
+- [#350](https://github.com/jyje/hermes-agent-helm/pull/350) [`30af4f4`](https://github.com/jyje/hermes-agent-helm/commit/30af4f471b29b7f3f3110837a59f1d043889d7a5) - Fix(auth): Copilot device login no longer repeats on every restart
+
+  The default `validateUrl` for `github-copilot` was `https://api.github.com/copilot_internal/v2/token`. On a GitHub Copilot Free account that endpoint answered 403 for a valid token, and the init container treats 403 as invalid, so every restart asked for a new login code. The default is now `https://api.github.com/user`, which answers 401 only for a revoked token and does not depend on the Copilot plan.
+
+### Documentation
+
+- [#351](https://github.com/jyje/hermes-agent-helm/pull/351) [`0752db1`](https://github.com/jyje/hermes-agent-helm/commit/0752db1f46966eb7a89711ac83d768b898b691e2) - Documentation(copilot): Later starts and Telegram delivery
+
+  The GitHub Copilot page (English and Korean) now explains that a later start validates the stored token against `api.github.com/user` and only a revoked token starts a new login, and it shows how to deliver the login code and the ready message through Telegram instead of Discord.
+
+- [#348](https://github.com/jyje/hermes-agent-helm/pull/348) [`d212d02`](https://github.com/jyje/hermes-agent-helm/commit/d212d02953d37da6d314a2f65a9661849c9ca313) - Documentation(dashboard): Show how the chart exposes the dashboard instead of a screenshot gallery
+
+  Replace the six web dashboard screenshots in the chart and repository READMEs with one architecture diagram: Browser, Ingress or HTTPRoute, a Service on port 9119, and the dashboard process running next to `hermes gateway run` in one pod, both sharing the `HERMES_HOME` volume, with the required auth gate and the values that drive each piece. The introduction now states that the dashboard is upstream Hermes' own and the chart only enables and exposes it. The diagram is also added to the English and Korean dashboard guides.
+
+- [#352](https://github.com/jyje/hermes-agent-helm/pull/352) [`eca931b`](https://github.com/jyje/hermes-agent-helm/commit/eca931b49431284272a45e656a2abf3233c8c64a) - Documentation(auth): Which device-flow provider and channel combinations work
+
+  The README now lists the four combinations of OpenAI Codex and GitHub Copilot with Discord and Telegram, all run on a real cluster, with a Telegram install example and the Discord allowed-user pitfall.
+
 ## 1.18.0
 
 ### Features
