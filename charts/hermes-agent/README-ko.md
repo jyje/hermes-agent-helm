@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 878ec63124de696150f957ad2992ea871f839b2e -->
+<!-- translation_source: charts/hermes-agent/README.md @ 007a2b002c11cf31a3e173be25fc8d3e27666c3d -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -744,6 +744,9 @@ Service 이름을 명시하면 차트 Service 없이도 됩니다. HTTPRoute도 
 `backendRefs` 항목에 같은 기본 규칙을 적용합니다. 암시적 chart-Service backend가
 존재하지 않는 Service를 가리키면 차트가 일찍 실패합니다.
 
+`ingress.annotations`와 `httpRoute.annotations`는 각 리소스에 metadata를 추가합니다.
+external-dns 힌트나 controller 및 Gateway 구현별 설정에 사용하세요.
+
 [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml)은 `/v1` API와
 webhook 트래픽을 서로 다른 Ingress host와 Service port로 라우팅합니다.
 [`values-httproute.yaml`](values-httproute.yaml)은 Gateway API 시작점입니다. 하나의
@@ -990,6 +993,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var: e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
+| httpRoute.annotations | object | Annotations to add to the HTTPRoute (e.g. external-dns, cert-manager,    or Gateway implementation-specific policies). | `{}` |
 | httpRoute.enabled | bool | Create a Gateway API HTTPRoute. The cluster must already provide the    Gateway API CRD and a Gateway selected by `parentRefs`. | `false` |
 | httpRoute.hostnames | list | HTTP hostnames accepted by this route. | `[]` |
 | httpRoute.parentRefs | list | Gateway API parent references. | `[]` |

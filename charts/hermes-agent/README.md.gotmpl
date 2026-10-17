@@ -779,6 +779,10 @@ named external Services are allowed without the chart Service. HTTPRoute uses
 the same defaulting rule for each `backendRefs` entry. The chart fails early if
 an implicit chart-Service backend would point at no Service.
 
+`ingress.annotations` and `httpRoute.annotations` add metadata to each resource,
+such as external-dns hints or controller- and Gateway implementation-specific
+settings.
+
 [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) routes `/v1`
 and webhook traffic through distinct Ingress hosts and Service ports.
 [`values-httproute.yaml`](values-httproute.yaml) is the equivalent Gateway API

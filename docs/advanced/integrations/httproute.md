@@ -28,6 +28,9 @@ An empty `backendRefs[].name` targets this release's Service, so it requires
 without the chart Service. The chart fails early if an implicit backend would
 target no Service.
 
+Add metadata such as external-dns or Gateway implementation-specific settings
+with `httpRoute.annotations`.
+
 `hostnames` apply to every rule in one HTTPRoute. Create separate HTTPRoutes
 when API and webhook rules must be isolated by hostname.
 

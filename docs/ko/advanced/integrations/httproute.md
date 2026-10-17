@@ -27,6 +27,9 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 `service.enabled: true`가 필요합니다. 외부 Service로 라우팅할 때는 이름을
 명시하세요. 암시적 backend가 존재하지 않는 Service를 가리키면 차트가 일찍 실패합니다.
 
+external-dns나 Gateway 구현별 설정 같은 메타데이터는 `httpRoute.annotations`로
+추가하세요.
+
 하나의 HTTPRoute에서 `hostnames`는 모든 rule에 적용됩니다. API와 webhook rule을
 hostname 단위로 분리해야 하면 별도의 HTTPRoute를 만드세요.
 

@@ -779,6 +779,10 @@ named external Services are allowed without the chart Service. HTTPRoute uses
 the same defaulting rule for each `backendRefs` entry. The chart fails early if
 an implicit chart-Service backend would point at no Service.
 
+`ingress.annotations` and `httpRoute.annotations` add metadata to each resource,
+such as external-dns hints or controller- and Gateway implementation-specific
+settings.
+
 [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) routes `/v1`
 and webhook traffic through distinct Ingress hosts and Service ports.
 [`values-httproute.yaml`](values-httproute.yaml) is the equivalent Gateway API
@@ -1070,6 +1074,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | extraVolumeMounts | list | Extra volume mounts on the hermes-agent container (pairs with extraVolumes). | `[]` |
 | extraVolumes | list | Extra volumes on the pod, for anything the agent needs as a FILE rather    than an env var: e.g. a Secret holding a service-account JSON    (see values-google-vertex.yaml). | `[]` |
 | fullnameOverride | string | Fully override the generated resource name (release-name-chart). | `""` |
+| httpRoute.annotations | object | Annotations to add to the HTTPRoute (e.g. external-dns, cert-manager,    or Gateway implementation-specific policies). | `{}` |
 | httpRoute.enabled | bool | Create a Gateway API HTTPRoute. The cluster must already provide the    Gateway API CRD and a Gateway selected by `parentRefs`. | `false` |
 | httpRoute.hostnames | list | HTTP hostnames accepted by this route. | `[]` |
 | httpRoute.parentRefs | list | Gateway API parent references. | `[]` |
