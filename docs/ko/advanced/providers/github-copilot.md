@@ -1,15 +1,16 @@
 ---
 title: GitHub Copilot
-description: Discord를 통해 GitHub OAuth device login을 완료하는 구성
+description: Discord 또는 Telegram을 통해 GitHub OAuth device login을 완료하는 구성
 ---
 
 | 필수 Secret | 오버레이 |
 | --- | --- |
 | `DISCORD_BOT_TOKEN` | `values-github-copilot.yaml` |
+| `TELEGRAM_BOT_TOKEN`, `auth.deviceFlow.notify: telegram`과 함께 | `values-github-copilot.yaml`에 아래 override를 더함 |
 
 ## 언제 사용하나요?
 
-Discord bot과 GitHub Copilot 권한이 필요합니다. 영속 볼륨도 활성화해야 로그인 토큰이 재사용됩니다.
+Discord 또는 Telegram bot과 GitHub Copilot 권한이 필요합니다. 영속 볼륨도 활성화해야 로그인 토큰이 재사용됩니다.
 
 ## 설치
 

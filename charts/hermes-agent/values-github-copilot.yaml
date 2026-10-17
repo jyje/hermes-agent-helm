@@ -3,7 +3,9 @@
 # Hermes Agent backed by GitHub Copilot, authenticated at startup via the OAuth
 # 2.0 Device Authorization Grant (RFC 8628): no API key to paste. The
 # "auth-device-login" init container surfaces a verification link + code to your
-# Discord home channel, waits for you to approve it on github.com (phone is
+# Discord home channel (or Telegram: set `auth.deviceFlow.notify: telegram` and
+# pass TELEGRAM_BOT_TOKEN, TELEGRAM_HOME_CHANNEL and TELEGRAM_ALLOWED_USERS
+# instead of the Discord values), waits for you to approve it on github.com (phone is
 # fine), then persists the resulting token to HERMES_HOME/.env where Hermes
 # reads it natively. The token lives on the persistent volume, so restarts are
 # fast; re-login only happens when it is missing or revoked.

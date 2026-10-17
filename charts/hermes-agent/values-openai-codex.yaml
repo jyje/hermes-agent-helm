@@ -1,8 +1,11 @@
 # values-openai-codex.yaml
 #
 # Hermes Agent backed by the account-authenticated OpenAI Codex provider. The
-# auth init container sends a verification URL + one-time code to Discord,
-# waits for approval, and stores the refreshable credential in
+# auth init container sends a verification URL + one-time code to Discord (or
+# to Telegram: set `auth.deviceFlow.notify: telegram` and pass
+# TELEGRAM_BOT_TOKEN, TELEGRAM_HOME_CHANNEL and TELEGRAM_ALLOWED_USERS instead
+# of the Discord values), waits for approval, and stores the refreshable
+# credential in
 # HERMES_HOME/auth.json through Hermes' native auth-store helper.
 #
 # This is distinct from the `openai-api` provider and does not use an OpenAI API
