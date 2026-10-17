@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 660d7ca1915a0bb390f4a00fec76af566ed82f6f -->
+<!-- translation_source: charts/hermes-agent/README.md @ dfee2e4b165f1307c6762b6e2d5a07134c689bc1 -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
