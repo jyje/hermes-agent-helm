@@ -81,9 +81,11 @@ change), see [Development](#development) below.
 - **Chat-first gateway and account login.** Supply a Discord or Telegram bot
   token and the chart runs Hermes's outbound gateway with a Kubernetes-managed
   lifecycle. For **GitHub Copilot** and **OpenAI Codex**, its optional
-  device-login bootstrap sends the one-time link and code to the Discord home
-  channel (or logs), then persists refreshable credentials in `HERMES_HOME`.
-  Approve once; normal Pod restarts reuse the stored login.
+  device-login bootstrap sends the one-time link and code to the Discord or
+  Telegram home channel (or logs), then persists refreshable credentials in
+  `HERMES_HOME`. An opt-in ready message tells you when the agent is up. Approve
+  once; normal Pod restarts reuse the stored login. All four combinations of the
+  two providers and the two messengers were run on a real cluster.
 - **Lightweight → Production.** Sized for homelab / single-node / edge clusters
   out of the box (one replica, modest requests, a small PVC), and ready for
   production by scaling *up* - not *out*. Hermes is a single-instance personal
@@ -95,8 +97,8 @@ change), see [Development](#development) below.
   cluster and runs the bundled test Job (`hermes doctor`). When the
   `NVIDIA_API_KEY` repository secret is available, it also runs a **live
   `hermes chat` round-trip** against NVIDIA NIM - not a mock.
-  The Discord-thread leader team has also completed a live human → leader →
-  two members → leader round-trip; Telegram team orchestration remains separate.
+  Leader teams have also completed a live human → leader → member → leader
+  round-trip on Discord (threads) and on Telegram.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/demos/team-k9s-pods.png" alt="A leader-orchestrated Hermes team (august, may, march) running on a kind cluster, shown in k9s"/>
