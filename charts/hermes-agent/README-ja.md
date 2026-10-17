@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ dfee2e4b165f1307c6762b6e2d5a07134c689bc1 -->
+<!-- translation_source: charts/hermes-agent/README.md @ a733bdaf587b8751e6224778aa9407fd6cc41f05 -->
 
 <div align="center" markdown="1">
 
@@ -63,7 +63,6 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex デバイスログイン（API キー不要） | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | プリセットの参照モデルと集約モデルによる | [`values-moa.yaml`](values-moa.yaml) |
 | カスタム（LiteLLM / vLLM / LM Studio） | `config.providers` 配下の独自 ID | プロキシによる | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 無料枠（`nous/welcome`） | `nous` | 不要。起動時に `HERMES_GUEST_ONBOARDING=1` で匿名 ID を発行 | [`values-nous.yaml`](values-nous.yaml) |
 
 > 接尾辞のない `openai` は有効なプロバイダー識別子ではありません。OpenRouter の別名として扱われます。**`openai-api` を使用してください。**
 
@@ -535,7 +534,6 @@ config:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix ホームサーバー連携 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | ループバック以外で必須となる dashboard の組み込みユーザー名・パスワード認証。`HERMES_DASHBOARD_PUBLIC_URL` は Ingress の背後の外部オリジンを宣言 |
-| `HERMES_GUEST_ONBOARDING` | `1` にすると起動時に匿名の Nous ID を発行します（無料の `nous/welcome` 推論と、Web 検索、ブラウザー、Gmail、Linear などのコネクターツール）。プロバイダーのキーが既に設定されている場合はコネクターツール用の ID だけを発行し、`active_provider` は変更しません。未設定（デフォルト）では v2026.9.11 より前と同じ動作です。外部キーなしのオーバーレイは `values-nous.yaml` を参照してください |
 | `HERMES_MAX_ITERATIONS` | 会話ごとのツール呼び出し反復数（デフォルト 500 回と終了処理 1 回）。厳密な上限は `config.agent.max_turns`。上流では標準で無制限で、このチャートでは初期配置しない |
 | `HERMES_AGENT_TIMEOUT` | ゲートウェイの無活動タイムアウト（デフォルト 1800 秒 / 30 分） |
 | `HERMES_TIMEZONE` | IANA タイムゾーンの上書き |
@@ -543,6 +541,22 @@ config:
 > **環境変数では設定できない項目:** コンテキスト圧縮、フォールバックプロバイダー、プロバイダールーティングは `.Values.config` の `config.yaml` でのみ設定します。対応する環境変数はありません。
 
 ## アップグレードノート
+
+### キー不要の Nous サンプルの廃止
+
+`values-nous.yaml` オーバーレイを削除しました。Hermes v0.22 では
+`HERMES_GUEST_ONBOARDING` が削除され、無料の `nous/welcome` による
+オンボーディングはデスクトップ専用になりました。このオーバーレイでは
+キー不要のゲートウェイを起動できません。
+[公式 v0.22.0 リリースノート](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)を参照してください。
+
+デプロイ設定から古いオーバーレイと環境変数を削除し、
+[OpenAI](values-openai.yaml) や [OpenRouter](values-openrouter.yaml) などの
+サンプルを選び、自分の認証情報を設定してください。
+`bootstrap.overwrite: false` の既存ボリュームでは `config.yaml` が保持されるため、
+保存されたプロバイダー・モデル設定も更新するか、バックアップ後に意図的に
+再シードしてください（[設定モデル](#設定モデル)参照）。
+廃止するのは匿名利用のサンプルであり、上流の認証済み Nous サポートではありません。
 
 ### Hermes v0.22（チャート 1.20.0）
 
@@ -606,7 +620,6 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL` でエンドポイントを上書き |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | 参照モデルを並列実行し、集約モデルが結果を統合 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | 任意 | **Bitwarden Secrets Manager** が起動時にプロバイダーキーを供給 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 無料枠（`nous`） | **外部 API キー不要**: 起動時に匿名 ID を発行（`HERMES_GUEST_ONBOARDING=1`）し、`nous/welcome` の推論とコネクターツールを利用 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM プロキシ（外部/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM プロキシ（クラスター内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**（dashboard 有効化、上流のパスワード認証、信頼するプロキシ） |

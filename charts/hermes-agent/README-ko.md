@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ dfee2e4b165f1307c6762b6e2d5a07134c689bc1 -->
+<!-- translation_source: charts/hermes-agent/README.md @ a733bdaf587b8751e6224778aa9407fd6cc41f05 -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -66,7 +66,6 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 디바이스 로그인(API 키 불필요) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 프리셋의 reference/aggregator 모델에 따라 다름 | [`values-moa.yaml`](values-moa.yaml) |
 | 커스텀 (LiteLLM / vLLM / LM Studio) | `config.providers` 아래 직접 정의한 id | 프록시마다 다름 | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 무료 티어 (`nous/welcome`) | `nous` | 없음: 부팅 시 `HERMES_GUEST_ONBOARDING=1`로 익명 identity 발급 | [`values-nous.yaml`](values-nous.yaml) |
 
 > `openai`(접미사 없음)는 **유효하지 않은** 제공자 키입니다 - OpenRouter의
 > 별칭으로 처리됩니다. `openai-api`를 사용하세요.
@@ -880,7 +879,6 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 대시보드 auth gate용 내장 사용자명/비밀번호 제공자 (업스트림은 non-loopback 바인드에서 항상 이 gate를 켬); `HERMES_DASHBOARD_PUBLIC_URL`은 Ingress 뒤의 외부 origin 선언 |
-| `HERMES_GUEST_ONBOARDING` | `1`로 설정하면 부팅 시 익명 Nous identity를 발급합니다(무료 `nous/welcome` 추론과 웹 검색, 브라우저, Gmail, Linear 등의 커넥터 도구). 제공자 키가 이미 설정되어 있으면 커넥터 도구용 identity만 발급하고 `active_provider`는 바꾸지 않습니다. 미설정(기본값)이면 v2026.9.11 이전과 동일하게 동작합니다. 외부 키 없는 오버레이는 `values-nous.yaml`을 참고하세요 |
 | `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (기본값: 500, 소진 시 마무리용 grace call 1회); 하드 캡은 `config.agent.max_turns`로, 업스트림 기본은 무제한이며 이 차트도 더 이상 시드하지 않음 |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
@@ -890,6 +888,21 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 > 없습니다.
 
 ## 업그레이드 노트
+
+### 외부 키 없는 Nous 예제 종료
+
+`values-nous.yaml` 오버레이를 제거했습니다. Hermes v0.22는
+`HERMES_GUEST_ONBOARDING`을 제거했고 무료 `nous/welcome` 온보딩 모델은
+데스크톱 전용이므로, 이 오버레이로 외부 키 없는 게이트웨이를 실행할 수 없습니다.
+[공식 v0.22.0 릴리즈 노트](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)를 참고하세요.
+
+배포 입력에서 기존 오버레이와 환경변수를 제거하세요.
+[OpenAI](values-openai.yaml)나 [OpenRouter](values-openrouter.yaml) 같은
+제공자 예제를 선택하고 자신의 인증 정보를 설정하세요.
+`bootstrap.overwrite: false`인 기존 볼륨은 `config.yaml`을 보존하므로,
+저장된 제공자·모델 설정도 수정하거나 백업 후 의도적으로 다시 시드해야 합니다
+([설정 모델](#설정-모델) 참고). 익명 예제만 종료하며 업스트림의 인증된 Nous
+지원을 제거하는 것은 아닙니다.
 
 ### Hermes v0.22 (차트 1.20.0)
 
@@ -996,7 +1009,6 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | reference 모델들이 병렬로 실행되고, aggregator 모델이 결과를 종합 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager**가 시작 시 제공자 키 제공 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 무료 티어 (`nous`) | **외부 API 키 0개**: 부팅 시 익명 identity를 발급(`HERMES_GUEST_ONBOARDING=1`)해 `nous/welcome` 추론과 커넥터 도구 사용 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (대시보드 활성화, 업스트림 비밀번호 gate, trusted proxy) |
