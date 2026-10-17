@@ -28,6 +28,7 @@
 ## 概要
 
 > 日本語版は入門ページを翻訳しています。未翻訳のセクションは英語で表示されます。日本語を母語とするメンテナーによる検証済みの翻訳ではありません。修正の提案を歓迎します。
+> メンテナーは日本語の母語話者ではなく、この翻訳は日本語の母語話者によるレビューを受けていません。不明確な表現は英語の原文を基準に確認してください。
 
 ![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
 
