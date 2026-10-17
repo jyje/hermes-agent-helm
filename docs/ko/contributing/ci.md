@@ -55,7 +55,8 @@ flowchart LR
 
 `helm lint`, `helm template`, `dashboard` 블록의 렌더링 전용 검증
 (`.github/scripts/assert-dashboard-render.sh`), 그리고 **helm-docs 드리프트 체크** - `charts/hermes-agent/README.md`가
-`README.md.gotmpl` 대비 오래됐으면 job이 실패합니다. `values.yaml`을 수정한
+`README.md.gotmpl` 대비 오래됐거나 번역된 차트 README에 있는 `## Values` 표 복사본이
+다르면 job이 실패합니다. `values.yaml`을 수정한
 뒤에는 항상 `make docs`를 실행하고 결과를 커밋하세요.
 
 ### `test`

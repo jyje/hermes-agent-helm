@@ -104,8 +104,10 @@ notice, translated into that locale:
 > language use English.
 
 The generated `## Values` table in every chart README stays English. It is
-generated from `values.yaml`, so translating a copy would create a second,
-drifting reference.
+generated from `values.yaml`, and `make docs` copies it verbatim into the
+Korean, Japanese and Chinese READMEs (`.github/scripts/sync-values-table.py`).
+CI fails when a copy differs, so a translated copy cannot drift. Never edit
+the table by hand and never translate it.
 
 ## README images
 
