@@ -65,9 +65,9 @@
 ## 为什么使用此 Chart
 
 - **通过 `values.yaml` 配置 Hermes 支持的提供商。** Hermes 本身通过环境变量支持 `openai-api`、`anthropic`、`gemini`、`openrouter`、`nvidia`、`deepseek` 以及 [LiteLLM](https://github.com/BerriAI/litellm) 等 OpenAI 兼容端点。此 Chart 通过 `values.yaml` 暴露这些配置，并提供可修改的各提供商示例，不在模板中固定提供商。
-- **以聊天为中心的网关与账户登录。** 提供 Discord 或 Telegram 机器人令牌后，Chart 会启动 Hermes 的出站网关，并由 Kubernetes 管理其生命周期。对于 **GitHub Copilot** 和 **OpenAI Codex**，可选的设备登录初始化功能会将一次性链接和验证码发送到 Discord 主频道或日志，然后将可刷新的凭据保存到 `HERMES_HOME`。批准一次后，正常的 Pod 重启会复用已保存的登录状态。
+- **以聊天为中心的网关与账户登录。** 提供 Discord 或 Telegram 机器人令牌后，Chart 会启动 Hermes 的出站网关，并由 Kubernetes 管理其生命周期。对于 **GitHub Copilot** 和 **OpenAI Codex**，可选的设备登录初始化功能会将一次性链接和验证码发送到 Discord 或 Telegram 主频道（或日志），然后将可刷新的凭据保存到 `HERMES_HOME`。可选的就绪消息会在智能体启动完成时通知你。批准一次后，正常的 Pod 重启会复用已保存的登录状态。两个提供商与两个消息平台的四种组合都已在真实集群上运行验证。
 - **从轻量配置扩展到生产环境。** 默认适用于家庭实验室、单节点和边缘集群：一个副本、适量的资源请求和较小的 PVC。通过增加资源进行纵向扩展。Hermes 是单实例个人智能体，拥有独立的 `HERMES_HOME`、网关和记忆。需要更多智能体时，运行多个独立管理的实例，将它们组成**团队**，通过共同的网关频道共享上下文。参阅 [Hermes 团队](docs/advanced/teams/reference.md)。
-- **端到端验证。** CI 在临时 **kind** 集群中安装 Chart，运行随附的测试 Job（`hermes doctor`）。当仓库中的 `NVIDIA_API_KEY` secret 可用时，还会向 NVIDIA NIM 执行真实的 **`hermes chat` 往返调用**。Discord 线程中的领导者团队也完成了真实的人类 → 领导者 → 两个成员 → 领导者流程。Telegram 团队编排另行验证。
+- **端到端验证。** CI 在临时 **kind** 集群中安装 Chart，运行随附的测试 Job（`hermes doctor`）。当仓库中的 `NVIDIA_API_KEY` secret 可用时，还会向 NVIDIA NIM 执行真实的 **`hermes chat` 往返调用**。领导者团队也已在 Discord（线程）和 Telegram 上完成了真实的人类 → 领导者 → 成员 → 领导者流程。
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/demos/team-k9s-pods.png" alt="在 k9s 中查看 kind 集群上的 Hermes 团队 august、may 和 march"/>
