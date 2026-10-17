@@ -98,6 +98,10 @@ as a **Secret**.
   `README-ko.md` (not just the values table), update that by hand too. Update
   an entry-scoped locale only when the changed page is in that locale's entry
   path.
+- **Never delete or rename a README-referenced image under `docs/images/`.**
+  READMEs load them from `main` through raw URLs, so every published chart
+  version depends on them; add a new file instead. See CONTRIBUTING.md
+  "README images".
 - Validate with `make lint` and `make template`.
 - Package for release with `make package` (runs docs + lint, then
   `helm package`). `Chart.yaml` carries `artifacthub.io/*` annotations for the

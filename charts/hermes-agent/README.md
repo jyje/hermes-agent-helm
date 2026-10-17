@@ -923,12 +923,54 @@ A few more commonly-used ones, current as of image `v0.22.2`:
 | `HERMES_GUEST_ONBOARDING` | Set to `1` to mint an anonymous Nous identity at boot (free `nous/welcome` inference plus connector tools: web search, browser, Gmail, Linear, ...). With a provider key already configured, only the connector-tools identity is minted; `active_provider` is left unchanged. Unset (default) matches pre-v2026.9.11 behavior. See `values-nous.yaml` for a zero-key overlay |
 | `HERMES_MAX_ITERATIONS` | Tool-calling iteration budget per conversation (default: 500, then one wrap-up grace call); a hard cap is `config.agent.max_turns`, unlimited upstream by default and no longer seeded by this chart |
 | `HERMES_AGENT_TIMEOUT` | Gateway inactivity timeout (default: 1800s / 30 min) |
-| `SESSION_IDLE_MINUTES` | Idle session reset window (default: 1440) |
 | `HERMES_TIMEZONE` | IANA timezone override |
 
 > **Not env-configurable:** context compression, fallback providers, and
 > provider routing live in `config.yaml` only (under `.Values.config`), with
 > no environment variable equivalent.
+
+## Upgrade notes
+
+### Hermes v0.22 (chart 1.20.0)
+
+Chart 1.20.0 moves the default image from `v2026.9.24` (Hermes v0.21.5) to
+`v0.22.2`. The chart's values and templates did not change, but Hermes itself
+changed a few defaults that reach data on the persistent volume. Read these
+before upgrading a release that already has history.
+
+- **Old sessions are pruned at startup.** `sessions.auto_prune` is now on by
+  default: ended sessions inactive for `sessions.retention_days` (default 90)
+  are deleted from `state.db` when the gateway starts. Open sessions are never
+  touched. To keep everything, set it before the upgrade:
+
+  ```yaml
+  config:
+    sessions:
+      auto_prune: false
+  ```
+
+  With the default `bootstrap.overwrite: false`, an existing `config.yaml` on
+  the volume is not replaced, so this value only reaches new installs. On an
+  existing release, run
+  `kubectl exec <pod> -- hermes config set sessions.auto_prune false` before
+  upgrading, or deploy once with `bootstrap.overwrite: true` (see
+  [Configuration model](#configuration-model)).
+- **Idle and daily session resets are retired.** Chats no longer reset on a
+  timer, and `SESSION_IDLE_MINUTES` and the `session_reset` idle/daily modes
+  have no effect (a config that still sets them logs a warning). Use `/new` or
+  `/reset` in the chat to start fresh.
+- **One gateway serves every profile.** Upstream folds per-profile gateways
+  into one multiplexed gateway per machine. Each chart release is its own pod
+  with one gateway, so [Agent team](#agent-team) deployments are unaffected.
+- **Image tags are semver.** Pin `image.tag` as `vX.Y.Z` from now on; see
+  [Overview](#overview).
+- **Security fixes.** The new image includes upstream's dashboard
+  authentication hardening from v0.21.6. If you
+  [expose the dashboard](#expose-the-dashboard), upgrade promptly.
+
+See the upstream
+[v0.22.0 release notes](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)
+for everything else.
 
 ## FAQ
 

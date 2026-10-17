@@ -1,11 +1,12 @@
 ---
 title: OpenAI Codex
-description: Discord로 전달한 device code를 이용해 ChatGPT/Codex 계정을 인증합니다.
+description: Discord 또는 Telegram으로 전달한 device code를 이용해 ChatGPT/Codex 계정을 인증합니다.
 ---
 
 | 필요한 secret | Overlay |
 | --- | --- |
 | `DISCORD_BOT_TOKEN` | `values-openai-codex.yaml` |
+| `TELEGRAM_BOT_TOKEN`, `auth.deviceFlow.notify: telegram`과 함께 | `values-openai-codex.yaml`에 아래 override를 더함 |
 
 ## 사용 시점
 
@@ -46,6 +47,15 @@ Codex 경로는 대부분의 모델에 272K를 광고합니다. Hermes는 `gpt-6
 `-900k` 접미사로 옵트인하면 약 900K까지 쓸 수 있고, 이때 `compression.threshold_tokens`도
 함께 올려야 합니다. 이 접미사는 Hermes의 별칭이지 OpenAI 모델명이 아니며, 창이 크면
 구독 사용량을 더 빨리 씁니다. 자세한 내용은 아래 overlay의 주석을 참고하세요.
+
+## Discord 대신 Telegram
+
+`auth.deviceFlow.notify: telegram`으로 설정하고, Discord 값 대신 Telegram 봇 토큰과 홈
+채널(`TELEGRAM_BOT_TOKEN`, `TELEGRAM_HOME_CHANNEL`, `TELEGRAM_ALLOWED_USERS`)을
+릴리스에 주세요. 그러면 코드가 Telegram 채팅으로 오고, `readyNotify.enabled: true`를 켜면
+에이전트가 올라왔을 때 그곳에 한 줄이 옵니다. 실제로 Telegram에서 로그인하고 준비 알림을 받고
+`gpt-6-luna`로 응답받는 것을 확인했습니다. 실행해 본 provider와 채널 조합은 README에
+정리했습니다.
 
 ## 하나의 ChatGPT 계정에 릴리스 여러 개
 

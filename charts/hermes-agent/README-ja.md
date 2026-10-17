@@ -538,10 +538,31 @@ config:
 | `HERMES_GUEST_ONBOARDING` | `1` にすると起動時に匿名の Nous ID を発行します（無料の `nous/welcome` 推論と、Web 検索、ブラウザー、Gmail、Linear などのコネクターツール）。プロバイダーのキーが既に設定されている場合はコネクターツール用の ID だけを発行し、`active_provider` は変更しません。未設定（デフォルト）では v2026.9.11 より前と同じ動作です。外部キーなしのオーバーレイは `values-nous.yaml` を参照してください |
 | `HERMES_MAX_ITERATIONS` | 会話ごとのツール呼び出し反復数（デフォルト 500 回と終了処理 1 回）。厳密な上限は `config.agent.max_turns`。上流では標準で無制限で、このチャートでは初期配置しない |
 | `HERMES_AGENT_TIMEOUT` | ゲートウェイの無活動タイムアウト（デフォルト 1800 秒 / 30 分） |
-| `SESSION_IDLE_MINUTES` | アイドルセッションのリセット時間（デフォルト 1440 分） |
 | `HERMES_TIMEZONE` | IANA タイムゾーンの上書き |
 
 > **環境変数では設定できない項目:** コンテキスト圧縮、フォールバックプロバイダー、プロバイダールーティングは `.Values.config` の `config.yaml` でのみ設定します。対応する環境変数はありません。
+
+## アップグレードノート
+
+### Hermes v0.22（チャート 1.20.0）
+
+チャート 1.20.0 はデフォルトイメージを `v2026.9.24`（Hermes v0.21.5）から `v0.22.2` に更新します。チャートの values とテンプレートは変わりませんが、Hermes 自体のデフォルトの一部が永続ボリューム上のデータに影響します。履歴のあるリリースをアップグレードする前に確認してください。
+
+- **古いセッションは起動時に削除されます。** `sessions.auto_prune` がデフォルトで有効になり、gateway の起動時に `sessions.retention_days`（デフォルト 90 日）以上操作のない終了済みセッションが `state.db` から削除されます。開いているセッションは対象外です。すべて残すには、アップグレード前に設定してください。
+
+  ```yaml
+  config:
+    sessions:
+      auto_prune: false
+  ```
+
+  デフォルトの `bootstrap.overwrite: false` では、ボリューム上の既存の `config.yaml` は置き換えられないため、この値は新規インストールにのみ反映されます。既存のリリースでは、アップグレード前に `kubectl exec <pod> -- hermes config set sessions.auto_prune false` を実行するか、`bootstrap.overwrite: true` で一度デプロイしてください（[設定モデル](#設定モデル)を参照）。
+- **アイドル／日次のセッションリセットは廃止されました。** 会話がタイマーでリセットされることはなくなり、`SESSION_IDLE_MINUTES` と `session_reset` の idle/daily モードは効果がありません（設定が残っていると警告が記録されます）。新しく始めるには会話で `/new` または `/reset` を使ってください。
+- **1 つの gateway がすべてのプロファイルを処理します。** upstream はプロファイルごとの gateway をマシンごとに 1 つの multiplexed gateway にまとめます。チャートのリリースはそれぞれ gateway を 1 つ持つ別の Pod なので、[エージェントチーム](#エージェントチーム)のデプロイには影響しません。
+- **イメージタグは semver です。** 今後 `image.tag` は `vX.Y.Z` 形式で固定してください（[概要](#概要)を参照）。
+- **セキュリティ修正。** 新しいイメージには v0.21.6 の dashboard 認証強化が含まれています。[ダッシュボードを公開](#ダッシュボードの公開)している場合は早めにアップグレードしてください。
+
+その他の変更は upstream の [v0.22.0 リリースノート](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)を参照してください。
 
 ## FAQ
 

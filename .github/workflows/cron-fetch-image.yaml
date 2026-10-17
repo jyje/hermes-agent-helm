@@ -17,6 +17,9 @@ name: ⏰ cron-fetch-image
 #     itself should react to, and files one GitHub Issue per item, labeled
 #     `upstream-review` + a priority. The maintainer triages each
 #     independently: accept (branch + implement) or reject (close it).
+#     If the NIM call fails, it files one "review manually" issue instead and
+#     the job fails, so a broken review is never mistaken for "nothing found".
+#     Without NVIDIA_API_KEY the review is skipped and the job stays green.
 # The bump PR includes a minor Changeset. Once it merges, propose-release.yaml
 # consumes that entry into the reviewed chart version and release PR.
 on:
@@ -254,7 +257,7 @@ jobs:
       - name: Create PR
         run: |
           NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
-          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> An AI-assisted review of upstream changes relevant to this chart is filing separate tracking issues - see issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`. Triage those independently of this PR.\n\n> [!NOTE]\n> The \`appVersion\` comment in Chart.yaml and the tag examples in \`README.md.gotmpl\` are not auto-updated - adjust them manually if they no longer match." \
+          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> A separate AI-assisted review of upstream changes relevant to this chart files tracking issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`, or one \"review manually\" issue if the review fails. Triage those independently of this PR.\n\n> [!NOTE]\n> The \`appVersion\` comment in Chart.yaml and the tag examples in \`README.md.gotmpl\` are not auto-updated - adjust them manually if they no longer match." \
             "$IMAGE" "$IMAGE" "$CURRENT_VERSION" "$TARGET_VERSION" "$NEW_LIST" "$TARGET_VERSION")
           gh pr create \
             --title "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
@@ -314,3 +317,13 @@ jobs:
         run: |
           python3 .github/scripts/release/file-image-bump-issues.py \
             image_bump_advice.json "${TARGET_VERSION}" "${{ github.repository }}"
+
+      # The issue above makes a failed review visible to triage; failing the
+      # job makes it visible in the run (and its notification) too. A skipped
+      # review (no NVIDIA_API_KEY) is not a failure.
+      - name: Fail the job when the AI review failed
+        run: |
+          if jq -e '.source == "failed"' image_bump_advice.json >/dev/null; then
+            echo "::error::The AI upstream review failed: $(jq -r '.note' image_bump_advice.json)"
+            exit 1
+          fi

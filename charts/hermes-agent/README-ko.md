@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 75e7e91ba90711bbfce6dc4368c715096f1f9b01 -->
+<!-- translation_source: charts/hermes-agent/README.md @ 9011740443cb6eecbe1fc9cd8d231762fd834f03 -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -883,12 +883,52 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 | `HERMES_GUEST_ONBOARDING` | `1`로 설정하면 부팅 시 익명 Nous identity를 발급합니다(무료 `nous/welcome` 추론과 웹 검색, 브라우저, Gmail, Linear 등의 커넥터 도구). 제공자 키가 이미 설정되어 있으면 커넥터 도구용 identity만 발급하고 `active_provider`는 바꾸지 않습니다. 미설정(기본값)이면 v2026.9.11 이전과 동일하게 동작합니다. 외부 키 없는 오버레이는 `values-nous.yaml`을 참고하세요 |
 | `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (기본값: 500, 소진 시 마무리용 grace call 1회); 하드 캡은 `config.agent.max_turns`로, 업스트림 기본은 무제한이며 이 차트도 더 이상 시드하지 않음 |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
-| `SESSION_IDLE_MINUTES` | 유휴 세션 초기화 주기 (기본값: 1440) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
 
 > **환경변수로 설정 불가:** 컨텍스트 압축, 폴백 제공자, 제공자 라우팅은
 > `config.yaml`(`.Values.config` 아래)에만 존재하며, 대응하는 환경변수가
 > 없습니다.
+
+## 업그레이드 노트
+
+### Hermes v0.22 (차트 1.20.0)
+
+차트 1.20.0은 기본 이미지를 `v2026.9.24`(Hermes v0.21.5)에서 `v0.22.2`로
+올립니다. 차트의 values와 템플릿은 바뀌지 않았지만, Hermes 자체의 기본값 일부가
+영구 볼륨의 데이터에 영향을 줍니다. 이미 기록이 쌓인 릴리스를 업그레이드하기 전에
+확인하세요.
+
+- **오래된 세션이 시작할 때 정리됩니다.** 이제 `sessions.auto_prune`이 기본으로
+  켜져 있어서, gateway가 시작할 때 `sessions.retention_days`(기본 90일) 동안
+  활동이 없던 종료된 세션을 `state.db`에서 삭제합니다. 열려 있는 세션은 건드리지
+  않습니다. 모두 보존하려면 업그레이드 전에 설정하세요.
+
+  ```yaml
+  config:
+    sessions:
+      auto_prune: false
+  ```
+
+  기본값 `bootstrap.overwrite: false`에서는 볼륨에 이미 있는 `config.yaml`을
+  교체하지 않으므로, 이 값은 새 설치에만 반영됩니다. 기존 릴리스에서는 업그레이드
+  전에 `kubectl exec <pod> -- hermes config set sessions.auto_prune false`를
+  실행하거나, `bootstrap.overwrite: true`로 한 번 배포하세요
+  ([설정 모델](#설정-모델) 참고).
+- **유휴/일일 세션 초기화가 폐기됐습니다.** 대화가 더 이상 타이머로 초기화되지
+  않으며, `SESSION_IDLE_MINUTES`와 `session_reset`의 idle/daily 모드는 효과가
+  없습니다(여전히 설정돼 있으면 경고가 기록됩니다). 새로 시작하려면 대화에서
+  `/new`나 `/reset`을 쓰세요.
+- **하나의 gateway가 모든 profile을 처리합니다.** upstream은 profile별 gateway를
+  머신당 하나의 multiplexed gateway로 합칩니다. 차트 릴리스는 각각 gateway 하나를
+  가진 별도 pod이므로 [에이전트 팀](#에이전트-팀) 배포에는 영향이 없습니다.
+- **이미지 태그는 semver입니다.** 앞으로 `image.tag`는 `vX.Y.Z` 형식으로
+  고정하세요([개요](#개요) 참고).
+- **보안 수정.** 새 이미지에는 v0.21.6의 dashboard 인증 강화가 들어 있습니다.
+  [대시보드를 노출](#대시보드-노출하기)하고 있다면 빠르게 업그레이드하세요.
+
+그 밖의 변경은 upstream
+[v0.22.0 릴리스 노트](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)를
+참고하세요.
 
 ## FAQ
 
