@@ -70,10 +70,16 @@ as a **Secret**.
   parity: every English `README.md` has a `README-ko.md` twin at the repo root
   and under `charts/hermes-agent/`, and every English page under `docs/` has
   its `docs/ko/` twin. When you edit either side, apply the equivalent edit to
-  its twin in the same change. Other locales are entry-path scoped, not
+  its twin in the same change. The contributing guide is the exception:
+  `CONTRIBUTING.md` is English-only for all locales, and the Korean contributing
+  landing page links to it; the remaining Korean contributing pages stay
+  translated. Other locales are entry-path scoped, not
   full-tree mirrors: update only their translated entry pages, and do not
   require a translation for an unrelated English or Korean page. Their entry
   landing page must tell readers that the remaining sections use English.
+  Japanese and Simplified Chinese notices also disclose that the maintainer
+  is not a native speaker, no native speaker has reviewed the translation,
+  and unclear wording should be checked against the English source.
   Record the source path and full English commit SHA in each translated page:
   as front matter on `docs/<locale>/` pages, and as a first-line HTML comment
   in translated READMEs, which GitHub renders directly and would otherwise show

@@ -61,7 +61,9 @@ actually took place.
 
 Korean (`ko`) is the full-parity locale. Every English docs page and the root
 and chart READMEs have Korean twins. Keep those pairs equivalent in the same
-change.
+change, except for the contributing guide: `CONTRIBUTING.md` is maintained in
+English only for every locale. The Korean contributing landing page links to
+that canonical guide; the other Korean contributing pages remain translated.
 
 New locales are deliberately smaller. They translate only the entry path and
 fall back to English elsewhere. This keeps security and operational guidance
@@ -102,6 +104,11 @@ notice, translated into that locale:
 
 > This locale translates the entry path. Sections not available in this
 > language use English.
+
+For Japanese and Simplified Chinese, state beside that notice that the
+maintainer is not a native speaker, no native speaker has reviewed the
+translation, and English is authoritative when wording is unclear. Update this
+claim only after an actual native-speaker review.
 
 The generated `## Values` table in every chart README stays English. It is
 generated from `values.yaml`, and `make docs` copies it verbatim into the
