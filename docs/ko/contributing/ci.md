@@ -1,6 +1,9 @@
 ---
 title: CI 가이드
 description: 지속적인 검증과 릴리즈 체크입니다.
+translation_source:
+  path: docs/contributing/ci.md
+  commit: 4f82f8eb3cde03aad0e5c90ba304d33b67d83d6e
 ---
 
 # CI / 지속적 검증
@@ -80,8 +83,15 @@ flowchart LR
 1. 차트가 관리하는 스토리지로 설치.
 2. 차트의 `hermes doctor` 테스트 훅을 실행(`helm test`와 같은 Job이지만,
    hook watch에서 멈추지 않도록 직접 호출).
-3. **신뢰된 실행에서만**(`NVIDIA_API_KEY` 시크릿이 있을 때): PVC에 skill을
-   주입한 뒤, NVIDIA NIM을 통한 `hermes chat` 라운드트립을 한 번 실행.
+3. **신뢰된 차트·이미지·라이브 하네스 변경에서만**(`NVIDIA_API_KEY` 시크릿이 있을 때):
+   PVC에 `skills/ci-ping/SKILL.md`를 주입하고 검색되는지 확인한 다음,
+   스킬 사용을 명시적으로 요청해 NVIDIA NIM을 통한 `hermes chat` 라운드트립을 실행합니다.
+
+문서와 릴리즈 도구 변경도 functional 매트릭스가 선택한 구조적 차트 설치 검사는
+유지하지만, 외부 모델과 Discord 전달 검사는 건너뜁니다.
+`requires-live-chat.py`가 실제 diff로 이 범위를 판단합니다.
+차트 입력·이미지·라이브 테스트 하네스 변경은 외부 검사를 유지하며,
+기준 커밋 기록이 없으면 외부 검사를 켠 상태로 처리합니다.
 
 `CI_MODELS` 풀은 **failover 전용**입니다 - 라운드트립은 모든 모델이 아니라
 먼저 응답한 모델에서 통과합니다. chat 호출은 차트 자체의 테스트 훅을
