@@ -63,6 +63,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex デバイスログイン（API キー不要） | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | プリセットの参照モデルと集約モデルによる | [`values-moa.yaml`](values-moa.yaml) |
 | カスタム（LiteLLM / vLLM / LM Studio） | `config.providers` 配下の独自 ID | プロキシによる | [`values-litellm.yaml`](values-litellm.yaml) |
+| Nous 無料枠（`nous/welcome`） | `nous` | 不要。起動時に `HERMES_GUEST_ONBOARDING=1` で匿名 ID を発行 | [`values-nous.yaml`](values-nous.yaml) |
 
 > 接尾辞のない `openai` は有効なプロバイダー識別子ではありません。OpenRouter の別名として扱われます。**`openai-api` を使用してください。**
 
@@ -194,7 +195,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 ## デバイスフローによるログイン（GitHub Copilot と OpenAI Codex）
 
-`auth.deviceFlow.enabled=true` で **`auth-device-login` init コンテナー**を追加します。認証 URL と一度限りのコードを Discord のホームチャンネルまたはログへ送り、人間の承認を待ち、得られた認証情報を `HERMES_HOME` ボリュームに保存します。
+`auth.deviceFlow.enabled=true` で **`auth-device-login` init コンテナー**を追加します。認証 URL と一度限りのコードを Discord または Telegram のホームチャンネル（またはログ）へ送り、人間の承認を待ち、得られた認証情報を `HERMES_HOME` ボリュームに保存します。
 
 - `github-copilot` は GitHub の OAuth 2.0 デバイス認可を実行し、`COPILOT_GITHUB_TOKEN` を `.env` に書き込みます。
 - `openai-codex` はチャートが固定する Hermes バージョンのデバイスコードフローに従い、Hermes のネイティブヘルパーでリフレッシュトークンの連鎖を含む `auth.json` をアトミックに更新します。ChatGPT/Codex アカウントの認証であり、API キーを使う `openai-api` とは別です。
@@ -207,10 +208,29 @@ helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --crea
 kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 ```
 
+**動作するプロバイダーとチャンネルの組み合わせ。** 1 つのリリースは 1 つのプロバイダー（`auth.deviceFlow.provider`）にログインし、コードと準備完了メッセージは 1 つのチャンネル（`notify`）に届きます。2 つのプロバイダーと 2 つのメッセンジャーの 4 通りすべてを実際のクラスターで実行しました（イメージ `v2026.9.24`、2026 年 10 月）。各実行では、チャンネルへのコードの到着、承認、保存された認証情報、完了メッセージ、準備完了メッセージ、メンションへのモデルの応答までを確認しています。
+
+| プロバイダー | Discord | Telegram |
+| --- | --- | --- |
+| `openai-codex` | 確認済み（`gpt-6-luna`） | 確認済み（`gpt-6-luna`） |
+| `github-copilot` | 確認済み（`gpt-4o`、Copilot Free アカウント） | 確認済み（`gpt-4o`、Copilot Free アカウント） |
+
+Copilot の実行には Free アカウントを使ったため、利用できるモデルは GitHub のプランの規則に従います。また Discord では `DISCORD_ALLOWED_USERS` に自分のユーザー ID も必要です（登録されていないアカウントからのメッセージは、ログを残さずに無視されます）。
+
+```bash
+# Same flow with Telegram instead of Discord (Copilot shown).
+helm upgrade --install hermes-copilot ./charts/hermes-agent -n hermes-copilot --create-namespace \
+  -f charts/hermes-agent/values-github-copilot.yaml \
+  --set auth.deviceFlow.notify=telegram \
+  --set-string env.TELEGRAM_BOT_TOKEN='<bot-token>' \
+  --set-json 'extraEnv=[{"name":"TELEGRAM_HOME_CHANNEL","value":"<chat-id>"},{"name":"TELEGRAM_ALLOWED_USERS","value":"<user-id>"}]'
+```
+
 注意点:
 
 - **`persistence.enabled=true` が必須**です。ボリュームがないと再起動でトークンが失われ、毎回承認が必要になります。
-- **`notify`** は `discord`（`DISCORD_BOT_TOKEN` と `DISCORD_HOME_CHANNEL` を再利用）または `logs`（init コンテナーのログのみに表示）です。
+- **`notify`** は `discord`（`DISCORD_BOT_TOKEN` と `DISCORD_HOME_CHANNEL` を再利用）、`telegram`（`TELEGRAM_BOT_TOKEN` と `TELEGRAM_HOME_CHANNEL` を再利用）、または `logs`（認証プロンプトを init コンテナーのログにだけ表示）です。`telegram` の場合は `sendMessage` だけで送信するため、同じボットをポーリングするエージェントと競合しません。複数リリースのチームでは、デバイスログインを実行するすべてのリリースに `TELEGRAM_HOME_CHANNEL` を設定してください。各プロンプトにはリリース名（チームモードではチーム内の識別名）が入るため、並行するログインを見分けられます。
+- **準備完了メッセージ**: 「login complete」は認証情報が保存されたことを示すだけです。初回起動にはその後も数分かかることがあり（スキルの同期、モデルのウォームアップ）、Hermes は*再起動*は通知しますが新規起動は通知しません。`readyNotify.enabled=true` を設定すると、ゲートウェイが起動した時点で同じ Discord または Telegram のホームチャンネルに 1 行投稿します（`readyNotify.notify` でチャンネルを選び、デバイスフローが有効な場合は `auth.deviceFlow.notify` に従います）。チャートは `env` / `extraEnvFrom` にあるボットの認証情報を再利用する `gateway:startup` フックを `HERMES_HOME/hooks/ready-notify` に配置します。実際の初回起動では、メッセージは Hermes 自身の `Gateway running` ログ行と同時に届き、最初のターンの準備が整う数秒前でした。
 - init コンテナーは任意のストレージクラスに書き込めるよう **root** で実行され、トークンファイルを `auth.deviceFlow.tokenOwner` に **chown** します。デフォルトは上流イメージの実行ユーザーである uid/gid `10000` で、非 root のエージェントが読めるようにします。
 - **プロファイル選択:** `auth.deviceFlow.provider` で `github-copilot` または `openai-codex` を選択します。Copilot のクライアント ID は上流 Hermes と共通です。OpenAI のプロトコル定数と保存処理は、チャート独自の認証情報ではなく固定した Hermes イメージから提供されます。
 
@@ -252,11 +272,49 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 リーダーと複数のメンバーには [`values-team-leader.yaml`](values-team-leader.yaml) と [`values-team-member.yaml`](values-team-member.yaml) を使用します。このプロトコルは明示的なボットメンションを 1 件ずつ処理し、すべてのタスク、結果、レビューを Discord スレッドに残します。チームモードでは、共通のメンバー一覧とプロトコルのスキル ConfigMap を各 Pod にマウントします。リーダーのリリースが ConfigMap と RWX 知識 PVC を一度だけ作成し、メンバーは名前で参照して読み取り専用でマウントします。PVC は永続的な共有知識を保存しますが、タスク、状態、結果の引き継ぎには使用しません。ApplicationSet の例では、メンバー一覧と共通ポリシーを一度だけ宣言し、各項目にはアイデンティティ、役割、専用 Secret 名だけを指定します。
 `file` と `memory` ツールセットは各エージェント自身の作業には利用できます。禁止するのは、ファイル、メモリ、フック、バックグラウンド処理を使ったエージェント間の引き継ぎです。
 
+Telegram のチームでは `team.platform: telegram` を設定し、役割ごとの Telegram 用 values ファイルを使い、[Telegram チームガイド](../../docs/advanced/teams/telegram.md)に従ってください。1 つのボットを共有するアシスタント構成、BotFather の設定、リリースごとの Secret、メンションのルーティング、ループ防止、ArgoCD ApplicationSet を扱っています。Telegram チームのサンプルは CI でレンダリングを確認しています。実際の Telegram グループでの実行では、2 つのモデル（`nemotron-3-ultra-550b` と `gpt-6-luna`）でリーダー、メンバー、リーダーの引き継ぎを最後まで完了しました。記録は [#311](https://github.com/jyje/hermes-agent-helm/pull/311) のコメントにあります。リーダーのモデルは重要で、30B のモデルは委任せずに自分で回答しました。別の人間アカウントがブロックされる場合、ループガードのしきい値、連続する複数の引き継ぎは検証していません。
+
+**例: すべてのボットが OpenAI Codex にログインする Telegram チーム。** 各リリースが個別にログインするため、外部の認証プロキシや共有トークンは使いません。3 つのボットトークンを Secret（`tg-august`、`tg-may`、`tg-march`。それぞれ `TELEGRAM_BOT_TOKEN` キーを持つ）に入れ、役割ごとの values ファイルに 1 つのオーバーレイを重ねます。
+
+```yaml
+# codex-overlay.yaml
+config:
+  model:
+    provider: openai-codex
+    default: gpt-6-luna            # gpt-6-luna-900k for the larger window
+auth:
+  deviceFlow:
+    enabled: true
+    provider: openai-codex
+    notify: telegram               # each code arrives in the team group
+readyNotify:
+  enabled: true                    # one "ready" line per bot when it is up
+```
+
+```bash
+# Install all three at once. Each bot posts its own code to the group,
+# for example "OpenAI Codex login required for may".
+for r in august may march; do
+  role=member; [ "$r" = august ] && role=leader
+  helm upgrade --install "hermes-$r" ./charts/hermes-agent \
+    --namespace hermes-team --create-namespace \
+    -f "charts/hermes-agent/values-telegram-team-$role.yaml" -f codex-overlay.yaml \
+    --set-string "fullnameOverride=hermes-$r" --set-string "team.identity=$r" \
+    --set-json "extraEnvFrom=[{\"secretRef\":{\"name\":\"tg-$r\"}}]" &
+done; wait
+```
+
+3 つのコードを `https://auth.openai.com/codex/device` で承認します。まだチームにメッセージを送らないでください。「login complete」の後も初回起動には数分かかり（実際の実行では約 7 分）、その間に送ったメッセージは失われます。各ボットの「is ready」の行を待ってから、リーダーにメンションしてください。
+
+- メンバーの values ファイルと同様に、**すべての**リリースに `TELEGRAM_HOME_CHANNEL` を設定します。ログインと準備完了のメッセージはそこに届きます。
+- 1 つの ChatGPT アカウントで 3 回ログインしても実際の確認ではリフレッシュに問題はありませんでしたが、上流では同じアカウントの 2 回目のログインが古いログインを無効にするとしています。チームではボットごとに 1 アカウントを推奨します。確認した内容としていない内容は [OpenAI Codex](../../docs/advanced/providers/openai-codex.md) を参照してください。
+- 各ボットのグループでの最初の返信に、Hermes の一度きりの「caps context at 272K」通知が含まれることがあります。`compression.codex_gpt55_autoraise_notice: false` で非表示にできます。
+
 > 上流では、Hermes ボット同士の Discord 会話は組み込みのサーキットブレーカーを持たない非対応の構成とされています。この例は実験的なものです。専用の信頼できるチャンネルを使用し、手動停止手段を確保して、固定したイメージで実通信を検証してから利用してください。
 
 参照シーケンスは kind 上の `v2026.7.20` で実通信を完了しています。日時付きの[チーム検証記録](../../docs/advanced/teams/reference.md#leader-orchestrated-teams)を参照してください。
 
-> **別の構成: 1 つの Pod と複数のプロファイル。** 1 つのチャンネルで複数のボットを連携させるのでなく、**単一のボットトークン**で Discord のサーバー、チャンネル、スレッドごとに異なるエージェントプロファイルへ振り分けたい場合は、`config.gateway.multiplex_profiles: true`（環境変数では `GATEWAY_MULTIPLEX_PROFILES=1`）を設定します。Pod は 1 つで済みます。これは連携ではなくルーティングのための機能なので、目的に合わせて選択してください。
+> **別の構成: 1 つの Pod と複数のプロファイル。** 1 つのチャンネルで複数のボットを連携させるのでなく、**単一のボットトークン**で Discord のサーバー、チャンネル、スレッドごとに異なるエージェントプロファイルへ振り分けたい場合は、ゲートウェイのプロファイル多重化を使います。上流ではこれが既定で有効なので（`gateway.multiplex_profiles` の既定値は `true` で、`true` だけが有効な値です。以前の `false` は廃止されました）、チャートの設定は不要です。Pod は 1 つで済みます。これは連携ではなくルーティングのための機能なので、目的に合わせて選択してください。
 
 ## 詳細なテスト
 
@@ -302,9 +360,13 @@ Hermes は `$HERMES_HOME/config.yaml` と環境変数のシークレットを、
 
 > **パススルーの原則。** `.Values.config` は**そのまま** `config.yaml` に生成され、どの階層にも任意のキーを追加できます（`values.schema.json` 参照）。Hermes の[設定ガイド](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)や[環境変数リファレンス](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)の設定は、`config.<path>` または `env` / `extraEnv` から**チャートを変更せず**指定できます。この README はインストール時によく使うプロバイダー、メッセンジャー、チーム構成を中心に説明します。探し方は [FAQ](#faq) を参照してください。
 
-- **`config.yaml`**: `.Values.config` に上書きするキーだけを設定します。ConfigMap に生成し、init コンテナーが永続ボリュームの **`HERMES_HOME` に初期配置**します。Hermes 自身もスキル、`auth.json`、自己改善などを実行時に書き込むためです。`bootstrap.overwrite=false`（デフォルト）はファイルがない場合だけ配置して実行時の編集を保持します。`true` にするとデプロイごとにチャートの設定で置き換えます。初期配置後、init コンテナーがHermesの非対話型設定マイグレーションを実行し、変更前に `config.yaml` と `.env` をバックアップします。明示的なバージョンがない設定はマイグレーションされます。上流のサポート下限より古いバージョンを明示した設定は変更せず、READMEの復旧手順が必要です。
+- **`config.yaml`**: `.Values.config` に上書きするキーだけを設定します。ConfigMap に生成し、init コンテナーが永続ボリュームの **`HERMES_HOME` に初期配置**します。Hermes 自身もスキル、`auth.json`、自己改善などを実行時に書き込むためです。`bootstrap.overwrite=false`（デフォルト）はファイルがない場合だけ配置して実行時の編集を保持します。`true` にするとデプロイごとにチャートの設定で置き換えます。初期配置後、init コンテナーが Hermes の非対話型の設定マイグレーションを実行します。変更前に `config.yaml` と `.env` をバックアップし、マイグレーションに失敗した場合は元に戻します。明示的なバージョンがない設定は、新しい部分設定としてマイグレーションされます。上流のサポート下限（現在 v12）より古いバージョンを明示した設定は変更しないため、下記の復旧手順に従ってください。
 - **`SOUL.md` のアイデンティティ**: `.Values.soul.text` で `HERMES_HOME/SOUL.md` に永続的なエージェントのアイデンティティを配置します。空の場合は Hermes が初回起動時に初期ファイルを作成します。配置の判断は `config.yaml` と独立しており、`bootstrap.overwrite=false` なら既存の内容を保持し、`true` ならデプロイごとに置き換えます。ConfigMap に保存されるため、シークレットを含めないでください。内容と適用範囲は上流の [SOUL.md ガイド](https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes)を参照してください。
 - **シークレットと API キー**: `.Values.env` に設定します。Secret に生成し、`envFrom` で環境変数として注入します。環境変数は `config.yaml` より優先されます。
+
+#### マイグレーションの下限より古い設定の復旧
+
+Hermes は、サポートされていないスキーマバージョンを明示した設定の自動マイグレーションを意図的に拒否します。編集する前に `HERMES_HOME/config.yaml` をバックアップしてください。まず上流のマイグレーション履歴を確認し、ファイルのキーがサポートされる下限と互換であれば、ルートに `_config_version: 12` を設定してワークロードを再起動します。Hermes はサポートされるマイグレーションを実行し、マイグレーション前のバックアップを `HERMES_HOME/backups/config/` に残します。互換でない場合は `hermes setup` で現在の設定を生成し、必要な設定をバックアップから戻してください。`bootstrap.overwrite=false` では、この復旧ができるようチャートは既存のファイルを既定で保持します。`bootstrap.overwrite=true` では、マイグレーションの前に values から生成した設定で置き換えます。
 
 ### シークレットの供給方法
 
@@ -400,6 +462,8 @@ extraEnv:
 
 各 Ingress パスは `service` と `port` を上書きできます。Service 名を省略するとこのチャートの Service を指すため、`service.enabled: true` が必要です。外部 Service 名を明示する場合はチャートの Service は不要です。HTTPRoute の `backendRefs` にも同じ既定値の規則が適用されます。暗黙の参照先となるチャートの Service が存在しない場合、チャートは早期に失敗します。
 
+`ingress.annotations` と `httpRoute.annotations` は、external-dns のヒントや、コントローラーまたは Gateway 実装固有の設定など、各リソースにメタデータを追加します。
+
 [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) は `/v1` と webhook を異なる Ingress ホストと Service ポートに振り分けます。[`values-httproute.yaml`](values-httproute.yaml) は Gateway API での同等の例です。HTTPRoute のホスト名はリソース内の全ルールに適用されるため、リスナー間をホスト単位で分離する場合は HTTPRoute を分けてください。
 
 ### Pod Security Standards による強化
@@ -471,6 +535,7 @@ config:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix ホームサーバー連携 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | ループバック以外で必須となる dashboard の組み込みユーザー名・パスワード認証。`HERMES_DASHBOARD_PUBLIC_URL` は Ingress の背後の外部オリジンを宣言 |
+| `HERMES_GUEST_ONBOARDING` | `1` にすると起動時に匿名の Nous ID を発行します（無料の `nous/welcome` 推論と、Web 検索、ブラウザー、Gmail、Linear などのコネクターツール）。プロバイダーのキーが既に設定されている場合はコネクターツール用の ID だけを発行し、`active_provider` は変更しません。未設定（デフォルト）では v2026.9.11 より前と同じ動作です。外部キーなしのオーバーレイは `values-nous.yaml` を参照してください |
 | `HERMES_MAX_ITERATIONS` | 会話ごとのツール呼び出し反復数（デフォルト 500 回と終了処理 1 回）。厳密な上限は `config.agent.max_turns`。上流では標準で無制限で、このチャートでは初期配置しない |
 | `HERMES_AGENT_TIMEOUT` | ゲートウェイの無活動タイムアウト（デフォルト 1800 秒 / 30 分） |
 | `SESSION_IDLE_MINUTES` | アイドルセッションのリセット時間（デフォルト 1440 分） |
@@ -506,6 +571,9 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex デバイスログイン**と Discord ボット |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | **Discord ボット**を設定済み |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | **Telegram ボット**を設定済み |
+| [`values-telegram-team-assistant.yaml`](values-telegram-team-assistant.yaml) | OpenAI (`openai-api`) | **許可された複数のユーザーで共有する Telegram ボット 1 つ** |
+| [`values-telegram-team-leader.yaml`](values-telegram-team-leader.yaml) + [`values-telegram-team-member.yaml`](values-telegram-team-member.yaml) | NVIDIA NIM | **Telegram のリーダー/メンバーチーム**。メンションによる制御とループ防止付き |
+| [`examples/argocd/hermes-team-telegram.yaml`](../../examples/argocd/hermes-team-telegram.yaml) | 任意 | **ArgoCD ApplicationSet**: リーダー 1 つと複数の Telegram メンバー、リリースごとの Secret |
 | [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | Pub/Sub pull サブスクリプションで **Google Chat ボット**を設定済み。サービスアカウント JSON は `extraVolumes` でマウント |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | : |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | : |
@@ -517,6 +585,7 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL` でエンドポイントを上書き |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | 参照モデルを並列実行し、集約モデルが結果を統合 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | 任意 | **Bitwarden Secrets Manager** が起動時にプロバイダーキーを供給 |
+| [`values-nous.yaml`](values-nous.yaml) | Nous 無料枠（`nous`） | **外部 API キー不要**: 起動時に匿名 ID を発行（`HERMES_GUEST_ONBOARDING=1`）し、`nous/welcome` の推論とコネクターツールを利用 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM プロキシ（外部/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM プロキシ（クラスター内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**（dashboard 有効化、上流のパスワード認証、信頼するプロキシ） |

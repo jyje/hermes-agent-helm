@@ -66,6 +66,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 디바이스 로그인(API 키 불필요) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 프리셋의 reference/aggregator 모델에 따라 다름 | [`values-moa.yaml`](values-moa.yaml) |
 | 커스텀 (LiteLLM / vLLM / LM Studio) | `config.providers` 아래 직접 정의한 id | 프록시마다 다름 | [`values-litellm.yaml`](values-litellm.yaml) |
+| Nous 무료 티어 (`nous/welcome`) | `nous` | 없음: 부팅 시 `HERMES_GUEST_ONBOARDING=1`로 익명 identity 발급 | [`values-nous.yaml`](values-nous.yaml) |
 
 > `openai`(접미사 없음)는 **유효하지 않은** 제공자 키입니다 - OpenRouter의
 > 별칭으로 처리됩니다. `openai-api`를 사용하세요.
@@ -591,7 +592,8 @@ Bitwarden과 GitHub Releases로의 egress가 필요합니다.
 <p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="아키텍처: 브라우저에서 Ingress, Service 9119 포트를 거쳐 hermes dashboard 프로세스로 이어지며, 이 프로세스는 같은 Pod에서 hermes gateway run과 함께 HERMES_HOME 볼륨을 공유합니다" width="900"></a></p>
 
 관리 대시보드(`service.port`, 기본값 9119)는 이미지 안의 s6 서비스이자 유일한 내장
-웹 UI입니다. 로그인한 사람에게 API 키를 보여 주고, 로그인한 사용자는 shell hook 생성과
+웹 UI입니다. 대시보드 자체는 업스트림 Hermes의 것이고, 이 차트는 켜서 노출만 합니다.
+로그인한 사람에게 API 키를 보여 주고, 로그인한 사용자는 shell hook 생성과
 Chat 탭 사용도 할 수 있으므로 로그인을 pod 셸 접근 권한으로 여기고 아래 순서대로 진행하세요.
 
 **1. 로그인 방식을 고릅니다.** non-loopback 바인드에서는 업스트림의 인증 gate가
@@ -775,6 +777,38 @@ non-root로도 동작합니다 - `values-hardened.yaml`이 `tokenOwner`와 맞�
 없습니다 - `restricted` 아래에서는 `permissions.enabled`를 꺼두고, storage
 backend가 fsGroup을 지원한다면 `podSecurityContext.fsGroup`에 맡기세요.
 
+## Gateway 라이프사이클: 롤아웃, 종료, drain
+
+이미지 `v2026.7.1`부터 gateway는 `agent.restart_drain_timeout`의 기본값을
+**0**으로 둡니다: Pod가 멈출 때(롤아웃, 노드 drain, `kubectl delete pod`)
+진행 중인 에이전트 실행을 즉시 중단하고, 대화 기록을 저장한 뒤 빠르게
+종료합니다. 그래서 롤아웃은 기본적으로 빠르고, Kubernetes 기본 종료 유예
+시간 30초로 충분합니다.
+
+대신 graceful drain 구간을 쓰고 싶다면(실행 중인 에이전트 턴을 기다린 뒤
+중단), 양쪽을 모두 설정하세요. Hermes config의 drain과 Pod의 유예 시간입니다:
+
+```yaml
+config:
+  agent:
+    restart_drain_timeout: 60    # seconds to wait for in-flight runs
+terminationGracePeriodSeconds: 90 # keep WELL ABOVE the drain timeout
+```
+
+유예 시간이 drain timeout보다 넉넉히 크지 않으면 kubelet이 drain 도중
+gateway를 SIGKILL합니다. 업스트림은 바로 이 경합(systemd의 `TimeoutStopSec`에
+대한)이 stale lock을 남겨 gateway를 crash-loop에 빠뜨린다고 문서화했고, 그래서
+기본값이 0으로 바뀌었습니다. drain 구간은 끝이 없는 에이전트 턴을 "구해"주지도
+못하니, 보장이 아니라 배려 정도로 여기세요.
+
+> **클러스터 안에서는 scale-to-zero가 적용되지 않습니다.** 업스트림
+> `v2026.7.1`은 scale-to-zero 유휴 감지(dormant-quiesce)도 추가했지만, Nous의
+> 관리형 relay 배포 전용입니다: 사용자 config 키가 아니라 플랫폼이 넣는
+> `HERMES_SCALE_TO_ZERO` env로 켜지고, 메시징이 wake URL이 등록된 relay 전용일
+> 때만 활성화되며, 호스팅 플랫폼이 VM을 일시 중지하는 것에 의존합니다. 이 차트의
+> Discord/Telegram/Slack 직접 연결에서는 절대 활성화되지 않고, Kubernetes는 어차피
+> Pod를 Running으로 유지하므로, 차트는 의도적으로 이를 노출하지 않습니다.
+
 ## 무인(unattended) 승인
 
 Gateway 파드에는 **TTY가 없습니다** - 위험한 `terminal`/`execute_code` 명령에
@@ -846,6 +880,7 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 대시보드 auth gate용 내장 사용자명/비밀번호 제공자 (업스트림은 non-loopback 바인드에서 항상 이 gate를 켬); `HERMES_DASHBOARD_PUBLIC_URL`은 Ingress 뒤의 외부 origin 선언 |
+| `HERMES_GUEST_ONBOARDING` | `1`로 설정하면 부팅 시 익명 Nous identity를 발급합니다(무료 `nous/welcome` 추론과 웹 검색, 브라우저, Gmail, Linear 등의 커넥터 도구). 제공자 키가 이미 설정되어 있으면 커넥터 도구용 identity만 발급하고 `active_provider`는 바꾸지 않습니다. 미설정(기본값)이면 v2026.9.11 이전과 동일하게 동작합니다. 외부 키 없는 오버레이는 `values-nous.yaml`을 참고하세요 |
 | `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (기본값: 500, 소진 시 마무리용 grace call 1회); 하드 캡은 `config.agent.max_turns`로, 업스트림 기본은 무제한이며 이 차트도 더 이상 시드하지 않음 |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `SESSION_IDLE_MINUTES` | 유휴 세션 초기화 주기 (기본값: 1440) |
@@ -921,6 +956,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | reference 모델들이 병렬로 실행되고, aggregator 모델이 결과를 종합 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager**가 시작 시 제공자 키 제공 |
+| [`values-nous.yaml`](values-nous.yaml) | Nous 무료 티어 (`nous`) | **외부 API 키 0개**: 부팅 시 익명 identity를 발급(`HERMES_GUEST_ONBOARDING=1`)해 `nous/welcome` 추론과 커넥터 도구 사용 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (대시보드 활성화, 업스트림 비밀번호 gate, trusted proxy) |

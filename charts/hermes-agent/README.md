@@ -614,7 +614,8 @@ so the pod needs egress to Bitwarden and GitHub Releases.
 <p align="center"><a href="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png"><img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/dashboard-architecture.png" alt="Architecture: Browser to Ingress to Service port 9119 to the hermes dashboard process, which runs next to hermes gateway run in one pod and shares the HERMES_HOME volume" width="900"></a></p>
 
 The management dashboard (`service.port`, default 9119) is an s6 service inside
-the image and the only built-in web UI. It shows API keys to whoever is signed
+the image and the only built-in web UI. The dashboard itself is upstream
+Hermes'; this chart only switches it on and exposes it. It shows API keys to whoever is signed
 in, and a signed-in user can also create shell hooks and use the Chat tab, so
 treat sign-in as shell access to the pod and work through these steps in order.
 
