@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.18.0
+version: 1.19.0
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Date-based tag; corresponds to Hermes Agent v0.16.0 (2026.6.5).
@@ -34,19 +34,13 @@ annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
+    - kind: "fixed"
+      description: "Documentation(copilot): Later starts and Telegram delivery The GitHub Copilot page (English and Korean) now explains that a later start validates the stored..."
+    - kind: "fixed"
+      description: "Fix(auth): Copilot device login no longer repeats on every restart The default `validateUrl` for `github-copilot` was `https://api.github.com/copilot_interna..."
+    - kind: "fixed"
+      description: "Documentation(dashboard): Show how the chart exposes the dashboard instead of a screenshot gallery Replace the six web dashboard screenshots in the chart and..."
+    - kind: "fixed"
+      description: "Documentation(auth): Which device-flow provider and channel combinations work The README now lists the four combinations of OpenAI Codex and GitHub Copilot w..."
     - kind: "added"
-      description: "Feature(team): Telegram team collaboration Support Telegram-specific team routing with per-bot examples, a shared-assistant example, and an ArgoCD Applicatio..."
-    - kind: "fixed"
-      description: "Documentation(values): OpenAI Codex context window, login expiry, and shared accounts Explain in `values-openai-codex.yaml` how to opt in to Hermes' `-900k`..."
-    - kind: "fixed"
-      description: "Documentation(readme): Introduce the web dashboard Mention the web dashboard where users first look: the Summary of the root README, the TL;DR of the chart R..."
-    - kind: "added"
-      description: "Feature(auth): Telegram delivery for device-flow login Add `auth.deviceFlow.notify: telegram`. The `auth-device-login` init container now posts the verificat..."
-    - kind: "fixed"
-      description: "Documentation(dashboard): Sign-in is shell access, profile multiplexing is on by default State that a signed-in dashboard user can also create shell hooks an..."
-    - kind: "fixed"
-      description: "Documentation(team): Codex Telegram team example in the README Add a README example for a Telegram team where every bot signs in to OpenAI Codex on its own,..."
-    - kind: "added"
-      description: "Feature(auth): Ready message when the gateway starts Add `readyNotify.enabled` (off by default) and `readyNotify.notify` (`discord` or `telegram`, or follow..."
-    - kind: "fixed"
-      description: "Documentation(roadmap): Web dashboard on the roadmap Add the web dashboard (sign-in, Ingress, NetworkPolicy, readiness probe, and its CI scenario) to the pro..."
+      description: "Feature(values): HTTPRoute annotations Set `httpRoute.annotations` to add annotations to the HTTPRoute, for example for external-dns or Gateway implementatio..."
