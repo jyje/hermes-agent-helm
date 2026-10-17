@@ -458,8 +458,12 @@ done; wait
 
 [`helm test`](#테스트) Job(훅 `helm.sh/hook: test`)은 `hermes --version`을
 실행하고, 시드된 `config.yaml`을 검증하며, docker 가용성을 확인하고(백엔드가
-`local`이므로 정보 제공용), `hermes doctor`를 실행합니다. `--set
-tests.enabled=false`로 끄거나, `--set tests.doctorStrict=true`로 doctor
+`local`이므로 정보 제공용), `hermes doctor`를 실행합니다. 기능이 켜져 있을 때만
+도는 점검이 두 가지 있습니다. 차트가 Hermes 이미지 안에서 실행하는 코드를 지키는
+것으로, 이미지를 올리면 깨질 수 있기 때문입니다. OpenAI Codex 디바이스 로그인에서는
+로그인이 불러오는 Hermes 내부 함수를 이미지가 여전히 제공하는지, `readyNotify.enabled`에서는
+Hermes가 심어 둔 `gateway:startup` 훅을 찾아 실행하는지 확인합니다. Job은
+`--set tests.enabled=false`로 끄거나, `--set tests.doctorStrict=true`로 doctor
 실패를 치명적 오류로 만들 수 있습니다.
 
 ### 제공자 엔드-투-엔드 검증 (`tests.chat.enabled`)

@@ -478,8 +478,13 @@ timestamped [team evidence](../../docs/advanced/teams/reference.md#leader-orches
 
 The [`helm test`](#test) Job (hook `helm.sh/hook: test`) runs `hermes
 --version`, verifies the seeded `config.yaml`, checks docker availability
-(informational, since the backend is `local`), and runs `hermes doctor`.
-Disable it with `--set tests.enabled=false`; make doctor failures fatal with
+(informational, since the backend is `local`), and runs `hermes doctor`. Two
+checks run only when the feature is on, because they guard code that the chart
+runs inside the Hermes image and that an image bump could break: with the
+OpenAI Codex device login it confirms the image still provides the Hermes
+helpers the login imports, and with `readyNotify.enabled` it confirms Hermes
+discovers and fires the seeded `gateway:startup` hook. Disable the Job with
+`--set tests.enabled=false`; make doctor failures fatal with
 `--set tests.doctorStrict=true`.
 
 ### Verifying a provider end-to-end (`tests.chat.enabled`)

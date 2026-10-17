@@ -518,7 +518,29 @@ def run_openai_codex_flow() -> int:
     return 0
 
 
+def check_native() -> int:
+    """Check that this Hermes image still provides what the Codex login imports.
+
+    The Codex flow borrows constants and a private persistence helper from
+    ``hermes_cli.auth``. A Hermes release that renames or moves them would break
+    the login for every user, and the unit tests mock the import. The chart's
+    Helm test runs this mode so an image bump is caught in CI and by ``helm test``.
+    """
+    try:
+        _codex_native()
+    except Exception as exc:  # noqa: BLE001 - any import problem means the contract broke
+        print(
+            "FAIL: this Hermes image no longer provides the OpenAI Codex helpers "
+            f"the device login imports from hermes_cli.auth ({type(exc).__name__}: {exc})"
+        )
+        return 1
+    print("OK: hermes_cli.auth provides the OpenAI Codex helpers the device login imports.")
+    return 0
+
+
 def main() -> int:
+    if "--check-native" in sys.argv[1:]:
+        return check_native()
     if FLOW_KIND == "openai-codex":
         return run_openai_codex_flow()
     if FLOW_KIND not in ("github", "github-copilot"):

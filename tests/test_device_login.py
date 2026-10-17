@@ -283,3 +283,34 @@ class TokenValidationTests(unittest.TestCase):
         response.__enter__.return_value.status = 200
         with mock.patch.object(module.urllib.request, "urlopen", return_value=response):
             self.assertTrue(module.token_is_valid("gho_live"))
+
+
+class CheckNativeTests(unittest.TestCase):
+    def test_passes_when_the_image_still_provides_the_helpers(self):
+        module = load_script()
+        module._codex_native = mock.Mock(return_value=("client", "url", mock.Mock(), mock.Mock()))
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(module.check_native(), 0)
+        self.assertIn("OK", out.getvalue())
+
+    def test_fails_clearly_when_a_helper_is_gone(self):
+        module = load_script()
+        module._codex_native = mock.Mock(
+            side_effect=ImportError("cannot import name '_save_codex_tokens' from 'hermes_cli.auth'")
+        )
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(module.check_native(), 1)
+        text = out.getvalue()
+        self.assertIn("FAIL", text)
+        self.assertIn("_save_codex_tokens", text)
+
+    def test_main_runs_only_the_check_with_the_flag(self):
+        module = load_script()
+        module.check_native = mock.Mock(return_value=0)
+        module.run_openai_codex_flow = mock.Mock()
+        module.run_github_device_flow = mock.Mock()
+        with mock.patch.object(module.sys, "argv", ["device_login.py", "--check-native"]):
+            self.assertEqual(module.main(), 0)
+        module.check_native.assert_called_once()
+        module.run_openai_codex_flow.assert_not_called()
+        module.run_github_device_flow.assert_not_called()

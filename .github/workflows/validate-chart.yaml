@@ -307,7 +307,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite, config-migration, dashboard-ingress]
+        scenario: [message, existing-claim, team, security-hardened, bootstrap-overwrite, config-migration, dashboard-ingress, image-contract]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     env:
