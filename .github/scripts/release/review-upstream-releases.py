@@ -176,7 +176,15 @@ def main() -> int:
     ledger = read_ledger(Path(".github/upstream-review-baseline.json"))
     ledger.update(read_ledger(args.state_dir / "ledger.json"))
     releases = github_json(f"repos/{UPSTREAM}/releases?per_page=100", paginate=True)
-    selected = plan(releases, ledger, args.from_tag, args.force)
+    inventory = plan(releases, {}, args.from_tag, force=True)
+    # Retain original bodies even when an unchanged digest skips a new model
+    # call, including the manually reviewed migration-era baseline.
+    (args.output_dir / "original-note-inventory.json").write_text(json.dumps([
+        {key: release.get(key) for key in ("tag_name", "html_url", "published_at", "body",
+                                          "draft", "prerelease")}
+        for release in inventory
+    ], indent=2) + "\n", encoding="utf-8")
+    selected = plan(inventory, ledger, args.from_tag, args.force)
     if args.plan_only:
         report = {"from_tag": args.from_tag, "selected": [r["tag_name"] for r in selected],
                   "reviewed_tags": sorted(ledger, key=version)}
