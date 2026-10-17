@@ -4,6 +4,48 @@ entries:
   - annotations:
       artifacthub.io/category: ai-machine-learning
       artifacthub.io/changes: |
+        - kind: "fixed"
+          description: "Documentation(copilot): Later starts and Telegram delivery The GitHub Copilot page (English and Korean) now explains that a later start validates the stored..."
+        - kind: "fixed"
+          description: "Fix(auth): Copilot device login no longer repeats on every restart The default `validateUrl` for `github-copilot` was `https://api.github.com/copilot_interna..."
+        - kind: "fixed"
+          description: "Documentation(dashboard): Show how the chart exposes the dashboard instead of a screenshot gallery Replace the six web dashboard screenshots in the chart and..."
+        - kind: "fixed"
+          description: "Documentation(auth): Which device-flow provider and channel combinations work The README now lists the four combinations of OpenAI Codex and GitHub Copilot w..."
+        - kind: "added"
+          description: "Feature(values): HTTPRoute annotations Set `httpRoute.annotations` to add annotations to the HTTPRoute, for example for external-dns or Gateway implementatio..."
+      artifacthub.io/license: MIT
+    apiVersion: v2
+    appVersion: v2026.9.24
+    created: "2026-10-17T03:43:29.830961977Z"
+    description: "\U0001F469\U0001F3FB\U0001F4BB Hermes Agent on Kubernetes - sign
+      in with Codex/Copilot, run agent teams, stay lightweight.  Run [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+      - a multi-provider LLM agent framework - on Kubernetes. Configure any provider
+      Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible
+      proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test
+      health check. "
+    digest: 33ae75d52d3421a59afd6d0774384f572a804c9de3d92bd3cfa450f4e26153d6
+    home: https://github.com/jyje/hermes-agent-helm
+    icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
+    keywords:
+    - hermes
+    - agent
+    - llm
+    - openai-compatible
+    maintainers:
+    - email: jyjeon@outlook.com
+      name: jyje
+    name: hermes-agent
+    sources:
+    - https://github.com/jyje/hermes-agent-helm
+    - https://github.com/NousResearch/hermes-agent
+    type: application
+    urls:
+    - https://jyje.github.io/hermes-agent-helm/hermes-agent-1.19.0.tgz
+    version: 1.19.0
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
         - kind: "added"
           description: "Feature(team): Telegram team collaboration Support Telegram-specific team routing with per-bot examples, a shared-assistant example, and an ArgoCD Applicatio..."
         - kind: "fixed"
@@ -1649,4 +1691,4 @@ entries:
     urls:
     - https://jyje.github.io/hermes-agent-helm/hermes-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2026-10-06T14:17:33.05706546Z"
+generated: "2026-10-17T03:43:29.825809331Z"
