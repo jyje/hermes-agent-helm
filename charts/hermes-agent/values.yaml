@@ -9,8 +9,8 @@ fullnameOverride: ""
 image:
   # -- Container image repository (multi-arch: amd64 + arm64).
   repository: nousresearch/hermes-agent
-  # -- Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" ==
-  # Hermes v0.16.0), plus `latest` / `main`. There is no semver tag.
+  # -- Image tag. Upstream uses semver tags (e.g. "v0.22.2") since
+  # October 2026; older images use date-based tags (e.g. "v2026.9.24").
   # Empty defaults to `.Chart.AppVersion`.
   tag: ""
   # -- Image pull policy.

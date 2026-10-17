@@ -1,9 +1,13 @@
 name: ⏰ cron-fetch-image
 
 # Watches the upstream container image (nousresearch/hermes-agent on Docker Hub)
-# for new DATE-based tags (vYYYY.M.D, occasionally with a 4th segment). When a
-# tag newer than the chart's current appVersion appears, two independent jobs
-# run in parallel:
+# for new release tags. Upstream publishes semver tags (vX.Y.Z, e.g. v0.22.2);
+# before 2026-10 it published date-based tags (vYYYY.M.D[.N], last one
+# v2026.9.24). Only plain vX.Y.Z tags are bump candidates: rc.*, -desktop,
+# -amd64/-arm64, stable/latest are ignored. A date-based appVersion is treated
+# as older than every semver tag (the date scheme is retired). When a tag newer
+# than the chart's current appVersion appears, two independent jobs run in
+# parallel:
 #   - bump-pr: opens a PR that bumps Chart.yaml's appVersion (the single
 #     source of truth: image.tag falls back to it) and regenerates the chart
 #     README via helm-docs, so validate-chart stays green. Ships immediately;
@@ -53,10 +57,12 @@ jobs:
             echo "$resp" | jq -r '.results[].name' >> raw_tags.txt
             url=$(echo "$resp" | jq -r '.next')
           done
-          # Keep only date-based tags (vYYYY.M.D[.N]); drop latest/main.
-          grep -E '^v[0-9]{4}\.[0-9]+\.[0-9]+(\.[0-9]+)?$' raw_tags.txt \
+          # Keep only plain semver release tags (vX.Y.Z). The 1-3 digit major
+          # excludes the retired date-based tags (v2026.9.24); the anchors drop
+          # rc.N-vX.Y.Z, vX.Y.Z-desktop, vX.Y.Z-amd64/-arm64, stable and latest.
+          grep -E '^v[0-9]{1,3}\.[0-9]+\.[0-9]+$' raw_tags.txt \
             | sort -uV > image_tags.txt
-          echo "Found $(wc -l < image_tags.txt) date-based tags"
+          echo "Found $(wc -l < image_tags.txt) semver tags"
 
       - name: Determine target version vs current appVersion
         id: pick_target
@@ -67,12 +73,24 @@ jobs:
           echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
 
           # Every tag strictly newer than CURRENT_VERSION (works even if CURRENT
-          # is not itself present in the tag list).
+          # is not itself present in the tag list). `sort -V` alone would rank
+          # a retired date tag (v2026.9.24) above any semver tag (v0.22.2), so
+          # compare on a key that puts the date scheme first: 0.<date> for
+          # vYYYY.M.D[.N], 1.<semver> for vX.Y.Z.
+          vkey() {
+            if printf '%s' "$1" | grep -qE '^v[0-9]{4}\.'; then
+              echo "0.${1#v}"
+            else
+              echo "1.${1#v}"
+            fi
+          }
+          CURRENT_KEY=$(vkey "$CURRENT_VERSION")
           : > newer_versions.txt
           while IFS= read -r t; do
             [ "$t" = "$CURRENT_VERSION" ] && continue
-            newest=$(printf '%s\n%s\n' "$CURRENT_VERSION" "$t" | sort -V | tail -n1)
-            [ "$newest" = "$t" ] && echo "$t" >> newer_versions.txt
+            key=$(vkey "$t")
+            newest=$(printf '%s\n%s\n' "$CURRENT_KEY" "$key" | sort -V | tail -n1)
+            [ "$newest" = "$key" ] && echo "$t" >> newer_versions.txt
           done < image_tags.txt
 
           TARGET_VERSION=$(sort -V newer_versions.txt | tail -n1)
@@ -102,7 +120,7 @@ jobs:
           # Any open image-bump PR (avoid multiple open ones → merge conflicts
           # when the first is merged).
           OPEN_COUNT=$(jq -r '.[].title' pr_list.json \
-            | grep -cE '^⬆️ dep\(image\): bump hermes-agent image to v[0-9]{4}\.[0-9]+\.[0-9]+(\.[0-9]+)?$' || true)
+            | grep -cE '^⬆️ dep\(image\): bump hermes-agent image to v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$' || true)
           if [ "${OPEN_COUNT:-0}" -ge 1 ]; then
             echo "has_open_version_pr=true" >> "$GITHUB_OUTPUT"
           else
@@ -236,7 +254,7 @@ jobs:
       - name: Create PR
         run: |
           NEW_LIST=$(sort -rV newer_versions.txt | while IFS= read -r v; do echo "- \`$v\`"; done)
-          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> An AI-assisted review of upstream changes relevant to this chart is filing separate tracking issues - see issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`. Triage those independently of this PR.\n\n> [!NOTE]\n> The semver mapping in the \`appVersion\` comment (Chart.yaml) and the example in \`README.md.gotmpl\` are not auto-updated - adjust them manually if you know the matching Hermes release." \
+          PR_BODY=$(printf "Automated bump of the chart's \`appVersion\` to track the upstream image [\`%s\`](https://hub.docker.com/r/%s/tags).\n\n- **Current:** \`%s\`\n- **Target (newest):** \`%s\`\n\n### Upstream tags newer than current\n\n%s\n\n> [!NOTE]\n> An AI-assisted review of upstream changes relevant to this chart is filing separate tracking issues - see issues labeled [\`upstream-review\`](../../issues?q=is%%3Aopen+label%%3Aupstream-review) for \`%s\`. Triage those independently of this PR.\n\n> [!NOTE]\n> The \`appVersion\` comment in Chart.yaml and the tag examples in \`README.md.gotmpl\` are not auto-updated - adjust them manually if they no longer match." \
             "$IMAGE" "$IMAGE" "$CURRENT_VERSION" "$TARGET_VERSION" "$NEW_LIST" "$TARGET_VERSION")
           gh pr create \
             --title "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \

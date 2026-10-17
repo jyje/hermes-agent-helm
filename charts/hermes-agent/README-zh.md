@@ -89,7 +89,7 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 
 智能体使用 **`local` 后端**执行命令，命令在 Pod 内运行，Pod 即沙箱。集群内**不支持 `docker` 后端**：它需要 Docker 守护进程或套接字，而 containerd 集群（MicroK8s / Raspberry Pi）不提供这些组件，挂载套接字也会带来安全风险。
 
-> 镜像标签使用**日期格式**，如 `v2026.6.5` 对应 Hermes v0.16.0。镜像支持 amd64 和 arm64，可在 Raspberry Pi 集群上运行。
+> 镜像标签自 2026 年 10 月起使用 **semver**，如 `v0.22.2`；更早的镜像使用日期格式标签，如 `v2026.9.24`。镜像支持 amd64 和 arm64，可在 Raspberry Pi 集群上运行。
 
 > **扩展说明。** Hermes 是单实例个人智能体，因此 Chart 固定 `replicaCount: 1`，不提供多副本模式，详见 [values 表](#values)。扩展时增加 `resources` 或 `persistence.size`。需要多个智能体时，运行多个独立实例，组成共享同一个网关频道的**团队**。参阅 [Hermes 团队](../../docs/advanced/teams/reference.md)。
 
@@ -595,7 +595,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | httpRoute.rules | list | HTTPRoute rules. An empty backendRef name targets this chart's Service. | `[]` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
-| image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
+| image.tag | string | Image tag. Upstream uses semver tags (e.g. "v0.22.2") since October 2026; older images use date-based tags (e.g. "v2026.9.24"). Empty defaults to `.Chart.AppVersion`. | `""` |
 | imagePullSecrets | list | Image pull secrets for private registries. | `[]` |
 | ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
 | ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |

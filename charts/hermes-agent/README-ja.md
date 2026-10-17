@@ -89,7 +89,7 @@ kubectl logs -n hermes-agent -l app.kubernetes.io/component=test --tail=-1
 
 エージェントのコマンド実行には **`local` バックエンド**を使用します。コマンドは Pod 内で実行され、Pod 自体がサンドボックスです。`docker` バックエンドは**クラスター内では非対応**です。Docker デーモンやソケットが必要で、containerd クラスター（MicroK8s / Raspberry Pi）には存在せず、マウントにもセキュリティリスクがあります。
 
-> イメージタグは**日付形式**です（例: `v2026.6.5` は Hermes v0.16.0）。amd64 と arm64 のマルチアーキテクチャに対応し、Raspberry Pi クラスターでも動作します。
+> イメージタグは 2026 年 10 月から **semver** です（例: `v0.22.2`）。それ以前のイメージは日付形式のタグ（例: `v2026.9.24`）を使います。amd64 と arm64 のマルチアーキテクチャに対応し、Raspberry Pi クラスターでも動作します。
 
 > **スケーリングについて。** Hermes は単一インスタンスのパーソナルエージェントなので、このチャートは `replicaCount: 1` に固定し、複数レプリカモードを提供しません。[values 表](#values)の注記も参照してください。拡張には `resources` や `persistence.size` を増やします。複数のエージェントが必要な場合は、別々のインスタンスを**チーム**にまとめ、1 つのゲートウェイチャンネルを共有します。[Hermes チーム](../../docs/advanced/teams/reference.md)を参照してください。
 
@@ -595,7 +595,7 @@ ArgoCD でデプロイする場合は [`examples/argocd/`](../../examples/argocd
 | httpRoute.rules | list | HTTPRoute rules. An empty backendRef name targets this chart's Service. | `[]` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
-| image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
+| image.tag | string | Image tag. Upstream uses semver tags (e.g. "v0.22.2") since October 2026; older images use date-based tags (e.g. "v2026.9.24"). Empty defaults to `.Chart.AppVersion`. | `""` |
 | imagePullSecrets | list | Image pull secrets for private registries. | `[]` |
 | ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
 | ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |

@@ -34,9 +34,13 @@ as a **Secret**.
   runs commands inside the pod (pod = sandbox). Never default to / wire up the
   `docker` backend in-cluster (needs a Docker daemon/socket; absent on
   containerd, security risk). Document it as unsupported, don't add socket mounts.
-- **Image tags are date-based** (`vYYYY.M.D`, e.g. `v2026.6.5` == Hermes v0.16.0)
-  - there is no semver tag. Image is multi-arch (amd64 + arm64). Don't invent
-  semver tags like `0.8.0`.
+- **Image tags are semver** (`vX.Y.Z`, e.g. `v0.22.2`) since October 2026.
+  Up to `v2026.9.24`, upstream published date-based tags (`vYYYY.M.D`); those
+  remain on Docker Hub but no new ones appear. Track only plain `vX.Y.Z` tags,
+  never `rc.N-vX.Y.Z`, `-desktop`, `-amd64`/`-arm64`, `stable` or `latest`.
+  `sort -V` ranks a date tag above any semver tag, so treat date tags as older
+  when comparing (see `cron-fetch-image.yaml`). Image is multi-arch
+  (amd64 + arm64). Always use the `v` prefix (`v0.22.2`, not `0.22.2`).
 - **No inbound API.** `hermes gateway run` is outbound (messaging platforms) and
   the image is s6-supervised - so don't set `command`/`args` (use the image
   entrypoint), don't add liveness/readiness tied to a listening port by default,

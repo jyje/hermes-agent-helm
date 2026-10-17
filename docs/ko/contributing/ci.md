@@ -165,8 +165,11 @@ pull request는 `mkdocs build --strict`를 실행하고 사이트 아티팩트�
 `0 */6 * * *` 스케줄은 UTC 기준 00:00, 06:00, 12:00, 18:00에 실행됩니다.
 수동 실행도 같은 절차를 따릅니다.
 
-1. Docker Hub에서 날짜 기반 `nousresearch/hermes-agent` 태그를 가져옵니다.
-2. 최신 태그를 차트의 현재 `appVersion`과 비교합니다.
+1. Docker Hub에서 `nousresearch/hermes-agent` 릴리즈 태그(`vX.Y.Z`)를
+   가져옵니다. `rc.*`, `-desktop`, 아키텍처별, `stable`, `latest` 태그는 무시합니다.
+2. 최신 태그를 차트의 현재 `appVersion`과 비교합니다. 날짜 기반
+   `appVersion`(upstream이 `v2026.9.24`까지 쓰던 `vYYYY.M.D` 형식)은 모든
+   semver 태그보다 오래된 것으로 취급합니다.
 3. 새 이미지가 있으면 minor Changeset을 포함한 appVersion 변경 PR을 만듭니다.
 4. 독립적으로 NVIDIA NIM이 그 사이의 upstream 릴리즈 노트를 검토하고,
    차트와 관련된 후속 작업마다 레이블이 있는 이슈를 하나씩 만듭니다.

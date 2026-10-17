@@ -107,8 +107,9 @@ the pod; the pod is the sandbox). The `docker` backend is intentionally **not
 supported in-cluster** - it requires a Docker daemon/socket, absent on
 containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 
-> Image tags are **date-based** (e.g. `v2026.6.5` == Hermes v0.16.0); the image
-> is multi-arch (amd64 + arm64), so it runs on Raspberry Pi clusters.
+> Image tags follow **semver** (e.g. `v0.22.2`) since October 2026; earlier
+> images use date-based tags (e.g. `v2026.9.24`). The image is multi-arch
+> (amd64 + arm64), so it runs on Raspberry Pi clusters.
 
 > **Scaling note.** Hermes is a single-instance personal agent, so this chart
 > pins `replicaCount: 1` and there is no multi-replica mode (see the
@@ -1081,7 +1082,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | httpRoute.rules | list | HTTPRoute rules. An empty backendRef name targets this chart's Service. | `[]` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
-| image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
+| image.tag | string | Image tag. Upstream uses semver tags (e.g. "v0.22.2") since October 2026; older images use date-based tags (e.g. "v2026.9.24"). Empty defaults to `.Chart.AppVersion`. | `""` |
 | imagePullSecrets | list | Image pull secrets for private registries. | `[]` |
 | ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
 | ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |
