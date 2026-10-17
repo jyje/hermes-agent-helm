@@ -1,11 +1,12 @@
 ---
 title: OpenAI Codex
-description: Authenticate a ChatGPT/Codex account through a Discord-delivered device code.
+description: Authenticate a ChatGPT/Codex account through a device code delivered to Discord or Telegram.
 ---
 
 | Required secret | Overlay |
 | --- | --- |
 | `DISCORD_BOT_TOKEN` | `values-openai-codex.yaml` |
+| `TELEGRAM_BOT_TOKEN`, with `auth.deviceFlow.notify: telegram` | `values-openai-codex.yaml` plus the override below |
 
 ## When to use it
 
@@ -48,6 +49,16 @@ you opt in with a `-900k` suffix, such as `gpt-6-luna-900k`, and you should
 raise `compression.threshold_tokens` with it. The suffix is a Hermes alias, not
 an OpenAI model name, and a larger window uses your subscription quota faster.
 The overlay below explains the details.
+
+## Telegram instead of Discord
+
+Set `auth.deviceFlow.notify: telegram` and give the release the Telegram bot
+token and home channel (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_HOME_CHANNEL`, and
+`TELEGRAM_ALLOWED_USERS`) in place of the Discord ones. The code then arrives in
+the Telegram chat, and `readyNotify.enabled: true` posts a line there when the
+agent is up. A live run signed in, posted the ready message, and answered with
+`gpt-6-luna` through Telegram. The README lists the provider and channel
+combinations that were run.
 
 ## Several releases on one ChatGPT account
 

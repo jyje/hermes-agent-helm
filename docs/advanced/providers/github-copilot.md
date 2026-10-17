@@ -1,15 +1,16 @@
 ---
 title: GitHub Copilot
-description: Complete GitHub Copilot device login through Discord.
+description: Complete GitHub Copilot device login through Discord or Telegram.
 ---
 
 | Required secret | Overlay |
 | --- | --- |
 | `DISCORD_BOT_TOKEN` | `values-github-copilot.yaml` |
+| `TELEGRAM_BOT_TOKEN`, with `auth.deviceFlow.notify: telegram` | `values-github-copilot.yaml` plus the override below |
 
 ## When to use it
 
-A Discord bot, GitHub Copilot access, and persistent storage are required so login tokens can be reused.
+A Discord or Telegram bot, GitHub Copilot access, and persistent storage are required so login tokens can be reused.
 
 ## Install
 
