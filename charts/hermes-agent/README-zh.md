@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 4c00dee9830393c8829109453d698bb1eb0ef3f3 -->
+<!-- translation_source: charts/hermes-agent/README.md @ 660d7ca1915a0bb390f4a00fec76af566ed82f6f -->
 
 <div align="center" markdown="1">
 
@@ -12,7 +12,7 @@
 
 在 Kubernetes 上运行支持多个 LLM 提供商的智能体框架 [Hermes Agent](https://github.com/NousResearch/hermes-agent)。通过 `values.yaml` 即可配置 Hermes 支持的提供商，包括 OpenAI、Anthropic、Gemini、OpenRouter、NVIDIA，以及 LiteLLM/vLLM 等 OpenAI 兼容代理，并使用内置的 `helm test` 健康检查。
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.20.0](https://img.shields.io/badge/Version-1.20.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.24](https://img.shields.io/badge/AppVersion-v2026.9.24-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.20.0](https://img.shields.io/badge/Version-1.20.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -63,6 +63,7 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 设备登录（无需 API 密钥） | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 取决于预设中的参考模型和聚合模型 | [`values-moa.yaml`](values-moa.yaml) |
 | 自定义（LiteLLM / vLLM / LM Studio） | `config.providers` 下的自定义 ID | 取决于代理 | [`values-litellm.yaml`](values-litellm.yaml) |
+| Nous 免费额度（`nous/welcome`） | `nous` | 无需密钥：启动时通过 `HERMES_GUEST_ONBOARDING=1` 签发匿名身份 | [`values-nous.yaml`](values-nous.yaml) |
 
 > 不带后缀的 `openai` **不是有效的提供商标识符**，它是 OpenRouter 的别名。请使用 **`openai-api`**。
 
@@ -194,10 +195,10 @@ Chart 提供占位用的 `OPENAI_API_KEY`。安装或升级时，请按所用提
 
 ## 设备流程登录（GitHub Copilot 和 OpenAI Codex）
 
-设置 `auth.deviceFlow.enabled=true` 会添加 **`auth-device-login` 初始化容器**。它将验证 URL 和一次性验证码发送至 Discord 主频道或日志，等待人工批准，并将凭据持久化到 `HERMES_HOME` 卷。
+设置 `auth.deviceFlow.enabled=true` 会添加一个 **`auth-device-login` init 容器**。它把验证 URL 和一次性代码发送到 Discord 或 Telegram 的主频道（或日志），等待人工批准，然后把获得的凭据保存到 `HERMES_HOME` 卷上。
 
-- `github-copilot` 执行 GitHub 的 OAuth 2.0 设备授权，将 `COPILOT_GITHUB_TOKEN` 写入 `.env`。
-- `openai-codex` 使用 Chart 固定的 Hermes 版本所实现的设备验证码流程，通过 Hermes 原生辅助函数原子更新 `auth.json`，包括刷新令牌链。它认证 ChatGPT/Codex 账户，与基于 API 密钥的 `openai-api` 不同。
+- `github-copilot` 执行 GitHub 的 OAuth 2.0 设备授权，并把 `COPILOT_GITHUB_TOKEN` 写入 `.env`。
+- `openai-codex` 遵循本 Chart 固定的 Hermes 版本中的设备码流程，并用 Hermes 自带的辅助程序原子地更新 `auth.json`，包括刷新令牌链。它认证的是 ChatGPT/Codex 账号，与基于 API 密钥的 `openai-api` 不同。
 
 ```bash
 helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --create-namespace \
@@ -207,12 +208,31 @@ helm upgrade --install hermes-agent ./charts/hermes-agent -n hermes-agent --crea
 kubectl logs deploy/hermes-agent -n hermes-agent -c auth-device-login -f
 ```
 
+**哪些提供方与频道的组合可用。** 一个 release 登录一个提供商（`auth.deviceFlow.provider`），代码和就绪消息发送到一个频道（`notify`）。两种提供商与两种消息平台的全部四种组合都在真实集群上运行过（镜像 `v2026.9.24`，2026 年 10 月）。每次运行都覆盖了：代码送达频道、批准、凭据保存、完成消息、就绪消息，以及模型对提及的回复。
+
+| 提供商 | Discord | Telegram |
+| --- | --- | --- |
+| `openai-codex` | 已验证（`gpt-6-luna`） | 已验证（`gpt-6-luna`） |
+| `github-copilot` | 已验证（`gpt-4o`，Copilot Free 账号） | 已验证（`gpt-4o`，Copilot Free 账号） |
+
+Copilot 的运行使用的是 Free 账号，因此你的套餐能用哪些模型取决于 GitHub 的规则。另外，Discord 还需要在 `DISCORD_ALLOWED_USERS` 中填入你自己的用户 ID（未列出的账号发来的消息会被忽略，且不留日志）。
+
+```bash
+# Same flow with Telegram instead of Discord (Copilot shown).
+helm upgrade --install hermes-copilot ./charts/hermes-agent -n hermes-copilot --create-namespace \
+  -f charts/hermes-agent/values-github-copilot.yaml \
+  --set auth.deviceFlow.notify=telegram \
+  --set-string env.TELEGRAM_BOT_TOKEN='<bot-token>' \
+  --set-json 'extraEnv=[{"name":"TELEGRAM_HOME_CHANNEL","value":"<chat-id>"},{"name":"TELEGRAM_ALLOWED_USERS","value":"<user-id>"}]'
+```
+
 注意事项：
 
-- **必须设置 `persistence.enabled=true`**。没有持久卷时，重启会丢失令牌，每次都需要重新批准。
-- **`notify`** 可设为 `discord`（复用 `DISCORD_BOT_TOKEN` 和 `DISCORD_HOME_CHANNEL`）或 `logs`（仅在初始化容器日志中输出验证提示）。
-- 初始化容器以 **root** 身份运行，以便向任意存储类写入文件，随后将令牌文件 **chown** 给 `auth.deviceFlow.tokenOwner`。默认 uid/gid 为上游镜像运行用户 `10000`，使非 root 智能体能够读取。
-- **配置选择：** 通过 `auth.deviceFlow.provider` 选择 `github-copilot` 或 `openai-codex`。Copilot 客户端 ID 与 Hermes 上游共用。OpenAI 协议常量与持久化逻辑来自固定的 Hermes 镜像，而非 Chart 自有凭据。
+- **需要 `persistence.enabled=true`**：没有卷时，令牌会在重启后丢失，每次都要重新批准。
+- **`notify`** 可以是 `discord`（复用 `DISCORD_BOT_TOKEN` 和 `DISCORD_HOME_CHANNEL`）、`telegram`（复用 `TELEGRAM_BOT_TOKEN` 和 `TELEGRAM_HOME_CHANNEL`）或 `logs`（验证提示只打印到 init 容器日志）。使用 `telegram` 时只通过 `sendMessage` 发送，因此不会与轮询同一个机器人的智能体冲突。在多 release 的团队中，请为每个运行设备登录的 release 都设置 `TELEGRAM_HOME_CHANNEL`。每条提示都会写明 release（团队模式下为团队身份，否则为 release 名称），便于区分并行的登录。
+- **就绪消息**：「login complete」只表示凭据已保存。首次启动之后可能仍需几分钟（技能同步、模型预热），而 Hermes 只会通知*重启*，不会通知全新启动。设置 `readyNotify.enabled=true` 后，网关启动时会向同一个 Discord 或 Telegram 主频道发一行消息（`readyNotify.notify` 选择频道；启用设备流程时跟随 `auth.deviceFlow.notify`）。Chart 会在 `HERMES_HOME/hooks/ready-notify` 中放置一个 `gateway:startup` 钩子，复用 `env` / `extraEnvFrom` 中已有的机器人凭据。在一次真实的首次启动中，这条消息与 Hermes 自己的 `Gateway running` 日志行同时到达，比第一轮对话准备就绪早几秒。
+- init 容器以 **root** 运行，以便写入任意存储类，然后把令牌文件 **chown** 给 `auth.deviceFlow.tokenOwner`（默认 uid/gid `10000`，即上游镜像的运行用户），让非 root 的智能体可以读取。
+- **配置文件选择：** 用 `auth.deviceFlow.provider` 选择 `github-copilot` 或 `openai-codex`。Copilot 的客户端 ID 与上游 Hermes 使用的共享客户端相同。OpenAI 的协议常量和持久化逻辑来自固定的 Hermes 镜像，而不是 Chart 自带的凭据。
 
 ## 智能体团队
 
@@ -252,11 +272,49 @@ helm upgrade --install hermes-builder ./charts/hermes-agent \
 领导者与多个成员的配置使用 [`values-team-leader.yaml`](values-team-leader.yaml) 和 [`values-team-member.yaml`](values-team-member.yaml)。参考协议每次只处理一个明确的机器人提及，将任务、结果与审核全部保留在 Discord 线程中。团队模式为每个 Pod 挂载共享的成员名单与协议技能 ConfigMap。领导者 release 只创建一次该 ConfigMap 和 RWX 知识 PVC；成员按名称引用并只读挂载。PVC 保存持久共享知识，不用于传递任务、状态或结果。ApplicationSet 示例只声明一次成员名单和公共策略，每项仅提供身份、角色与私有 Secret 名称。
 各智能体仍可用 `file`、`memory` 工具处理自身工作；禁止的是通过文件、记忆、钩子或后台工作进行智能体之间的任务交接。
 
+Telegram 团队请设置 `team.platform: telegram`，使用按角色划分的 Telegram values 文件，并参阅 [Telegram 团队指南](../../docs/advanced/teams/telegram.md)。指南涵盖单机器人共享助手模式、BotFather 设置、每个 release 的 Secret、提及路由、防循环措施以及 ArgoCD ApplicationSet。Telegram 团队示例在 CI 中做了渲染检查。在真实的 Telegram 群组中，使用两个模型（`nemotron-3-ultra-550b` 和 `gpt-6-luna`）完整跑通了「领导者、成员、领导者」的交接，证据见 [#311](https://github.com/jyje/hermes-agent-helm/pull/311) 的评论。领导者的模型很关键：一个 30B 模型没有委派，而是自己作答。另一个人类账号被拦截的情况、循环保护阈值以及连续多次交接尚未测试。
+
+**示例：每个机器人都登录 OpenAI Codex 的 Telegram 团队。** 每个 release 各自登录，不涉及外部凭据代理或共享令牌。把三个机器人令牌放进 Secret（`tg-august`、`tg-may`、`tg-march`，各含一个 `TELEGRAM_BOT_TOKEN` 键），然后在按角色划分的 values 文件之上叠加一个覆盖文件：
+
+```yaml
+# codex-overlay.yaml
+config:
+  model:
+    provider: openai-codex
+    default: gpt-6-luna            # gpt-6-luna-900k for the larger window
+auth:
+  deviceFlow:
+    enabled: true
+    provider: openai-codex
+    notify: telegram               # each code arrives in the team group
+readyNotify:
+  enabled: true                    # one "ready" line per bot when it is up
+```
+
+```bash
+# Install all three at once. Each bot posts its own code to the group,
+# for example "OpenAI Codex login required for may".
+for r in august may march; do
+  role=member; [ "$r" = august ] && role=leader
+  helm upgrade --install "hermes-$r" ./charts/hermes-agent \
+    --namespace hermes-team --create-namespace \
+    -f "charts/hermes-agent/values-telegram-team-$role.yaml" -f codex-overlay.yaml \
+    --set-string "fullnameOverride=hermes-$r" --set-string "team.identity=$r" \
+    --set-json "extraEnvFrom=[{\"secretRef\":{\"name\":\"tg-$r\"}}]" &
+done; wait
+```
+
+在 `https://auth.openai.com/codex/device` 批准这三个代码。先不要给团队发消息：出现「login complete」之后，首次启动仍需几分钟（真实运行中约七分钟），这段时间内发送的消息会丢失。等每个机器人发出「is ready」后，再提及领导者。
+
+- 像成员 values 文件那样，为**每个** release 设置 `TELEGRAM_HOME_CHANNEL`：登录和就绪消息都发到那里。
+- 同一个 ChatGPT 账号登录三次，在真实检查中刷新正常，但上游说明同一账号的第二次登录会使较早的登录失效。团队中建议每个机器人使用一个账号，已验证和未验证的内容见 [OpenAI Codex](../../docs/advanced/providers/openai-codex.md)。
+- 每个机器人在群组中的第一条回复可能带有 Hermes 一次性的「caps context at 272K」提示。设置 `compression.codex_gpt55_autoraise_notice: false` 可关闭它。
+
 > 上游目前将 Hermes 机器人之间的 Discord 会话列为不受支持的拓扑，且没有内置熔断器。此示例为实验性质：使用专用可信频道，保留手动停止方式，并在固定镜像上完成真实验证后再依赖它。
 
 参考流程已在 kind 和 `v2026.7.20` 镜像上完成真实验证，参阅带时间记录的[团队验证证据](../../docs/advanced/teams/reference.md#leader-orchestrated-teams)。
 
-> **另一种方案：一个 Pod，多个配置档案。** 如果需要通过**一个机器人令牌**将不同的 Discord 服务器、频道、线程路由到不同智能体配置档案，可设置 `config.gateway.multiplex_profiles: true`（环境变量覆盖为 `GATEWAY_MULTIPLEX_PROFILES=1`）。这只需一个 Pod。该功能解决路由问题，与多个机器人在同一频道交接任务的协作模式不同，请按需求选择。
+> **另一种方案：一个 Pod，多个配置档案。** 如果需要通过**一个机器人令牌**将不同的 Discord 服务器、频道、线程路由到不同智能体配置档案，而不是让多个机器人共享一个频道，请使用网关配置档案多路复用。上游默认启用它（`gateway.multiplex_profiles` 默认为 `true`，且 `true` 是唯一有效值；旧的 `false` 已废弃），因此无需任何 Chart 设置。这只需一个 Pod。该功能解决路由问题，与上面的交接模式（协作）不同，请按需求选择。
 
 ## 高级测试
 
@@ -302,9 +360,13 @@ Hermes 将 `$HERMES_HOME/config.yaml` 和环境中的密钥作为对各版本内
 
 > **透传原则。** `.Values.config` **原样**生成 `config.yaml`，每一层均允许任意附加键（见 `values.schema.json`）。Hermes 官方[配置指南](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)或[环境变量参考](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)中支持的配置，都可以通过 `config.<path>`、`env` / `extraEnv` 设置，**无需修改 Chart**。此 README 聚焦安装时常用的提供商、消息平台和团队拓扑，其他配置的查找方式见 [FAQ](#faq)。
 
-- **`config.yaml`**：只在 `.Values.config` 下设置需要覆盖的键，渲染为 ConfigMap，由初始化容器**写入持久卷中的 `HERMES_HOME`**。Hermes 运行时也会写入技能、`auth.json` 和自我改进内容。`bootstrap.overwrite=false`（默认）仅在文件不存在时写入，以保留运行时修改；设为 `true` 则每次部署都用 chart 配置替换。写入后，初始化容器会运行 Hermes 的非交互配置迁移，并在修改前备份 `config.yaml` 和 `.env`。没有显式版本的配置会执行迁移；显式版本低于上游支持下限的配置保持不变，需按 README 中的恢复步骤处理。
+- **`config.yaml`**：只在 `.Values.config` 下设置需要覆盖的键，渲染为 ConfigMap，由初始化容器**写入持久卷中的 `HERMES_HOME`**。Hermes 运行时也会写入技能、`auth.json` 和自我改进内容。`bootstrap.overwrite=false`（默认）仅在文件不存在时写入，以保留运行时修改；设为 `true` 则每次部署都用 chart 配置替换。写入后，初始化容器会运行 Hermes 的非交互式配置迁移。迁移前会备份 `config.yaml` 和 `.env`，迁移失败时会还原。没有显式版本的配置会作为全新的部分配置进行迁移；显式版本低于上游支持下限（目前为 v12）的配置保持不变，请按下面的恢复步骤处理。
 - **`SOUL.md` 身份**：设置 `.Values.soul.text`，将持久化的智能体身份写入 `HERMES_HOME/SOUL.md`。留空时由 Hermes 在首次运行时创建初始文件。写入判断独立于 `config.yaml`：`bootstrap.overwrite=false` 保留已有身份，`true` 则在每次部署时替换。此值保存在 ConfigMap 中，**不要放入密钥**。内容和范围见上游 [SOUL.md 指南](https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes)。
 - **密钥与 API 密钥**：放在 `.Values.env` 下，渲染为 Secret，通过 `envFrom` 注入环境变量，环境变量优先于 `config.yaml`。
+
+#### 恢复早于迁移下限的配置
+
+对于显式声明了不受支持的 schema 版本的配置，Hermes 会刻意拒绝自动迁移。编辑前请先备份 `HERMES_HOME/config.yaml`。先查看上游的迁移历史；如果文件中的键与支持的下限兼容，就在根部设置 `_config_version: 12` 并重启工作负载。Hermes 随后会执行受支持的迁移，并在 `HERMES_HOME/backups/config/` 下保留迁移前的备份。否则请用 `hermes setup` 生成一份当前配置，再从备份中恢复需要的设置。使用 `bootstrap.overwrite=false` 时，Chart 默认保留现有文件，以便你完成这次恢复。使用 `bootstrap.overwrite=true` 时，Chart 会在迁移前用 values 渲染的配置替换它。
 
 ### 密钥供应方式
 
@@ -400,6 +462,8 @@ extraEnv:
 
 每条 Ingress 路径可覆盖 `service` 与 `port`。省略 Service 名称时指向本 Chart 的 Service，因此需要 `service.enabled: true`；显式指定外部 Service 时不要求启用 Chart Service。HTTPRoute 的 `backendRefs` 使用相同默认规则。如果隐式引用指向不存在的 Chart Service，Chart 会提前报错。
 
+`ingress.annotations` 和 `httpRoute.annotations` 为各自的资源添加元数据，例如 external-dns 提示，或控制器、Gateway 实现特有的设置。
+
 [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) 将 `/v1` 和 webhook 流量路由到不同的 Ingress 主机和 Service 端口。[`values-httproute.yaml`](values-httproute.yaml) 是对应的 Gateway API 示例。HTTPRoute 主机名适用于同一资源内的所有规则；需要在监听器规则间按主机隔离时，请创建不同的 HTTPRoute。
 
 ### Pod Security Standards 加固
@@ -470,7 +534,8 @@ config:
 | `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` | Slack 机器人（Socket Mode） |
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 主服务器集成 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
-| `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 仪表板内置用户名和密码认证，上游在非回环绑定时强制启用；`HERMES_DASHBOARD_PUBLIC_URL` 声明 Ingress 后的外部来源地址 |
+| `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 仪表盘内置用户名和密码认证，上游在非回环绑定时强制启用；`HERMES_DASHBOARD_PUBLIC_URL` 声明 Ingress 后的外部来源地址 |
+| `HERMES_GUEST_ONBOARDING` | 设为 `1` 时在启动时签发匿名 Nous 身份（免费的 `nous/welcome` 推理，以及网页搜索、浏览器、Gmail、Linear 等连接器工具）。如果已配置提供商密钥，则只签发连接器工具用的身份，`active_provider` 保持不变。未设置（默认）时与 v2026.9.11 之前的行为一致。零外部密钥的覆盖文件见 `values-nous.yaml` |
 | `HERMES_MAX_ITERATIONS` | 每次会话的工具调用迭代预算（默认 500 次，之后允许一次收尾调用）；硬上限为 `config.agent.max_turns`，上游默认不限，Chart 已不再初始化该值 |
 | `HERMES_AGENT_TIMEOUT` | 网关无活动超时（默认 1800 秒 / 30 分钟） |
 | `HERMES_TIMEZONE` | 覆盖 IANA 时区 |
@@ -527,6 +592,9 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-openai-codex.yaml`](values-openai-codex.yaml) | OpenAI Codex (`openai-codex`) | **ChatGPT/Codex 设备登录**与 Discord 机器人 |
 | [`values-anthropic-and-discord.yaml`](values-anthropic-and-discord.yaml) | Anthropic (Claude) | 已配置 **Discord 机器人** |
 | [`values-openai-and-telegram.yaml`](values-openai-and-telegram.yaml) | OpenAI (`openai-api`) | 已配置 **Telegram 机器人** |
+| [`values-telegram-team-assistant.yaml`](values-telegram-team-assistant.yaml) | OpenAI (`openai-api`) | **多个授权用户共享的一个 Telegram 机器人** |
+| [`values-telegram-team-leader.yaml`](values-telegram-team-leader.yaml) + [`values-telegram-team-member.yaml`](values-telegram-team-member.yaml) | NVIDIA NIM | **Telegram 领导者/成员团队**，带提及门控和防循环措施 |
+| [`examples/argocd/hermes-team-telegram.yaml`](../../examples/argocd/hermes-team-telegram.yaml) | 任意 | **ArgoCD ApplicationSet**：一个领导者和多个 Telegram 成员，每个 release 独立的 Secret |
 | [`values-google-chat.yaml`](values-google-chat.yaml) | OpenAI (`openai-api`) | 通过 Pub/Sub pull 订阅配置 **Google Chat 机器人**，服务账户 JSON 通过 `extraVolumes` 挂载 |
 | [`values-openai.yaml`](values-openai.yaml) | OpenAI (`openai-api`) | : |
 | [`values-anthropic.yaml`](values-anthropic.yaml) | Anthropic (Claude) | : |
@@ -538,9 +606,10 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | 通过 `UPSTAGE_BASE_URL` 覆盖端点 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | 并行运行参考模型，由聚合模型综合结果 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | 任意 | **Bitwarden Secrets Manager** 在启动时提供密钥 |
+| [`values-nous.yaml`](values-nous.yaml) | Nous 免费额度（`nous`） | **零外部 API 密钥**：启动时签发匿名身份（`HERMES_GUEST_ONBOARDING=1`），用于 `nous/welcome` 推理和连接器工具 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 代理（远程/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 代理（集群内 Service DNS） | : |
-| [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**：启用仪表板、上游密码认证及可信代理 |
+| [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**：启用仪表盘、上游密码认证及可信代理 |
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **使用 Nous Portal OAuth 的仪表盘 Ingress**，上游推荐用于公网仪表盘的登录方式 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **使用你自己的 OpenID Connect 提供方的仪表盘 Ingress**（public PKCE 客户端，无需 Nous Portal） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API 服务器与 webhook**：显式 Service 端口和外部监听器密钥 |
