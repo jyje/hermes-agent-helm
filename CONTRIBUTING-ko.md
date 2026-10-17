@@ -217,8 +217,9 @@ SemVer 선택과 fix 예제를 포함한 전체 가이드는
 다른 이유로 `Chart.yaml`을 건드리는 커밋(예: `appVersion`, description)은
 안전합니다 - 태그 존재 여부 가드가 이를 no-op으로 만듭니다.
 
-> `appVersion`은 upstream Hermes 이미지(날짜 기반, 예: `v2026.6.5`)를
-> 따라가며 수동으로 올립니다. 릴리즈를 일으키는 건 차트 `version`뿐입니다.
+> `appVersion`은 upstream Hermes 이미지 태그(semver, 예: `v0.22.2`. 2026년
+> 10월 이전에는 `v2026.9.24` 같은 날짜 기반)를 따라갑니다. 변경 PR은
+> `cron-fetch-image` workflow가 만들고, 릴리즈를 일으키는 건 차트 `version`뿐입니다.
 
 ## Conventional Commits(권장)
 

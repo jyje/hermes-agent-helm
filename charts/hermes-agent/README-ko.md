@@ -104,8 +104,9 @@ Kubernetes에서 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를
 내에서 지원하지 않습니다** - Docker 데몬/소켓이 필요한데, containerd 클러스터
 (MicroK8s / Raspberry Pi)에는 없고, 마운트하는 것 자체가 보안 위험입니다.
 
-> 이미지 태그는 **날짜 기반**입니다(예: `v2026.6.5` == Hermes v0.16.0); 이미지는
-> 멀티 아키텍처(amd64 + arm64)이므로 Raspberry Pi 클러스터에서도 실행됩니다.
+> 이미지 태그는 2026년 10월부터 **semver**를 따릅니다(예: `v0.22.2`). 그 이전
+> 이미지는 날짜 기반 태그(예: `v2026.9.24`)를 씁니다. 이미지는 멀티
+> 아키텍처(amd64 + arm64)이므로 Raspberry Pi 클러스터에서도 실행됩니다.
 
 > **스케일링 참고.** Hermes는 단일 인스턴스 개인용 에이전트이므로, 이 차트는
 > `replicaCount: 1`을 고정하며 멀티 레플리카 모드가 없습니다([값 테이블](#values)의
@@ -1000,7 +1001,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | httpRoute.rules | list | HTTPRoute rules. An empty backendRef name targets this chart's Service. | `[]` |
 | image.pullPolicy | string | Image pull policy. | `"IfNotPresent"` |
 | image.repository | string | Container image repository (multi-arch: amd64 + arm64). | `"nousresearch/hermes-agent"` |
-| image.tag | string | Image tag. Upstream uses DATE-based tags (e.g. "v2026.6.5" == Hermes v0.16.0), plus `latest` / `main`. There is no semver tag. Empty defaults to `.Chart.AppVersion`. | `""` |
+| image.tag | string | Image tag. Upstream uses semver tags (e.g. "v0.22.2") since October 2026; older images use date-based tags (e.g. "v2026.9.24"). Empty defaults to `.Chart.AppVersion`. | `""` |
 | imagePullSecrets | list | Image pull secrets for private registries. | `[]` |
 | ingress.annotations | object | Annotations to add to the Ingress (e.g. auth, cert-manager, rewrite rules). | `{}` |
 | ingress.className | string | IngressClass name (e.g. "nginx", "traefik"). Empty uses the cluster default. | `""` |

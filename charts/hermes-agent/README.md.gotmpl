@@ -107,8 +107,9 @@ the pod; the pod is the sandbox). The `docker` backend is intentionally **not
 supported in-cluster** - it requires a Docker daemon/socket, absent on
 containerd clusters (MicroK8s / Raspberry Pi) and a security risk to mount.
 
-> Image tags are **date-based** (e.g. `v2026.6.5` == Hermes v0.16.0); the image
-> is multi-arch (amd64 + arm64), so it runs on Raspberry Pi clusters.
+> Image tags follow **semver** (e.g. `v0.22.2`) since October 2026; earlier
+> images use date-based tags (e.g. `v2026.9.24`). The image is multi-arch
+> (amd64 + arm64), so it runs on Raspberry Pi clusters.
 
 > **Scaling note.** Hermes is a single-instance personal agent, so this chart
 > pins `replicaCount: 1` and there is no multi-replica mode (see the

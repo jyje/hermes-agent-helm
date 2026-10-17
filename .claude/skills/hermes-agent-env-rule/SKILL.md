@@ -37,6 +37,10 @@ Source of truth: [NousResearch/hermes-agent - Environment Variables](https://her
    If the tag doesn't exist upstream (chart's appVersion fell out of sync),
    fall back to the nearest tag at or before it from
    `gh api repos/NousResearch/hermes-agent/tags --jq '.[].name'`.
+   Upstream tags are semver (`v0.22.2`) since October 2026 and date-based
+   (`v2026.9.24`) before that, so `sort -V` ranks the old date tags above
+   every semver tag: pick "nearest" by release date
+   (`gh api repos/NousResearch/hermes-agent/releases`), not by version sort.
 
 3. **Diff against the curated table** in the chart's "Environment variables"
    section (`charts/hermes-agent/README.md.gotmpl`) - look specifically for:

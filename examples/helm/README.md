@@ -171,5 +171,4 @@ settings) so Artifact Hub and users can pull anonymously.
    the listing.
 
 > Chart version vs app version: bump `version` in `Chart.yaml` for chart
-> changes; `appVersion` tracks the Hermes image tag (date-based, e.g.
-> `v2026.6.5`).
+> changes; `appVersion` tracks the Hermes image tag (semver, e.g. `v0.22.2`).

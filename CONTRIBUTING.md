@@ -295,8 +295,9 @@ and publishes the chart to **both**:
 Commits that touch `Chart.yaml` for other reasons (e.g. `appVersion`,
 description) are safe - the tag-existence guard makes them no-ops.
 
-> `appVersion` tracks the upstream Hermes image (date-based, e.g. `v2026.6.5`)
-> and is bumped manually; only the chart `version` drives releases.
+> `appVersion` tracks the upstream Hermes image tag (semver, e.g. `v0.22.2`;
+> date-based such as `v2026.9.24` before October 2026). The `cron-fetch-image`
+> workflow opens the bump PR; only the chart `version` drives releases.
 
 ## Conventional Commits (recommended)
 

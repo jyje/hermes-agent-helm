@@ -171,4 +171,4 @@ make push
    어노테이션이 목록을 채웁니다.
 
 > 차트 버전 vs 앱 버전: 차트가 바뀌면 `Chart.yaml`의 `version`을 올리고,
-> `appVersion`은 Hermes 이미지 태그(날짜 기반, 예: `v2026.6.5`)를 따라갑니다.
+> `appVersion`은 Hermes 이미지 태그(semver, 예: `v0.22.2`)를 따라갑니다.

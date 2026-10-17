@@ -165,8 +165,11 @@ store; `deploy-docs` is the only workflow that publishes the Pages site.
 The schedule `0 */6 * * *` runs at 00:00, 06:00, 12:00, and 18:00 UTC. A
 manual dispatch runs the same process.
 
-1. Fetch date-based `nousresearch/hermes-agent` tags from Docker Hub.
-2. Compare the newest tag with the chart's current `appVersion`.
+1. Fetch `nousresearch/hermes-agent` release tags (`vX.Y.Z`) from Docker Hub,
+   ignoring `rc.*`, `-desktop`, per-arch, `stable`, and `latest` tags.
+2. Compare the newest tag with the chart's current `appVersion`. A date-based
+   `appVersion` (`vYYYY.M.D`, the scheme upstream used until `v2026.9.24`)
+   counts as older than every semver tag.
 3. If a newer image exists, open an appVersion bump PR with a minor Changeset.
 4. Independently review intervening upstream release notes with NVIDIA NIM and
    create one labeled issue for each chart-relevant follow-up.
