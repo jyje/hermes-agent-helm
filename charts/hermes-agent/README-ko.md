@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 878ec63124de696150f957ad2992ea871f839b2e -->
+<!-- translation_source: charts/hermes-agent/README.md @ 007a2b002c11cf31a3e173be25fc8d3e27666c3d -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -743,6 +743,9 @@ Gateway가 이미 있으면 `httpRoute`를 사용하세요. 같은 host와 path�
 Service 이름을 명시하면 차트 Service 없이도 됩니다. HTTPRoute도 각
 `backendRefs` 항목에 같은 기본 규칙을 적용합니다. 암시적 chart-Service backend가
 존재하지 않는 Service를 가리키면 차트가 일찍 실패합니다.
+
+`ingress.annotations`와 `httpRoute.annotations`는 각 리소스에 metadata를 추가합니다.
+external-dns 힌트나 controller 및 Gateway 구현별 설정에 사용하세요.
 
 [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml)은 `/v1` API와
 webhook 트래픽을 서로 다른 Ingress host와 Service port로 라우팅합니다.
