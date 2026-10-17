@@ -3,7 +3,7 @@ title: CI 가이드
 description: 지속적인 검증과 릴리즈 체크입니다.
 translation_source:
   path: docs/contributing/ci.md
-  commit: fb6fb80ad7fc2981fdef8d2dae5ef1052ae46336
+  commit: 10dddf4fce567fa28a77d419f50330ffb482c4b3
 ---
 
 # CI / 지속적 검증

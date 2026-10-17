@@ -77,7 +77,9 @@ def image_info(tag: str) -> dict:
             image["architecture"] for image in data.get("images", []) if image.get("architecture")
         }), "digest": data.get("digest")}
     except urllib.error.HTTPError as exc:
-        return {"status": "missing" if exc.code == 404 else "unknown", "http_status": exc.code}
+        code = exc.code
+        exc.close()
+        return {"status": "missing" if code == 404 else "unknown", "http_status": code}
     except (OSError, ValueError) as exc:
         return {"status": "unknown", "error": type(exc).__name__}
 
