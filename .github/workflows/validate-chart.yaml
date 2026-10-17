@@ -37,6 +37,7 @@ jobs:
     runs-on: ubuntu-26.04-arm
     outputs:
       functional: ${{ steps.filter.outputs.functional }}
+      live_chat: ${{ steps.live_chat.outputs.live_chat }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -60,6 +61,13 @@ jobs:
           else
             echo "functional=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Decide whether external model checks are needed
+        id: live_chat
+        run: |
+          python3 .github/scripts/requires-live-chat.py \
+            --base "${{ github.event.pull_request.base.sha || github.event.before }}" \
+            --head "${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
   lint:
     runs-on: ubuntu-26.04-arm
@@ -312,7 +320,9 @@ jobs:
     timeout-minutes: 15
     env:
       NS: test-hermes-chart
-      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      # Keep structural installs for tooling changes, without making them
+      # depend on a live free-tier model. Chart/image/harness changes keep it.
+      NVIDIA_API_KEY: ${{ needs.changes.outputs.live_chat == 'true' && secrets.NVIDIA_API_KEY || '' }}
       CI_MODELS: "nvidia/nemotron-3.5-lightning-30b-a3b,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning,google/gemma-4-31b-it,openai/gpt-oss-20b"
       # Optional live Discord verification: only scenario-message.sh ever
       # uses these (it's the only scenario installing Discord), so they're
@@ -344,7 +354,7 @@ jobs:
         # installs Discord, and only this job's own success() is checked: it
         # does not wait on the existing-claim job (GitHub Actions' own check
         # status already reports overall pass/fail across the matrix).
-        if: matrix.scenario == 'message' && success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
+        if: matrix.scenario == 'message' && needs.changes.outputs.live_chat == 'true' && success() && env.DISCORD_BOT_TOKEN != '' && env.DISCORD_HOME_CHANNEL != ''
         run: |
           set -euo pipefail
           pod=$(kubectl get pod -n test-hermes-chart -l app.kubernetes.io/name=hermes-agent \
