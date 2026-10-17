@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ 9011740443cb6eecbe1fc9cd8d231762fd834f03 -->
+<!-- translation_source: charts/hermes-agent/README.md @ 660d7ca1915a0bb390f4a00fec76af566ed82f6f -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -11,7 +11,7 @@
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) - 멀티 제공자 LLM 에이전트 프레임워크 - 를 Kubernetes에서 실행하세요. Hermes가 지원하는 모든 제공자(OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, 또는 LiteLLM/vLLM 같은 OpenAI 호환 프록시)를 `values.yaml`만으로 설정할 수 있고, 내장된 `helm test` 헬스체크도 함께 제공됩니다.
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.20.0](https://img.shields.io/badge/Version-1.20.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v2026.9.24](https://img.shields.io/badge/AppVersion-v2026.9.24-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.20.0](https://img.shields.io/badge/Version-1.20.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -139,7 +139,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 설치 시점에 설정하는 가장 중요한 항목입니다 - Hermes가 *어떤* LLM 백엔드와
 대화할지를 정합니다. (채팅 플랫폼 설정은 아래
-[메신저 통합](#messenger-integrations-telegram--discord)을 참고하세요.)
+[메신저 통합](#메신저-통합-telegram--discord)을 참고하세요.)
 
 - **내장 제공자**: `config.model.provider`를 Hermes의 내장 키(`openai-api`,
   `anthropic`, `gemini`, `openrouter`, `nvidia`, `deepseek`, `lmstudio`, …)
@@ -171,7 +171,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 - **커스텀 OpenAI 호환 제공자**(LiteLLM, vLLM, LM Studio, …): `config.providers.<id>`
   (`base_url`, `key_env`) 아래 등록하고 `config.model.provider`가 해당 `<id>`를
-  가리키게 하세요. ["More examples"](#more-examples)의 `values-litellm.yaml`
+  가리키게 하세요. ["More examples"](#더-많은-예제)의 `values-litellm.yaml`
   (원격 프록시) 또는 `values-litellm-k8s.yaml`(클러스터 내)을 참고하세요.
 
 ### 메신저 통합 (Telegram / Discord)
@@ -247,7 +247,7 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
   Slack의 기본 unfurl 동작을 유지하려면 각 키를 생략하세요. 이 설정은
   Slack으로 나가는 메시지에만 적용됩니다.
 
-복사해서 바로 쓸 수 있는 메신저 설정 블록은 ["More examples"](#more-examples)의
+복사해서 바로 쓸 수 있는 메신저 설정 블록은 ["More examples"](#더-많은-예제)의
 `values-anthropic-and-discord.yaml` / `values-openai-and-telegram.yaml`을
 참고하세요.
 
@@ -854,12 +854,12 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 
 ## 환경변수
 
-이 차트는 시작에 필요한 [제공자](#install-options-llm-provider) 및
-[메신저](#messenger-integrations-telegram--discord) 변수만 다룹니다 - Hermes
+이 차트는 시작에 필요한 [제공자](#설치-옵션-llm-제공자) 및
+[메신저](#메신저-통합-telegram--discord) 변수만 다룹니다 - Hermes
 자체는 환경에서 훨씬 많은 변수를 읽습니다. 이들 모두 위와 같은 방식으로
 설정할 수 있습니다: 시크릿은 `.Values.env`(Secret) 아래, 민감하지 않은 설정은
 `.Values.extraEnv`(평문 env) 아래, 또는 외부에서 관리되는 시크릿은
-`extraEnvFrom`을 통해([설정 모델](#configuration-model) 참고).
+`extraEnvFrom`을 통해([설정 모델](#설정-모델) 참고).
 
 전체 레퍼런스(각 Hermes 릴리즈에 맞춰 최신 상태 유지):
 **[Environment Variables - Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
