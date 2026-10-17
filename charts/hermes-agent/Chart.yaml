@@ -14,7 +14,7 @@ version: 1.19.0
 # Upstream Hermes Agent image version this chart targets by default.
 # Upstream tags images with semver (vX.Y.Z) since October 2026; this pin is
 # still the last date-based tag (vYYYY.M.D) until the next image bump.
-appVersion: "v2026.9.24"
+appVersion: "v0.22.2"
 
 keywords:
   - hermes
