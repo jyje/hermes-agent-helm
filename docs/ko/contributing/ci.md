@@ -3,7 +3,7 @@ title: CI 가이드
 description: 지속적인 검증과 릴리즈 체크입니다.
 translation_source:
   path: docs/contributing/ci.md
-  commit: 10dddf4fce567fa28a77d419f50330ffb482c4b3
+  commit: 04b1eca02cc2fbbceed46282ffddbdcd6ee428a8
 ---
 
 # CI / 지속적 검증
@@ -19,7 +19,7 @@ translation_source:
 | [cron-fetch-image.yaml](../../../.github/workflows/cron-fetch-image.yaml) | 6시간마다 또는 수동 실행 | 새 upstream 이미지를 감지하고 appVersion 변경 PR과 upstream-review 이슈 생성 |
 | [propose-release.yaml](../../../.github/workflows/propose-release.yaml) | 수동 실행 | 게시하지 않고 대기 중인 Changeset을 검토 가능한 릴리즈 PR 하나로 변환 |
 | [release-chart.yaml](../../../.github/workflows/release-chart.yaml) | `charts/hermes-agent/Chart.yaml`을 바꾸는 `main` push | `vX.Y.Z` 태그 생성, OCI와 Helm Repository 게시, OCI cosign 서명 및 Pages 갱신 |
-| [verify-release.yaml](../../../.github/workflows/verify-release.yaml) | `release-chart` 성공 이후 | **게시되어 서명된** 아티팩트를 처음부터 끝까지 다시 검증 |
+| [verify-release.yaml](../../../.github/workflows/verify-release.yaml) | `release-chart` 성공 이후 또는 게시된 버전의 수동 실행 | **게시되어 서명된** 아티팩트를 처음부터 끝까지 다시 검증 |
 
 ## workflow 연결 구조
 
@@ -93,9 +93,11 @@ flowchart LR
 차트 입력·이미지·라이브 테스트 하네스 변경은 외부 검사를 유지하며,
 기준 커밋 기록이 없으면 외부 검사를 켠 상태로 처리합니다.
 
-`CI_MODELS` 풀은 **failover 전용**입니다 - 라운드트립은 모든 모델이 아니라
-먼저 응답한 모델에서 통과합니다. chat 호출은 차트 자체의 테스트 훅을
-그대로 반영합니다: `hermes chat -m <model> --provider nvidia -q <prompt> --max-turns N`.
+`CI_MODELS` 풀은 **failover 전용**입니다. 모든 모델이 아니라 정확히 `CI_PONG`을
+먼저 반환한 모델에서 통과합니다. PR과 릴리즈 후 검사는 같은 스킬과 검색 확인
+함수를 사용합니다. `--skills ci-ping`으로 스킬을 미리 불러오고 `--quiet`로 최종
+응답만 검사합니다. 빈 응답이나 다른 답변은 종료 코드가 0이어도 통과하지 않습니다.
+각 시도에는 시간 제한이 있고 실패하면 다음 모델로 넘어갑니다.
 
 라이브 Discord 알림 단계(workflow 레벨, 시나리오 스크립트 이후)는 이
 시나리오에서만 실행됩니다 - Discord가 켜져 있는 유일한 시나리오이기
@@ -259,7 +261,18 @@ Artifact Hub 어노테이션, 생성된 차트 문서, 버전이 포함된 예�
 2. (로컬 소스가 아니라) **OCI 레지스트리에서** `helm install`.
 3. `validate-chart`와 같은 `hermes doctor` + chat 라운드트립 실행.
 
-여기서 실패하면 게시된 아티팩트나 서명이 깨졌다는 뜻입니다.
+릴리즈 태그에서 차트 버전과 불변 릴리즈 SHA를 결정하고, 워크플로 자신의
+커밋에서 테스트 하네스를 가져옵니다. 로그에는 두 SHA를 모두 남깁니다.
+하네스를 수정한 뒤 같은 아티팩트를 재게시하지 않고 검증하려면:
+
+```bash
+gh workflow run verify-release.yaml --ref main -f version=1.21.0
+```
+
+수동 버전은 `X.Y.Z` 형식이어야 하며, 기존 태그와 차트 메타데이터가 일치해야
+합니다. 자동 릴리즈가 no-op이면 기존과 같이 아티팩트 검증을 건너뜁니다.
+실패는 근거로 분류하세요. 서명·설치 문제, 하네스 문제, 외부 모델·네트워크
+실패는 별개이며 모델 요청 실패만으로 게시된 차트가 깨졌다고 판단하지 않습니다.
 
 ## 로컬에서 동등한 작업 실행하기
 
