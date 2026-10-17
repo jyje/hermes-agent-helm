@@ -177,6 +177,21 @@ pull request는 `mkdocs build --strict`를 실행하고 사이트 아티팩트�
 버전 변경과 upstream-review job은 서로 독립적입니다. 메인테이너는 모든 후속
 이슈의 구현을 기다리지 않고 일반 검증을 통과한 이미지 변경을 머지할 수 있습니다.
 
+upstream 검토는 결과를 항상 드러내서 알립니다.
+
+- **건너뜀.** `NVIDIA_API_KEY` secret이 없거나 upstream 릴리즈 노트가 없으면
+  안내 메시지만 남기고 job은 성공으로 끝납니다.
+- **실패.** NIM이 모든 시도에서 오류나 쓸 수 없는 응답을 돌려주면 "Automated
+  upstream review failed - review manually"라는 `upstream-review` 이슈를 하나
+  만들고 job을 실패시킵니다. 검토가 실패했는데 "올릴 이슈 없음"으로 보고하는
+  일은 없습니다.
+- **입력 축약.** 릴리즈 노트가 글자 수 예산(`NIM_MAX_NOTES_CHARS`, 기본값
+  60000)을 넘으면 호출 전에 줄입니다. highlights, upgrade, breaking,
+  security, gateway, infrastructure 섹션을 먼저 담고, 기여자 목록과 테스트
+  변경 내역은 뺍니다. 빠진 섹션 이름은 프롬프트와 생성된 각 이슈에 적힙니다.
+  시도가 실패하면 예산을 절반으로 줄여 다시 시도하고, 로그에 HTTP 상태와 응답
+  앞부분을 남깁니다.
+
 ## propose-release
 
 대기 중인 Changeset이 릴리즈 준비를 마치면 메인테이너가 이 workflow를

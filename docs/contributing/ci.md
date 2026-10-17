@@ -178,6 +178,22 @@ The version bump and upstream-review jobs are independent. Maintainers can merge
 the image update after its normal checks without waiting for every follow-up
 issue to be implemented.
 
+The upstream review reports every outcome explicitly:
+
+- **Skipped.** Without an `NVIDIA_API_KEY` secret (or with no upstream release
+  notes), the job prints a notice and stays green.
+- **Failed.** If NIM returns an error or an unusable response on every attempt,
+  the job files one `upstream-review` issue titled "Automated upstream review
+  failed - review manually" and then fails. A failed review is never reported
+  as "nothing to file".
+- **Condensed input.** Release notes over a character budget
+  (`NIM_MAX_NOTES_CHARS`, default 60000) are condensed before the call:
+  highlights, upgrade, breaking, security, gateway and infrastructure sections
+  go first, contributor lists and test changelogs are dropped, and the omitted
+  sections are named in the prompt and in each filed issue. A failed attempt
+  retries with half the budget, and the log shows the HTTP status and a short
+  excerpt of the response.
+
 ## propose-release
 
 A maintainer starts this workflow when pending Changesets are ready. It combines
