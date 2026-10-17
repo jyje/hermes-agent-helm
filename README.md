@@ -19,7 +19,7 @@
 
 ---
 
-**Found this useful? Please give it a ⭐ - it helps others find it.**
+**Found [this project](https://github.com/jyje/hermes-agent-helm) useful? Please give it a [⭐ on GitHub](https://github.com/jyje/hermes-agent-helm) - it helps others find it.**
 
 </div>
 
