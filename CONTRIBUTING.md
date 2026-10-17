@@ -107,6 +107,23 @@ The generated `## Values` table in every chart README stays English. It is
 generated from `values.yaml`, so translating a copy would create a second,
 drifting reference.
 
+## README images
+
+The chart and repository READMEs load images from
+`https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/...`,
+because Artifact Hub and `helm show readme` render the README packaged with
+each release and cannot resolve relative paths. Those URLs point at `main`, so
+every chart version already published depends on the files that exist there
+today.
+
+- Never delete or rename a file under `docs/images/` that a README references,
+  even after the README stops using it. Removing the dashboard screenshots in
+  #348 broke the gallery on the v1.18.0 Artifact Hub page; they were restored
+  for that reason.
+- To change a picture, add a new file name and point the README at it. Keep the
+  old file.
+- Keep a diagram's editable source next to it under `docs/images/src/`.
+
 ## Branch model
 
 | Branch | Purpose | CI |
