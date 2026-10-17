@@ -1,5 +1,63 @@
 # Changelog
 
+## 1.21.0
+
+### Features
+
+- [#390](https://github.com/jyje/hermes-agent-helm/pull/390) [`acccd84`](https://github.com/jyje/hermes-agent-helm/commit/acccd84696f466447c0f84b957288819c332416e) - Feature(networking): Native messenger webhook deployment example
+
+  Add an opt-in Telegram webhook overlay with explicit receiver, Service and TLS Ingress wiring. Document the public listener inventory, authentication and port collisions at the pinned Hermes version, and distinguish native messenger receivers from the generic webhook adapter. Existing chart defaults remain unchanged.
+
+- [#377](https://github.com/jyje/hermes-agent-helm/pull/377) [`0237344`](https://github.com/jyje/hermes-agent-helm/commit/0237344440cbd1ae31f1b4142c80c559ebbbbd51) - Feature(test): Helm test guards the two paths that depend on the Hermes image
+
+  The Helm test Job now checks, only when the feature is on, that the pinned Hermes image still provides the helpers the OpenAI Codex device login imports from `hermes_cli.auth`, and that Hermes discovers and fires the seeded `gateway:startup` ready-message hook. Both run in CI on every image bump, in the post-release verification, and in your own `helm test`. A failure names what is missing instead of breaking the login or the ready message silently.
+
+### Documentation
+
+- [#369](https://github.com/jyje/hermes-agent-helm/pull/369) [`b3c87d9`](https://github.com/jyje/hermes-agent-helm/commit/b3c87d950ae76566027d1bedc1c674a3bdee87b5) - Documentation(locales): Bring the Korean, Japanese and Chinese chart READMEs level with English
+
+  Every chart README now has the same sections, tables and examples in the same order. The Korean README gains the "Gateway lifecycle" section and the Nous free-tier rows. The Japanese and Chinese READMEs gain the current device-flow section (provider and channel matrix, Telegram notify, ready message), the Telegram team guide and the OpenAI Codex Telegram team example, the recovery steps for a config older than the migration floor, the Nous free-tier rows, and the Telegram team and ApplicationSet rows in the examples table. All four now say that the dashboard is upstream Hermes' own and the chart only switches it on and exposes it.
+
+- [#388](https://github.com/jyje/hermes-agent-helm/pull/388) [`3363d0c`](https://github.com/jyje/hermes-agent-helm/commit/3363d0cc00b94a9eb9d94c9786228e9bb3a98ac3) - Documentation(locales): Keep one canonical contributor guide
+
+  Link Korean contributors to the maintained English guide instead of a stale copy. Keep the other Korean contributor pages translated and explain the native-review status and English source of truth on Japanese and Simplified Chinese entry pages.
+
+- [#371](https://github.com/jyje/hermes-agent-helm/pull/371) [`d107f47`](https://github.com/jyje/hermes-agent-helm/commit/d107f47554e96cec1da393a54f91b3494f33dd3c) - Documentation(auth): Codex and Copilot pages mention Telegram
+
+  The OpenAI Codex and GitHub Copilot provider pages (English and Korean) and the header comments of `values-openai-codex.yaml` and `values-github-copilot.yaml` described a Discord-only flow. They now say the login code and the ready message can go to Discord or Telegram, with the settings to switch.
+
+- [#379](https://github.com/jyje/hermes-agent-helm/pull/379) [`9975302`](https://github.com/jyje/hermes-agent-helm/commit/997530277802a90e11b3d334a4cb5923b81b8484) - Documentation(readme): Show the latest released chart's Hermes version
+
+  Add a final Hermes Agent badge to the centered README headers. Read appVersion from the published Helm repository index so the badge follows the latest released chart without advertising an unreleased image update.
+
+- [#379](https://github.com/jyje/hermes-agent-helm/pull/379) [`848f559`](https://github.com/jyje/hermes-agent-helm/commit/848f559741ab9f5b080ed9e9e1334575903196d8) - Documentation(readme): Link every star prompt to the GitHub project
+
+  Link the project name and star action in every root and chart README locale to the same absolute GitHub repository URL. Keep the destination consistent when reading on GitHub, Artifact Hub, packaged chart pages, or the documentation site.
+
+- [#364](https://github.com/jyje/hermes-agent-helm/pull/364) [`9f1b651`](https://github.com/jyje/hermes-agent-helm/commit/9f1b651102c94e9970e28526aaa44c50576f0d02) - Documentation(readme): The root README says Telegram works for login and teams
+
+  The root README (English, Korean, Japanese, Simplified Chinese) no longer says the device-login code goes only to Discord or that Telegram team orchestration is separate. It now says the code and an opt-in ready message can go to Discord or Telegram, that all four combinations of the two providers and two messengers were run on a real cluster, and that leader teams completed a live handoff on both Discord and Telegram.
+
+- [#391](https://github.com/jyje/hermes-agent-helm/pull/391) [`f45edec`](https://github.com/jyje/hermes-agent-helm/commit/f45edec4d5c8b50794cc586a93b10b9ca936c099) - Documentation(i18n): Refresh Japanese and Simplified Chinese entry pages
+
+  Read the missing browser-dashboard guidance and feature-gated image compatibility test descriptions in Japanese and Simplified Chinese. Refresh the environment reference version and translation provenance after auditing every translated entry page against its English source; keep generated Values tables in English and the English fallback explicit.
+
+- [#381](https://github.com/jyje/hermes-agent-helm/pull/381) [`a733bda`](https://github.com/jyje/hermes-agent-helm/commit/a733bdaf587b8751e6224778aa9407fd6cc41f05) - Documentation(providers): Retire the removed Nous guest-onboarding example
+
+  Remove the zero-key Nous gateway overlay and its provider/environment/example listings. Hermes v0.22 restricts free onboarding to desktop and removes HERMES_GUEST_ONBOARDING. Use a supported provider overlay with your own credentials, and follow the upgrade note when replacing an existing values-nous.yaml override.
+
+- [#383](https://github.com/jyje/hermes-agent-helm/pull/383) [`c017504`](https://github.com/jyje/hermes-agent-helm/commit/c01750499ee5af1acdf9c942208329023f4580b3) - Documentation(upgrade): Explain the v0.22.1 persisted-session exception
+
+  Warn deployments that ran Hermes v0.22.1 about the upstream session-deletion limitation in v0.22.2. Distinguish that history from fresh installations and direct upgrades, preserve backups, and avoid unsupported database deletion or rollback advice.
+
+- [#363](https://github.com/jyje/hermes-agent-helm/pull/363) [`2c50cf6`](https://github.com/jyje/hermes-agent-helm/commit/2c50cf60a1671b605302f6cc10319d772eda09c3) - Documentation(chart): Upgrade notes for Hermes v0.22
+
+  Read the new "Upgrade notes" section before moving an existing release to the `v0.22.2` image: Hermes now prunes ended sessions older than 90 days at startup (`sessions.auto_prune`), with steps to keep them on an existing volume. It also covers the retired idle/daily session resets, the single multiplexed gateway, semver image tags, and the dashboard security fixes. The stale `SESSION_IDLE_MINUTES` row is removed from the environment variable table.
+
+- [#380](https://github.com/jyje/hermes-agent-helm/pull/380) [`5c754d0`](https://github.com/jyje/hermes-agent-helm/commit/5c754d05f6462d0fc1ee3fc6aa03e19c8975c9ad) - Documentation(locales): The Values table in the translated chart READMEs is current again
+
+  The Korean, Japanese and Simplified Chinese chart READMEs carried a hand-copied Values table that had drifted: it lacked the `dashboard.*`, `readyNotify.*` and other newer rows and still showed the old Copilot `validateUrl` default. `make docs` now copies the generated English table into them, and CI fails if a copy differs, so they stay in step with `values.yaml`.
+
 ## 1.20.0
 
 ### Documentation
