@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ c01750499ee5af1acdf9c942208329023f4580b3 -->
+<!-- translation_source: charts/hermes-agent/README.md @ acccd84696f466447c0f84b957288819c332416e -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -697,8 +697,9 @@ Service가 연결할 수 있도록 차트의 기본 host는 업스트림 loopbac
 공식 [API server 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server)를
 참고하세요.
 
-`webhook.enabled`는 하나의 범용 webhook receiver를 시작합니다. Telegram,
-Discord, Slack 등은 별도 리스너가 아니라 이 리스너 뒤의 route입니다.
+`webhook.enabled`는 범용 webhook receiver와 설정된 route를 시작합니다.
+Telegram과 WhatsApp Cloud 같은 메신저 자체 웹훅 모드는 별도 리스너이며
+이 스위치로 시작하지 않습니다.
 `WEBHOOK_SECRET` 또는 route별 secret을 `env`나 `extraEnvFrom`으로 설정하세요.
 공식 [webhook 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks)를
 참고하세요.
@@ -708,6 +709,12 @@ Service를 유지하려면 `service.ports: []`를 두고, API server나 webhook�
 때는 필요한 Service port를 모두 명시하세요. 바로 사용할 수 있는
 [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)은 API
 server와 webhook 포트를 노출하고 필요한 자격증명은 외부 Secret으로 참조합니다.
+
+[공개 리스너 목록](https://jyje.github.io/hermes-agent-helm/ko/advanced/integrations/listeners/)에서
+버전별 포트·바인딩 주소·인증·차트 연결 방식을 확인하세요.
+Telegram 자체 수신기는 [`values-telegram-webhook.yaml`](values-telegram-webhook.yaml)로
+리스너·Service·TLS Ingress를 명시적으로 연결할 수 있습니다.
+기본 폴링은 아웃바운드 방식이므로 이 리소스들이 필요하지 않습니다.
 
 ### A2A(Agent-to-Agent) 리스너
 
@@ -1028,6 +1035,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Nous Portal OAuth를 쓰는 대시보드 Ingress**, 인터넷에 공개하는 대시보드에 업스트림이 권장하는 로그인 방식 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **자체 OpenID Connect 제공자를 쓰는 대시보드 Ingress** (public PKCE 클라이언트, Nous Portal 불필요) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook**: 명시적 Service port와 외부 listener secret |
+| [`values-telegram-webhook.yaml`](values-telegram-webhook.yaml) | OpenAI (`openai-api`) | **Telegram 자체 웹훅**: 수신기·Service 포트·TLS Ingress를 명시하고 외부 인증 정보 사용 |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**: config.yaml passthrough + 명시적 Service port로 다른 A2A 에이전트가 발견·구동 가능 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 리스너 라우팅**: `/v1` API와 webhook host가 별도 Service port 사용 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 사전에 만든 Gateway를 통한 리스너 라우팅 |
@@ -1193,7 +1201,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
-| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Telegram, Discord,    Slack, and other sources are routes behind this single listener. | `false` |
+| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Native messenger    webhook modes (such as Telegram) are separate listeners configured via env/config. | `false` |
 | webhook.port | int | Webhook receiver port. | `8644` |
 
 ----------------------------------------------

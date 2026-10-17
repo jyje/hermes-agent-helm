@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ c01750499ee5af1acdf9c942208329023f4580b3 -->
+<!-- translation_source: charts/hermes-agent/README.md @ acccd84696f466447c0f84b957288819c332416e -->
 
 <div align="center" markdown="1">
 
@@ -431,9 +431,11 @@ Bitwarden Secrets Manager は起動時に `config.secrets.bitwarden` からプ�
 
 `apiServer.enabled` は Hermes の OpenAI 互換 API サーバーを起動します。上流のデフォルトはループバックですが、このチャートでは Kubernetes Service から到達できるよう `0.0.0.0` を使います。`API_SERVER_KEY` を `env`、または推奨の `extraEnvFrom` で参照する外部管理 Secret に設定してください。ループバックだけで待ち受ける場合も必須です。`apiServer.corsOrigins` は明示的かつ限定的なブラウザーオリジンの許可リストにのみ使用します。上流の [API サーバーガイド](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server)を参照してください。
 
-`webhook.enabled` は共通の webhook 受信リスナーを 1 つ起動します。Telegram、Discord、Slack などはその背後のルートであり、個別のリスナーではありません。`WEBHOOK_SECRET` またはルートごとのシークレットを `env` / `extraEnvFrom` に指定してください。上流の [webhook ガイド](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks)を参照してください。
+`webhook.enabled` は共通の webhook 受信リスナーと設定したルートを起動します。Telegram や WhatsApp Cloud 固有の webhook モードは別のリスナーで、このスイッチでは起動しません。`WEBHOOK_SECRET` またはルートごとのシークレットを `env` / `extraEnvFrom` に指定してください。上流の [webhook ガイド](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks)を参照してください。
 
 実行時の設定だけではポートは公開されません。従来の dashboard 専用 Service には `service.ports: []` を維持し、それ以外では全 Service ポートを明示します。[`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) は API サーバーと webhook のポートを公開し、必須の認証情報を外部 Secret から参照する例です。
+
+バージョン別のポート、バインド、認証とチャートの接続方法は[公開リスナー一覧（英語）](https://jyje.github.io/hermes-agent-helm/advanced/integrations/listeners/)を参照してください。[`values-telegram-webhook.yaml`](values-telegram-webhook.yaml) は Telegram 固有の受信リスナー、Service、TLS Ingress を明示的に接続します。通常のポーリングは外向き接続なので、これらは不要です。
 
 ### A2A（Agent-to-Agent）リスナー
 
@@ -637,6 +639,7 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Nous Portal OAuth を使うダッシュボード Ingress**。インターネットに公開するダッシュボードに上流が推奨するログイン方式 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **独自の OpenID Connect プロバイダーを使うダッシュボード Ingress**（public PKCE クライアント、Nous Portal 不要） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API サーバーと webhook**。明示的な Service ポートと外部 Secret |
+| [`values-telegram-webhook.yaml`](values-telegram-webhook.yaml) | OpenAI (`openai-api`) | **Telegram 固有の webhook**: 受信リスナー、Service ポート、TLS Ingress、外部 Secret を明示 |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A（Agent-to-Agent）**。config.yaml パススルーと明示的な Service ポートで、ほかの A2A エージェントから検出・操作可能 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress のリスナールーティング**: `/v1` API と webhook のホストを別の Service ポートへ接続 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: 既存の Gateway を経由するリスナールーティング |
@@ -800,7 +803,7 @@ ArgoCD でデプロイする場合は [`examples/argocd/`](../../examples/argocd
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
-| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Telegram, Discord,    Slack, and other sources are routes behind this single listener. | `false` |
+| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Native messenger    webhook modes (such as Telegram) are separate listeners configured via env/config. | `false` |
 | webhook.port | int | Webhook receiver port. | `8644` |
 
 ----------------------------------------------

@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ c01750499ee5af1acdf9c942208329023f4580b3 -->
+<!-- translation_source: charts/hermes-agent/README.md @ acccd84696f466447c0f84b957288819c332416e -->
 
 <div align="center" markdown="1">
 
@@ -431,9 +431,11 @@ Bitwarden Secrets Manager 在启动时通过 `config.secrets.bitwarden` 解析�
 
 `apiServer.enabled` 启动 Hermes 的 OpenAI 兼容 API 服务器。Chart 默认绑定 `0.0.0.0`，以便 Kubernetes Service 访问，与上游回环默认值不同。通过 `env`，或更推荐通过 `extraEnvFrom` 引用的外部 Secret 设置 `API_SERVER_KEY`，即使只监听回环地址也必须配置。`apiServer.corsOrigins` 仅用于明确且范围有限的浏览器来源允许列表。参阅上游 [API 服务器指南](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server)。
 
-`webhook.enabled` 启动一个通用 webhook 接收器。Telegram、Discord、Slack 等集成是该监听器后的路由，而非独立监听器。通过 `env` / `extraEnvFrom` 设置 `WEBHOOK_SECRET` 或各路由的密钥，参阅上游 [webhook 指南](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks)。
+`webhook.enabled` 启动通用 webhook 接收器及其配置的路由。Telegram 和 WhatsApp Cloud 等平台的原生 webhook 模式使用独立监听器，不由此开关启动。通过 `env` / `extraEnvFrom` 设置 `WEBHOOK_SECRET` 或各路由的密钥，参阅上游 [webhook 指南](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks)。
 
 这些运行时设置本身不会公开端口。沿用仅支持 dashboard 的 Service 时保持 `service.ports: []`，否则明确列出每个 Service 端口。[`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) 提供公开 API 服务器和 webhook 端口、通过外部 Secret 引用必需凭据的示例。
+
+各版本的端口、绑定地址、认证与图表接线请参阅[公开监听器列表（英语）](https://jyje.github.io/hermes-agent-helm/advanced/integrations/listeners/)。[`values-telegram-webhook.yaml`](values-telegram-webhook.yaml) 显式连接 Telegram 原生接收器、Service 和 TLS Ingress。普通轮询使用出站连接，不需要这些资源。
 
 ### A2A（Agent-to-Agent）监听器
 
@@ -632,6 +634,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **使用 Nous Portal OAuth 的仪表盘 Ingress**，上游推荐用于公网仪表盘的登录方式 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **使用你自己的 OpenID Connect 提供方的仪表盘 Ingress**（public PKCE 客户端，无需 Nous Portal） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API 服务器与 webhook**：显式 Service 端口和外部监听器密钥 |
+| [`values-telegram-webhook.yaml`](values-telegram-webhook.yaml) | OpenAI (`openai-api`) | **Telegram 原生 webhook**：显式接收器、Service 端口、TLS Ingress 和外部凭据 |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A（Agent-to-Agent）**：config.yaml 透传与显式 Service 端口，供其他 A2A 智能体发现并调用 |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress 监听器路由**：`/v1` API 与 webhook 主机使用不同 Service 端口 |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**：通过已有 Gateway 路由监听器流量 |
@@ -795,7 +798,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
-| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Telegram, Discord,    Slack, and other sources are routes behind this single listener. | `false` |
+| webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Native messenger    webhook modes (such as Telegram) are separate listeners configured via env/config. | `false` |
 | webhook.port | int | Webhook receiver port. | `8644` |
 
 ----------------------------------------------
