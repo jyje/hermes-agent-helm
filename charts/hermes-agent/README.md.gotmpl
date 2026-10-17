@@ -729,9 +729,10 @@ for a loopback-only server. Use `apiServer.corsOrigins` only for an explicit,
 narrow browser-origin allowlist. See the upstream [API server
 guide](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server).
 
-`webhook.enabled` starts the one generic webhook receiver. Telegram, Discord,
-Slack, and other integrations are routes behind that listener, not separate
-listeners. Set `WEBHOOK_SECRET` or a per-route secret through `env` or
+`webhook.enabled` starts the generic webhook receiver and its configured routes.
+Native messenger webhook modes, such as Telegram and WhatsApp Cloud, use
+separate listeners and are not started by this switch.
+Set `WEBHOOK_SECRET` or a per-route secret through `env` or
 `extraEnvFrom`; see the upstream [webhook
 guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks).
 
@@ -740,6 +741,13 @@ the legacy dashboard-only Service, or specify every Service port explicitly.
 The copy-ready [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml)
 overlay exposes API server and webhook ports and references an external Secret
 for the required credentials.
+
+The [public listener inventory](https://jyje.github.io/hermes-agent-helm/advanced/integrations/listeners/)
+lists version-specific ports, bind addresses, authentication and chart wiring.
+For Telegram's native receiver, use
+[`values-telegram-webhook.yaml`](values-telegram-webhook.yaml): it explicitly
+connects the listener, Service and TLS Ingress. Ordinary polling remains outbound
+and needs none of those resources.
 
 ### A2A (Agent-to-Agent) listener
 
@@ -1072,6 +1080,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with Nous Portal OAuth**, the upstream-recommended sign-in for an internet-facing dashboard |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with your own OpenID Connect provider** (public PKCE client, no Nous Portal) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |
+| [`values-telegram-webhook.yaml`](values-telegram-webhook.yaml) | OpenAI (`openai-api`) | **Native Telegram webhook**: explicit receiver, Service port and TLS Ingress with external credentials |
 | [`values-a2a.yaml`](values-a2a.yaml) | OpenAI (`openai-api`) | **A2A (Agent-to-Agent)**, config.yaml passthrough + explicit Service port, so other A2A agents can discover and drive this one |
 | [`values-ingress-listeners.yaml`](values-ingress-listeners.yaml) | OpenAI (`openai-api`) | **Ingress listener routing**: `/v1` API and webhook hosts use separate Service ports |
 | [`values-httproute.yaml`](values-httproute.yaml) | OpenAI (`openai-api`) | **Gateway API HTTPRoute**: listener routing through a pre-existing Gateway |

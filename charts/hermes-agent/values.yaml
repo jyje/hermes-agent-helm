@@ -481,8 +481,8 @@ persistence:
   existingClaim: ""
 
 # ---------------------------------------------------------------------------
-# Networking. `hermes gateway run` is primarily OUTBOUND (Telegram/Discord/etc.)
-# and exposes no inbound API, so no access Service is created by default. A
+# Networking. `hermes gateway run` uses outbound messenger connections by
+# default, so no access Service is created by default. A
 # headless Service is always created for StatefulSet DNS/governance.
 #
 # The management `dashboard`, optional OpenAI-compatible API server, and
@@ -558,8 +558,8 @@ apiServer:
   corsOrigins: ""
 
 webhook:
-  # -- Enable Hermes' generic inbound webhook receiver. Telegram, Discord,
-  #    Slack, and other sources are routes behind this single listener.
+  # -- Enable Hermes' generic inbound webhook receiver. Native messenger
+  #    webhook modes (such as Telegram) are separate listeners configured via env/config.
   enabled: false
   # -- Webhook receiver port.
   port: 8644
