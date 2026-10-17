@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ dfee2e4b165f1307c6762b6e2d5a07134c689bc1 -->
+<!-- translation_source: charts/hermes-agent/README.md @ a733bdaf587b8751e6224778aa9407fd6cc41f05 -->
 
 <div align="center" markdown="1">
 
@@ -63,7 +63,6 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 设备登录（无需 API 密钥） | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 取决于预设中的参考模型和聚合模型 | [`values-moa.yaml`](values-moa.yaml) |
 | 自定义（LiteLLM / vLLM / LM Studio） | `config.providers` 下的自定义 ID | 取决于代理 | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 免费额度（`nous/welcome`） | `nous` | 无需密钥：启动时通过 `HERMES_GUEST_ONBOARDING=1` 签发匿名身份 | [`values-nous.yaml`](values-nous.yaml) |
 
 > 不带后缀的 `openai` **不是有效的提供商标识符**，它是 OpenRouter 的别名。请使用 **`openai-api`**。
 
@@ -535,7 +534,6 @@ config:
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 主服务器集成 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 仪表盘内置用户名和密码认证，上游在非回环绑定时强制启用；`HERMES_DASHBOARD_PUBLIC_URL` 声明 Ingress 后的外部来源地址 |
-| `HERMES_GUEST_ONBOARDING` | 设为 `1` 时在启动时签发匿名 Nous 身份（免费的 `nous/welcome` 推理，以及网页搜索、浏览器、Gmail、Linear 等连接器工具）。如果已配置提供商密钥，则只签发连接器工具用的身份，`active_provider` 保持不变。未设置（默认）时与 v2026.9.11 之前的行为一致。零外部密钥的覆盖文件见 `values-nous.yaml` |
 | `HERMES_MAX_ITERATIONS` | 每次会话的工具调用迭代预算（默认 500 次，之后允许一次收尾调用）；硬上限为 `config.agent.max_turns`，上游默认不限，Chart 已不再初始化该值 |
 | `HERMES_AGENT_TIMEOUT` | 网关无活动超时（默认 1800 秒 / 30 分钟） |
 | `HERMES_TIMEZONE` | 覆盖 IANA 时区 |
@@ -543,6 +541,19 @@ config:
 > **无法通过环境变量配置：** 上下文压缩、回退提供商及提供商路由只存在于 `config.yaml`（`.Values.config`）中，没有对应环境变量。
 
 ## 升级说明
+
+### 移除无需密钥的 Nous 示例
+
+已移除 `values-nous.yaml` 覆盖文件。Hermes v0.22 移除了
+`HERMES_GUEST_ONBOARDING`，免费的 `nous/welcome` 入门模型仅供桌面应用使用，
+因此该覆盖文件已无法提供无需密钥的网关部署。
+请参阅[官方 v0.22.0 发布说明](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)。
+
+请从部署输入中移除旧覆盖文件和环境变量，选择
+[OpenAI](values-openai.yaml) 或 [OpenRouter](values-openrouter.yaml) 等示例，
+并配置自己的凭据。设置 `bootstrap.overwrite: false` 时，现有卷会保留
+`config.yaml`，因此还需要更新持久化的提供商和模型配置，或先备份再主动重新初始化
+（参阅[配置模型](#配置模型)）。本次移除的是匿名使用示例，并不移除上游已认证的 Nous 支持。
 
 ### Hermes v0.22（Chart 1.20.0）
 
@@ -606,7 +617,6 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | 通过 `UPSTAGE_BASE_URL` 覆盖端点 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | 并行运行参考模型，由聚合模型综合结果 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | 任意 | **Bitwarden Secrets Manager** 在启动时提供密钥 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 免费额度（`nous`） | **零外部 API 密钥**：启动时签发匿名身份（`HERMES_GUEST_ONBOARDING=1`），用于 `nous/welcome` 推理和连接器工具 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 代理（远程/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 代理（集群内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**：启用仪表盘、上游密码认证及可信代理 |
