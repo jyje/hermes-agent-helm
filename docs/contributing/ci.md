@@ -55,17 +55,19 @@ Two jobs run on every functional change:
 `helm lint`, `helm template`, render-only assertions for the `dashboard`
 block (`.github/scripts/assert-dashboard-render.sh`), and a **helm-docs drift check** - if
 `charts/hermes-agent/README.md` is out of date relative to `README.md.gotmpl`,
-the job fails. Always run `make docs` after editing `values.yaml` and commit the
+or the copy of its `## Values` table in a translated chart README differs, the
+job fails. Always run `make docs` after editing `values.yaml` and commit the
 result.
 
 ### `test`
 
-Seven scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
+Eight scenarios run as a **matrix**, each on its **own ephemeral kind cluster**
 (a separate runner) - fully isolated, with native per-job status, timeout, and
 failure diagnostics instead of one bundled log. The PR checks list shows them
 separately: `test (message)`, `test (existing-claim)`, `test (team)`,
 `test (security-hardened)`, `test (bootstrap-overwrite)`,
-`test (config-migration)`, and `test (dashboard-ingress)`.
+`test (config-migration)`, `test (dashboard-ingress)`, and
+`test (image-contract)`.
 Scenario logic lives in [.github/scripts](../../.github/scripts) (`lib.sh` +
 one script per scenario) rather than inline in the workflow.
 
@@ -136,6 +138,19 @@ certificate is self-signed, so no DNS or public certificate is involved; never
 use a `*.localhost` host here, because upstream treats loopback hosts as a
 development setup and does not set `Secure` for them. Real DNS and Let's
 Encrypt issuance are verified by hand on a real cluster.
+
+The `image-contract` scenario guards two chart paths that run code inside the
+Hermes image and are off by default, so no other scenario touches them: the
+OpenAI Codex device login imports its helpers from `hermes_cli.auth`, and the
+ready message is a `gateway:startup` hook that Hermes loads in-process. It
+installs the chart with both enabled (without `--wait`, because the main Pod
+waits for a person to approve a login code), runs the Helm test Job, and
+requires both of its checks to report `OK`. The helper check is an import; the
+hook check sets an unknown channel so the handler logs and returns, and it
+requires that handler log line, because the registry swallows handler errors.
+No secret and no provider call is needed, so it also runs on fork PRs. An
+image bump that renames or moves either dependency fails here with the missing
+name instead of breaking a user's login or ready message silently.
 
 ### Fork PRs
 

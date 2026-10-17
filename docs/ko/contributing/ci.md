@@ -55,17 +55,19 @@ flowchart LR
 
 `helm lint`, `helm template`, `dashboard` 블록의 렌더링 전용 검증
 (`.github/scripts/assert-dashboard-render.sh`), 그리고 **helm-docs 드리프트 체크** - `charts/hermes-agent/README.md`가
-`README.md.gotmpl` 대비 오래됐으면 job이 실패합니다. `values.yaml`을 수정한
+`README.md.gotmpl` 대비 오래됐거나 번역된 차트 README에 있는 `## Values` 표 복사본이
+다르면 job이 실패합니다. `values.yaml`을 수정한
 뒤에는 항상 `make docs`를 실행하고 결과를 커밋하세요.
 
 ### `test`
 
-시나리오 일곱 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
+시나리오 여덟 개가 **매트릭스**로 실행되며, 각각 **독립된 임시 kind
 클러스터**(별도 러너)에서 돕니다 - 완전히 격리되어 있고, 하나로 뭉친 로그
 대신 job별로 고유한 상태·타임아웃·실패 진단을 갖습니다. PR 체크 목록에는
 `test (message)`, `test (existing-claim)`, `test (team)`,
 `test (security-hardened)`, `test (bootstrap-overwrite)`,
-`test (config-migration)`, `test (dashboard-ingress)`로 따로 표시됩니다.
+`test (config-migration)`, `test (dashboard-ingress)`, `test (image-contract)`로 따로
+표시됩니다.
 시나리오 로직은 workflow에 인라인으로 있지 않고
 [.github/scripts](../../../.github/scripts)(`lib.sh` + 시나리오별 스크립트)에
 있습니다.
@@ -136,6 +138,17 @@ flowchart LR
 필요 없습니다. 업스트림이 loopback 호스트를 개발 환경으로 보고 `Secure`를 설정하지
 않으므로 여기서는 `*.localhost` 호스트를 쓰지 마세요. 실제 DNS와 Let's Encrypt 발급은
 실제 클러스터에서 수동으로 검증합니다.
+
+`image-contract` 시나리오는 Hermes 이미지 안에서 실행되고 기본으로 꺼져 있어서 다른
+시나리오가 건드리지 못하는 차트 경로 두 가지를 지킵니다. OpenAI Codex 디바이스 로그인은
+`hermes_cli.auth`에서 함수를 불러오고, 준비 완료 메시지는 Hermes가 프로세스 안에서
+로드하는 `gateway:startup` 훅입니다. 이 시나리오는 두 기능을 켜고 차트를 설치한 뒤
+(메인 Pod가 사람이 로그인 코드를 승인하기를 기다리므로 `--wait` 없이) Helm test Job을
+실행하고 두 점검이 모두 `OK`를 보고해야 통과합니다. 함수 점검은 import이고, 훅 점검은 알 수
+없는 채널을 설정해 핸들러가 로그만 남기고 돌아오게 하며, 레지스트리가 핸들러 오류를
+삼키므로 그 핸들러의 로그 줄을 요구합니다. 시크릿도 제공자 호출도 필요 없어서 포크 PR에서도
+돕니다. 이미지를 올렸을 때 둘 중 하나의 이름이 바뀌거나 옮겨지면 사용자의 로그인이나
+준비 완료 메시지가 조용히 깨지는 대신 이 시나리오가 빠진 이름과 함께 실패합니다.
 
 ### Fork PR
 

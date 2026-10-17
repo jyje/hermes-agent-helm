@@ -66,7 +66,6 @@ helm upgrade --install hermes-agent hermes-agent/hermes-agent \
 | OpenAI Codex | `openai-codex` | ChatGPT/Codex 디바이스 로그인(API 키 불필요) | [`values-openai-codex.yaml`](values-openai-codex.yaml) |
 | Mixture-of-Agents (MoA) | `moa` | 프리셋의 reference/aggregator 모델에 따라 다름 | [`values-moa.yaml`](values-moa.yaml) |
 | 커스텀 (LiteLLM / vLLM / LM Studio) | `config.providers` 아래 직접 정의한 id | 프록시마다 다름 | [`values-litellm.yaml`](values-litellm.yaml) |
-| Nous 무료 티어 (`nous/welcome`) | `nous` | 없음: 부팅 시 `HERMES_GUEST_ONBOARDING=1`로 익명 identity 발급 | [`values-nous.yaml`](values-nous.yaml) |
 
 > `openai`(접미사 없음)는 **유효하지 않은** 제공자 키입니다 - OpenRouter의
 > 별칭으로 처리됩니다. `openai-api`를 사용하세요.
@@ -458,8 +457,12 @@ done; wait
 
 [`helm test`](#테스트) Job(훅 `helm.sh/hook: test`)은 `hermes --version`을
 실행하고, 시드된 `config.yaml`을 검증하며, docker 가용성을 확인하고(백엔드가
-`local`이므로 정보 제공용), `hermes doctor`를 실행합니다. `--set
-tests.enabled=false`로 끄거나, `--set tests.doctorStrict=true`로 doctor
+`local`이므로 정보 제공용), `hermes doctor`를 실행합니다. 기능이 켜져 있을 때만
+도는 점검이 두 가지 있습니다. 차트가 Hermes 이미지 안에서 실행하는 코드를 지키는
+것으로, 이미지를 올리면 깨질 수 있기 때문입니다. OpenAI Codex 디바이스 로그인에서는
+로그인이 불러오는 Hermes 내부 함수를 이미지가 여전히 제공하는지, `readyNotify.enabled`에서는
+Hermes가 심어 둔 `gateway:startup` 훅을 찾아 실행하는지 확인합니다. Job은
+`--set tests.enabled=false`로 끄거나, `--set tests.doctorStrict=true`로 doctor
 실패를 치명적 오류로 만들 수 있습니다.
 
 ### 제공자 엔드-투-엔드 검증 (`tests.chat.enabled`)
@@ -880,7 +883,6 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 | `MATRIX_HOMESERVER` / `MATRIX_ACCESS_TOKEN` | Matrix 홈서버 통합 |
 | `WHATSAPP_CLOUD_PHONE_NUMBER_ID` / `WHATSAPP_CLOUD_ACCESS_TOKEN` | WhatsApp Cloud API |
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 대시보드 auth gate용 내장 사용자명/비밀번호 제공자 (업스트림은 non-loopback 바인드에서 항상 이 gate를 켬); `HERMES_DASHBOARD_PUBLIC_URL`은 Ingress 뒤의 외부 origin 선언 |
-| `HERMES_GUEST_ONBOARDING` | `1`로 설정하면 부팅 시 익명 Nous identity를 발급합니다(무료 `nous/welcome` 추론과 웹 검색, 브라우저, Gmail, Linear 등의 커넥터 도구). 제공자 키가 이미 설정되어 있으면 커넥터 도구용 identity만 발급하고 `active_provider`는 바꾸지 않습니다. 미설정(기본값)이면 v2026.9.11 이전과 동일하게 동작합니다. 외부 키 없는 오버레이는 `values-nous.yaml`을 참고하세요 |
 | `HERMES_MAX_ITERATIONS` | 대화당 도구 호출 반복 예산 (기본값: 500, 소진 시 마무리용 grace call 1회); 하드 캡은 `config.agent.max_turns`로, 업스트림 기본은 무제한이며 이 차트도 더 이상 시드하지 않음 |
 | `HERMES_AGENT_TIMEOUT` | Gateway 비활성 타임아웃 (기본값: 1800초 / 30분) |
 | `HERMES_TIMEZONE` | IANA 타임존 오버라이드 |
@@ -890,6 +892,21 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 > 없습니다.
 
 ## 업그레이드 노트
+
+### 외부 키 없는 Nous 예제 종료
+
+`values-nous.yaml` 오버레이를 제거했습니다. Hermes v0.22는
+`HERMES_GUEST_ONBOARDING`을 제거했고 무료 `nous/welcome` 온보딩 모델은
+데스크톱 전용이므로, 이 오버레이로 외부 키 없는 게이트웨이를 실행할 수 없습니다.
+[공식 v0.22.0 릴리즈 노트](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)를 참고하세요.
+
+배포 입력에서 기존 오버레이와 환경변수를 제거하세요.
+[OpenAI](values-openai.yaml)나 [OpenRouter](values-openrouter.yaml) 같은
+제공자 예제를 선택하고 자신의 인증 정보를 설정하세요.
+`bootstrap.overwrite: false`인 기존 볼륨은 `config.yaml`을 보존하므로,
+저장된 제공자·모델 설정도 수정하거나 백업 후 의도적으로 다시 시드해야 합니다
+([설정 모델](#설정-모델) 참고). 익명 예제만 종료하며 업스트림의 인증된 Nous
+지원을 제거하는 것은 아닙니다.
 
 ### Hermes v0.22 (차트 1.20.0)
 
@@ -1005,7 +1022,6 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-upstage.yaml`](values-upstage.yaml) | Upstage Solar | `UPSTAGE_BASE_URL`로 엔드포인트 오버라이드 |
 | [`values-moa.yaml`](values-moa.yaml) | Mixture-of-Agents (`moa`) | reference 모델들이 병렬로 실행되고, aggregator 모델이 결과를 종합 |
 | [`values-bitwarden.yaml`](values-bitwarden.yaml) | any | **Bitwarden Secrets Manager**가 시작 시 제공자 키 제공 |
-| [`values-nous.yaml`](values-nous.yaml) | Nous 무료 티어 (`nous`) | **외부 API 키 0개**: 부팅 시 익명 identity를 발급(`HERMES_GUEST_ONBOARDING=1`)해 `nous/welcome` 추론과 커넥터 도구 사용 |
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (대시보드 활성화, 업스트림 비밀번호 gate, trusted proxy) |
@@ -1032,24 +1048,23 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
 | affinity | object | Affinity rules for Pod scheduling. | `{}` |
-| apiServer | object | ------------------------------------------------------------------------- | `{"corsOrigins":"","enabled":false,"host":"0.0.0.0","port":8642}` |
 | apiServer.corsOrigins | string | Comma-separated browser origins allowed to call the API directly. Empty    disables browser CORS access. | `""` |
 | apiServer.enabled | bool | Enable Hermes' OpenAI-compatible HTTP API server. | `false` |
 | apiServer.host | string | Bind address. Upstream defaults to 127.0.0.1; a Kubernetes Service needs    a non-loopback address. API_SERVER_KEY is still required on loopback. | `"0.0.0.0"` |
 | apiServer.port | int | API server port. | `8642` |
 | args | list | Arguments passed through the image entrypoint. `gateway run` selects the    non-interactive outbound messaging service instead of the default TUI. | `["gateway","run"]` |
-| auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/copilot_internal/v2/token"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"securityContext":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
+| auth | object | ------------------------------------------------------------------------- | `{"deviceFlow":{"enabled":false,"forceRelogin":false,"image":{"repository":"python","tag":"3.13-slim"},"notify":"discord","provider":"github-copilot","providers":{"github-copilot":{"authHost":"github.com","clientId":"Ov23li8tweQw6odWQebz","flow":"github","scope":"read:user","tokenEnv":"COPILOT_GITHUB_TOKEN","validateUrl":"https://api.github.com/user"},"openai-codex":{"flow":"openai-codex","issuer":"https://auth.openai.com"}},"resources":{},"securityContext":{},"timeoutSeconds":870,"tokenOwner":{"gid":10000,"uid":10000}}}` |
 | auth.deviceFlow.enabled | bool | Bootstrap a provider credential via the OAuth device flow at startup.    When false, the agent uses the static key from `env`/`extraEnvFrom`. | `false` |
 | auth.deviceFlow.forceRelogin | bool | Force a fresh login even if a token already exists on the volume. | `false` |
 | auth.deviceFlow.image | object | Login image for GitHub-style profiles. OpenAI Codex uses the pinned    Hermes image so auth.json persistence and refresh stay version-aligned. | `{"repository":"python","tag":"3.13-slim"}` |
-| auth.deviceFlow.notify | string | Where to deliver the verification URL + user code for human approval.    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`). The code is always    also printed to the init container logs as a fallback. | `"discord"` |
+| auth.deviceFlow.notify | string | Where to deliver the verification URL + user code for human approval.    `discord` reuses the agent's bot creds (DISCORD_BOT_TOKEN +    DISCORD_HOME_CHANNEL from `env`/`extraEnvFrom`); `telegram` reuses    TELEGRAM_BOT_TOKEN + TELEGRAM_HOME_CHANNEL the same way. The code is    always also printed to the init container logs as a fallback. | `"discord"` |
 | auth.deviceFlow.provider | string | Which provider profile to authenticate. Must be a key under    `providers` below. Only one device-flow login runs at a time. | `"github-copilot"` |
 | auth.deviceFlow.providers.github-copilot.authHost | string | Host serving the device-code + token endpoints (GitHub-style paths). | `"github.com"` |
 | auth.deviceFlow.providers.github-copilot.clientId | string | OAuth client id for the device grant. The shared opencode/Copilot-CLI    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py). | `"Ov23li8tweQw6odWQebz"` |
 | auth.deviceFlow.providers.github-copilot.flow | string | Login protocol handler. | `"github"` |
 | auth.deviceFlow.providers.github-copilot.scope | string | OAuth scope requested in the device grant. | `"read:user"` |
 | auth.deviceFlow.providers.github-copilot.tokenEnv | string | .env key Hermes reads this provider's token from (resolution order    COPILOT_GITHUB_TOKEN > GH_TOKEN > GITHUB_TOKEN). | `"COPILOT_GITHUB_TOKEN"` |
-| auth.deviceFlow.providers.github-copilot.validateUrl | string | Optional endpoint to verify an existing token is still live; on    401/403 the init container re-runs the login. Empty = skip the check. | `"https://api.github.com/copilot_internal/v2/token"` |
+| auth.deviceFlow.providers.github-copilot.validateUrl | string | Optional endpoint to verify an existing token is still live; on    401/403 the init container re-runs the login. Empty = skip the check.    `/user` answers 401 for a revoked token and does not depend on the    Copilot plan. The old `copilot_internal/v2/token` exchange endpoint    returned 403 for a valid token on a Copilot Free account, which made    every restart ask for a new login. | `"https://api.github.com/user"` |
 | auth.deviceFlow.providers.openai-codex.flow | string | Use the OpenAI Codex device-code flow bundled with the pinned    Hermes version and persist refreshable credentials in auth.json. | `"openai-codex"` |
 | auth.deviceFlow.providers.openai-codex.issuer | string | OpenAI account issuer. Override only for a compatible test server. | `"https://auth.openai.com"` |
 | auth.deviceFlow.resources | object | Resources for the login init container. | `{}` |
@@ -1062,6 +1077,13 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
+| dashboard | object | ------------------------------------------------------------------------- | `{"auth":{"provider":"basic"},"enabled":false,"publicUrl":"","readinessProbe":{"enabled":true,"periodSeconds":10},"trustedProxies":[]}` |
+| dashboard.auth.provider | string | Upstream auth provider the credentials below are for. The template    fails when the provider's required keys are missing from `env` or    `extraEnv`: `basic` (HERMES_DASHBOARD_BASIC_AUTH_USERNAME + _PASSWORD    or _PASSWORD_HASH), `oauth` (HERMES_DASHBOARD_OAUTH_CLIENT_ID) or    `oidc` (HERMES_DASHBOARD_OIDC_ISSUER + _CLIENT_ID). Use `external`    when credentials arrive through `extraEnvFrom` or an ExternalSecret,    which the chart cannot inspect. | `"basic"` |
+| dashboard.enabled | bool | Start the supervised management dashboard (renders `HERMES_DASHBOARD=1`).    Exposing it also needs `service.enabled` plus an `ingress` or `httpRoute`.    `public_url` and `trusted_proxies` are written into `config.yaml` when the    volume is first seeded, so changing the host or `dashboard.*` later needs    `--set bootstrap.overwrite=true` for that upgrade (see the README, "Expose the    dashboard"). | `false` |
+| dashboard.publicUrl | string | External origin the dashboard is reached at, for example    `https://hermes.example.com`. Feeds `config.dashboard.public_url`. When    empty and `ingress.enabled`, it is derived from the first Ingress host    (`https` when `ingress.tls` is set). Set it explicitly for an HTTPRoute.    A value already set under `config.dashboard` wins. | `""` |
+| dashboard.readinessProbe.enabled | bool | Render a TCP readiness probe on `service.port` while the dashboard is    enabled, so the pod only joins the Service once the dashboard    listens. The first start can take minutes (bundled skills sync onto    the volume), during which an Ingress would otherwise answer 502. An    explicit `probes.readiness` wins. Readiness never restarts the pod. | `true` |
+| dashboard.readinessProbe.periodSeconds | int | Seconds between readiness checks. | `10` |
+| dashboard.trustedProxies | list | Peers allowed to supply X-Forwarded-Proto / X-Forwarded-For, usually the    ingress controller's pod CIDR. Feeds `config.dashboard.trusted_proxies`;    upstream rejects unbounded entries such as 0.0.0.0/0. | `[]` |
 | deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
 | externalSecret | object | ------------------------------------------------------------------------- | `{"data":[],"dataFrom":[],"enabled":false,"refreshInterval":"1h","secretStoreRef":{"kind":"ClusterSecretStore","name":""},"target":{"creationPolicy":"Owner","deletionPolicy":"Retain","name":""}}` |
@@ -1112,6 +1134,8 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | probes.liveness | object | Liveness probe spec. Empty = no liveness probe. | `{}` |
 | probes.readiness | object | Readiness probe spec. Empty = no readiness probe. | `{}` |
 | probes.startup | object | Startup probe spec. Empty = no startup probe. Use this when first start takes longer than the liveness probe allows. | `{}` |
+| readyNotify.enabled | bool | Seed the hook and enable it. Off by default. | `false` |
+| readyNotify.notify | string | Where to post: `discord` (DISCORD_BOT_TOKEN + DISCORD_HOME_CHANNEL) or    `telegram` (TELEGRAM_BOT_TOKEN + TELEGRAM_HOME_CHANNEL). Required when    enabled, unless `auth.deviceFlow.enabled` is true: then empty follows    `auth.deviceFlow.notify`. | `""` |
 | replicaCount | int | Set to 0 to prepare GitOps resources (Secret, ConfigMap, PVC, ...)    without starting an agent Pod, then scale to 1 after credentials and    optional device login are ready. The gateway and device-login init    container do not run while paused. Hermes Agent is a single-writer    workload bound to one HERMES_HOME (ReadWriteOnce PVC), so values above 1    are unsupported: Deployment replicas contend for the same volume and    StatefulSet replicas are disconnected agent identities. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
 | runtimeClassName | string | RuntimeClass for the Pod. Set to a sandboxed runtime (gVisor: "gvisor",    Kata: "kata-containers") to add a kernel isolation boundary around the    agent's shell execution. Empty by default: the cluster's default runtime. | `""` |
