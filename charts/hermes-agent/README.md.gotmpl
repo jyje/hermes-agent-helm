@@ -933,6 +933,16 @@ A few more commonly-used ones, current as of image `{{ template "chart.appVersio
 
 ### Hermes v0.22 (chart 1.20.0)
 
+> **If you ran v0.22.1:** upstream says that release was built from the wrong
+> commit and that sessions used by its gateway cannot be deleted in v0.22.2.
+> Keep a backup of your Hermes volume before changing versions. This exception
+> concerns deployments that ran v0.22.1, including explicit `image.tag`
+> overrides; it does not describe fresh v0.22.2 installs or direct upgrades
+> that skipped v0.22.1. Keep the chart's v0.22.2 default and avoid selecting
+> v0.22.1. No safe rollback or manual database repair is established here:
+> do not delete `state.db` to work around it. See the
+> [official v0.22.2 correction and known issue](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.2).
+
 Chart 1.20.0 moves the default image from `v2026.9.24` (Hermes v0.21.5) to
 `v0.22.2`. The chart's values and templates did not change, but Hermes itself
 changed a few defaults that reach data on the persistent volume. Read these
