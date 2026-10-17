@@ -40,6 +40,21 @@
 [docs/ko/contributing/ci.md](docs/ko/contributing/ci.md)에 정리되어 있습니다.
 workflow 세부사항은 여기에 다시 옮겨 적지 말고 그 문서를 단일 출처로 유지하세요.
 
+## README 이미지
+
+차트와 저장소 README는 이미지를
+`https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/...`에서
+불러옵니다. Artifact Hub와 `helm show readme`는 릴리스마다 패키징된 README를
+렌더링하므로 상대 경로를 해석할 수 없기 때문입니다. 이 URL은 `main`을 가리키므로,
+이미 배포된 모든 차트 버전이 지금 `main`에 있는 파일에 의존합니다.
+
+- README가 참조하는 `docs/images/` 아래 파일은 README가 더는 쓰지 않게 되어도
+  삭제하거나 이름을 바꾸지 마세요. #348에서 대시보드 스크린샷을 지우자 v1.18.0의
+  Artifact Hub 페이지 갤러리가 깨져서, 이 파일들을 다시 복원했습니다.
+- 그림을 바꿀 때는 새 파일 이름을 추가하고 README가 그 파일을 가리키게 하세요.
+  이전 파일은 남겨 둡니다.
+- 다이어그램의 편집 가능한 원본은 `docs/images/src/`에 함께 두세요.
+
 ## 브랜치 모델
 
 | 브랜치 | 목적 | CI |
