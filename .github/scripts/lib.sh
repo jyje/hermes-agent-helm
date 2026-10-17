@@ -108,28 +108,48 @@ pod_name() {
     -o jsonpath='{.items[0].metadata.name}'
 }
 
-# chat_round_trip <pod>: passes on the first model that answers; the
+inject_ci_skill() {
+  local pod="$1"
+  # shellcheck disable=SC2016
+  kubectl exec -n "$NS" "$pod" -- sh -c '
+    skill_dir="${HERMES_HOME:-/opt/data}/skills/ci-ping"
+    mkdir -p "$skill_dir"
+    printf "%s\n" "---" "name: ci-ping" \
+      "description: Reply with CI_PONG when asked for a CI ping." "---" \
+      "# CI Ping" "" "Reply with exactly CI_PONG. Do not call other tools." \
+      > "$skill_dir/SKILL.md"
+  ' || return
+  # A flat Markdown file is absent from the current upstream skill index.
+  kubectl exec -n "$NS" "$pod" -- hermes skills list \
+    | grep -E '(^|[^[:alnum:]_-])ci-ping([^[:alnum:]_-]|$)' >/dev/null
+}
+
+# chat_round_trip <pod>: passes on the first exact expected response; the
 # free-tier pool tolerates per-model flakiness (it's a FAILOVER pool, not
 # exhaustive per-model testing). Each model attempt is bounded by
-# CHAT_ROUND_TRIP_TIMEOUT so a single hung model can't burn the whole
+# CHAT_TIMEOUT_SECS so a single hung model can't burn the whole
 # step's time budget and starve the remaining failover candidates.
-CHAT_ROUND_TRIP_TIMEOUT="${CHAT_ROUND_TRIP_TIMEOUT:-1800}"
 chat_round_trip() {
-  pod="$1"; ok=false
+  local pod="$1" model reply chat_timeout_secs
   chat_timeout_secs="${CHAT_TIMEOUT_SECS:-180}"
   for model in $(echo "$CI_MODELS" | tr ',' ' '); do
-    echo "[$NS] --- model: $model (timeout ${CHAT_ROUND_TRIP_TIMEOUT}s) ---"
+    echo "[$NS] --- model: $model (timeout ${chat_timeout_secs}s) ---"
     # Prompt goes via -q (not positional) and --max-turns bounds the
     # round-trip: same invocation the chart's own test hook uses. Bound each
     # model attempt with timeout so one stalled model doesn't consume the
     # entire workflow step budget.
-    if timeout -k 15 "${chat_timeout_secs}" \
+    if reply=$(timeout -k 15 "${chat_timeout_secs}" \
       kubectl exec -n "$NS" "$pod" -- \
         hermes chat -m "$model" --provider nvidia \
-          -q "Use the installed ci-ping skill. Reply only with its response; do not run shell or search tools." --max-turns 2; then
-      ok=true; break
+          --quiet --skills ci-ping \
+          -q "Use the installed ci-ping skill. Reply only with its response; do not run shell or search tools." --max-turns 2); then
+      printf '%s\n' "$reply"
+      if [ "$reply" = CI_PONG ]; then
+        return 0
+      fi
+      echo "::warning::[$NS] model $model exited successfully but did not return CI_PONG"
     fi
     echo "[$NS] model $model failed or timed out after ${chat_timeout_secs}s, trying next"
   done
-  [ "$ok" = true ]
+  return 1
 }

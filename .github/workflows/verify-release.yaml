@@ -19,6 +19,12 @@ name: 🔒 verify-release
 # not, release-chart no-op'd and there is nothing new to verify.
 
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Published chart version to verify (for example 1.21.0, without v)'
+        required: true
+        type: string
   workflow_run:
     workflows: ["🚀 release-chart"]
     types: [completed]
@@ -29,28 +35,27 @@ permissions:
 
 jobs:
   check:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-26.04-arm
     outputs:
       should_verify: ${{ steps.tag.outputs.should_verify }}
+      version: ${{ steps.tag.outputs.version }}
+      chart_name: ${{ steps.tag.outputs.chart_name }}
+      release_sha: ${{ steps.tag.outputs.release_sha }}
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0   # need tag refs, not just this commit
 
       - name: Check whether release-chart actually published something new
         id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          TRIGGER_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
-          tag_sha="$(git rev-list -n 1 "refs/tags/v$VER" 2>/dev/null || true)"
-          if [ "$tag_sha" = "${{ github.event.workflow_run.head_sha }}" ]; then
-            echo "should_verify=true" >> "$GITHUB_OUTPUT"
-            echo "v$VER was tagged at this push - release-chart published something new."
-          else
-            echo "should_verify=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::v$VER's tag doesn't point at this push - release-chart no-op'd (tag already existed). Nothing new to verify."
-          fi
+          bash .github/scripts/resolve-verify-release.sh >> "$GITHUB_OUTPUT"
 
   verify:
     needs: check
@@ -69,19 +74,23 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
 
       - name: Resolve chart version
         id: ver
+        env:
+          VER: ${{ needs.check.outputs.version }}
+          NAME: ${{ needs.check.outputs.chart_name }}
+          RELEASE_SHA: ${{ needs.check.outputs.release_sha }}
         run: |
-          VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
-          NAME="$(grep -E '^name:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
           {
             echo "version=$VER"
             echo "chart_name=$NAME"
             echo "image=ghcr.io/${{ github.repository }}/$NAME:$VER"
           } >> "$GITHUB_OUTPUT"
           echo "Verifying release: $NAME v$VER"
+          echo "Release SHA: $RELEASE_SHA"
+          echo "Harness SHA: ${{ github.sha }}"
 
       # ── Step 1: verify the cosign signature ─────────────────────────────────
       - name: Install cosign
@@ -170,17 +179,9 @@ jobs:
           pod=$(pod_name)
           echo "Pod: $pod"
 
-          # Inject a test skill via the PVC mount
+          # Use the same discoverable fixture and discovery gate as PR CI.
           echo "=== skill injection ==="
-          # shellcheck disable=SC2016  # $HERMES_HOME/$skill_dir expand in the pod's shell, not the runner
-          kubectl exec -n "$NS" "$pod" -- sh -c '
-            skill_dir="${HERMES_HOME:-/opt/data}/skills"
-            mkdir -p "$skill_dir"
-            printf "# CI Ping\n\nWhen the user says \"ci-ping\", reply with exactly: CI_PONG\n" \
-              > "$skill_dir/ci-test.md"
-            echo "Skill written:"
-            cat "$skill_dir/ci-test.md"
-          '
+          inject_ci_skill "$pod"
 
           echo "=== chat with injected skill ==="
           chat_round_trip "$pod" || { echo "::error::All models failed chat round-trip"; exit 1; }
