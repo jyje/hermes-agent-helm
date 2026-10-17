@@ -259,6 +259,8 @@ jobs:
             '"@jyje/hermes-agent-helm": minor' \
             '---' \
             '' \
+            "Dependency(image): Update the default Hermes Agent image" \
+            '' \
             "Update the default Hermes Agent image to ${TARGET_VERSION}." \
             > ".changeset/image-${TARGET_VERSION#v}.md"
 

@@ -1,6 +1,9 @@
 ---
 title: CI 가이드
 description: 지속적인 검증과 릴리즈 체크입니다.
+translation_source:
+  path: docs/contributing/ci.md
+  commit: fb6fb80ad7fc2981fdef8d2dae5ef1052ae46336
 ---
 
 # CI / 지속적 검증
@@ -184,23 +187,39 @@ pull request는 `mkdocs build --strict`를 실행하고 사이트 아티팩트�
    `appVersion`(upstream이 `v2026.9.24`까지 쓰던 `vYYYY.M.D` 형식)은 모든
    semver 태그보다 오래된 것으로 취급합니다.
 3. 새 이미지가 있으면 minor Changeset을 포함한 appVersion 변경 PR을 만듭니다.
-4. 독립적으로 NVIDIA NIM이 그 사이의 upstream 릴리즈 노트를 검토하고,
-   차트와 관련된 후속 작업마다 레이블이 있는 이슈를 하나씩 만듭니다.
+4. 일치하는 Docker 태그가 없는 경우도 포함해 GitHub의 정식 안정 릴리즈를
+   독립적으로 조회합니다. 원문을 가져오고 릴리즈별 Helm lint와
+   Deployment·StatefulSet 렌더 검사를 수행한 뒤 NVIDIA NIM으로 차트 영향을
+   검토합니다. 관련 후속 작업마다 레이블이 있는 이슈를 만듭니다.
 
 버전 변경과 upstream-review job은 서로 독립적입니다. 메인테이너는 모든 후속
 이슈의 구현을 기다리지 않고 일반 검증을 통과한 이미지 변경을 머지할 수 있습니다.
 
+appVersion이 최신이거나 이미지 PR·브랜치가 이미 있어도 정식 릴리즈 검토는
+실행됩니다. 수동 입력 `review_only=true`는 이미지 변경 제안을 건너뛰고,
+`review_from=v0.21.6`는 포함할 SemVer 시작점을 지정하며,
+`force_review=true`는 기록된 원문까지 다시 검토합니다. 검토 전용 실행도
+이슈를 만들고 NIM 시크릿을 사용할 수 있습니다.
+
+저장소의 수동 검토 기준선에는 2026-10-17에 검토한 전환기 릴리즈 5개를
+기록합니다. 이후 완료된 원문의 digest를 실행 사이에 캐시하며, 캐시가 사라지면
+검토 완료로 가정하지 않고 다시 검토합니다. 한 릴리즈가 실패해도 나머지를
+검사하며 완료된 결과만 원장에 기록합니다. 원문이 바뀌면 다시 검토합니다.
+차트 커밋·원문·릴리즈별 검사·누락된 섹션·원장은 실행 아티팩트에 90일간
+보존합니다. 정적 검사이며 이미지 지원 보장이나 실제 PVC·인증 검증은 아닙니다.
+
 upstream 검토는 결과를 항상 드러내서 알립니다.
 
-- **건너뜀.** `NVIDIA_API_KEY` secret이 없거나 upstream 릴리즈 노트가 없으면
-  안내 메시지만 남기고 job은 성공으로 끝납니다.
+- **미검토.** `NVIDIA_API_KEY` secret이 없으면 해당 릴리즈를 미검토로 기록하고
+  나중에 재시도합니다. 검토 원장의 완료 기록은 갱신하지 않습니다.
 - **실패.** NIM이 모든 시도에서 오류나 쓸 수 없는 응답을 돌려주면 "Automated
   upstream review failed - review manually"라는 `upstream-review` 이슈를 하나
   만들고 job을 실패시킵니다. 검토가 실패했는데 "올릴 이슈 없음"으로 보고하는
-  일은 없습니다.
+  일은 없습니다. 원문이 없거나 비어 있는 경우, 정적 검사 실패,
+  중요한 업그레이드·보안·되돌림 섹션 누락도 수동 검토 이슈를 만들고 실행을 실패시킵니다.
 - **입력 축약.** 릴리즈 노트가 글자 수 예산(`NIM_MAX_NOTES_CHARS`, 기본값
   60000)을 넘으면 호출 전에 줄입니다. highlights, upgrade, breaking,
-  security, gateway, infrastructure 섹션을 먼저 담고, 기여자 목록과 테스트
+  security, gateway, infrastructure, revert 섹션을 먼저 담고, 기여자 목록과 테스트
   변경 내역은 뺍니다. 빠진 섹션 이름은 프롬프트와 생성된 각 이슈에 적힙니다.
   시도가 실패하면 예산을 절반으로 줄여 다시 시도하고, 로그에 HTTP 상태와 응답
   앞부분을 남깁니다.
