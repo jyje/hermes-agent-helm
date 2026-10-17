@@ -30,6 +30,24 @@ def load_script():
 
 
 class AdviseImageBumpTests(unittest.TestCase):
+    def test_manual_filing_has_explicit_non_nim_attribution(self):
+        filer = load_module(FILER, "manual_issue_attribution")
+        item = {"priority": "medium", "detail": "Verified evidence."}
+        body = filer.issue_body("v0.22.2", item, {"source": "manual"})
+        self.assertIn("review-upstream agent skill", body)
+        self.assertIn("not a NVIDIA NIM workflow run", body)
+        self.assertNotIn("Auto-filed", body)
+        self.assertIn("Verified evidence.", body)
+
+    def test_nim_and_legacy_filing_keep_existing_attribution(self):
+        filer = load_module(FILER, "nim_issue_attribution")
+        item = {"priority": "medium", "detail": "Verified evidence."}
+        for advice in (None, {"source": "nim"}):
+            with self.subTest(advice=advice):
+                body = filer.issue_body("v0.22.2", item, advice)
+                self.assertIn("Auto-filed by cron-fetch-image.yaml", body)
+                self.assertNotIn("manual original-release-note review", body)
+
     def setUp(self):
         self.module = load_script()
 
