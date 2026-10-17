@@ -305,6 +305,20 @@ Not enforced, but [Conventional Commits](https://www.conventionalcommits.org/)
 (`feat:`, `fix:`, `docs:`, `ci:`, `refactor:`, …) keep history readable.
 Changeset summaries, rather than commit subjects, are the release changelog.
 
+### `fix` versus `bug`
+
+The PR title's type decides how a change is recorded, because squash merges
+use the PR title as the commit subject on `main`.
+
+- `🛠️ fix` is an intentional functional or configuration change, such as
+  adapting to a change upstream. The code was right for its assumptions.
+- `🐛 bug` corrects code that was wrong as written.
+
+PR labels follow the title type: label a `🛠️ fix` PR `fix` and a `🐛 bug` PR
+`bug`. If a label and the title disagree, the title wins. On issues, `bug`
+keeps its usual meaning of "something isn't working", whichever kind of PR
+ends up fixing it.
+
 ## CI validation
 
 Chart pull requests run lint + an isolated **kind** install/test, and every
