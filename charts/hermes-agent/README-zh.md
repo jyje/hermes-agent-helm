@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ a733bdaf587b8751e6224778aa9407fd6cc41f05 -->
+<!-- translation_source: charts/hermes-agent/README.md @ c01750499ee5af1acdf9c942208329023f4580b3 -->
 
 <div align="center" markdown="1">
 
@@ -557,6 +557,14 @@ config:
 （参阅[配置模型](#配置模型)）。本次移除的是匿名使用示例，并不移除上游已认证的 Nous 支持。
 
 ### Hermes v0.22（Chart 1.20.0）
+
+> **如果运行过 v0.22.1：** 上游明确说明该版本从错误的提交构建，
+> 且其网关使用过的会话无法在 v0.22.2 中删除。更改版本前请备份 Hermes 卷。
+> 此限制适用于运行过 v0.22.1 的部署，包括显式覆盖 `image.tag` 的情况，
+> 并非指全新安装 v0.22.2，或跳过 v0.22.1 的直接升级。
+> 请保持图表默认的 v0.22.2，不要选择 v0.22.1。
+> 此处未验证安全回退或手动数据库修复步骤，不要通过删除 `state.db` 来绕过问题。
+> 请参阅[官方 v0.22.2 更正及已知问题](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.2)。
 
 Chart 1.20.0 将默认镜像从 `v2026.9.24`（Hermes v0.21.5）更新为 `v0.22.2`。Chart 的 values 和模板没有变化，但 Hermes 自身的部分默认值会影响持久卷上的数据。升级已有历史记录的 release 之前，请先阅读以下内容。
 
