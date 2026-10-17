@@ -56,10 +56,10 @@ ERROR_EXCERPT_CHARS = 500
 KEY_SECTION_WORDS = (
     "highlight", "upgrade", "breaking", "migrat", "deprecat", "security",
     "updating", "about this release", "gateway", "messaging", "docker",
-    "infrastructure", "config",
+    "infrastructure", "config", "revert",
 )
 LOW_SECTION_WORDS = ("desktop", "documentation", "cli, tui", "other changes")
-DROP_SECTION_WORDS = ("contributor", "tests", "reverted")
+DROP_SECTION_WORDS = ("contributor", "tests")
 
 PRIORITIES = ("high", "medium", "low")
 
@@ -102,6 +102,10 @@ bare new config.yaml key or env var on its own (see above).
 
 List every relevant item you find - do not cap the count, but do not invent \
 busywork either; if truly nothing applies, return an empty list.
+
+The chart context can include existing issue/PR titles. Do not file a duplicate \
+of an already-tracked or resolved item; use the current chart context and later \
+release corrections, including reverted changes, to judge what still applies.
 
 Respond with ONLY a JSON object, no prose, no markdown fence:
 {"items":[{"priority":"high|medium|low","title":"<=80 chars",\

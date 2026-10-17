@@ -186,24 +186,43 @@ manual dispatch runs the same process.
    `appVersion` (`vYYYY.M.D`, the scheme upstream used until `v2026.9.24`)
    counts as older than every semver tag.
 3. If a newer image exists, open an appVersion bump PR with a minor Changeset.
-4. Independently review intervening upstream release notes with NVIDIA NIM and
-   create one labeled issue for each chart-relevant follow-up.
+4. Independently inventory formal stable GitHub releases, including those
+   without a matching Docker tag. Fetch original notes, run small Helm
+   lint/Deployment/StatefulSet render checks per release, and review chart impact
+   with NVIDIA NIM. Create one labeled issue per chart-relevant follow-up.
 
 The version bump and upstream-review jobs are independent. Maintainers can merge
 the image update after its normal checks without waiting for every follow-up
 issue to be implemented.
 
+Formal review runs even when appVersion is current, an image PR/branch already
+exists, or the image check cannot proceed. Use workflow inputs `review_only=true`
+to avoid proposing an image update, `review_from=v0.21.6` for the inclusive
+SemVer baseline, and `force_review=true` for explicit backfill of already-recorded
+notes. Review-only dispatch can still file issues and use the NIM secret.
+
+The committed manual baseline records the five migration-era releases reviewed
+on 2026-10-17. Later completed original-note digests are cached between runs;
+cache eviction causes re-review rather than a false clean result. A failed tag
+does not prevent other tags from being checked, and only completed reviews enter
+the ledger. Changed note bodies are reviewed again. The chart snapshot,
+original notes, per-release checks, omitted sections and ledger are retained in
+the run artifact for 90 days. These are static checks, not image support or live
+PVC/authentication evidence.
+
 The upstream review reports every outcome explicitly:
 
-- **Skipped.** Without an `NVIDIA_API_KEY` secret (or with no upstream release
-  notes), the job prints a notice and stays green.
+- **Unreviewed.** Without an `NVIDIA_API_KEY` secret, the job records that the
+  release remains unreviewed and retries it later. It does not advance the ledger.
 - **Failed.** If NIM returns an error or an unusable response on every attempt,
   the job files one `upstream-review` issue titled "Automated upstream review
   failed - review manually" and then fails. A failed review is never reported
-  as "nothing to file".
+  as "nothing to file". Missing or empty original notes, failed static checks,
+  and omitted critical upgrade/security/revert sections also require a manual
+  review issue and fail the run.
 - **Condensed input.** Release notes over a character budget
   (`NIM_MAX_NOTES_CHARS`, default 60000) are condensed before the call:
-  highlights, upgrade, breaking, security, gateway and infrastructure sections
+  highlights, upgrade, breaking, security, gateway, infrastructure and revert sections
   go first, contributor lists and test changelogs are dropped, and the omitted
   sections are named in the prompt and in each filed issue. A failed attempt
   retries with half the budget, and the log shows the HTTP status and a short

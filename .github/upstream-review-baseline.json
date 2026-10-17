@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "note": "Manual original-note review on 2026-10-17. Records review coverage, not resolution of findings or historical image support. Changed original note digests require a new review.",
+  "releases": {
+    "v0.21.6": {
+      "status": "reviewed",
+      "source": "manual",
+      "notes_sha256": "9198dd67d231813fe7e4a325ab095117c4c8673e1cdf3168cc05021f83011972",
+      "release_url": "https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6",
+      "chart_sha": "d107f47554e96cec1da393a54f91b3494f33dd3c",
+      "reviewed_on": "2026-10-17",
+      "checks": "Helm lint, Deployment/StatefulSet render assertions and tagged migration-interface inspection passed; static only",
+      "image": {
+        "status": "available",
+        "architectures": [
+          "amd64",
+          "arm64"
+        ]
+      },
+      "findings": [
+        374,
+        376
+      ],
+      "evidence_url": "https://github.com/jyje/hermes-agent-helm/issues/355#issuecomment-6232416854"
+    },
+    "v0.21.7": {
+      "status": "reviewed",
+      "source": "manual",
+      "notes_sha256": "2386932fc076910e0ee75fe55a38f75a3e7743cc3e49c57eb0be9da808cc3eac",
+      "release_url": "https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.7",
+      "chart_sha": "d107f47554e96cec1da393a54f91b3494f33dd3c",
+      "reviewed_on": "2026-10-17",
+      "checks": "Helm lint, Deployment/StatefulSet render assertions and tagged migration-interface inspection passed; static only",
+      "image": {
+        "status": "missing",
+        "http_status": 404
+      },
+      "findings": [
+        374,
+        376
+      ],
+      "evidence_url": "https://github.com/jyje/hermes-agent-helm/issues/355#issuecomment-6232416854"
+    },
+    "v0.22.0": {
+      "status": "reviewed",
+      "source": "manual",
+      "notes_sha256": "5e840e9c6908816d384d7bf25a0e5c611b4f5fea89c9ad932772efd4f83a7578",
+      "release_url": "https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0",
+      "chart_sha": "d107f47554e96cec1da393a54f91b3494f33dd3c",
+      "reviewed_on": "2026-10-17",
+      "checks": "Helm lint, Deployment/StatefulSet render assertions and tagged migration-interface inspection passed; static only",
+      "image": {
+        "status": "available",
+        "architectures": [
+          "amd64",
+          "arm64"
+        ]
+      },
+      "findings": [
+        373,
+        374,
+        376
+      ],
+      "evidence_url": "https://github.com/jyje/hermes-agent-helm/issues/355#issuecomment-6232416854"
+    },
+    "v0.22.1": {
+      "status": "reviewed",
+      "source": "manual",
+      "notes_sha256": "02e73a235cd322dd3b5b9b9b69263bff08e2fc43efb0efe19d1d46c816832aef",
+      "release_url": "https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.1",
+      "chart_sha": "d107f47554e96cec1da393a54f91b3494f33dd3c",
+      "reviewed_on": "2026-10-17",
+      "checks": "Helm lint, Deployment/StatefulSet render assertions and tagged migration-interface inspection passed; static only",
+      "image": {
+        "status": "available",
+        "architectures": [
+          "amd64",
+          "arm64"
+        ]
+      },
+      "findings": [
+        374,
+        376
+      ],
+      "evidence_url": "https://github.com/jyje/hermes-agent-helm/issues/355#issuecomment-6232416854"
+    },
+    "v0.22.2": {
+      "status": "reviewed",
+      "source": "manual",
+      "notes_sha256": "028526cfc65824ac8262030566f5807d9f317848a4b1691e3b3ab218451f6146",
+      "release_url": "https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.2",
+      "chart_sha": "d107f47554e96cec1da393a54f91b3494f33dd3c",
+      "reviewed_on": "2026-10-17",
+      "checks": "Helm lint, Deployment/StatefulSet render assertions and tagged migration-interface inspection passed; static only",
+      "image": {
+        "status": "available",
+        "architectures": [
+          "amd64",
+          "arm64"
+        ]
+      },
+      "findings": [
+        375,
+        376
+      ],
+      "evidence_url": "https://github.com/jyje/hermes-agent-helm/issues/355#issuecomment-6232416854"
+    }
+  }
+}
