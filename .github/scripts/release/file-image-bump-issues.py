@@ -13,6 +13,11 @@ release notes) only prints a notice, so runs without the secret stay green.
 
 Usage: file-image-bump-issues.py <advice_json> <target_version> <owner/repo>
 Requires the `gh` CLI to be authenticated (GH_TOKEN env var).
+
+Agent workflow: .claude/skills/review-upstream/SKILL.md.
+Use advice source "manual" for an authorized agent review rather than a NIM
+result. The skill owns scope and semantic deduplication; this script owns
+the shared issue format, labels and exact-title duplicate guard.
 """
 from __future__ import annotations
 
@@ -85,6 +90,13 @@ def failure_body(target_version: str, advice: dict) -> str:
 
 def issue_body(target_version: str, item: dict, advice: dict | None = None) -> str:
     ref_line = f"\n**Upstream ref:** {item['upstream_ref']}" if item.get("upstream_ref") else ""
+    attribution = (
+        "_Filed from a manual original-release-note review using the "
+        "review-upstream agent skill; not a NVIDIA NIM workflow run._"
+        if (advice or {}).get("source") == "manual"
+        else "_Auto-filed by cron-fetch-image.yaml's upstream-review job "
+        "(NVIDIA NIM, nemotron-3-ultra-550b-a55b)._"
+    )
     return (
         f"**Upstream version:** `{target_version}`\n"
         f"**Priority:** {item['priority']}{ref_line}\n\n"
@@ -94,8 +106,7 @@ def issue_body(target_version: str, item: dict, advice: dict | None = None) -> s
         "**Maintainer triage:**\n"
         "- ✅ Accept → create a branch and implement this, referencing this issue.\n"
         "- ❌ Reject → close this issue with a short reason.\n\n"
-        "_Auto-filed by cron-fetch-image.yaml's upstream-review job "
-        "(NVIDIA NIM, nemotron-3-ultra-550b-a55b)._"
+        f"{attribution}"
     )
 
 

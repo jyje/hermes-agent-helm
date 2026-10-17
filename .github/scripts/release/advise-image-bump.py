@@ -22,6 +22,10 @@ the budget.
 
 Usage: advise-image-bump.py <release_notes_file> <chart_context_file> <out_json>
 Stdlib only (urllib) so it needs no pip install in CI.
+
+Agent workflow: .claude/skills/review-upstream/SKILL.md.
+The skill owns original-note review and scope; this script is its optional
+NIM advisor and the cron-fetch-image workflow's shared implementation.
 """
 from __future__ import annotations
 
