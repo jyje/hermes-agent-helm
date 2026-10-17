@@ -1,4 +1,4 @@
-<!-- translation_source: README.md @ 4c00dee9830393c8829109453d698bb1eb0ef3f3 -->
+<!-- translation_source: README.md @ 7a875e39c8ac5dbc756f52d36a7dfdcab61c3aac -->
 
 <div align="center" markdown="1">
 
@@ -65,9 +65,9 @@
 ## このチャートを使う理由
 
 - **`values.yaml` で Hermes のプロバイダー設定を管理。** Hermes は環境変数で `openai-api`、`anthropic`、`gemini`、`openrouter`、`nvidia`、`deepseek`、および [LiteLLM](https://github.com/BerriAI/litellm) などの OpenAI 互換エンドポイントに対応しています。このチャートはその設定を `values.yaml` から渡し、プロバイダー別の編集可能なサンプルを提供します。テンプレートに特定のプロバイダーを固定しません。
-- **チャット中心のゲートウェイとアカウントログイン。** Discord または Telegram のボットトークンを渡すと、Kubernetes がライフサイクルを管理する Hermes のアウトバウンドゲートウェイが起動します。**GitHub Copilot** と **OpenAI Codex** では、任意のデバイスログイン初期化機能が一度限りのリンクとコードを Discord のホームチャンネルまたはログに送り、更新可能な認証情報を `HERMES_HOME` に保存します。一度承認すると、通常の Pod 再起動では保存済みログインを再利用します。
+- **チャット中心のゲートウェイとアカウントログイン。** Discord または Telegram のボットトークンを渡すと、Kubernetes がライフサイクルを管理する Hermes のアウトバウンドゲートウェイが起動します。**GitHub Copilot** と **OpenAI Codex** では、任意のデバイスログイン初期化機能が一度限りのリンクとコードを Discord または Telegram のホームチャンネル（またはログ）に送り、更新可能な認証情報を `HERMES_HOME` に保存します。任意で有効にできる準備完了メッセージが、エージェントが起動した時点を知らせます。一度承認すると、通常の Pod 再起動では保存済みログインを再利用します。2 つのプロバイダーと 2 つのメッセンジャーの 4 通りの組み合わせはすべて実際のクラスターで実行して確認しました。
 - **軽量な構成から本番運用へ。** 初期設定はホームラボ、単一ノード、エッジクラスター向けです。レプリカ 1 個、控えめなリソース要求、小さな PVC から、リソースを増やして拡張できます。Hermes は単一インスタンスのパーソナルエージェントで、`HERMES_HOME`、ゲートウェイ、メモリをそれぞれ 1 つ持ちます。複数のエージェントが必要なら、個別に管理するインスタンスを**チーム**にまとめ、共通のゲートウェイチャンネルでコンテキストを共有します。[Hermes チーム](docs/advanced/teams/reference.md)を参照してください。
-- **エンドツーエンドの検証。** CI は一時的な **kind** クラスターにチャートをインストールし、付属のテスト Job（`hermes doctor`）を実行します。リポジトリの `NVIDIA_API_KEY` シークレットが利用可能な場合は、NVIDIA NIM に対して実際の **`hermes chat` 往復通信**も行います。Discord スレッドのリーダーチームでは、人間 → リーダー → メンバー 2 体 → リーダーの実通信も完了しています。Telegram のチーム連携は別の検証対象です。
+- **エンドツーエンドの検証。** CI は一時的な **kind** クラスターにチャートをインストールし、付属のテスト Job（`hermes doctor`）を実行します。リポジトリの `NVIDIA_API_KEY` シークレットが利用可能な場合は、NVIDIA NIM に対して実際の **`hermes chat` 往復通信**も行います。リーダーチームでも、Discord（スレッド）と Telegram で、人間 → リーダー → メンバー → リーダーの実通信が完了しています。
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/demos/team-k9s-pods.png" alt="kind クラスター上の Hermes チーム august、may、march を k9s で表示"/>

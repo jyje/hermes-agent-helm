@@ -79,9 +79,11 @@
 - **채팅 우선 gateway와 계정 로그인.** Discord 또는 Telegram 봇 토큰을 넣으면
   차트가 Kubernetes 수명주기 안에서 Hermes의 outbound gateway를 실행합니다.
   **GitHub Copilot**과 **OpenAI Codex**는 선택 가능한 device-login bootstrap이
-  Discord 홈 채널(또는 로그)로 일회용 링크와 코드를 전달하고, 갱신 가능한
-  자격증명을 `HERMES_HOME`에 보존합니다. 한 번 승인하면 일반적인 Pod 재시작에는
-  저장된 로그인을 재사용합니다.
+  Discord 또는 Telegram 홈 채널(또는 로그)로 일회용 링크와 코드를 전달하고,
+  갱신 가능한 자격증명을 `HERMES_HOME`에 보존합니다. 선택 기능인 준비 완료 메시지가
+  에이전트가 올라온 때를 알려 줍니다. 한 번 승인하면 일반적인 Pod 재시작에는 저장된
+  로그인을 재사용합니다. 두 제공자와 두 메신저의 네 조합을 모두 실제 클러스터에서
+  실행해 확인했습니다.
 - **경량 → 프로덕션.** 기본값은 홈랩/싱글노드/엣지 클러스터용(단일 레플리카, 적당한
   요청, 작은 PVC)이면서, 스케일 아웃이 아니라 스케일 업으로 키워 프로덕션까지 갑니다. Hermes는
   단일 인스턴스 개인용 에이전트(하나의 `HERMES_HOME`·gateway·메모리)이므로 파드를
@@ -91,8 +93,8 @@
   번들된 테스트 Job(`hermes doctor`)을 실행합니다. `NVIDIA_API_KEY` 리포지토리
   시크릿이 있으면 NVIDIA NIM에 대한 **live `hermes chat` 라운드트립**도 실행합니다
   - 목(mock)이 아닙니다.
-  Discord 스레드 리더 팀도 사람 → 리더 → 멤버 둘 → 리더 라이브 라운드트립을
-  완주했습니다. Telegram 팀 오케스트레이션은 별도 실증 대상입니다.
+  리더 팀도 Discord(스레드)와 Telegram에서 사람 → 리더 → 멤버 → 리더 라이브
+  라운드트립을 완주했습니다.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/demos/team-k9s-pods.png" alt="kind 클러스터에서 k9s로 본, 리더 주도 Hermes 팀(august, may, march)"/>
