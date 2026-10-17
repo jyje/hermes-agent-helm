@@ -85,9 +85,14 @@ def image_info(tag: str) -> dict:
 
 
 def chart_context(chart: Path) -> str:
+    root = chart.resolve().parents[1]
     paths = [chart / "Chart.yaml", chart / "values.yaml", chart / "README.md.gotmpl",
-             *sorted(chart.glob("values-*.yaml"))]
-    return "\n\n".join(f"## {path}\n\n{path.read_text(encoding='utf-8')}" for path in paths)
+             *sorted(chart.glob("values-*.yaml")),
+             *sorted((root / "docs/advanced/integrations").glob("*.md")),
+             *sorted((root / "docs/advanced/providers").glob("*.md"))]
+    return "\n\n".join(
+        f"## {path.resolve().relative_to(root)}\n\n{path.read_text(encoding='utf-8')}"
+        for path in paths)
 
 
 def review_one(tag: str, chart: Path, output: Path, repo: str, context: Path) -> dict:
