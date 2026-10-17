@@ -125,8 +125,16 @@ spec:
               {{- if and .Values.readyNotify.enabled .Values.bootstrap.enabled }}
               echo "[2c/4] ready-notify hook loads and fires in this Hermes image"
               python3 - <<'PY' || exit 1
-              import asyncio, sys
+              import asyncio, io, logging, os, sys
               from gateway.hooks import HookRegistry
+
+              # An unknown channel makes the handler log a warning and return without
+              # a request. Setting it here also overrides any READY_NOTIFY that the
+              # chart Secret or extraEnvFrom may carry, so this never posts a message.
+              os.environ["READY_NOTIFY"] = "ci-check"
+              stream = io.StringIO()
+              log = logging.getLogger("hooks.ready-notify")
+              log.addHandler(logging.StreamHandler(stream))
 
               registry = HookRegistry()
               registry.discover_and_load()
@@ -134,9 +142,13 @@ spec:
               if "ready-notify" not in names:
                   print(f"FAIL: the ready-notify hook was not loaded (loaded: {names})")
                   sys.exit(1)
-              # READY_NOTIFY is unset in this Job, so the handler returns without a request.
+              # emit() swallows handler errors and returns when nothing is registered,
+              # so a clean return proves nothing: require the handler's own log line.
               asyncio.run(registry.emit("gateway:startup", {"platforms": ["test"]}))
-              print("OK: the gateway:startup hook was discovered and fired.")
+              if "unknown READY_NOTIFY channel" not in stream.getvalue():
+                  print("FAIL: Hermes loaded the hook but did not run its handler on gateway:startup")
+                  sys.exit(1)
+              print("OK: the gateway:startup hook was discovered and its handler ran.")
               PY
 
               {{- end }}

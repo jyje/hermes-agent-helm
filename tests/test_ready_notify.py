@@ -123,5 +123,24 @@ class HandleTests(unittest.TestCase):
         send.assert_called_once()
 
 
+class UnknownChannelTests(unittest.TestCase):
+    def test_unknown_channel_logs_the_line_the_helm_test_looks_for(self):
+        # The Helm test sets READY_NOTIFY to an unknown channel so no request is made
+        # and proves the handler ran by looking for this exact log text.
+        module = load_hook()
+        stream = io.StringIO()
+        handler = logging.StreamHandler(stream)
+        module.logger.addHandler(handler)
+        try:
+            with mock.patch.dict(os.environ, {"READY_NOTIFY": "ci-check"}, clear=True), mock.patch.object(
+                module.urllib.request, "urlopen"
+            ) as urlopen:
+                asyncio.run(module.handle("gateway:startup", {"platforms": ["test"]}))
+        finally:
+            module.logger.removeHandler(handler)
+        self.assertIn("unknown READY_NOTIFY channel", stream.getvalue())
+        urlopen.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
