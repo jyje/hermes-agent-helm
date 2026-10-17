@@ -5,27 +5,42 @@ name: ⏰ cron-fetch-image
 # before 2026-10 it published date-based tags (vYYYY.M.D[.N], last one
 # v2026.9.24). Only plain vX.Y.Z tags are bump candidates: rc.*, -desktop,
 # -amd64/-arm64, stable/latest are ignored. A date-based appVersion is treated
-# as older than every semver tag (the date scheme is retired). When a tag newer
-# than the chart's current appVersion appears, two independent jobs run in
-# parallel:
+# as older than every semver tag (the date scheme is retired). Image bumping
+# and formal-release review have separate eligibility:
 #   - bump-pr: opens a PR that bumps Chart.yaml's appVersion (the single
 #     source of truth: image.tag falls back to it) and regenerates the chart
 #     README via helm-docs, so validate-chart stays green. Ships immediately;
 #     it doesn't wait on the AI review.
-#   - upstream-review: asks NVIDIA NIM which upstream changes (across every
-#     release note between the current and target appVersion) the CHART
-#     itself should react to, and files one GitHub Issue per item, labeled
+#   - upstream-review: inventories official stable GitHub releases even when
+#     no image bump can proceed. It fetches original notes, runs small static
+#     checks per release, and asks NVIDIA NIM which changes the chart should
+#     react to. It files one GitHub Issue per item, labeled
 #     `upstream-review` + a priority. The maintainer triages each
 #     independently: accept (branch + implement) or reject (close it).
 #     If the NIM call fails, it files one "review manually" issue instead and
 #     the job fails, so a broken review is never mistaken for "nothing found".
-#     Without NVIDIA_API_KEY the review is skipped and the job stays green.
+#     Without NVIDIA_API_KEY a release stays unreviewed and is retried later.
+#     Completed note digests are cached; eviction safely backfills them.
+#     review_only/review_from/force_review enable explicit manual backfill.
 # The bump PR includes a minor Changeset. Once it merges, propose-release.yaml
 # consumes that entry into the reviewed chart version and release PR.
 on:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      review_only:
+        description: Review formal releases without proposing an image bump
+        type: boolean
+        default: false
+      review_from:
+        description: First stable SemVer release to consider (inclusive)
+        type: string
+        default: v0.21.6
+      force_review:
+        description: Re-review notes even when their digest is already recorded
+        type: boolean
+        default: false
 
 concurrency:
   group: cron-fetch-image
@@ -38,6 +53,7 @@ env:
 jobs:
   check:
     name: 🔍 Check Upstream Image
+    if: github.event_name != 'workflow_dispatch' || !inputs.review_only
     runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
@@ -239,6 +255,8 @@ jobs:
             '"@jyje/hermes-agent-helm": minor' \
             '---' \
             '' \
+            "Dependency(image): Update the default Hermes Agent image" \
+            '' \
             "Update the default Hermes Agent image to ${TARGET_VERSION}." \
             > ".changeset/image-${TARGET_VERSION#v}.md"
 
@@ -246,7 +264,7 @@ jobs:
             ".changeset/image-${TARGET_VERSION#v}.md"
           git commit \
             -m "⬆️ dep(image): bump hermes-agent image to ${TARGET_VERSION}" \
-            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it), sync the OAuth init-container Python version from the upstream Dockerfile, and regenerate the README badge." \
+            -m "Track the upstream nousresearch/hermes-agent image: bump the chart's appVersion (image.tag falls back to it), sync the OAuth init-container Python version from tagged pm/lock.json, and regenerate the README badge." \
             --allow-empty
           git push origin "image/${TARGET_VERSION}"
 
@@ -264,42 +282,29 @@ jobs:
 
   upstream-review:
     name: 🤖 AI review of upstream changes
-    needs: check
-    if: needs.check.outputs.proceed == 'true'
+    # Formal release review is independent of registry availability, current
+    # appVersion and every existing image-PR/branch gate.
     runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       issues: write
     env:
-      TARGET_VERSION: ${{ needs.check.outputs.target_version }}
       GH_TOKEN: ${{ github.token }}
+      REVIEW_FROM: ${{ inputs.review_from || 'v0.21.6' }}
+      FORCE_REVIEW: ${{ inputs.force_review && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/cache/restore@v6
+        id: ledger-cache
         with:
-          name: newer-versions
+          path: .review-state
+          key: hermes-upstream-review-ledger-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: hermes-upstream-review-ledger-v1-
 
-      - name: Collect upstream release notes (current appVersion -> target)
-        run: |
-          : > upstream_release_notes.md
-          while IFS= read -r v; do
-            body="$(gh api "repos/NousResearch/hermes-agent/releases/tags/$v" --jq '.body // empty' 2>/dev/null || true)"
-            if [ -n "$body" ]; then
-              { echo "## $v"; echo; echo "$body"; echo; } >> upstream_release_notes.md
-            fi
-          done < newer_versions.txt
-          cat "${CHART}/values.yaml" > chart_context.txt
-
-      - name: AI advice on chart-relevant upstream changes (NVIDIA NIM)
-        env:
-          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-          NIM_MODEL: "nvidia/nemotron-3-ultra-550b-a55b"
-        run: |
-          python3 .github/scripts/release/advise-image-bump.py \
-            upstream_release_notes.md chart_context.txt image_bump_advice.json
+      - uses: azure/setup-helm@v5
 
       - name: Ensure tracking labels exist
         run: |
@@ -309,17 +314,31 @@ jobs:
           gh label create "priority:medium" --repo "${{ github.repository }}" --color "fbca04" --force
           gh label create "priority:low" --repo "${{ github.repository }}" --color "0e8a16" --force
 
-      - name: File one issue per action item
+      - name: Review each unreviewed formal stable release
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NIM_MODEL: "nvidia/nemotron-3-ultra-550b-a55b"
         run: |
-          python3 .github/scripts/release/file-image-bump-issues.py \
-            image_bump_advice.json "${TARGET_VERSION}" "${{ github.repository }}"
+          args=()
+          if [ "$FORCE_REVIEW" = true ]; then args+=(--force); fi
+          python3 .github/scripts/release/review-upstream-releases.py \
+            --repo "${{ github.repository }}" --chart "$CHART" \
+            --from-tag "$REVIEW_FROM" "${args[@]}"
 
-      # The issue above makes a failed review visible to triage; failing the
-      # job makes it visible in the run (and its notification) too. A skipped
-      # review (no NVIDIA_API_KEY) is not a failure.
-      - name: Fail the job when the AI review failed
-        run: |
-          if jq -e '.source == "failed"' image_bump_advice.json >/dev/null; then
-            echo "::error::The AI upstream review failed: $(jq -r '.note' image_bump_advice.json)"
-            exit 1
-          fi
+      - name: Preserve completed reviews, including partial-run progress
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: .review-state
+          key: ${{ steps.ledger-cache.outputs.cache-primary-key }}
+
+      - name: Upload original notes, per-release checks and coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: upstream-review-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .review-results/
+            .review-state/ledger.json
+          include-hidden-files: true
+          retention-days: 90

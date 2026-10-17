@@ -59,9 +59,17 @@ Read the relevant implementation before running its mode:
 - [file-image-bump-issues.py](../../../.github/scripts/release/file-image-bump-issues.py)
   writes issues with shared titles, priority labels, triage guidance and an
   exact-open-title duplicate guard. Run only when issue filing is authorized.
+- [review-upstream-releases.py](../../../.github/scripts/release/review-upstream-releases.py)
+  inventories formal stable releases, retains originals and small per-tag checks,
+  and records only completed reviews by original-note digest. Inspect the
+  committed manual baseline and cached ledger; neither means findings are fixed.
+  `--plan-only` provides a read-only inventory preview without model or issue calls.
 - [cron-fetch-image.yaml](../../../.github/workflows/cron-fetch-image.yaml)
-  integrates these scripts. Inspect current gates: dispatch may create a bump
-  PR and is not a substitute for retrospective review.
+  runs formal reviews independently of image bump gates. An authorized dispatch
+  with `review_only=true` cannot propose an image bump; `review_from` selects
+  an inclusive baseline and `force_review=true` rechecks recorded digests.
+  It can still create issues and consume NIM requests. Cache eviction causes
+  backfill, and missing notes or omitted critical sections require manual review.
 
 For an authorized manual filing, prepare and inspect this JSON contract:
 

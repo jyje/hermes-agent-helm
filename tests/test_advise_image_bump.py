@@ -30,6 +30,15 @@ def load_script():
 
 
 class AdviseImageBumpTests(unittest.TestCase):
+    def test_condensing_keeps_reverted_changes_that_did_not_ship(self):
+        module = load_script()
+        notes = ("## v0.23.0\n\nOfficial release.\n\n"
+                 "## Reverted\n\nExperimental gateway change did not ship.\n\n"
+                 "## Contributors\n\n" + "contributor " * 2000)
+        text, stats = module.condense_notes(notes, 3000)
+        self.assertIn("Experimental gateway change did not ship", text)
+        self.assertNotIn("Reverted", stats["omitted"]["v0.23.0"])
+
     def test_manual_filing_has_explicit_non_nim_attribution(self):
         filer = load_module(FILER, "manual_issue_attribution")
         item = {"priority": "medium", "detail": "Verified evidence."}
