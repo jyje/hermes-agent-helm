@@ -1,4 +1,4 @@
-<!-- translation_source: charts/hermes-agent/README.md @ a733bdaf587b8751e6224778aa9407fd6cc41f05 -->
+<!-- translation_source: charts/hermes-agent/README.md @ c01750499ee5af1acdf9c942208329023f4580b3 -->
 <div align="center" markdown="1">
 
 # hermes-agent-helm/hermes-agent
@@ -909,6 +909,15 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 지원을 제거하는 것은 아닙니다.
 
 ### Hermes v0.22 (차트 1.20.0)
+
+> **v0.22.1을 실행했다면:** 업스트림은 이 버전이 잘못된 커밋으로 배포되었고,
+> 해당 게이트웨이에서 사용한 세션을 v0.22.2에서 삭제할 수 없다고 명시합니다.
+> 버전을 바꾸기 전에 Hermes 볼륨을 백업하세요. 명시적인 `image.tag` 재정의를
+> 포함해 v0.22.1을 실행한 배포에 해당하는 제한이며, 새 v0.22.2 설치나 v0.22.1을
+> 거치지 않은 직접 업그레이드를 뜻하지 않습니다. 차트 기본값 v0.22.2를 유지하고
+> v0.22.1은 선택하지 마세요. 안전한 롤백이나 수동 DB 복구 절차는 검증되지 않았으므로
+> 우회하려고 `state.db`를 삭제하지 마세요.
+> [공식 v0.22.2 정정 및 알려진 문제](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.2)를 참고하세요.
 
 차트 1.20.0은 기본 이미지를 `v2026.9.24`(Hermes v0.21.5)에서 `v0.22.2`로
 올립니다. 차트의 values와 템플릿은 바뀌지 않았지만, Hermes 자체의 기본값 일부가

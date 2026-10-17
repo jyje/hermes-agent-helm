@@ -230,21 +230,17 @@ jobs:
           # appVersion is the single source of truth (image.tag falls back to it).
           sed -i -E "s|^appVersion:.*|appVersion: \"${TARGET_VERSION}\"|" "${CHART}/Chart.yaml"
 
-          # Sync the OAuth init-container Python image to the version the upstream
-          # container actually runs. The upstream Dockerfile declares it via a
-          # `uv:*-python<X.Y>-*` base image; we extract it and write X.Y-slim
-          # into values.yaml so the init container always matches the runtime.
-          DOCKERFILE=$(curl -fsSL \
-            "https://raw.githubusercontent.com/NousResearch/hermes-agent/${TARGET_VERSION}/Dockerfile" \
-            2>/dev/null || true)
-          DOCKER_PY=$(printf '%s' "$DOCKERFILE" \
-            | grep -oE 'python[0-9]+\.[0-9]+' | head -1 | sed 's/python//')
-          if [ -n "$DOCKER_PY" ]; then
+          # Match the standalone OAuth init interpreter to the authoritative
+          # managed-runtime pin. Dockerfile comments may describe obsolete bases.
+          if curl -fsSL \
+            "https://raw.githubusercontent.com/NousResearch/hermes-agent/${TARGET_VERSION}/pm/lock.json" \
+            --output upstream-pm-lock.json \
+            && DOCKER_PY=$(python3 .github/scripts/release/detect-upstream-python.py upstream-pm-lock.json); then
             sed -i -E "s|(      tag: \")[0-9]+\.[0-9]+[^\"]*\"|\1${DOCKER_PY}-slim\"|" \
               "${CHART}/values.yaml"
-            echo "Init-container Python synced to ${DOCKER_PY}-slim (from upstream Dockerfile)"
+            echo "Init-container Python synced to ${DOCKER_PY}-slim (from tagged pm/lock.json)"
           else
-            echo "::warning::Could not detect Python version from upstream Dockerfile; values.yaml unchanged"
+            echo "::warning::Could not read a valid Python pin from tagged pm/lock.json; values.yaml unchanged"
           fi
 
           # Keep the generated README in sync (validate-chart fails on a stale README).
