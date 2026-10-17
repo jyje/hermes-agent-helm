@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { CATEGORY_ORDER, OTHER_LABEL, categorizeBullet } from './changelog-categories.mjs';
+import { syncReleaseDoc } from './sync-release-doc.mjs';
 
 const root = resolve(import.meta.dirname, '../../..');
 const packageName = '@jyje/hermes-agent-helm';
@@ -153,7 +154,7 @@ for (const path of [
   resolve(root, 'charts/hermes-agent/README-zh.md'),
 ]) {
   const source = readFileSync(path, 'utf8');
-  writeFileSync(path, source.replaceAll(release.oldVersion, packageVersion));
+  writeFileSync(path, syncReleaseDoc(source, release.oldVersion, packageVersion));
 }
 
 console.log(`Prepared Hermes Agent chart v${packageVersion} from ${entries.length} Changeset(s).`);
