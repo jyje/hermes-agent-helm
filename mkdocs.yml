@@ -68,6 +68,7 @@ plugins:
             Providers: 제공자
             Integrations: 통합
             Dashboard sign-in: 대시보드 로그인
+            Public listeners: 공개 리스너
             Configuration model: 설정 모델
             Secrets and persistence: Secret과 영속성
             Operations and testing: 운영과 테스트
@@ -181,6 +182,7 @@ nav:
           - Anthropic + Discord: advanced/integrations/anthropic-and-discord.md
           - Ingress: advanced/integrations/ingress.md
           - Dashboard sign-in: advanced/integrations/dashboard.md
+          - Public listeners: advanced/integrations/listeners.md
           - HTTPRoute: advanced/integrations/httproute.md
           - LiteLLM: advanced/integrations/litellm.md
           - LiteLLM (in-cluster): advanced/integrations/litellm-k8s.md
