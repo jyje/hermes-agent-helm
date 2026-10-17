@@ -55,7 +55,8 @@ Two jobs run on every functional change:
 `helm lint`, `helm template`, render-only assertions for the `dashboard`
 block (`.github/scripts/assert-dashboard-render.sh`), and a **helm-docs drift check** - if
 `charts/hermes-agent/README.md` is out of date relative to `README.md.gotmpl`,
-the job fails. Always run `make docs` after editing `values.yaml` and commit the
+or the copy of its `## Values` table in a translated chart README differs, the
+job fails. Always run `make docs` after editing `values.yaml` and commit the
 result.
 
 ### `test`

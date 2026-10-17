@@ -283,8 +283,11 @@ jobs:
       - name: helm-docs is up to date
         run: |
           helm-docs --chart-search-root=charts --template-files=README.md.gotmpl --badge-style=flat
+          python3 .github/scripts/sync-values-table.py
           git diff --exit-code charts/hermes-agent/README.md \
             || { echo "::error::charts/hermes-agent/README.md is stale: run 'make docs' and commit"; exit 1; }
+          git diff --exit-code charts/hermes-agent/README-ko.md charts/hermes-agent/README-ja.md charts/hermes-agent/README-zh.md \
+            || { echo "::error::the translated READMEs carry a stale Values table: run 'make docs' and commit"; exit 1; }
 
   test:
     # Each matrix entry gets its OWN ephemeral kind cluster (a separate
