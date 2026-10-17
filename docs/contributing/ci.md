@@ -15,7 +15,7 @@ documentation site, track upstream images, and release signed chart artifacts.
 | [cron-fetch-image.yaml](../../.github/workflows/cron-fetch-image.yaml) | Every 6 hours or manually | Detect a newer upstream image, open an appVersion update PR, and create upstream-review issues. |
 | [propose-release.yaml](../../.github/workflows/propose-release.yaml) | Manual | Consume pending Changesets into one reviewable release PR without publishing. |
 | [release-chart.yaml](../../.github/workflows/release-chart.yaml) | Push to `main` that changes `charts/hermes-agent/Chart.yaml` | Tag `vX.Y.Z`, publish OCI and Helm Repository artifacts, cosign-sign OCI, and refresh Pages. |
-| [verify-release.yaml](../../.github/workflows/verify-release.yaml) | After a successful `release-chart` run | Re-verifies the **published, signed** artifact end to end. |
+| [verify-release.yaml](../../.github/workflows/verify-release.yaml) | After a successful `release-chart` run, or manual dispatch for a published version | Re-verifies the **published, signed** artifact end to end. |
 
 ## How the workflows connect
 
@@ -90,8 +90,10 @@ actual diff. Chart inputs, image changes and live-test harness changes retain
 the external checks; missing base history keeps them enabled.
 
 The `CI_MODELS` pool is **failover only** - the round-trip passes on the first
-model that answers, not every model. The chat invocation mirrors the chart's own
-test hook: `hermes chat -m <model> --provider nvidia -q <prompt> --max-turns N`.
+model returning exactly `CI_PONG`, not every model. The PR and post-release
+checks share the fixture and discovery gate. They preload `--skills ci-ping` and
+use `--quiet` so only the final reply is checked; a zero exit with an empty or
+unrelated answer does not pass. Each attempt remains bounded and fails over.
 
 The live Discord notification step (workflow-level, after the scenario script)
 only runs for this scenario, since it's the only one with Discord enabled.
@@ -263,7 +265,19 @@ against the artifact users actually pull (namespace `verify-hermes-chart`):
 2. `helm install` **from the OCI registry** (not local source).
 3. Run the same `hermes doctor` + chat round-trip as `validate-chart`.
 
-A failure here means the published artifact or its signature is broken.
+The release tag determines the chart version and immutable release SHA. The
+workflow's own commit determines the test harness, and logs record both. To
+check an existing artifact after correcting a harness, without publishing again:
+
+```bash
+gh workflow run verify-release.yaml --ref main -f version=1.21.0
+```
+
+The manual version must be plain `X.Y.Z` and its existing tag must agree with
+the chart metadata. Automatic no-op releases still skip artifact verification.
+Classify failures from evidence: signature/installation, harness, and external
+model/network failures are distinct; a failed model request alone does not prove
+the published chart is broken.
 
 ## Running the equivalents locally
 
