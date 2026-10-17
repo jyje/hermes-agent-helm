@@ -473,10 +473,31 @@ config:
 | `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | 仪表板内置用户名和密码认证，上游在非回环绑定时强制启用；`HERMES_DASHBOARD_PUBLIC_URL` 声明 Ingress 后的外部来源地址 |
 | `HERMES_MAX_ITERATIONS` | 每次会话的工具调用迭代预算（默认 500 次，之后允许一次收尾调用）；硬上限为 `config.agent.max_turns`，上游默认不限，Chart 已不再初始化该值 |
 | `HERMES_AGENT_TIMEOUT` | 网关无活动超时（默认 1800 秒 / 30 分钟） |
-| `SESSION_IDLE_MINUTES` | 空闲会话重置窗口（默认 1440 分钟） |
 | `HERMES_TIMEZONE` | 覆盖 IANA 时区 |
 
 > **无法通过环境变量配置：** 上下文压缩、回退提供商及提供商路由只存在于 `config.yaml`（`.Values.config`）中，没有对应环境变量。
+
+## 升级说明
+
+### Hermes v0.22（Chart 1.20.0）
+
+Chart 1.20.0 将默认镜像从 `v2026.9.24`（Hermes v0.21.5）更新为 `v0.22.2`。Chart 的 values 和模板没有变化，但 Hermes 自身的部分默认值会影响持久卷上的数据。升级已有历史记录的 release 之前，请先阅读以下内容。
+
+- **旧会话会在启动时被清理。** `sessions.auto_prune` 现在默认开启：gateway 启动时，会从 `state.db` 删除超过 `sessions.retention_days`（默认 90 天）没有活动的已结束会话。打开的会话不受影响。如需全部保留，请在升级前设置：
+
+  ```yaml
+  config:
+    sessions:
+      auto_prune: false
+  ```
+
+  在默认的 `bootstrap.overwrite: false` 下，卷上已有的 `config.yaml` 不会被替换，因此该值只对新安装生效。对已有的 release，请在升级前运行 `kubectl exec <pod> -- hermes config set sessions.auto_prune false`，或使用 `bootstrap.overwrite: true` 部署一次（参阅[配置模型](#配置模型)）。
+- **空闲/每日会话重置已废弃。** 对话不再按计时器重置，`SESSION_IDLE_MINUTES` 和 `session_reset` 的 idle/daily 模式不再生效（仍设置时会记录警告）。如需重新开始，请在对话中使用 `/new` 或 `/reset`。
+- **一个 gateway 服务所有配置档案。** upstream 将每个配置档案的 gateway 合并为每台机器一个 multiplexed gateway。每个 Chart release 都是只有一个 gateway 的独立 Pod，因此[智能体团队](#智能体团队)部署不受影响。
+- **镜像标签使用 semver。** 今后请以 `vX.Y.Z` 形式固定 `image.tag`（参阅[概述](#概述)）。
+- **安全修复。** 新镜像包含 v0.21.6 的 dashboard 认证加固。如果你[公开了仪表盘](#公开仪表盘)，请尽快升级。
+
+其他变更请参阅 upstream 的 [v0.22.0 发布说明](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0)。
 
 ## FAQ
 
