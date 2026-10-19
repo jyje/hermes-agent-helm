@@ -66,11 +66,12 @@ Each release logs in on its own and keeps its credential in its own
 `auth.json`. Upstream documents that two logins of the same OpenAI account
 share one token family and that OpenAI revokes the older one. In a live check,
 three releases logged in to one Plus account within a minute, and a
-`hermes auth refresh openai-codex` in each release still succeeded right after
-the login and again about an hour later, so no revocation appeared. A refresh
-after a full day has not been confirmed yet.
+`hermes auth refresh openai-codex` in each release succeeded right after the
+login, after about an hour, and after about a day. No login was revoked in that
+time. Longer periods and other plan types were not checked.
 
-- For a team, prefer one account per release.
+- One account per release keeps each bot's usage limits separate. Sharing one
+  account works, but then all releases draw on the same limits.
 - If a release starts failing to refresh, run
   `hermes auth refresh openai-codex` in each release to see which login died,
   then log in again there.
