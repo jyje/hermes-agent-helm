@@ -28,11 +28,20 @@
 ![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) on Kubernetes
-with one `helm install` - works with any LLM provider Hermes supports, scales
-down to a single small node, and is verified to actually run, not just render.
-Just as easily, group several instances into a full [**Hermes Team**](docs/advanced/teams/index.md)
-on the same cluster. A **community-powered** chart, not an official Nous
-Research release.
+with one `helm install`. Pick a provider from the ready-to-adapt values examples
+(every built-in provider, plus any OpenAI-compatible endpoint such as
+[LiteLLM](https://github.com/BerriAI/litellm)), connect Discord or Telegram, and
+the agent stays up.
+
+Sign in with ChatGPT/Codex or GitHub Copilot from a chat message: the chart sends
+the one-time code to your channel and reuses the login after restarts. It scales
+down to a single small node, and when you want more hands you can group several
+instances into a full [**Hermes Team**](docs/advanced/teams/index.md) on the same
+cluster.
+
+Each release is installed on a fresh kind cluster before and after it ships, so
+it is verified to run, not just render. A **community-powered** chart, not an
+official Nous Research release.
 
 Prefer a browser? Hermes ships its own **web dashboard** (chat in the full
 terminal UI, past sessions, models, skills, cron jobs and settings). The chart
