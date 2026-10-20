@@ -32,7 +32,11 @@
 
 ![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
 
-[Hermes Agent](https://github.com/NousResearch/hermes-agent) を Kubernetes 上で、1 回の `helm install` で実行できます。Hermes が対応するすべての LLM プロバイダーを利用でき、小規模な単一ノードでも動作し、テンプレート生成だけでなく実際の稼働も検証しています。同じクラスターで複数のインスタンスを [**Hermes チーム**](docs/advanced/teams/reference.md) にまとめることもできます。これは **コミュニティが開発するチャート**であり、Nous Research の公式リリースではありません。
+[Hermes Agent](https://github.com/NousResearch/hermes-agent) を Kubernetes 上で、1 回の `helm install` で実行できます。すぐに使える values の例からプロバイダーを選び（組み込みのプロバイダーすべてと、[LiteLLM](https://github.com/BerriAI/litellm) のような OpenAI 互換エンドポイント）、Discord または Telegram につなぐと、エージェントが動き続けます。
+
+ChatGPT/Codex や GitHub Copilot へのサインインも、チャットのメッセージだけで済みます。チャートがワンタイムコードをチャンネルに送り、再起動後もログインを引き継ぎます。小規模な単一ノードまで小さく動かせて、人手が必要になったら同じクラスターで複数のインスタンスを [**Hermes チーム**](docs/advanced/teams/reference.md) にまとめられます。
+
+すべてのリリースは、公開の前後に新しい kind クラスターへインストールして確認するため、テンプレート生成だけでなく実際に動くことを検証しています。**コミュニティが開発するチャート**であり、Nous Research の公式リリースではありません。
 
 ブラウザで使いたい場合、Hermes には独自の **Web ダッシュボード**があります（ターミナル UI でのチャット、過去のセッション、モデル、スキル、cron、設定）。チャートはこれを有効にし、Ingress または HTTPRoute で独自の URL に公開して、パスワード、Nous Portal OAuth、または独自の OpenID Connect ログインで保護します。構成要素のつながりは下図を、設定方法は[ダッシュボードのドキュメント](docs/advanced/integrations/dashboard.md)を参照してください。
 

@@ -32,7 +32,11 @@
 
 ![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
 
-只需一次 `helm install`，即可在 Kubernetes 上运行 [Hermes Agent](https://github.com/NousResearch/hermes-agent)。支持 Hermes 可用的所有 LLM 提供商，可在小型单节点上运行，并经过实际运行验证。同一集群中的多个实例也可以组成 [**Hermes 团队**](docs/advanced/teams/reference.md)。这是一个**社区维护的 Chart**，并非 Nous Research 的官方发行版。
+只需一次 `helm install`，即可在 Kubernetes 上运行 [Hermes Agent](https://github.com/NousResearch/hermes-agent)。从现成可改的 values 示例中选择提供商（所有内置提供商，以及 [LiteLLM](https://github.com/BerriAI/litellm) 这类兼容 OpenAI 的端点），接入 Discord 或 Telegram，智能体就会持续在线。
+
+通过聊天消息即可登录 ChatGPT/Codex 或 GitHub Copilot：Chart 会把一次性验证码发到你的频道，重启后继续沿用该登录。它可以缩小到一台小型单节点上运行，需要更多人手时，还可以把同一集群中的多个实例组成完整的 [**Hermes 团队**](docs/advanced/teams/reference.md)。
+
+每个版本在发布前后都会安装到全新的 kind 集群中，因此验证的是真正能运行，而不只是能渲染。这是一个**社区维护的 Chart**，并非 Nous Research 的官方发行版。
 
 如果更习惯用浏览器，Hermes 自带 **Web 仪表盘**（完整终端界面中的对话、历史会话、模型、技能、cron 和设置）。本 Chart 可以启用它，并通过 Ingress 或 HTTPRoute 发布到你自己的 URL，用密码、Nous Portal OAuth 或你自己的 OpenID Connect 登录加以保护。各组件如何连接见下图，配置方法详见[仪表盘文档](docs/advanced/integrations/dashboard.md)。
 
