@@ -421,7 +421,7 @@ auth:
     #    Hermes image so auth.json persistence and refresh stay version-aligned.
     image:
       repository: python
-      tag: "3.13-slim"
+      tag: "3.14-slim"
     # -- Resources for the login init container.
     resources: {}
     # Catalog of interactive-login profiles. `flow` selects the handler;
