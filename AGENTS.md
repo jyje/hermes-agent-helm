@@ -75,7 +75,11 @@ as a **Secret**.
   landing page links to it; the remaining Korean contributing pages stay
   translated. Other locales are entry-path scoped, not
   full-tree mirrors: update only their translated entry pages, and do not
-  require a translation for an unrelated English or Korean page. Their entry
+  require a translation for an unrelated English or Korean page. When the
+  English page you change is itself one of those entry pages, apply the same
+  edit to every locale that translates it (ko, ja and zh) in the same PR, never
+  as a follow-up. A partial edit keeps the recorded `translation_source` SHA;
+  it moves only on a full refresh. Their entry
   landing page must tell readers that the remaining sections use English.
   Japanese and Simplified Chinese notices also disclose that the maintainer
   is not a native speaker, no native speaker has reviewed the translation,

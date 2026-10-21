@@ -30,11 +30,18 @@
 ![Flow of Hermes Agent](https://raw.githubusercontent.com/jyje/hermes-agent-helm/main/docs/images/hermes-agent-helm-flow.png)
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)를 Kubernetes에서
-`helm install` 한 번으로 실행하세요 - Hermes가 지원하는 모든 LLM 제공자에서 동작하고,
-단일 소형 노드로 확장되며, 실제로 동작하는지 검증된(단순 렌더만 아님) 차트입니다.
-같은 클러스터 위에서 여러 인스턴스를 묶어 완전한 [**Hermes 팀**](docs/ko/advanced/teams/index.md)을
-만드는 것도 그만큼 쉽습니다. **커뮤니티 기반** 차트이며, Nous Research 공식
-릴리즈가 아닙니다.
+`helm install` 한 번으로 실행하세요. 바로 가져다 쓸 수 있는 values 예제에서 제공자를
+고르고(내장 제공자 전부, 그리고 [LiteLLM](https://github.com/BerriAI/litellm) 같은
+OpenAI 호환 엔드포인트 모두), Discord나 Telegram을 연결하면 에이전트가 계속 떠 있습니다.
+
+ChatGPT/Codex나 GitHub Copilot 로그인도 채팅 메시지로 끝납니다. 차트가 일회용 코드를
+채널로 보내 주고, 재시작해도 로그인을 그대로 이어 씁니다. 단일 소형 노드까지 작게
+줄일 수 있고, 일손이 더 필요하면 같은 클러스터 위에서 여러 인스턴스를 묶어 완전한
+[**Hermes 팀**](docs/ko/advanced/teams/index.md)을 만들 수 있습니다.
+
+모든 릴리즈는 배포 전과 후에 새 kind 클러스터에 설치해 보므로, 렌더링만 되는 것이 아니라
+실제로 동작하는지 검증됩니다. **커뮤니티 기반** 차트이며, Nous Research 공식 릴리즈가
+아닙니다.
 
 브라우저가 편하다면, Hermes에는 자체 **웹 대시보드**가 있습니다(전체 터미널 UI 채팅,
 지난 세션, 모델, 스킬, cron, 설정). 차트는 이를 켜고 Ingress나 HTTPRoute로 나만의 URL에
