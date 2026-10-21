@@ -16,12 +16,17 @@ permissions:
   actions: write    # trigger deploy-docs.yaml after updating the Helm repo data
 
 jobs:
-  release-chart:
+  # Cheap gate so the Actions UI shows the release job itself as skipped when
+  # this Chart.yaml change is not a new chart version (e.g. an appVersion-only
+  # image bump), instead of a "successful" job with every step skipped inside.
+  check-version:
     runs-on: ubuntu-26.04-arm
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      chart_name: ${{ steps.ver.outputs.chart_name }}
+      exists: ${{ steps.ver.outputs.exists }}
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0   # tags are needed for the release guard
 
       - name: Resolve chart version
         id: ver
@@ -30,17 +35,25 @@ jobs:
           NAME="$(grep -E '^name:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
           echo "version=$VER" >> "$GITHUB_OUTPUT"
           echo "chart_name=$NAME" >> "$GITHUB_OUTPUT"
-          if git rev-parse -q --verify "refs/tags/v$VER" >/dev/null; then
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VER" >/dev/null; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::v$VER already released - nothing to do."
+            echo "::notice::v$VER already released - release-chart is skipped."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
+  release-chart:
+    needs: check-version
+    if: needs.check-version.outputs.exists == 'false'
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # tags are needed for the release guard
+
       - name: Extract Changesets changelog section for this version
-        if: steps.ver.outputs.exists == 'false'
         run: |
-          awk -v version="${{ steps.ver.outputs.version }}" '
+          awk -v version="${{ needs.check-version.outputs.version }}" '
             /^## / {
               if (found) exit
               heading = $0
@@ -54,42 +67,37 @@ jobs:
             found { print }
           ' CHANGELOG.md > CHANGELOG_SECTION.md
           test -s CHANGELOG_SECTION.md || {
-            echo "::error::No CHANGELOG.md section found for v${{ steps.ver.outputs.version }}"
+            echo "::error::No CHANGELOG.md section found for v${{ needs.check-version.outputs.version }}"
             exit 1
           }
 
       - name: Render release notes
-        if: steps.ver.outputs.exists == 'false'
         run: |
           bash .github/scripts/release/render-release-notes.sh \
-            "${{ github.repository }}" "${{ steps.ver.outputs.chart_name }}" \
-            "${{ steps.ver.outputs.version }}" CHANGELOG_SECTION.md \
+            "${{ github.repository }}" "${{ needs.check-version.outputs.chart_name }}" \
+            "${{ needs.check-version.outputs.version }}" CHANGELOG_SECTION.md \
             charts/hermes-agent/Chart.yaml \
             > RELEASE_NOTES.md
 
       - name: Create tag + GitHub Release
-        if: steps.ver.outputs.exists == 'false'
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: v${{ steps.ver.outputs.version }}
-          name: ${{ steps.ver.outputs.chart_name }} v${{ steps.ver.outputs.version }}
+          tag_name: v${{ needs.check-version.outputs.version }}
+          name: ${{ needs.check-version.outputs.chart_name }} v${{ needs.check-version.outputs.version }}
           body_path: RELEASE_NOTES.md
 
       - name: Ensure release title (action-gh-release may reuse a stale release without it)
-        if: steps.ver.outputs.exists == 'false'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh release edit "v${{ steps.ver.outputs.version }}" \
+          gh release edit "v${{ needs.check-version.outputs.version }}" \
             --repo "${{ github.repository }}" \
-            --title "${{ steps.ver.outputs.chart_name }} v${{ steps.ver.outputs.version }}"
+            --title "${{ needs.check-version.outputs.chart_name }} v${{ needs.check-version.outputs.version }}"
 
       - name: Setup Helm
-        if: steps.ver.outputs.exists == 'false'
         uses: azure/setup-helm@v5
 
       - name: Package & push to ghcr (OCI)
-        if: steps.ver.outputs.exists == 'false'
         run: |
           helm package charts/hermes-agent --destination dist/
           echo "${{ secrets.GITHUB_TOKEN }}" \
@@ -97,11 +105,9 @@ jobs:
           helm push dist/hermes-agent-*.tgz "oci://ghcr.io/${{ github.repository }}"
 
       - name: Install cosign
-        if: steps.ver.outputs.exists == 'false'
         uses: sigstore/cosign-installer@v3
 
       - name: Log in to ghcr for cosign
-        if: steps.ver.outputs.exists == 'false'
         # `helm registry login` above only writes Helm's own registry config;
         # cosign reads the Docker keychain (~/.docker/config.json). Without this
         # login cosign cannot push the signature and fails with UNAUTHORIZED.
@@ -110,13 +116,11 @@ jobs:
             | cosign login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Sign the chart (keyless, Sigstore)
-        if: steps.ver.outputs.exists == 'false'
         run: |
           cosign sign --yes \
-            "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"
+            "ghcr.io/${{ github.repository }}/${{ needs.check-version.outputs.chart_name }}:${{ needs.check-version.outputs.version }}"
 
       - name: Verify signature (self-check)
-        if: steps.ver.outputs.exists == 'false'
         run: |
           for attempt in 1 2 3 4 5; do
             if cosign verify \
@@ -124,7 +128,7 @@ jobs:
                 "https://github.com/${{ github.repository }}/.*" \
               --certificate-oidc-issuer \
                 "https://token.actions.githubusercontent.com" \
-              "ghcr.io/${{ github.repository }}/${{ steps.ver.outputs.chart_name }}:${{ steps.ver.outputs.version }}"; then
+              "ghcr.io/${{ github.repository }}/${{ needs.check-version.outputs.chart_name }}:${{ needs.check-version.outputs.version }}"; then
               exit 0
             fi
 
@@ -139,7 +143,6 @@ jobs:
           exit 1
 
       - name: Checkout existing Helm repo index (gh-pages)
-        if: steps.ver.outputs.exists == 'false'
         uses: actions/checkout@v7
         continue-on-error: true
         with:
@@ -147,7 +150,6 @@ jobs:
           path: gh-pages-index
 
       - name: Build Helm repo index
-        if: steps.ver.outputs.exists == 'false'
         run: |
           mkdir -p .deploy
           cp dist/hermes-agent-*.tgz .deploy/
@@ -163,7 +165,6 @@ jobs:
       # actions/deploy-pages. keep_files preserves every prior release's .tgz
       # that isn't part of this run's .deploy/ dir.
       - name: Publish Helm repo data to the gh-pages branch
-        if: steps.ver.outputs.exists == 'false'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -172,7 +173,6 @@ jobs:
           keep_files: true
 
       - name: Trigger a Pages deployment with the new release
-        if: steps.ver.outputs.exists == 'false'
         run: gh workflow run deploy-docs.yaml --ref main
         env:
           GH_TOKEN: ${{ github.token }}
