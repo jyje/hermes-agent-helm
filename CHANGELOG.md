@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.22.0
+
+### Dependencies
+
+- [#399](https://github.com/jyje/hermes-agent-helm/pull/399) [`735a35a`](https://github.com/jyje/hermes-agent-helm/commit/735a35aae69be3d6e8baa8d95ca7f0d5ba946713) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.22.3.
+
+- [#399](https://github.com/jyje/hermes-agent-helm/pull/399) [`735a35a`](https://github.com/jyje/hermes-agent-helm/commit/735a35aae69be3d6e8baa8d95ca7f0d5ba946713) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.22.4.
+
+- [#399](https://github.com/jyje/hermes-agent-helm/pull/399) [`735a35a`](https://github.com/jyje/hermes-agent-helm/commit/735a35aae69be3d6e8baa8d95ca7f0d5ba946713) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.22.5.
+
+### Documentation
+
+- [#397](https://github.com/jyje/hermes-agent-helm/pull/397) [`5bb6433`](https://github.com/jyje/hermes-agent-helm/commit/5bb64330f64bd9d16d0601d53b7ab6eccee31c40) - Documentation(docs): Codex same-account refresh checked after one day
+
+  Record that three releases logged in to one ChatGPT account still refreshed their credentials right after login, an hour later and a day later. Several releases on one account worked in this check, and one account per release is still preferred for a team because it isolates a single login failure.
+
+- [#398](https://github.com/jyje/hermes-agent-helm/pull/398) [`74e69e8`](https://github.com/jyje/hermes-agent-helm/commit/74e69e804ebe72a7b6d96ce871dfe3329a9a15ff) - Documentation(docs): README summary says what you get
+
+  Rewrite the README summary to lead with the concrete things the chart does: pick a provider from the ready-to-adapt examples, connect Discord or Telegram, sign in with Codex or Copilot from a chat message, scale down to one small node or group instances into a team, and a fresh-cluster install before and after every release. The Korean, Japanese and Chinese READMEs have the same edit.
+
 ## 1.21.0
 
 ### Features
