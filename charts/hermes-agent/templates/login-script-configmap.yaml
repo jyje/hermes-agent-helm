@@ -5,6 +5,10 @@ metadata:
   name: {{ include "hermes-agent.fullname" . }}-login
   labels:
     {{- include "hermes-agent.labels" . | nindent 4 }}
+  {{- with .Values.configMapAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 data:
   # Interactive provider login script mounted into the auth init container.
   # OpenAI Codex persistence is delegated to the pinned Hermes image.

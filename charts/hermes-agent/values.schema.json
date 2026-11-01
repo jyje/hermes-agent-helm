@@ -322,6 +322,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "refreshInterval": { "type": "string" },
         "secretStoreRef": {
           "type": "object",
@@ -677,6 +678,8 @@
     },
 
     "podAnnotations": { "type": "object" },
+    "configMapAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
+    "secretAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
     "deploymentAnnotations": { "type": "object" },
     "podLabels": { "type": "object" },
     "nodeSelector": { "type": "object" },
