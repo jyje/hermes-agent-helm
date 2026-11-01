@@ -7,6 +7,13 @@ metadata:
     {{- include "hermes-agent.labels" . | nindent 4 }}
     app.kubernetes.io/component: test
   annotations:
+    {{- /* The hook annotations below are fixed: skip any user key that repeats one. */}}
+    {{- $hookKeys := list "helm.sh/hook" "helm.sh/hook-weight" "helm.sh/hook-delete-policy" "argocd.argoproj.io/hook" "argocd.argoproj.io/hook-delete-policy" }}
+    {{- range $key, $value := .Values.tests.annotations }}
+    {{- if not (has $key $hookKeys) }}
+    {{ $key | quote }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
     # Helm test hook: created/run by `helm test <release>`, after install.
     "helm.sh/hook": test
     "helm.sh/hook-weight": "1"
