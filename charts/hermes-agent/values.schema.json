@@ -230,6 +230,7 @@
             },
             "size": { "type": "string", "minLength": 1 },
             "retain": { "type": "boolean" },
+            "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
             "permissions": {
               "type": "object",
               "additionalProperties": false,
@@ -420,7 +421,8 @@
         "accessModes": { "type": "array", "items": { "type": "string" } },
         "size": { "type": "string" },
         "mountPath": { "type": "string" },
-        "existingClaim": { "type": "string" }
+        "existingClaim": { "type": "string" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     },
 
