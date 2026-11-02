@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.23.0
+
+### Features
+
+- [#412](https://github.com/jyje/hermes-agent-helm/pull/412) [`0af42ea`](https://github.com/jyje/hermes-agent-helm/commit/0af42ea63a14d462d07a373460f55d4e6190d621) - Feature(values): ConfigMap, Secret and ExternalSecret annotations
+
+  Set `configMapAnnotations` to add annotations to every ConfigMap the chart renders (config, device login script, team skill), `secretAnnotations` for the env Secret, and `externalSecret.annotations` for the ExternalSecret, for example Argo CD sync waves so these objects exist before the workload. All three default to `{}` and take string values, so existing installs render the same objects. With `externalSecret.enabled` the Secret is created by the External Secrets Operator, so use `externalSecret.annotations` there.
+
+- [#413](https://github.com/jyje/hermes-agent-helm/pull/413) [`bdb25e8`](https://github.com/jyje/hermes-agent-helm/commit/bdb25e83da1cba6af111cbee57828f60f30c00a8) - Feature(values): NetworkPolicy and test Job annotations
+
+  Set `networkPolicy.annotations` to add annotations to the NetworkPolicy, and `tests.annotations` to add annotations to the Helm test Job. The Job's own Helm and Argo CD hook annotations are always set, and a key in `tests.annotations` that repeats one of them is ignored. Both default to `{}` and take string values, so existing installs render the same objects.
+
+- [#411](https://github.com/jyje/hermes-agent-helm/pull/411) [`0c58ed1`](https://github.com/jyje/hermes-agent-helm/commit/0c58ed17b30ff9b332e7f3b01c5c9ad04afc4f5d) - Feature(values): PVC annotations
+
+  Set `persistence.annotations` to add annotations to the PersistentVolumeClaim, or to the StatefulSet's volumeClaimTemplate, for example backup tool hints or `helm.sh/resource-policy: keep`. Set `team.sharedVolume.annotations` to do the same for the shared team volume; its `helm.sh/resource-policy: keep` annotation from `retain: true` is always kept. Both default to `{}`, so existing installs render the same objects. Kubernetes does not allow changing a StatefulSet's volumeClaimTemplates, so set the annotations at install time.
+
+### Fixes
+
+- [#410](https://github.com/jyje/hermes-agent-helm/pull/410) [`2cbf96a`](https://github.com/jyje/hermes-agent-helm/commit/2cbf96a1040830ef870ac5479519b99f610dda79) - Fix(values): Validate annotation and label values as strings
+
+  The values schema now requires string values in `serviceAccount.annotations`, `service.annotations`, `ingress.annotations`, `httpRoute.annotations`, `podAnnotations`, `deploymentAnnotations` and `podLabels`. A number or boolean there, for example from `--set key=true`, is now rejected by `helm` with the offending path, instead of rendering and failing later when Kubernetes applies the object. Use `--set-string` or quote the value in a values file.
+
+- [#416](https://github.com/jyje/hermes-agent-helm/pull/416) [`776cd19`](https://github.com/jyje/hermes-agent-helm/commit/776cd19dfe0fd7e694880c0258ef44f1925a264c) - Fix(chart): give the Helm test Job 1Gi of memory
+
+  Raise the test Job's default memory limit from 512Mi to 1Gi. `hermes doctor` was killed with `OOMKilled` at the old limit, so `helm test` failed on a fresh install.
+
 ## 1.22.0
 
 ### Dependencies
