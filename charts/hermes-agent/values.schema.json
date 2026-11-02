@@ -48,7 +48,7 @@
       "properties": {
         "create": { "type": "boolean" },
         "name": { "type": "string" },
-        "annotations": { "type": "object" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "automountServiceAccountToken": { "type": "boolean" }
       }
     },
@@ -230,6 +230,7 @@
             },
             "size": { "type": "string", "minLength": 1 },
             "retain": { "type": "boolean" },
+            "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
             "permissions": {
               "type": "object",
               "additionalProperties": false,
@@ -421,7 +422,8 @@
         "accessModes": { "type": "array", "items": { "type": "string" } },
         "size": { "type": "string" },
         "mountPath": { "type": "string" },
-        "existingClaim": { "type": "string" }
+        "existingClaim": { "type": "string" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     },
 
@@ -491,7 +493,7 @@
             }
           }
         },
-        "annotations": { "type": "object" }
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     },
 
@@ -501,7 +503,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "className": { "type": "string" },
-        "annotations": { "type": "object" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "hosts": {
           "type": "array",
           "items": {
@@ -539,7 +541,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
-        "annotations": { "type": "object" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "parentRefs": {
           "type": "array",
           "items": {
@@ -677,11 +679,11 @@
       }
     },
 
-    "podAnnotations": { "type": "object" },
+    "podAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
     "configMapAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
     "secretAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
-    "deploymentAnnotations": { "type": "object" },
-    "podLabels": { "type": "object" },
+    "deploymentAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
+    "podLabels": { "type": "object", "additionalProperties": { "type": "string" } },
     "nodeSelector": { "type": "object" },
     "tolerations": { "type": "array" },
     "affinity": { "type": "object" },

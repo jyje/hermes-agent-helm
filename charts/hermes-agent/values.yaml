@@ -220,6 +220,9 @@ team:
     size: 10Gi
     # -- Keep a chart-created shared claim when the owning release is removed.
     retain: true
+    # -- Annotations to add to the shared PVC, used only when `create=true`. With
+    #    `retain: true` the `helm.sh/resource-policy: keep` annotation is always set.
+    annotations: {}
     permissions:
       # -- On the leader, chown the shared volume before Hermes starts. Enable
       # only when the storage backend permits ownership changes. This init
@@ -482,6 +485,11 @@ persistence:
   # -- Use an existing PVC instead of creating a new one.
   # When specified, the chart will use this PVC and skip creating its own.
   existingClaim: ""
+  # -- Annotations to add to the PVC, or to the StatefulSet's volumeClaimTemplate
+  #    (for example backup tool hints or `helm.sh/resource-policy: keep`). They are
+  #    not applied to `existingClaim`. Kubernetes does not allow changing a
+  #    StatefulSet's volumeClaimTemplates, so set them at install time.
+  annotations: {}
 
 # ---------------------------------------------------------------------------
 # Networking. `hermes gateway run` uses outbound messenger connections by
@@ -788,7 +796,7 @@ tests:
       memory: 128Mi
     limits:
       cpu: "1"
-      memory: 512Mi
+      memory: 1Gi
 
 # -- Annotations to add to the Pod.
 podAnnotations: {}

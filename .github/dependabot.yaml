@@ -21,6 +21,12 @@ updates:
       - "/charts/*"
     schedule:
       interval: "weekly"
+    # The device-login init container's Python tag is managed by
+    # cron-fetch-image.yaml: it follows the Python that the pinned Hermes image
+    # runs (upstream pm/lock.json). Do not let Dependabot move it ahead.
+    ignore:
+      - dependency-name: "python"
+        versions: [">=3.15"]
     labels:
       - "github-actions"
     commit-message:
