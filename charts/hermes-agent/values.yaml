@@ -347,6 +347,9 @@ externalSecret:
   #    Requires the External Secrets Operator CRDs to already be installed
   #    in-cluster.
   enabled: false
+  # -- Annotations to add to the ExternalSecret, for example an Argo CD sync wave
+  #    so the Secret exists before the workload starts.
+  annotations: {}
   # -- How often ESO resyncs the target Secret from the provider.
   refreshInterval: 1h
   # -- Which SecretStore/ClusterSecretStore to pull from. `name` is required
@@ -797,6 +800,12 @@ tests:
 
 # -- Annotations to add to the Pod.
 podAnnotations: {}
+# -- Annotations to add to every ConfigMap the chart renders (config, login
+#    script, team skill), for example Argo CD sync waves.
+configMapAnnotations: {}
+# -- Annotations to add to the chart's env Secret. With `externalSecret.enabled`
+#    the Secret is created by ESO, so use `externalSecret.annotations` instead.
+secretAnnotations: {}
 # -- Annotations to add to the Deployment or StatefulSet object.
 deploymentAnnotations: {}
 # -- Labels to add to the Pod.

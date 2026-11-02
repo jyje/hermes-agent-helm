@@ -1128,6 +1128,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | bootstrap.overwrite | bool | false: seed config.yaml and configured SOUL.md only if absent, preserving    runtime edits across upgrades. Set true to replace both files with chart    content on every deploy. | `false` |
 | command | list | Container command override. Empty keeps the Hermes image entrypoint, which    starts the s6-supervised outbound messaging gateway and prepares volume    ownership before dropping privileges. Set only for explicit debugging. | `[]` |
 | config | object | ------------------------------------------------------------------------- | `{"agent":{"gateway_timeout":1800},"model":{"default":"gpt-4o-mini","provider":"openai-api"},"providers":{},"terminal":{"backend":"local"}}` |
+| configMapAnnotations | object | Annotations to add to every ConfigMap the chart renders (config, login    script, team skill), for example Argo CD sync waves. | `{}` |
 | controller | object | ------------------------------------------------------------------------- | `{"type":"deployment"}` |
 | controller.type | string | Workload kind: "deployment" or "statefulset". | `"deployment"` |
 | dashboard | object | ------------------------------------------------------------------------- | `{"auth":{"provider":"basic"},"enabled":false,"publicUrl":"","readinessProbe":{"enabled":true,"periodSeconds":10},"trustedProxies":[]}` |
@@ -1139,7 +1140,8 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | dashboard.trustedProxies | list | Peers allowed to supply X-Forwarded-Proto / X-Forwarded-For, usually the    ingress controller's pod CIDR. Feeds `config.dashboard.trusted_proxies`;    upstream rejects unbounded entries such as 0.0.0.0/0. | `[]` |
 | deploymentAnnotations | object | Annotations to add to the Deployment or StatefulSet object. | `{}` |
 | env | object | ------------------------------------------------------------------------- | `{"OPENAI_API_KEY":"sk-REPLACE_ME"}` |
-| externalSecret | object | ------------------------------------------------------------------------- | `{"data":[],"dataFrom":[],"enabled":false,"refreshInterval":"1h","secretStoreRef":{"kind":"ClusterSecretStore","name":""},"target":{"creationPolicy":"Owner","deletionPolicy":"Retain","name":""}}` |
+| externalSecret | object | ------------------------------------------------------------------------- | `{"annotations":{},"data":[],"dataFrom":[],"enabled":false,"refreshInterval":"1h","secretStoreRef":{"kind":"ClusterSecretStore","name":""},"target":{"creationPolicy":"Owner","deletionPolicy":"Retain","name":""}}` |
+| externalSecret.annotations | object | Annotations to add to the ExternalSecret, for example an Argo CD sync wave    so the Secret exists before the workload starts. | `{}` |
 | externalSecret.data | list | Individual remoteRef -> key mappings. See the External Secrets    Operator docs for the full field set. | `[]` |
 | externalSecret.dataFrom | list | Bulk provider-native secret imports. See the External Secrets    Operator docs for the full field set. | `[]` |
 | externalSecret.enabled | bool | Render an ExternalSecret instead of the chart's own env Secret.    Requires the External Secrets Operator CRDs to already be installed    in-cluster. | `false` |
@@ -1193,6 +1195,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | replicaCount | int | Set to 0 to prepare GitOps resources (Secret, ConfigMap, PVC, ...)    without starting an agent Pod, then scale to 1 after credentials and    optional device login are ready. The gateway and device-login init    container do not run while paused. Hermes Agent is a single-writer    workload bound to one HERMES_HOME (ReadWriteOnce PVC), so values above 1    are unsupported: Deployment replicas contend for the same volume and    StatefulSet replicas are disconnected agent identities. | `1` |
 | resources | object | Container resource requests/limits. Lightweight defaults aimed at small clusters (incl. Raspberry Pi / arm64). | `{"limits":{"cpu":"2","memory":"2Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` |
 | runtimeClassName | string | RuntimeClass for the Pod. Set to a sandboxed runtime (gVisor: "gvisor",    Kata: "kata-containers") to add a kernel isolation boundary around the    agent's shell execution. Empty by default: the cluster's default runtime. | `""` |
+| secretAnnotations | object | Annotations to add to the chart's env Secret. With `externalSecret.enabled`    the Secret is created by ESO, so use `externalSecret.annotations` instead. | `{}` |
 | securityContext | object | Container-level securityContext. Same caveat as `podSecurityContext` above. | `{}` |
 | service.annotations | object | Annotations to add to the Service. | `{}` |
 | service.enabled | bool | Create a ClusterIP Service for explicitly selected listeners. | `false` |
