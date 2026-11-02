@@ -5,6 +5,10 @@ metadata:
   name: {{ include "hermes-agent.fullname" . }}
   labels:
     {{- include "hermes-agent.labels" . | nindent 4 }}
+  {{- with .Values.networkPolicy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   podSelector:
     matchLabels:

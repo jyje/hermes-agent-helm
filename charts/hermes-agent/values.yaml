@@ -658,6 +658,8 @@ httpRoute:
 # which on most managed clusters hands out node IAM credentials.
 # ---------------------------------------------------------------------------
 networkPolicy:
+  # -- Annotations to add to the NetworkPolicy.
+  annotations: {}
   # -- Create a NetworkPolicy isolating both directions. Ingress is denied
   #    entirely by default - not an oversight: `hermes gateway run` is
   #    outbound-only, so nothing needs to reach this Pod unless a listener
@@ -753,6 +755,10 @@ terminationGracePeriodSeconds: ""
 tests:
   # -- Render the chart test Job.
   enabled: true
+  # -- Extra annotations to add to the test Job. The chart's own Helm and Argo CD
+  #    hook annotations are always set, and a key here that repeats one of them
+  #    is ignored.
+  annotations: {}
   # -- Image used by the test Job. Empty fields fall back to the main
   # `image.*` (so the hermes CLI + doctor are available and arch matches).
   image:

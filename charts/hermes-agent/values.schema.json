@@ -595,6 +595,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "allowDns": { "type": "boolean" },
         "dns": {
           "type": "object",
@@ -645,6 +646,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "image": {
           "type": "object",
           "additionalProperties": false,
