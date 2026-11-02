@@ -793,7 +793,7 @@ tests:
       memory: 128Mi
     limits:
       cpu: "1"
-      memory: 512Mi
+      memory: 1Gi
 
 # -- Annotations to add to the Pod.
 podAnnotations: {}

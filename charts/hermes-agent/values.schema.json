@@ -48,7 +48,7 @@
       "properties": {
         "create": { "type": "boolean" },
         "name": { "type": "string" },
-        "annotations": { "type": "object" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "automountServiceAccountToken": { "type": "boolean" }
       }
     },
@@ -492,7 +492,7 @@
             }
           }
         },
-        "annotations": { "type": "object" }
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     },
 
@@ -502,7 +502,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "className": { "type": "string" },
-        "annotations": { "type": "object" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "hosts": {
           "type": "array",
           "items": {
@@ -540,7 +540,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean" },
-        "annotations": { "type": "object" },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
         "parentRefs": {
           "type": "array",
           "items": {
@@ -678,9 +678,9 @@
       }
     },
 
-    "podAnnotations": { "type": "object" },
-    "deploymentAnnotations": { "type": "object" },
-    "podLabels": { "type": "object" },
+    "podAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
+    "deploymentAnnotations": { "type": "object", "additionalProperties": { "type": "string" } },
+    "podLabels": { "type": "object", "additionalProperties": { "type": "string" } },
     "nodeSelector": { "type": "object" },
     "tolerations": { "type": "array" },
     "affinity": { "type": "object" },
