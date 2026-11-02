@@ -41,6 +41,12 @@ as a **Secret**.
   `sort -V` ranks a date tag above any semver tag, so treat date tags as older
   when comparing (see `cron-fetch-image.yaml`). Image is multi-arch
   (amd64 + arm64). Always use the `v` prefix (`v0.22.2`, not `0.22.2`).
+- **The login init container's Python follows Hermes.** `auth.deviceFlow.image.tag`
+  (`python:<minor>-slim`) is set by `cron-fetch-image.yaml` from the Python pin in
+  the tagged upstream `pm/lock.json` (3.14 today), so the login interpreter
+  matches the one Hermes runs. Never bump it by hand or merge a Dependabot
+  python bump: `.github/dependabot.yaml` ignores `python` 3.15 and above, and the
+  image-bump PR moves the tag itself when Hermes does.
 - **No inbound API.** `hermes gateway run` is outbound (messaging platforms) and
   the image is s6-supervised - so don't set `command`/`args` (use the image
   entrypoint), don't add liveness/readiness tied to a listening port by default,

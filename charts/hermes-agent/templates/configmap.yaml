@@ -5,6 +5,10 @@ metadata:
   name: {{ include "hermes-agent.fullname" . }}-config
   labels:
     {{- include "hermes-agent.labels" . | nindent 4 }}
+  {{- with .Values.configMapAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 data:
   # Partial config.yaml: only keys that override Hermes' built-in defaults.
   config.yaml: |

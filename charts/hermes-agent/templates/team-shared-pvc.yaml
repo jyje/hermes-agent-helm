@@ -4,9 +4,13 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "hermes-agent.team.sharedClaimName" . }}
+  {{- $annotations := deepCopy (.Values.team.sharedVolume.annotations | default dict) }}
   {{- if .Values.team.sharedVolume.retain }}
+  {{- $_ := set $annotations "helm.sh/resource-policy" "keep" }}
+  {{- end }}
+  {{- with $annotations }}
   annotations:
-    helm.sh/resource-policy: keep
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   labels:
     {{- include "hermes-agent.labels" . | nindent 4 }}
