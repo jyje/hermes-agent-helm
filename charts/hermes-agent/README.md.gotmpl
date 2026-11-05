@@ -957,6 +957,23 @@ persisted provider/model configuration too, or intentionally reseed it after
 backing it up (see [Configuration model](#configuration-model)). This retires
 the anonymous example; it does not remove upstream's authenticated Nous support.
 
+### Hermes v0.23.0
+
+- **Session pruning is opt-in.** The `v0.23.0` image defaults
+  `sessions.auto_prune` to `false`. Check the existing `config.yaml` on your
+  PVC before upgrading: an explicit `true` still enables pruning. With the
+  default `bootstrap.overwrite: false`, changing the Helm value does not
+  replace that existing file.
+- **Browser automation uses `browser_exec`.** Update prompts, skills and
+  explicit tool lists that still name the removed `agent-browser` CLI or
+  tools such as `browser_navigate` and `browser_click`.
+- **The MCP server moved to a plugin.** If an MCP client launches Hermes as
+  a server, change its command from `hermes mcp serve` to `hermes mcp-serve`.
+- **Webapp stays off by default.** Upgrading does not enable its listener.
+
+See the [official v0.23.0 upgrade notes](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)
+and [tagged session defaults](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257).
+
 ### Hermes v0.22 (chart 1.20.0)
 
 > **If you ran v0.22.1:** upstream says that release was built from the wrong
@@ -974,8 +991,8 @@ Chart 1.20.0 moves the default image from `v2026.9.24` (Hermes v0.21.5) to
 changed a few defaults that reach data on the persistent volume. Read these
 before upgrading a release that already has history.
 
-- **Old sessions are pruned at startup.** `sessions.auto_prune` is now on by
-  default: ended sessions inactive for `sessions.retention_days` (default 90)
+- **v0.22.2 prunes old sessions at startup by default.** In that image,
+  ended sessions inactive for `sessions.retention_days` (default 90)
   are deleted from `state.db` when the gateway starts. Open sessions are never
   touched. To keep everything, set it before the upgrade:
 
