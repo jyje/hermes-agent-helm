@@ -771,13 +771,17 @@ extraEnv:
     value: "9900"
 ```
 
-Set `A2A_BEARER_TOKEN` (shared) or `A2A_PEER_TOKENS` (per-peer, preferred)
-through `env` or `extraEnvFrom`: upstream only widens the bind past loopback
-once one is configured. See the upstream [A2A
+For a Service-backed listener, set `A2A_PEER_TOKENS` in an external Secret
+(for example, `agent-a:<token>`) and list the matching names in
+`A2A_TRUSTED_PEERS`. Clients send only the token in the Bearer header.
+The token allows a non-loopback bind and authenticates the caller; the
+allowlist authorizes the caller to send work. Without an allowlist, the
+listener refuses dispatch by default even if authentication succeeds.
+If you use a shared `A2A_BEARER_TOKEN`, Hermes identifies the peer by
+`ip:<source-ip>` instead of a name. See the upstream [A2A
 guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a).
-The copy-ready [`values-a2a.yaml`](values-a2a.yaml) overlay exposes the port
-through an explicit Service and references an external Secret for the
-required token.
+The [`values-a2a.yaml`](values-a2a.yaml) overlay pairs a named peer allowlist
+with an external Secret and an explicit Service port.
 
 ### HTTP routing: Ingress or HTTPRoute
 

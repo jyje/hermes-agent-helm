@@ -11,13 +11,14 @@
 # directly through the chart's existing free-form `config:` passthrough
 # (see the "A2A (Agent-to-Agent) listener" section in README.md).
 #
-# The external Secret below must contain OPENAI_API_KEY and A2A_BEARER_TOKEN.
-# Do not commit real keys.
+# The external Secret below must contain OPENAI_API_KEY and A2A_PEER_TOKENS.
+# Each entry is peer-name:token. Use the same names in A2A_TRUSTED_PEERS.
+# Clients send only their token as the Bearer credential. Do not commit real keys.
 #
 #   kubectl create secret generic hermes-agent-a2a-secrets \
 #     --namespace hermes-agent \
 #     --from-literal=OPENAI_API_KEY='sk-<real>' \
-#     --from-literal=A2A_BEARER_TOKEN='<long-random-token>'
+#     --from-literal=A2A_PEER_TOKENS='agent-a:<long-random-token>'
 #
 #   helm upgrade --install hermes-agent ./charts/hermes-agent \
 #     --namespace hermes-agent --create-namespace \
@@ -44,6 +45,10 @@ extraEnv:
     value: "0.0.0.0"
   - name: A2A_PORT
     value: "9900"
+  # Authentication and dispatch are separate. A valid token without an
+  # allowlisted peer is not enough to send work to a non-loopback listener.
+  - name: A2A_TRUSTED_PEERS
+    value: "agent-a"
 
 extraEnvFrom:
   - secretRef:

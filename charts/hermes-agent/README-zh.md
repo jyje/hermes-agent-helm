@@ -456,7 +456,7 @@ extraEnv:
     value: "9900"
 ```
 
-通过 `env` / `extraEnvFrom` 设置共享的 `A2A_BEARER_TOKEN`，或更推荐的逐对端 `A2A_PEER_TOKENS`。上游只有在配置其中之一后才允许绑定非回环地址。参阅 [A2A 指南](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)。[`values-a2a.yaml`](values-a2a.yaml) 示例通过显式 Service 公开端口，并从外部 Secret 引用必需令牌。
+通过 Service 公开监听器时，在外部 Secret 中设置 `A2A_PEER_TOKENS`（例如 `agent-a:<token>`），并在 `A2A_TRUSTED_PEERS` 中列出对应的对端名称。客户端只在 Bearer 请求头中发送令牌。令牌用于绑定非回环地址和身份验证，允许列表决定对端能否发送任务。没有允许列表时，即使身份验证成功，默认也会拒绝任务请求。如果使用共享的 `A2A_BEARER_TOKEN`，Hermes 以 `ip:<source-ip>` 标识对端。参阅 [A2A 指南](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)以及同时配置允许列表、外部 Secret 和 Service 端口的 [`values-a2a.yaml`](values-a2a.yaml) 示例。
 
 ### HTTP 路由：Ingress 或 HTTPRoute
 
