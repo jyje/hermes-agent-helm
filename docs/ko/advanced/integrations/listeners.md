@@ -8,7 +8,7 @@ translation_source:
 
 # 공개 리스너 목록
 
-**Hermes v0.22.2 태그의 소스**를 확인했습니다. 아래 값은 **해당 리스너를
+각 행에 연결된 **Hermes 태그의 소스**를 확인했습니다. 아래 값은 **해당 리스너를
 활성화했을 때**의 기본값이며 기본 차트 설치에서 열리는 포트 목록이 아닙니다.
 기본 게이트웨이는 메신저에 아웃바운드로 연결하며, 접근용 Service와 HTTP 라우팅은
 선택 사항입니다. StatefulSet의 headless Service는 DNS만 제공합니다.
@@ -18,6 +18,7 @@ IPv4와 IPv6를 포함합니다.
 | 리스너와 태그 소스 | 활성화 시 기본 바인딩 / 포트 | 메시지·데이터 요청 인증 | 차트 연결 방식 |
 | --- | --- | --- | --- |
 | [관리 대시보드](https://github.com/NousResearch/hermes-agent/tree/v0.22.2/hermes_cli/dashboard_auth) | 이미지에서 모든 인터페이스, 9119 | basic/OAuth/OIDC 세션. 루프백 외에는 인증 제공자가 필수이며 로그인은 셸 접근과 같습니다. | `dashboard.enabled`, Service, Ingress/HTTPRoute. 제한 없는 공개 노출은 OAuth/OIDC를 사용하고 basic은 신뢰 네트워크·VPN에 한정합니다. |
+| [Webapp](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/gateway/webapp_listener.py) | 루프백, 9120 | 루프백 외 바인딩 또는 외부 URL에는 대시보드 로그인 적용 | `config.webapp`과 명시적 `service.ports`. `values-webapp.yaml` 참고 |
 | [OpenAI 호환 API](https://github.com/NousResearch/hermes-agent/blob/v0.22.2/gateway/platforms/api_server.py) | 업스트림은 루프백, 8642. 차트는 활성화 시 0.0.0.0으로 설정합니다. | 루프백에서도 필수인 Bearer `API_SERVER_KEY` | `apiServer.enabled`와 명시적 `service.ports` 및 라우팅 |
 | [일반 웹훅](https://github.com/NousResearch/hermes-agent/blob/v0.22.2/gateway/platforms/webhook.py) | 모든 인터페이스, 8644 | 전역·경로별 서명 시크릿과 소스별 서명 검증 | `webhook.enabled`, `/webhooks/<route>` 및 프로필 접두사 경로. Service 포트를 명시합니다. |
 | [A2A](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/plugins/platforms/a2a/security.py) | 루프백, 9900. 원격 바인딩에는 토큰이 필요합니다. | 피어별 `A2A_PEER_TOKENS`(피어 이름) 또는 공유 `A2A_BEARER_TOKEN`(`ip:<source-ip>`). 작업 요청을 허용하려면 해당 식별자를 `A2A_TRUSTED_PEERS`에 넣습니다. | 자유 형식 `config.gateway.platforms.a2a`, 호스트·포트 환경변수와 명시적 Service. `values-a2a.yaml` 참고 |
@@ -49,6 +50,33 @@ IPv4와 IPv6를 포함합니다.
   허용하세요. 다른 웹훅 문제를 해결하려고 대시보드 접근을 넓히지 마세요.
 - 제공자의 웹훅 경로와 서명 검증에 쓰는 외부 HTTPS URL을 보존하세요.
   프록시 재작성을 수용하려고 서명을 끄지 마세요.
+
+## 신뢰된 클러스터의 Webapp
+
+Hermes v0.23.0과 새 릴리스를 사용하세요. 네임스페이스를 만들고
+`hermes-agent-webapp-secrets`라는 외부 Secret에 `OPENAI_API_KEY`,
+`HERMES_DASHBOARD_BASIC_AUTH_USERNAME`, `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`,
+`HERMES_DASHBOARD_BASIC_AUTH_SECRET`을 넣으세요. 강한 비밀번호와 별도의 임의
+세션 서명 키를 사용하세요.
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent \
+  -f charts/hermes-agent/values-webapp.yaml --wait
+kubectl --namespace hermes-agent port-forward --address 127.0.0.1 \
+  service/hermes-agent 9120:9120
+```
+
+`http://127.0.0.1:9120`을 열어 로그인하세요. Webapp 리스너는 내장 비밀번호
+인증을 사용하며, 9119 포트의 관리 대시보드와 별개입니다. 페이지에 접속할 수
+없으면 게이트웨이 로그에서 리스너와 인증 시작 오류를 확인하세요.
+Helm의 대기는 Webapp 리스너를 확인하지 않습니다.
+
+이 비밀번호 예제는 신뢰된 클러스터에서 로컬 포트 포워딩으로 사용하세요.
+로그인하면 에이전트의 작업 공간과 도구에 접근할 수 있습니다.
+`bootstrap.overwrite: false`인 기존 릴리스에서는 영속 볼륨의
+`config.yaml`을 직접 갱신하고 Pod를 다시 시작하세요. Helm 값만 바꿔서는
+기존 파일이 교체되지 않습니다.
 
 ## Telegram 웹훅 예제
 

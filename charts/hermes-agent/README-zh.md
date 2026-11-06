@@ -642,6 +642,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 代理（远程/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 代理（集群内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**：启用仪表盘、上游密码认证及可信代理 |
+| [`values-webapp.yaml`](values-webapp.yaml) | OpenAI (`openai-api`) | **Webapp**：内部 ClusterIP、外部密码 Secret 和本地端口转发 |
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **使用 Nous Portal OAuth 的仪表盘 Ingress**，上游推荐用于公网仪表盘的登录方式 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **使用你自己的 OpenID Connect 提供方的仪表盘 Ingress**（public PKCE 客户端，无需 Nous Portal） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API 服务器与 webhook**：显式 Service 端口和外部监听器密钥 |
