@@ -921,13 +921,15 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
   `sessions.auto_prune`의 기본값은 `false`입니다. 업그레이드 전에 PVC에 있는
   `config.yaml`을 확인하세요. 값이 명시적으로 `true`이면 계속 정리합니다.
   기본값인 `bootstrap.overwrite: false`에서는 Helm 값을 변경해도 기존 파일을
-  교체하지 않습니다.
+  교체하지 않습니다. 값이 설정되지 않았다면 디스크 공간이 부족할 때 Hermes가
+  선택을 묻고, 켜기 또는 끄기 응답을 `config.yaml`에 저장할 수 있습니다.
 - **브라우저 자동화는 `browser_exec`를 사용합니다.** 프롬프트, 스킬, 명시적
   도구 목록에서 제거된 `agent-browser` CLI 또는 `browser_navigate`,
   `browser_click` 같은 도구를 참조한다면 수정하세요.
 - **MCP 서버가 플러그인으로 이동했습니다.** Hermes를 서버로 실행하는 MCP
   클라이언트의 명령을 `hermes mcp serve`에서 `hermes mcp-serve`로 바꾸세요.
-- **Webapp은 기본으로 꺼져 있습니다.** 업그레이드해도 리스너가 활성화되지 않습니다.
+- **Webapp은 기본으로 꺼져 있습니다.** 리스너를 쓰려면 `webapp.enabled`를
+  명시적으로 켜세요.
 
 [공식 v0.23.0 업그레이드 노트](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)와
 [해당 태그의 세션 기본값](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257)을 참고하세요.

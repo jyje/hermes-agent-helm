@@ -560,10 +560,10 @@ config:
 
 ### Hermes v0.23.0
 
-- **会话自动清理需要主动开启。** `v0.23.0` 镜像的 `sessions.auto_prune` 默认值为 `false`。升级前请检查 PVC 上已有的 `config.yaml`。显式设置的 `true` 仍会启用清理。在默认的 `bootstrap.overwrite: false` 下，修改 Helm 值不会替换已有文件。
+- **会话自动清理需要主动开启。** `v0.23.0` 镜像的 `sessions.auto_prune` 默认值为 `false`。升级前请检查 PVC 上已有的 `config.yaml`。显式设置的 `true` 仍会启用清理。在默认的 `bootstrap.overwrite: false` 下，修改 Helm 值不会替换已有文件。若未设置此选项，磁盘空间不足时 Hermes 可能会询问，并将开启或关闭的选择保存到 `config.yaml`。
 - **浏览器自动化使用 `browser_exec`。** 请更新仍引用已移除的 `agent-browser` CLI 或 `browser_navigate`、`browser_click` 等工具的提示词、技能和工具列表。
 - **MCP 服务器已移至插件。** 如果 MCP 客户端将 Hermes 作为服务器启动，请将命令从 `hermes mcp serve` 改为 `hermes mcp-serve`。
-- **Webapp 默认关闭。** 升级不会启用其监听器。
+- **Webapp 默认关闭。** 如需使用监听器，请显式开启 `webapp.enabled`。
 
 请参阅[官方 v0.23.0 升级说明](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)和[该标签的会话默认值](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257)。
 

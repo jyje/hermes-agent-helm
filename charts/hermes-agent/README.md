@@ -963,13 +963,15 @@ the anonymous example; it does not remove upstream's authenticated Nous support.
   `sessions.auto_prune` to `false`. Check the existing `config.yaml` on your
   PVC before upgrading: an explicit `true` still enables pruning. With the
   default `bootstrap.overwrite: false`, changing the Helm value does not
-  replace that existing file.
+  replace that existing file. If the setting is unset, Hermes can prompt
+  when disk space is low and saves an on/off answer to `config.yaml`.
 - **Browser automation uses `browser_exec`.** Update prompts, skills and
   explicit tool lists that still name the removed `agent-browser` CLI or
   tools such as `browser_navigate` and `browser_click`.
 - **The MCP server moved to a plugin.** If an MCP client launches Hermes as
   a server, change its command from `hermes mcp serve` to `hermes mcp-serve`.
-- **Webapp stays off by default.** Upgrading does not enable its listener.
+- **Webapp is off by default.** Enable the listener explicitly with
+  `webapp.enabled`.
 
 See the [official v0.23.0 upgrade notes](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)
 and [tagged session defaults](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257).
