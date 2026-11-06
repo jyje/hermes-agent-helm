@@ -657,6 +657,7 @@
           }
         },
         "doctorStrict": { "type": "boolean" },
+        "isolateDoctor": { "type": "boolean" },
         "doctorTimeout": { "type": "integer" },
         "chat": {
           "type": "object",

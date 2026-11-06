@@ -486,6 +486,13 @@ discovers and fires the seeded `gateway:startup` hook. Disable the Job with
 `--set tests.enabled=false`; make doctor failures fatal with
 `--set tests.doctorStrict=true`.
 
+On Kubernetes 1.33 or later, set `tests.isolateDoctor: true` to run
+non-strict diagnostics in a separate restartable init container. The
+required test continues if diagnostics run out of memory or miss their
+wait budget. Both containers use `tests.resources`, so budget for both.
+See diagnostic output with `kubectl logs job/<release>-test -c hermes-doctor-diagnostics`.
+Keep isolation off when `tests.doctorStrict` is enabled.
+
 ### Verifying a provider end-to-end (`tests.chat.enabled`)
 
 `tests.chat.enabled=true` adds a 5th check: a real `hermes chat` round-trip
