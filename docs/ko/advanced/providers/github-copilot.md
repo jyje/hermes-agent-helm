@@ -12,6 +12,17 @@ description: Discord 또는 Telegram을 통해 GitHub OAuth device login을 완�
 
 Discord 또는 Telegram bot과 GitHub Copilot 권한이 필요합니다. 영속 볼륨도 활성화해야 로그인 토큰이 재사용됩니다.
 
+Hermes v0.23.0부터 `copilot` 공급자는
+[GitHub Copilot Labs 플러그인](https://github.com/NousResearch/hermes-labs-plugins/pull/34)으로
+이동했습니다. Copilot을 선택한 프로필에는 Hermes가 플러그인을 자동으로 설치합니다.
+외부 트래픽을 제한한다면 Copilot API뿐 아니라 처음 시작할 때 플러그인 카탈로그와
+GitHub 소스에도 접근할 수 있어야 합니다.
+
+`config.model.provider: copilot`은 그대로 사용하세요. 차트의 기기 로그인은
+Hermes 볼륨에 `COPILOT_GITHUB_TOKEN`을 저장하고, 플러그인도 같은 키를 읽습니다.
+다른 머신의 GitHub 또는 Copilot CLI에만 로그인이 저장돼 있다면 차트의 기기
+로그인으로 인증하세요.
+
 ## 설치
 
 ```bash

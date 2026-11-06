@@ -437,7 +437,7 @@ auth:
         # -- Login protocol handler.
         flow: github
         # -- OAuth client id for the device grant. The shared opencode/Copilot-CLI
-        #    client that Hermes upstream itself uses (hermes_cli/copilot_auth.py).
+        #    client used by the upstream GitHub Copilot provider.
         clientId: "Ov23li8tweQw6odWQebz"
         # -- OAuth scope requested in the device grant.
         scope: "read:user"

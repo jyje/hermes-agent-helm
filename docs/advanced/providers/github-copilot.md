@@ -12,6 +12,17 @@ description: Complete GitHub Copilot device login through Discord or Telegram.
 
 A Discord or Telegram bot, GitHub Copilot access, and persistent storage are required so login tokens can be reused.
 
+In Hermes v0.23.0, the `copilot` provider moved to the
+[GitHub Copilot Labs plugin](https://github.com/NousResearch/hermes-labs-plugins/pull/34).
+Hermes installs it automatically for profiles that select Copilot. If you
+restrict outbound traffic, allow the plugin catalog and its GitHub source
+to be reached on first startup, in addition to the Copilot API.
+
+Keep `config.model.provider: copilot`. The chart's device login still writes
+`COPILOT_GITHUB_TOKEN` to the Hermes volume, and the plugin still reads that key.
+A login stored only by the GitHub or Copilot CLI on another machine is not
+available to the plugin. Use the chart's device login in that case.
+
 ## Install
 
 ```bash
