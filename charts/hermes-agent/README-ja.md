@@ -456,7 +456,9 @@ extraEnv:
     value: "9900"
 ```
 
-共有の `A2A_BEARER_TOKEN` または推奨のピア別 `A2A_PEER_TOKENS` を `env` / `extraEnvFrom` に設定します。上流はこれらのいずれかが設定された場合にのみループバック以外へのバインドを許可します。[A2A ガイド](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)を参照してください。[`values-a2a.yaml`](values-a2a.yaml) は明示的な Service ポートを公開し、必須トークンを外部 Secret から参照する例です。
+Service 経由でリスナーを公開するには、外部 Secret に `A2A_PEER_TOKENS`（例: `agent-a:<token>`）を設定し、`A2A_TRUSTED_PEERS` に対応するピア名を列挙します。クライアントは Bearer ヘッダーにトークンだけを送ります。トークンはループバック以外へのバインドと認証に使われ、許可リストがタスク送信を許可します。許可リストがなければ、認証に成功してもタスク送信はデフォルトで拒否されます。共有の `A2A_BEARER_TOKEN` を使う場合、ピアは名前ではなく `ip:<source-ip>` で識別されます。[A2A ガイド](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)と、許可リスト、外部 Secret、Service ポートを組み合わせた [`values-a2a.yaml`](values-a2a.yaml) を参照してください。
+
+以前の共有トークンの例を使用していた場合は、この設定を適用する前に既存の Secret にピア別トークンを追加し、クライアントも各ピアのトークンを使うように変更してください。コールバック受信側が通知の署名を検証する場合は、Secret に `A2A_PUSH_SECRET` を設定し、受信側にも同じ署名キーを設定します。別途設定しないまま共有トークンを削除すると、デフォルトのコールバック署名キーも失われます。
 
 ### HTTP ルーティング: Ingress または HTTPRoute
 

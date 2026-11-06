@@ -737,12 +737,21 @@ extraEnv:
     value: "9900"
 ```
 
-`A2A_BEARER_TOKEN`(공유) 또는 `A2A_PEER_TOKENS`(피어별, 권장)를 `env`나
-`extraEnvFrom`으로 설정하세요 — 업스트림은 이 토큰이 설정돼야만 loopback
-너머로 바인딩을 넓힙니다. 공식
-[A2A 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)를
-참고하세요. 바로 사용할 수 있는 [`values-a2a.yaml`](values-a2a.yaml)은 명시적
-Service port로 이 포트를 노출하고 필요한 토큰은 외부 Secret으로 참조합니다.
+Service로 리스너를 노출하려면 외부 Secret에 `A2A_PEER_TOKENS`를 설정하고
+(예: `agent-a:<token>`), `A2A_TRUSTED_PEERS`에 같은 피어 이름을 나열하세요.
+클라이언트는 Bearer 헤더에 토큰만 보냅니다. 토큰은 루프백 외 바인딩과 호출자
+인증에 쓰이며, 허용 목록은 작업 요청 권한을 결정합니다. 허용 목록이 없으면
+인증에 성공해도 기본적으로 작업 요청을 거부합니다. 공유 `A2A_BEARER_TOKEN`을
+사용하면 Hermes는 이름 대신 `ip:<source-ip>`로 피어를 식별합니다.
+[업스트림 A2A 가이드](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)를
+참고하세요. [`values-a2a.yaml`](values-a2a.yaml) 예제는 피어 이름 허용 목록,
+외부 Secret, 명시적 Service 포트를 함께 설정합니다.
+
+이전 공유 토큰 예제를 사용했다면 이 예제를 적용하기 전에 기존 Secret에
+피어별 토큰을 추가하고, 클라이언트도 각 피어의 토큰을 쓰도록 바꾸세요.
+콜백 수신자가 알림 서명을 검증한다면 Secret에 `A2A_PUSH_SECRET`을 설정하고
+수신자에도 같은 서명 키를 설정하세요. 따로 설정하지 않으면 공유 토큰을 제거할 때
+기본 콜백 서명 키도 사라집니다.
 
 ### HTTP 라우팅: Ingress 또는 HTTPRoute
 
