@@ -783,6 +783,13 @@ guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a).
 The [`values-a2a.yaml`](values-a2a.yaml) overlay pairs a named peer allowlist
 with an external Secret and an explicit Service port.
 
+If you used the earlier shared-token example, add the new per-peer token
+entries to the existing Secret before applying this overlay, and switch
+the clients to their named peers' tokens. If a callback receiver verifies
+notification signatures, set `A2A_PUSH_SECRET` in the Secret and configure
+the receiver with the same signing secret. Otherwise, removing the shared
+token also removes the default callback signing secret.
+
 ### HTTP routing: Ingress or HTTPRoute
 
 Both routing resources are off by default. Use `ingress` for an installed

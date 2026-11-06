@@ -14,6 +14,8 @@
 # The external Secret below must contain OPENAI_API_KEY and A2A_PEER_TOKENS.
 # Each entry is peer-name:token. Use the same names in A2A_TRUSTED_PEERS.
 # Clients send only their token as the Bearer credential. Do not commit real keys.
+# When upgrading the old shared-token example, update the existing Secret and
+# the calling clients too. Set A2A_PUSH_SECRET separately for signed callbacks.
 #
 #   kubectl create secret generic hermes-agent-a2a-secrets \
 #     --namespace hermes-agent \

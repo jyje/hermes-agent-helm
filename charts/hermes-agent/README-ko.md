@@ -747,6 +747,12 @@ Service로 리스너를 노출하려면 외부 Secret에 `A2A_PEER_TOKENS`를 �
 참고하세요. [`values-a2a.yaml`](values-a2a.yaml) 예제는 피어 이름 허용 목록,
 외부 Secret, 명시적 Service 포트를 함께 설정합니다.
 
+이전 공유 토큰 예제를 사용했다면 이 예제를 적용하기 전에 기존 Secret에
+피어별 토큰을 추가하고, 클라이언트도 각 피어의 토큰을 쓰도록 바꾸세요.
+콜백 수신자가 알림 서명을 검증한다면 Secret에 `A2A_PUSH_SECRET`을 설정하고
+수신자에도 같은 서명 키를 설정하세요. 따로 설정하지 않으면 공유 토큰을 제거할 때
+기본 콜백 서명 키도 사라집니다.
+
 ### HTTP 라우팅: Ingress 또는 HTTPRoute
 
 두 라우팅 리소스는 기본으로 꺼져 있습니다. 설치된 Ingress controller가 있으면
