@@ -563,6 +563,15 @@ config:
 再シードしてください（[設定モデル](#設定モデル)参照）。
 廃止するのは匿名利用のサンプルであり、上流の認証済み Nous サポートではありません。
 
+### Hermes v0.23.0
+
+- **セッションの自動削除はオプトインです。** `v0.23.0` イメージでは `sessions.auto_prune` のデフォルトは `false` です。アップグレード前に PVC 上の `config.yaml` を確認してください。明示的に `true` を設定している場合は自動削除が続きます。デフォルトの `bootstrap.overwrite: false` では、Helm の値を変更しても既存ファイルは置き換わりません。未設定の場合、ディスクの空き容量が少なくなると Hermes が確認を求めることがあり、有効または無効を選ぶと `config.yaml` に保存されます。
+- **ブラウザー自動化には `browser_exec` を使います。** 削除された `agent-browser` CLI や `browser_navigate`、`browser_click` などを参照するプロンプト、スキル、ツール一覧を更新してください。
+- **MCP サーバーはプラグインに移動しました。** Hermes をサーバーとして起動する MCP クライアントのコマンドを `hermes mcp serve` から `hermes mcp-serve` に変更してください。
+- **Webapp はデフォルトで無効です。** リスナーを使うには `webapp.enabled` を明示的に有効にしてください。
+
+[公式 v0.23.0 アップグレードノート](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)と[タグのセッションデフォルト](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257)を参照してください。
+
 ### Hermes v0.22（チャート 1.20.0）
 
 > **v0.22.1 を実行した場合:** 上流は、このリリースが誤ったコミットから作られ、
@@ -577,7 +586,7 @@ config:
 
 チャート 1.20.0 はデフォルトイメージを `v2026.9.24`（Hermes v0.21.5）から `v0.22.2` に更新します。チャートの values とテンプレートは変わりませんが、Hermes 自体のデフォルトの一部が永続ボリューム上のデータに影響します。履歴のあるリリースをアップグレードする前に確認してください。
 
-- **古いセッションは起動時に削除されます。** `sessions.auto_prune` がデフォルトで有効になり、gateway の起動時に `sessions.retention_days`（デフォルト 90 日）以上操作のない終了済みセッションが `state.db` から削除されます。開いているセッションは対象外です。すべて残すには、アップグレード前に設定してください。
+- **v0.22.2 では古いセッションが起動時にデフォルトで削除されます。** このイメージでは gateway の起動時に `sessions.retention_days`（デフォルト 90 日）以上操作のない終了済みセッションが `state.db` から削除されます。開いているセッションは対象外です。すべて残すには、アップグレード前に設定してください。
 
   ```yaml
   config:

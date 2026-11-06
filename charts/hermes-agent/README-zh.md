@@ -560,6 +560,15 @@ config:
 `config.yaml`，因此还需要更新持久化的提供商和模型配置，或先备份再主动重新初始化
 （参阅[配置模型](#配置模型)）。本次移除的是匿名使用示例，并不移除上游已认证的 Nous 支持。
 
+### Hermes v0.23.0
+
+- **会话自动清理需要主动开启。** `v0.23.0` 镜像的 `sessions.auto_prune` 默认值为 `false`。升级前请检查 PVC 上已有的 `config.yaml`。显式设置的 `true` 仍会启用清理。在默认的 `bootstrap.overwrite: false` 下，修改 Helm 值不会替换已有文件。若未设置此选项，磁盘空间不足时 Hermes 可能会询问，并将开启或关闭的选择保存到 `config.yaml`。
+- **浏览器自动化使用 `browser_exec`。** 请更新仍引用已移除的 `agent-browser` CLI 或 `browser_navigate`、`browser_click` 等工具的提示词、技能和工具列表。
+- **MCP 服务器已移至插件。** 如果 MCP 客户端将 Hermes 作为服务器启动，请将命令从 `hermes mcp serve` 改为 `hermes mcp-serve`。
+- **Webapp 默认关闭。** 如需使用监听器，请显式开启 `webapp.enabled`。
+
+请参阅[官方 v0.23.0 升级说明](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)和[该标签的会话默认值](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257)。
+
 ### Hermes v0.22（Chart 1.20.0）
 
 > **如果运行过 v0.22.1：** 上游明确说明该版本从错误的提交构建，
@@ -572,7 +581,7 @@ config:
 
 Chart 1.20.0 将默认镜像从 `v2026.9.24`（Hermes v0.21.5）更新为 `v0.22.2`。Chart 的 values 和模板没有变化，但 Hermes 自身的部分默认值会影响持久卷上的数据。升级已有历史记录的 release 之前，请先阅读以下内容。
 
-- **旧会话会在启动时被清理。** `sessions.auto_prune` 现在默认开启：gateway 启动时，会从 `state.db` 删除超过 `sessions.retention_days`（默认 90 天）没有活动的已结束会话。打开的会话不受影响。如需全部保留，请在升级前设置：
+- **v0.22.2 默认在启动时清理旧会话。** 在该镜像中，gateway 启动时会从 `state.db` 删除超过 `sessions.retention_days`（默认 90 天）没有活动的已结束会话。打开的会话不受影响。如需全部保留，请在升级前设置：
 
   ```yaml
   config:

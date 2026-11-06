@@ -924,6 +924,25 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 ([설정 모델](#설정-모델) 참고). 익명 예제만 종료하며 업스트림의 인증된 Nous
 지원을 제거하는 것은 아닙니다.
 
+### Hermes v0.23.0
+
+- **세션 자동 정리는 선택 사항입니다.** `v0.23.0` 이미지에서
+  `sessions.auto_prune`의 기본값은 `false`입니다. 업그레이드 전에 PVC에 있는
+  `config.yaml`을 확인하세요. 값이 명시적으로 `true`이면 계속 정리합니다.
+  기본값인 `bootstrap.overwrite: false`에서는 Helm 값을 변경해도 기존 파일을
+  교체하지 않습니다. 값이 설정되지 않았다면 디스크 공간이 부족할 때 Hermes가
+  선택을 묻고, 켜기 또는 끄기 응답을 `config.yaml`에 저장할 수 있습니다.
+- **브라우저 자동화는 `browser_exec`를 사용합니다.** 프롬프트, 스킬, 명시적
+  도구 목록에서 제거된 `agent-browser` CLI 또는 `browser_navigate`,
+  `browser_click` 같은 도구를 참조한다면 수정하세요.
+- **MCP 서버가 플러그인으로 이동했습니다.** Hermes를 서버로 실행하는 MCP
+  클라이언트의 명령을 `hermes mcp serve`에서 `hermes mcp-serve`로 바꾸세요.
+- **Webapp은 기본으로 꺼져 있습니다.** 리스너를 쓰려면 `webapp.enabled`를
+  명시적으로 켜세요.
+
+[공식 v0.23.0 업그레이드 노트](https://github.com/NousResearch/hermes-agent/releases/tag/v0.23.0#-upgrade-notes)와
+[해당 태그의 세션 기본값](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/hermes_cli/config_defaults.py#L2257)을 참고하세요.
+
 ### Hermes v0.22 (차트 1.20.0)
 
 > **v0.22.1을 실행했다면:** 업스트림은 이 버전이 잘못된 커밋으로 배포되었고,
@@ -940,8 +959,8 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 영구 볼륨의 데이터에 영향을 줍니다. 이미 기록이 쌓인 릴리스를 업그레이드하기 전에
 확인하세요.
 
-- **오래된 세션이 시작할 때 정리됩니다.** 이제 `sessions.auto_prune`이 기본으로
-  켜져 있어서, gateway가 시작할 때 `sessions.retention_days`(기본 90일) 동안
+- **v0.22.2에서는 시작 시 오래된 세션을 기본으로 정리합니다.** 해당 이미지에서
+  gateway가 시작할 때 `sessions.retention_days`(기본 90일) 동안
   활동이 없던 종료된 세션을 `state.db`에서 삭제합니다. 열려 있는 세션은 건드리지
   않습니다. 모두 보존하려면 업그레이드 전에 설정하세요.
 
