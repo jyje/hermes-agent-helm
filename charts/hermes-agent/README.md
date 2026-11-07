@@ -486,6 +486,13 @@ discovers and fires the seeded `gateway:startup` hook. Disable the Job with
 `--set tests.enabled=false`; make doctor failures fatal with
 `--set tests.doctorStrict=true`.
 
+On Kubernetes 1.33 or later, set `tests.isolateDoctor: true` to run
+non-strict diagnostics in a separate restartable init container. The
+required test continues if diagnostics run out of memory or miss their
+wait budget. Both containers use `tests.resources`, so budget for both.
+See diagnostic output with `kubectl logs job/<release>-test -c hermes-doctor-diagnostics`.
+Keep isolation off when `tests.doctorStrict` is enabled.
+
 ### Verifying a provider end-to-end (`tests.chat.enabled`)
 
 `tests.chat.enabled=true` adds a 5th check: a real `hermes chat` round-trip
@@ -1268,7 +1275,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | team.skill.extraInstructions | string | Optional deployment-specific policy appended to the generated skill. Used only by the release with `skill.create=true`. | `""` |
 | team.skill.name | string | Skill name. Empty defaults to `<team.name>-roster`. | `""` |
 | terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast: the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop: the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
-| tests | object | ------------------------------------------------------------------------- | `{"annotations":{},"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
+| tests | object | ------------------------------------------------------------------------- | `{"annotations":{},"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"isolateDoctor":false,"resources":{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.annotations | object | Extra annotations to add to the test Job. The chart's own Helm and Argo CD    hook annotations are always set, and a key here that repeats one of them    is ignored. | `{}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
 | tests.chat.enabled | bool | Run a `hermes chat` round-trip and log the conversation. | `false` |
@@ -1281,6 +1288,7 @@ per example above, each with its `extraEnvFrom`-based secret pattern.
 | tests.doctorTimeout | int | Seconds to allow `hermes doctor` to run before timing out. | `120` |
 | tests.enabled | bool | Render the chart test Job. | `true` |
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
+| tests.isolateDoctor | bool | Run non-strict doctor in a separate container so a diagnostic OOM    does not kill the required checks. Opt-in; requires Kubernetes 1.33+    and a positive doctorTimeout. Each container uses tests.resources. | `false` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
 | webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Native messenger    webhook modes (such as Telegram) are separate listeners configured via env/config. | `false` |

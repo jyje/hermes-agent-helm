@@ -320,6 +320,8 @@ done; wait
 
 [`helm test`](#テスト) Job（フック `helm.sh/hook: test`）は `hermes --version`、初期配置した `config.yaml` の確認、docker の利用可否の確認、`hermes doctor` を実行します。バックエンドは `local` なので docker の確認は情報表示のみです。さらに、チャートが Hermes イメージ内で実行するコードをイメージ更新時の非互換から守るため、対応する機能が有効な場合だけ 2 つの検査を実行します。OpenAI Codex デバイスログインではログイン処理がインポートする Hermes ヘルパーの存在を確認し、`readyNotify.enabled` では初期配置した `gateway:startup` フックを Hermes が検出して実行することを確認します。`--set tests.enabled=false` で Job を無効にでき、`--set tests.doctorStrict=true` で doctor の問題をテスト失敗として扱えます。
 
+Kubernetes 1.33 以降では、`tests.isolateDoctor: true` で任意の診断を再起動可能な別の init コンテナで実行できます。診断がメモリ不足で終了したり待機時間内に完了しなかったりしても、必須チェックは続行されます。`tests.resources` は各コンテナに適用されます。診断ログは `kubectl logs job/<release>-test -c hermes-doctor-diagnostics` で確認してください。`tests.doctorStrict` が有効な場合は隔離を無効にします。
+
 ### プロバイダーのエンドツーエンド検証（`tests.chat.enabled`）
 
 `tests.chat.enabled=true` は 5 番目の検査を追加します。インストール時と**同じ `config` / `env`** で実際の `hermes chat` 往復通信を行い、**プロンプトと応答の全文をテスト Job のログへ出力**します。メインのワークロードと同じ ConfigMap と Secret をマウントするため、別の API キーは不要です。`helm test` は `--set` を受け付けないので、先に `helm upgrade --reuse-values` で有効にします。
@@ -806,7 +808,7 @@ ArgoCD でデプロイする場合は [`examples/argocd/`](../../examples/argocd
 | team.skill.extraInstructions | string | Optional deployment-specific policy appended to the generated skill. Used only by the release with `skill.create=true`. | `""` |
 | team.skill.name | string | Skill name. Empty defaults to `<team.name>-roster`. | `""` |
 | terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast: the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop: the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
-| tests | object | ------------------------------------------------------------------------- | `{"annotations":{},"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
+| tests | object | ------------------------------------------------------------------------- | `{"annotations":{},"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"isolateDoctor":false,"resources":{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.annotations | object | Extra annotations to add to the test Job. The chart's own Helm and Argo CD    hook annotations are always set, and a key here that repeats one of them    is ignored. | `{}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
 | tests.chat.enabled | bool | Run a `hermes chat` round-trip and log the conversation. | `false` |
@@ -819,6 +821,7 @@ ArgoCD でデプロイする場合は [`examples/argocd/`](../../examples/argocd
 | tests.doctorTimeout | int | Seconds to allow `hermes doctor` to run before timing out. | `120` |
 | tests.enabled | bool | Render the chart test Job. | `true` |
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
+| tests.isolateDoctor | bool | Run non-strict doctor in a separate container so a diagnostic OOM    does not kill the required checks. Opt-in; requires Kubernetes 1.33+    and a positive doctorTimeout. Each container uses tests.resources. | `false` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
 | webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Native messenger    webhook modes (such as Telegram) are separate listeners configured via env/config. | `false` |

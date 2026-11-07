@@ -768,6 +768,10 @@ tests:
   # -- When true, `hermes doctor` issues fail the test. When false, doctor runs
   #    for visibility but only hard checks (hermes --version, seeded config) fail.
   doctorStrict: false
+  # -- Run non-strict doctor in a separate container so a diagnostic OOM
+  #    does not kill the required checks. Opt-in; requires Kubernetes 1.33+
+  #    and a positive doctorTimeout. Each container uses tests.resources.
+  isolateDoctor: false
   # -- Seconds to allow `hermes doctor` to run before timing out.
   doctorTimeout: 120
   # ---------------------------------------------------------------------------

@@ -320,6 +320,8 @@ done; wait
 
 [`helm test`](#测试) Job（钩子 `helm.sh/hook: test`）执行 `hermes --version`、检查初始化的 `config.yaml`、检查 docker 可用性，并运行 `hermes doctor`。由于后端是 `local`，docker 检查只提供信息。另有两项检查仅在对应功能开启时运行，用于保护 Chart 在 Hermes 镜像内执行的代码，防止镜像更新破坏兼容性：启用 OpenAI Codex 设备登录时，确认镜像仍提供登录过程导入的 Hermes 辅助函数；启用 `readyNotify.enabled` 时，确认 Hermes 能发现并触发初始化的 `gateway:startup` 钩子。通过 `--set tests.enabled=false` 禁用 Job，或用 `--set tests.doctorStrict=true` 将 doctor 问题视为测试失败。
 
+在 Kubernetes 1.33 或更高版本上，设置 `tests.isolateDoctor: true` 可在独立的可重启 init 容器中运行可选诊断。即使诊断因内存不足终止或超出等待时间，必需检查也会继续。两个容器分别使用 `tests.resources`。通过 `kubectl logs job/<release>-test -c hermes-doctor-diagnostics` 查看诊断日志。启用 `tests.doctorStrict` 时请保持隔离关闭。
+
 ### 提供商端到端验证（`tests.chat.enabled`）
 
 `tests.chat.enabled=true` 添加第五项检查：使用**安装时相同的 `config` / `env`** 执行真实的 `hermes chat` 往返调用，并将**完整对话，包括提示和响应，输出到测试 Job 日志**。测试挂载与主工作负载相同的 ConfigMap 和 Secret，无需另设提供商密钥。`helm test` 不接受 `--set`，因此先通过 `helm upgrade --reuse-values` 开启，再运行测试：
@@ -801,7 +803,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | team.skill.extraInstructions | string | Optional deployment-specific policy appended to the generated skill. Used only by the release with `skill.create=true`. | `""` |
 | team.skill.name | string | Skill name. Empty defaults to `<team.name>-roster`. | `""` |
 | terminationGracePeriodSeconds | string | Pod termination grace period in seconds. Empty = Kubernetes default (30s). The gateway (image v2026.7.1+) defaults `agent.restart_drain_timeout` to 0: on stop it interrupts in-flight runs immediately, persists the transcript, and exits fast: the default grace period is plenty. If you opt into a drain window via `config.agent.restart_drain_timeout: <seconds>`, raise this WELL ABOVE that value or the kubelet SIGKILLs the gateway mid-drain (stale lock + crash loop: the same race upstream warns about with systemd's TimeoutStopSec). See "Gateway lifecycle" in the README. | `""` |
-| tests | object | ------------------------------------------------------------------------- | `{"annotations":{},"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"resources":{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
+| tests | object | ------------------------------------------------------------------------- | `{"annotations":{},"chat":{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180},"doctorStrict":false,"doctorTimeout":120,"enabled":true,"image":{"pullPolicy":"","repository":"","tag":""},"isolateDoctor":false,"resources":{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}}` |
 | tests.annotations | object | Extra annotations to add to the test Job. The chart's own Helm and Argo CD    hook annotations are always set, and a key here that repeats one of them    is ignored. | `{}` |
 | tests.chat | object | ------------------------------------------------------------------------- | `{"enabled":false,"failOnError":false,"maxTurns":1,"models":[],"prompt":"Just say hi.","timeout":180}` |
 | tests.chat.enabled | bool | Run a `hermes chat` round-trip and log the conversation. | `false` |
@@ -814,6 +816,7 @@ Hermes 已支持的设置无需修改 Chart，参阅[透传原则](#配置模型
 | tests.doctorTimeout | int | Seconds to allow `hermes doctor` to run before timing out. | `120` |
 | tests.enabled | bool | Render the chart test Job. | `true` |
 | tests.image | object | Image used by the test Job. Empty fields fall back to the main `image.*` (so the hermes CLI + doctor are available and arch matches). | `{"pullPolicy":"","repository":"","tag":""}` |
+| tests.isolateDoctor | bool | Run non-strict doctor in a separate container so a diagnostic OOM    does not kill the required checks. Opt-in; requires Kubernetes 1.33+    and a positive doctorTimeout. Each container uses tests.resources. | `false` |
 | tests.resources | object | Resource requests/limits for the test Job's container. | `{"limits":{"cpu":"1","memory":"1Gi"},"requests":{"cpu":"100m","memory":"128Mi"}}` |
 | tolerations | list | Tolerations for Pod scheduling. | `[]` |
 | webhook.enabled | bool | Enable Hermes' generic inbound webhook receiver. Native messenger    webhook modes (such as Telegram) are separate listeners configured via env/config. | `false` |
