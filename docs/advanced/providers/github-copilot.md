@@ -42,13 +42,14 @@ Approve the device code from the initial pod logs or Discord prompt in GitHub.
 
 The token is stored in `HERMES_HOME/.env` on the persistent volume. On a later
 start the init container checks it against `https://api.github.com/user` and
-skips the login when it still works. Only a revoked token (HTTP 401) starts a new
-device login. The check does not depend on your Copilot plan. Chart versions
-up to 1.18.0 checked `copilot_internal/v2/token` instead, which answered 403 for
+skips the login when it still works. If the validation endpoint returns HTTP 401
+or 403, the init container starts a new device login. The check does not depend
+on your Copilot plan. Chart versions up to 1.18.0 checked
+`copilot_internal/v2/token` instead, which answered 403 for
 a valid token on a Copilot Free account and asked for a new code on every
 restart ([#349](https://github.com/jyje/hermes-agent-helm/issues/349)). If you
-override `validateUrl`, keep it to an endpoint that answers 401 for a revoked
-token and 200 otherwise.
+override `validateUrl`, use an endpoint that returns 200 for a usable token and
+reserves 401 or 403 for cases that require signing in again.
 
 ## Telegram instead of Discord
 
