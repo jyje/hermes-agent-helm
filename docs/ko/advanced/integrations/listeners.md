@@ -118,11 +118,15 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 - 브라우저에서 사용하는 외부 주소는 `config.webapp.public_url`에 설정하세요.
   `config.dashboard.public_url`은 관리 대시보드용입니다.
 - 관리 대시보드를 꺼도 Hermes는 `config.dashboard.trusted_proxies`에서 신뢰할
-  프록시를 읽습니다. 실제 접속 프록시 IP 또는 그 피어를 포함하는 가장 좁은
-  CIDR을 사용하세요. 모든 주소를 신뢰하지 마세요. TLS가 프록시에서 종료될 때
-  신뢰할 피어가 없으면 로그인에 성공해도 쿠키에 `Secure`가 붙지 않습니다.
+  프록시를 읽습니다. 실제 프록시 IP 또는 해당 프록시 전용 CIDR만 등록하세요.
+  공유 Pod CIDR을 신뢰하면 다른 워크로드가 전달된 클라이언트 IP를 위조할 수
+  있습니다. 공유 클러스터에서는 [NetworkPolicy](networkpolicy.md)로 Webapp
+  포트 9120에 Ingress 컨트롤러 피어만 접근하도록 제한하세요. TLS가 프록시에서
+  종료될 때 신뢰할 피어가 없으면 로그인에 성공해도 쿠키에 `Secure`가 붙지
+  않습니다.
 - 외부 호스트 이름을 유지하고 TLS 종료 지점에서 `X-Forwarded-Proto: https`를
-  설정하세요. `/api/ws` 경로를 바꾸지 말고 WebSocket 업그레이드를 전달하세요.
+  설정하세요. 클라이언트가 보낸 전달 헤더를 그대로 통과시키지 마세요.
+  `/api/ws` 경로를 바꾸지 말고 WebSocket 업그레이드를 전달하세요.
 - URL을 공유하기 전에 로그인하지 않은 요청이 차단되고, 로그인 쿠키에
   `Secure`와 `HttpOnly`가 붙으며, 로그인 후 WebSocket이 연결되는지 확인하세요.
   이 비밀번호 예제는 공개 인터넷에 노출하지 마세요.

@@ -115,12 +115,17 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 - Set the browser-facing origin in `config.webapp.public_url`, not
   `config.dashboard.public_url`. The latter is for the management dashboard.
 - Hermes reads trusted proxy peers from `config.dashboard.trusted_proxies`
-  even with the management dashboard disabled. Use the actual connecting
-  proxy IP or the narrowest CIDR containing its peers. Do not trust all
-  addresses. Without a trusted peer, login can succeed but the cookies are
-  not marked `Secure` when TLS terminates at the proxy.
-- Preserve the public host, set `X-Forwarded-Proto: https` at TLS termination,
-  and forward WebSocket upgrades on `/api/ws` without rewriting the path.
+  even with the management dashboard disabled. List the actual proxy IPs or
+  a CIDR dedicated to those proxies. Do not trust a shared Pod CIDR: other
+  workloads in it could spoof forwarded client IPs. In a shared cluster,
+  use [NetworkPolicy](networkpolicy.md) to allow traffic to Webapp port 9120
+  only from the Ingress controller peers. Without a trusted peer, login can
+  succeed but the cookies are not marked `Secure` when TLS terminates at
+  the proxy.
+- Preserve the public host and set `X-Forwarded-Proto: https` at TLS
+  termination. Do not pass client-supplied forwarding headers through
+  unchanged. Forward WebSocket upgrades on `/api/ws` without rewriting
+  the path.
 - Before sharing the URL, check that signed-out access is denied, the signed-in
   session cookie is `Secure` and `HttpOnly`, and the WebSocket connects after
   sign-in. Keep this password example off the public internet.
