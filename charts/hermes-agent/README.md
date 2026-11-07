@@ -593,6 +593,45 @@ existing file by default so you can perform this recovery. With
 `bootstrap.overwrite=true`, the chart replaces it with the values-rendered
 config before migration.
 
+### Remote Config (opt-in)
+
+Starting with Hermes v0.23.0, fleet deployments can read each profile's
+configuration from a central config service. The workload selects the
+backend through environment variables, not through `config:`. For a
+self-hosted service, register the agent first, then set these Helm values:
+
+```yaml
+extraEnv:
+  - name: HERMES_CONFIG_BACKEND
+    value: remote
+  - name: HERMES_CONFIG_INSTANCE_ID
+    value: my-registered-agent
+  - name: HERMES_CONFIG_REMOTE_URL
+    value: https://config.example.com
+extraEnvFrom:
+  - secretRef:
+      name: hermes-remote-config-credentials
+```
+
+Replace the instance ID and HTTPS URL with your own. Create the referenced
+Secret in the release namespace with `GATEWAY_RELAY_IDP_TOKEN_URL`,
+`GATEWAY_RELAY_IDP_CLIENT_ID`, and `GATEWAY_RELAY_IDP_CLIENT_SECRET` (optionally
+`GATEWAY_RELAY_IDP_SCOPE`). For Hermes Cloud, omit the custom URL and that
+Secret reference, and make the Nous access token available in the profile's
+`auth.json`. See the [upstream Remote Config guide](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/website/docs/user-guide/remote-config.md)
+for authentication and multi-profile setup.
+
+Remote mode ignores the local `config.yaml`. Changing Helm's `config:` does
+not update the remote service. If Hermes cannot fetch remote config at
+startup, it exits without falling back to the local file.
+
+Leave `bootstrap.enabled` at its default of `true` unless you deliberately
+want to skip local seeding. Turning it off also skips seeding any configured
+`SOUL.md` and ready-notify hook, and the standard `helm test` fails because
+its fresh test volume has no seeded `config.yaml`. A passing `helm test`
+does not verify the workload's remote config connection. Check that the
+deployed workload starts and loads its profile from the remote service.
+
 ### Secret provisioning strategies
 
 Pick one per deployment - they compose (e.g. SealedSecret for the provider key,

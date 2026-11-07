@@ -370,6 +370,29 @@ Hermes は `$HERMES_HOME/config.yaml` と環境変数のシークレットを、
 
 Hermes は、サポートされていないスキーマバージョンを明示した設定の自動マイグレーションを意図的に拒否します。編集する前に `HERMES_HOME/config.yaml` をバックアップしてください。まず上流のマイグレーション履歴を確認し、ファイルのキーがサポートされる下限と互換であれば、ルートに `_config_version: 12` を設定してワークロードを再起動します。Hermes はサポートされるマイグレーションを実行し、マイグレーション前のバックアップを `HERMES_HOME/backups/config/` に残します。互換でない場合は `hermes setup` で現在の設定を生成し、必要な設定をバックアップから戻してください。`bootstrap.overwrite=false` では、この復旧ができるようチャートは既存のファイルを既定で保持します。`bootstrap.overwrite=true` では、マイグレーションの前に values から生成した設定で置き換えます。
 
+### リモート設定（オプトイン）
+
+Hermes v0.23.0 以降、複数のエージェントを運用する場合は、各プロファイルの設定を中央の設定サービスから読み込めます。ワークロードは `config:` ではなく環境変数でバックエンドを選択します。セルフホストの設定サービスを使う場合は、まずエージェントを登録し、次の Helm values を設定します。
+
+```yaml
+extraEnv:
+  - name: HERMES_CONFIG_BACKEND
+    value: remote
+  - name: HERMES_CONFIG_INSTANCE_ID
+    value: my-registered-agent
+  - name: HERMES_CONFIG_REMOTE_URL
+    value: https://config.example.com
+extraEnvFrom:
+  - secretRef:
+      name: hermes-remote-config-credentials
+```
+
+インスタンス ID と HTTPS URL を実際の値に置き換えます。リリースと同じ名前空間に参照先の Secret を作成し、`GATEWAY_RELAY_IDP_TOKEN_URL`、`GATEWAY_RELAY_IDP_CLIENT_ID`、`GATEWAY_RELAY_IDP_CLIENT_SECRET` を設定します。`GATEWAY_RELAY_IDP_SCOPE` は任意です。Hermes Cloud を使う場合は、カスタム URL とこの Secret 参照を省略し、プロファイルの `auth.json` で Nous アクセストークンを利用できるようにします。認証と複数プロファイルの設定方法は、[上流のリモート設定ガイド](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/website/docs/user-guide/remote-config.md)を参照してください。
+
+リモートモードではローカルの `config.yaml` は読み込まれません。Helm の `config:` を変更しても設定サービスには反映されません。起動時にリモート設定を取得できない場合、Hermes はローカルファイルにフォールバックせず終了します。
+
+ローカルファイルの初期配置を意図的に省略する場合を除き、`bootstrap.enabled` はデフォルトの `true` のままにしてください。無効にすると、設定した `SOUL.md` や ready-notify フックも配置されなくなり、新しいテスト用ボリュームに `config.yaml` がないため、標準の `helm test` は失敗します。`helm test` に成功しても、ワークロードからリモート設定サービスへの接続は検証されません。デプロイしたワークロードが起動し、サービスからプロファイル設定を読み込めることを確認してください。
+
 ### シークレットの供給方法
 
 デプロイごとに方法を選びます。API キーに SealedSecret、それ以外に Bitwarden を使うなど、組み合わせも可能です。

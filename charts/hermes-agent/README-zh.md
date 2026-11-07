@@ -370,6 +370,29 @@ Hermes 将 `$HERMES_HOME/config.yaml` 和环境中的密钥作为对各版本内
 
 对于显式声明了不受支持的 schema 版本的配置，Hermes 会刻意拒绝自动迁移。编辑前请先备份 `HERMES_HOME/config.yaml`。先查看上游的迁移历史；如果文件中的键与支持的下限兼容，就在根部设置 `_config_version: 12` 并重启工作负载。Hermes 随后会执行受支持的迁移，并在 `HERMES_HOME/backups/config/` 下保留迁移前的备份。否则请用 `hermes setup` 生成一份当前配置，再从备份中恢复需要的设置。使用 `bootstrap.overwrite=false` 时，Chart 默认保留现有文件，以便你完成这次恢复。使用 `bootstrap.overwrite=true` 时，Chart 会在迁移前用 values 渲染的配置替换它。
 
+### 远程配置（按需启用）
+
+从 Hermes v0.23.0 起，批量部署的智能体可以从集中配置服务读取各个配置档案的设置。工作负载通过环境变量选择后端，而不是通过 `config:`。使用自托管配置服务时，请先注册智能体，再设置以下 Helm values：
+
+```yaml
+extraEnv:
+  - name: HERMES_CONFIG_BACKEND
+    value: remote
+  - name: HERMES_CONFIG_INSTANCE_ID
+    value: my-registered-agent
+  - name: HERMES_CONFIG_REMOTE_URL
+    value: https://config.example.com
+extraEnvFrom:
+  - secretRef:
+      name: hermes-remote-config-credentials
+```
+
+将实例 ID 和 HTTPS URL 替换为实际值。在 Helm release 所在的命名空间中创建所引用的 Secret，并设置 `GATEWAY_RELAY_IDP_TOKEN_URL`、`GATEWAY_RELAY_IDP_CLIENT_ID` 和 `GATEWAY_RELAY_IDP_CLIENT_SECRET`。`GATEWAY_RELAY_IDP_SCOPE` 可选。使用 Hermes Cloud 时，省略自定义 URL 和此 Secret 引用，并确保配置档案的 `auth.json` 中有 Nous 访问令牌。认证和多配置档案设置请参阅[上游远程配置指南](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/website/docs/user-guide/remote-config.md)。
+
+远程模式不会读取本地 `config.yaml`。修改 Helm 的 `config:` 不会更新远程服务。如果启动时无法获取远程配置，Hermes 会退出，不会回退到本地文件。
+
+除非有意跳过本地文件初始化，否则请保留 `bootstrap.enabled` 的默认值 `true`。关闭后，已配置的 `SOUL.md` 和 ready-notify 钩子也不会写入，而且标准 `helm test` 会因为新的测试卷上没有 `config.yaml` 而失败。`helm test` 通过并不代表工作负载可以连接到远程配置服务。请确认已部署的工作负载能够启动并从远程服务读取其配置档案。
+
 ### 密钥供应方式
 
 为部署选择合适方式，也可以组合使用，例如用 SealedSecret 保存提供商密钥，用 Bitwarden 管理其他密钥。
