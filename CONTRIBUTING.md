@@ -52,23 +52,26 @@ selector in this order: **English, 한국어, 日本語, 简体中文** (`en`, `
 and `/zh/`. Chinese here means Simplified Chinese; Traditional Chinese is a
 separate future locale, not an alias for `zh`.
 
-Use consistent terminology in translated entry pages: Japanese uses
+Use consistent terminology in translated pages: Japanese uses
 プロバイダー, エージェント, チャート, and デプロイ; Simplified Chinese uses
 提供商, 智能体, Chart, 部署, and 密钥. Keep identifiers, commands, environment
 variables, and example filenames verbatim. Translate warnings without
 weakening their meaning, and do not imply native-speaker review unless it
 actually took place.
 
-Korean (`ko`) is the full-parity locale. Every English docs page and the root
-and chart READMEs have Korean twins. Keep those pairs equivalent in the same
-change, except for the contributing guide: `CONTRIBUTING.md` is maintained in
-English only for every locale. The Korean contributing landing page links to
-that canonical guide; the other Korean contributing pages remain translated.
+Document new and changed user-facing behavior in every supported language.
+For fast iteration, an implementation PR may update only the canonical English
+docs if it explicitly records the localization deferral and links a tracking
+issue or follow-up PR. Before proposing or merging a release that includes the
+change, merge the remaining translations and verify the updated guidance in
+each locale's rendered page. English fallback is not a completed translation.
+Do not backfill unrelated legacy pages as part of this work.
 
-New locales are deliberately smaller. They translate only the entry path and
-fall back to English elsewhere. This keeps security and operational guidance
-accurate until a native-speaking maintainer can maintain a broader translation.
-Do not expand a locale's scope incidentally in an unrelated docs PR.
+Korean (`ko`) has historically mirrored the full docs tree. Japanese and
+Simplified Chinese historically prioritized the entry pages below, so older
+pages may still fall back to English. The contributing guide remains an
+exception: `CONTRIBUTING.md` is maintained in English for every locale. The
+Korean contributing landing page links to it; its other pages stay translated.
 
 | Entry page | Localized form |
 | --- | --- |
@@ -80,9 +83,9 @@ Do not expand a locale's scope incidentally in an unrelated docs PR.
 | Contributing | Keep the English `CONTRIBUTING.md` source |
 
 Record the English source of every translation. Use the full SHA of the
-English source commit used for the translation, then update it whenever the
-translation is refreshed. Translated `docs/<locale>/**/*.md` pages carry it
-as MkDocs front matter:
+committed English baseline. Keep that SHA for partial edits and update it on
+a full refresh. Translated `docs/<locale>/**/*.md` pages carry it as MkDocs
+front matter:
 
 ```yaml
 translation_source:
@@ -99,10 +102,10 @@ first line instead:
 <!-- translation_source: README.md @ 0123456789abcdef0123456789abcdef01234567 -->
 ```
 
-Every entry-scoped locale landing page must also show this reader-facing
-notice, translated into that locale:
+Every locale landing page with English fallback must also show this
+reader-facing notice, translated into that locale:
 
-> This locale translates the entry path. Sections not available in this
+> This locale includes translated entry pages. Sections not available in this
 > language use English.
 
 For Japanese and Simplified Chinese, state beside that notice that the
@@ -290,6 +293,10 @@ Rendered references stay compact: prefer the implementation PR as
 `[#101](https://github.com/jyje/hermes-agent-helm/pull/101) (minor) [@jyje](https://github.com/jyje)`;
 when there is no PR, use a linked short commit hash in the same position.
 
+Before proposing or merging a release, check that all included user-facing
+changes meet the [documentation locale requirements](#documentation-locales).
+If any required translation is still deferred, hold the release.
+
 Pending Changesets remain on `main` until you manually run
 [propose-release.yaml](.github/workflows/propose-release.yaml) from the Actions
 tab. It opens or updates one release PR. Its custom version step:
@@ -375,7 +382,7 @@ make propose     # preview the pending calculated version
 
 CI reruns helm-docs and fails if `charts/hermes-agent/README.md` is out of
 date. It does not generate `README-ko.md`, so keep the Korean twin in sync
-manually after editing `values.yaml`. An entry-scoped locale only needs a
-manual update when the affected page belongs to its entry path.
+manually after editing `values.yaml`. Update affected README prose in all
+supported locales, or record the deferral and finish it before release.
 
 See [AGENTS.md](AGENTS.md) for chart design principles.
