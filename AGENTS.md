@@ -72,30 +72,15 @@ as a **Secret**.
 
 ## Workflow
 
-- **Documentation locales have explicit scopes.** Korean (`ko`) has full
-  parity: every English `README.md` has a `README-ko.md` twin at the repo root
-  and under `charts/hermes-agent/`, and every English page under `docs/` has
-  its `docs/ko/` twin. When you edit either side, apply the equivalent edit to
-  its twin in the same change. The contributing guide is the exception:
-  `CONTRIBUTING.md` is English-only for all locales, and the Korean contributing
-  landing page links to it; the remaining Korean contributing pages stay
-  translated. Other locales are entry-path scoped, not
-  full-tree mirrors: update only their translated entry pages, and do not
-  require a translation for an unrelated English or Korean page. When the
-  English page you change is itself one of those entry pages, apply the same
-  edit to every locale that translates it (ko, ja and zh) in the same PR, never
-  as a follow-up. A partial edit keeps the recorded `translation_source` SHA;
-  it moves only on a full refresh. Their entry
-  landing page must tell readers that the remaining sections use English.
-  Japanese and Simplified Chinese notices also disclose that the maintainer
-  is not a native speaker, no native speaker has reviewed the translation,
-  and unclear wording should be checked against the English source.
-  Record the source path and full English commit SHA in each translated page:
-  as front matter on `docs/<locale>/` pages, and as a first-line HTML comment
-  in translated READMEs, which GitHub renders directly and would otherwise show
-  the front matter as a table. See `CONTRIBUTING.md` for the entry-path list,
-  both forms, and the notice wording. The chart README's auto-generated `## Values` table stays English
-  in every locale so it cannot drift from `values.yaml`.
+- **Feature documentation is a release gate.** Document new and changed
+  user-facing behavior in every supported language (currently en, ko, ja, zh).
+  For fast iteration, an implementation PR may explicitly defer localization,
+  update only the canonical English docs, and link the remaining work. Before
+  proposing or merging a release that includes the feature, merge and verify
+  its docs in every supported locale. English fallback does not count as
+  translation. This does not require backfilling unrelated legacy pages.
+  See `CONTRIBUTING.md` for translation provenance, legacy coverage, and the
+  English-only contributing guide and generated Values table exceptions.
 - **Changeset release items are a contributor contract.** For every
   user-visible chart change - including a new `values-*.yaml` example, a new
   ArgoCD example, or docs a user reads, not just template/default changes -
@@ -110,10 +95,9 @@ as a **Secret**.
   history.
 - Regenerate chart docs with **helm-docs** after any `values.yaml` change:
   `make docs` (uses `charts/hermes-agent/README.md.gotmpl` + `# --` annotations).
-  This only updates `README.md`; if the change affects prose covered in
-  `README-ko.md` (not just the values table), update that by hand too. Update
-  an entry-scoped locale only when the changed page is in that locale's entry
-  path.
+  Update affected README prose in all supported locales by hand, or track
+  those translations as deferred work under the release gate above. Keep the
+  generated Values table in English in every locale.
 - **Never delete or rename a README-referenced image under `docs/images/`.**
   READMEs load them from `main` through raw URLs, so every published chart
   version depends on them; add a new file instead. See CONTRIBUTING.md
