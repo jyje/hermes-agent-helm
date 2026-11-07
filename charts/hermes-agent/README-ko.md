@@ -570,6 +570,45 @@ Hermes는 지원하지 않는 설정 스키마 버전을 명시한 파일을 자
 보존하므로 이 복구를 수행할 수 있습니다. `true`이면 마이그레이션 전에 차트
 values의 설정으로 파일을 교체합니다.
 
+### 원격 설정 (선택 기능)
+
+Hermes v0.23.0부터 여러 에이전트를 운영할 때 중앙 설정 서비스에서 각
+프로필의 설정을 읽을 수 있습니다. 워크로드는 `config:`가 아니라 환경
+변수로 백엔드를 선택합니다. 자체 호스팅 서비스를 사용한다면 먼저
+에이전트를 등록하고 다음 Helm 값을 설정하세요.
+
+```yaml
+extraEnv:
+  - name: HERMES_CONFIG_BACKEND
+    value: remote
+  - name: HERMES_CONFIG_INSTANCE_ID
+    value: my-registered-agent
+  - name: HERMES_CONFIG_REMOTE_URL
+    value: https://config.example.com
+extraEnvFrom:
+  - secretRef:
+      name: hermes-remote-config-credentials
+```
+
+인스턴스 ID와 HTTPS URL을 실제 값으로 바꾸세요. 릴리스 네임스페이스에
+참조한 Secret을 만들고 `GATEWAY_RELAY_IDP_TOKEN_URL`,
+`GATEWAY_RELAY_IDP_CLIENT_ID`, `GATEWAY_RELAY_IDP_CLIENT_SECRET`을 넣으세요.
+`GATEWAY_RELAY_IDP_SCOPE`는 선택 사항입니다. Hermes Cloud를 사용한다면
+사용자 지정 URL과 이 Secret 참조를 빼고, 프로필의 `auth.json`에서 Nous
+액세스 토큰을 사용할 수 있게 하세요. 인증과 여러 프로필의 설정 방법은
+[업스트림 원격 설정 가이드](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/website/docs/user-guide/remote-config.md)를 참고하세요.
+
+원격 모드는 로컬 `config.yaml`을 읽지 않습니다. Helm의 `config:`를
+바꿔도 원격 서비스에는 반영되지 않습니다. 시작 시 원격 설정을 가져오지
+못하면 Hermes는 로컬 파일로 대체하지 않고 종료합니다.
+
+로컬 파일 초기화를 의도적으로 생략할 때가 아니라면 `bootstrap.enabled`를
+기본값 `true`로 유지하세요. 끄면 설정한 `SOUL.md`와 ready-notify 훅도
+초기화되지 않으며, 새 테스트 볼륨에 `config.yaml`이 없어 기본 `helm test`가
+실패합니다. `helm test`가 통과해도 워크로드의 원격 설정 연결을 검증한
+것은 아닙니다. 배포한 워크로드가 기동하고 원격 서비스에서 프로필 설정을
+읽는지 확인하세요.
+
 ### 시크릿 공급 전략
 
 배포마다 하나를 고르세요 - 조합도 가능합니다(제공자 키는 SealedSecret, 나머지는
