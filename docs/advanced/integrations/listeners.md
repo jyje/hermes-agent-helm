@@ -69,11 +69,65 @@ password provider and is separate from the management dashboard on port 9119.
 If the page is unreachable, inspect the gateway logs for listener or sign-in
 startup errors: Helm's wait does not check the Webapp listener.
 
-Keep this password example on a trusted cluster and use the local port
-forward. Signing in gives access to the agent's workspace and tools.
+Keep this password example on a trusted network. Use local port forwarding
+when you do not need a shared URL. Signing in gives access to the agent's
+workspace and tools.
 For an existing release with `bootstrap.overwrite: false`, update its
 persisted `config.yaml` deliberately and restart the Pod; a new Helm value
 does not replace the existing file.
+
+### Webapp behind an HTTPS Ingress
+
+For a trusted network or VPN, keep the same external Secret and layer the
+following values over `values-webapp.yaml`. Replace the hostname, Ingress
+class, TLS Secret name, and proxy address. The TLS Secret must be in the
+release namespace and cover the Webapp hostname.
+
+```yaml title="webapp-ingress.yaml"
+config:
+  webapp:
+    public_url: https://webapp.example.com
+  dashboard:
+    trusted_proxies:
+      - "192.0.2.10/32"
+
+ingress:
+  enabled: true
+  className: your-ingress-class
+  hosts:
+    - host: webapp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 9120
+  tls:
+    - secretName: webapp-tls
+      hosts:
+        - webapp.example.com
+```
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent \
+  -f charts/hermes-agent/values-webapp.yaml -f webapp-ingress.yaml --wait
+```
+
+- Set the browser-facing origin in `config.webapp.public_url`, not
+  `config.dashboard.public_url`. The latter is for the management dashboard.
+- Hermes reads trusted proxy peers from `config.dashboard.trusted_proxies`
+  even with the management dashboard disabled. Use the actual connecting
+  proxy IP or the narrowest CIDR containing its peers. Do not trust all
+  addresses. Without a trusted peer, login can succeed but the cookies are
+  not marked `Secure` when TLS terminates at the proxy.
+- Preserve the public host, set `X-Forwarded-Proto: https` at TLS termination,
+  and forward WebSocket upgrades on `/api/ws` without rewriting the path.
+- Before sharing the URL, check that signed-out access is denied, the signed-in
+  session cookie is `Secure` and `HttpOnly`, and the WebSocket connects after
+  sign-in. Keep this password example off the public internet.
+
+This route was checked in kind with Hermes v0.23.0, a test TLS certificate, and
+an Ingress controller. Public DNS, certificate issuance, and HTTPRoute were
+not part of that check.
 
 ## Telegram webhook example
 

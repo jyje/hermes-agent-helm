@@ -72,11 +72,64 @@ kubectl --namespace hermes-agent port-forward --address 127.0.0.1 \
 없으면 게이트웨이 로그에서 리스너와 인증 시작 오류를 확인하세요.
 Helm의 대기는 Webapp 리스너를 확인하지 않습니다.
 
-이 비밀번호 예제는 신뢰된 클러스터에서 로컬 포트 포워딩으로 사용하세요.
-로그인하면 에이전트의 작업 공간과 도구에 접근할 수 있습니다.
+이 비밀번호 예제는 신뢰된 네트워크에서 사용하세요. URL을 공유할 필요가
+없다면 로컬 포트 포워딩을 사용하세요. 로그인하면 에이전트의 작업 공간과
+도구에 접근할 수 있습니다.
 `bootstrap.overwrite: false`인 기존 릴리스에서는 영속 볼륨의
 `config.yaml`을 직접 갱신하고 Pod를 다시 시작하세요. Helm 값만 바꿔서는
 기존 파일이 교체되지 않습니다.
+
+### HTTPS Ingress 뒤의 Webapp
+
+신뢰된 네트워크나 VPN에서는 같은 외부 Secret을 유지하고 아래 값을
+`values-webapp.yaml` 위에 적용하세요. 호스트 이름, Ingress 클래스, TLS Secret
+이름, 프록시 주소를 환경에 맞게 바꾸세요. TLS Secret은 릴리스와 같은
+네임스페이스에 있어야 하며 Webapp 호스트 이름을 포함해야 합니다.
+
+```yaml title="webapp-ingress.yaml"
+config:
+  webapp:
+    public_url: https://webapp.example.com
+  dashboard:
+    trusted_proxies:
+      - "192.0.2.10/32"
+
+ingress:
+  enabled: true
+  className: your-ingress-class
+  hosts:
+    - host: webapp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 9120
+  tls:
+    - secretName: webapp-tls
+      hosts:
+        - webapp.example.com
+```
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent \
+  -f charts/hermes-agent/values-webapp.yaml -f webapp-ingress.yaml --wait
+```
+
+- 브라우저에서 사용하는 외부 주소는 `config.webapp.public_url`에 설정하세요.
+  `config.dashboard.public_url`은 관리 대시보드용입니다.
+- 관리 대시보드를 꺼도 Hermes는 `config.dashboard.trusted_proxies`에서 신뢰할
+  프록시를 읽습니다. 실제 접속 프록시 IP 또는 그 피어를 포함하는 가장 좁은
+  CIDR을 사용하세요. 모든 주소를 신뢰하지 마세요. TLS가 프록시에서 종료될 때
+  신뢰할 피어가 없으면 로그인에 성공해도 쿠키에 `Secure`가 붙지 않습니다.
+- 외부 호스트 이름을 유지하고 TLS 종료 지점에서 `X-Forwarded-Proto: https`를
+  설정하세요. `/api/ws` 경로를 바꾸지 말고 WebSocket 업그레이드를 전달하세요.
+- URL을 공유하기 전에 로그인하지 않은 요청이 차단되고, 로그인 쿠키에
+  `Secure`와 `HttpOnly`가 붙으며, 로그인 후 WebSocket이 연결되는지 확인하세요.
+  이 비밀번호 예제는 공개 인터넷에 노출하지 마세요.
+
+이 경로는 Hermes v0.23.0, 테스트 TLS 인증서, Ingress 컨트롤러를 사용해
+kind에서 확인했습니다. 공개 DNS, 인증서 발급, HTTPRoute는 검증 범위에
+포함하지 않았습니다.
 
 ## Telegram 웹훅 예제
 
