@@ -1114,6 +1114,7 @@ comment), or use the SealedSecret + `extraEnvFrom` pattern above.
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM proxy (remote/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM proxy (in-cluster Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress** wired in (dashboard enabled, upstream password gate, trusted proxy) |
+| [`values-webapp.yaml`](values-webapp.yaml) | OpenAI (`openai-api`) | **Webapp**, private ClusterIP, external password Secret, and local port forwarding |
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with Nous Portal OAuth**, the upstream-recommended sign-in for an internet-facing dashboard |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress with your own OpenID Connect provider** (public PKCE client, no Nous Portal) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook** with explicit Service ports and external listener secrets |

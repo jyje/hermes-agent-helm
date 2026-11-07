@@ -5,7 +5,7 @@ description: Version-specific HTTP listeners, authentication, and explicit Kuber
 
 # Public listener inventory
 
-Checked against the tagged **Hermes v0.22.2** source. These are the defaults
+Checked against the Hermes tag linked in each row. These are the defaults
 **when a listener is enabled**, not open ports in a default chart installation.
 The default gateway uses outbound messenger connections; access Services and
 HTTP routing are opt-in. A StatefulSet's headless Service provides DNS only.
@@ -15,6 +15,7 @@ uses its dual-stack default.
 | Listener and tagged source | Default bind / port | Authentication for message/data requests | Chart wiring |
 | --- | --- | --- | --- |
 | [Management dashboard](https://github.com/NousResearch/hermes-agent/tree/v0.22.2/hermes_cli/dashboard_auth) | All interfaces, 9119 in the image | Session through basic/OAuth/OIDC; non-loopback requires a provider. Treat sign-in as shell access. | `dashboard.enabled`, Service and Ingress/HTTPRoute. Use OAuth/OIDC for unrestricted public exposure; basic is for a trusted network/VPN. |
+| [Webapp](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/gateway/webapp_listener.py) | Loopback, 9120 | Dashboard sign-in gate for a non-loopback bind or external origin | `config.webapp` and explicit `service.ports`; see `values-webapp.yaml` |
 | [OpenAI-compatible API](https://github.com/NousResearch/hermes-agent/blob/v0.22.2/gateway/platforms/api_server.py) | Upstream loopback, 8642; chart sets 0.0.0.0 when enabled | Bearer `API_SERVER_KEY`, required even on loopback | `apiServer.enabled` plus explicit `service.ports` and routing |
 | [Generic webhook](https://github.com/NousResearch/hermes-agent/blob/v0.22.2/gateway/platforms/webhook.py) | All interfaces, 8644 | Global/per-route signing secret and source-specific signature validation | `webhook.enabled`; routes under `/webhooks/<route>`, including profile-prefixed routes. Explicit Service port. |
 | [A2A](https://github.com/NousResearch/hermes-agent/blob/v0.23.0/plugins/platforms/a2a/security.py) | Loopback, 9900; remote bind requires a token | Per-peer `A2A_PEER_TOKENS` (named identity) or shared `A2A_BEARER_TOKEN` (`ip:<source-ip>` identity). Match that identity in `A2A_TRUSTED_PEERS` for dispatch. | Freeform `config.gateway.platforms.a2a`, host/port env, explicit Service; see `values-a2a.yaml` |
@@ -46,6 +47,33 @@ platform. Enabling an upstream listener does not create Kubernetes routing.
   controller peers. Never broaden dashboard access to fix an unrelated webhook.
 - Preserve provider webhook paths and the external HTTPS URL used by signature
   validation. Do not turn off signatures to accommodate a proxy rewrite.
+
+## Webapp on a trusted cluster
+
+Use Hermes v0.23.0 and a fresh release. Create the namespace and an external
+Secret named `hermes-agent-webapp-secrets` with `OPENAI_API_KEY`,
+`HERMES_DASHBOARD_BASIC_AUTH_USERNAME`, `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`
+and `HERMES_DASHBOARD_BASIC_AUTH_SECRET`. Use a strong password and a separate
+random session signing secret.
+
+```bash
+helm upgrade --install hermes-agent ./charts/hermes-agent \
+  --namespace hermes-agent \
+  -f charts/hermes-agent/values-webapp.yaml --wait
+kubectl --namespace hermes-agent port-forward --address 127.0.0.1 \
+  service/hermes-agent 9120:9120
+```
+
+Open `http://127.0.0.1:9120` and sign in. The Webapp listener uses the bundled
+password provider and is separate from the management dashboard on port 9119.
+If the page is unreachable, inspect the gateway logs for listener or sign-in
+startup errors: Helm's wait does not check the Webapp listener.
+
+Keep this password example on a trusted cluster and use the local port
+forward. Signing in gives access to the agent's workspace and tools.
+For an existing release with `bootstrap.overwrite: false`, update its
+persisted `config.yaml` deliberately and restart the Pod; a new Helm value
+does not replace the existing file.
 
 ## Telegram webhook example
 

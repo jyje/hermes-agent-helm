@@ -1067,6 +1067,7 @@ Hermes 자체가 이미 지원하는 설정이라면 차트 변경은 전혀 필
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM 프록시 (원격/Ingress) |: |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM 프록시 (클러스터 내 Service DNS) |: |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **대시보드 Ingress** 연결됨 (대시보드 활성화, 업스트림 비밀번호 gate, trusted proxy) |
+| [`values-webapp.yaml`](values-webapp.yaml) | OpenAI (`openai-api`) | **Webapp**: 내부 ClusterIP, 외부 비밀번호 Secret, 로컬 포트 포워딩 |
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Nous Portal OAuth를 쓰는 대시보드 Ingress**, 인터넷에 공개하는 대시보드에 업스트림이 권장하는 로그인 방식 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **자체 OpenID Connect 제공자를 쓰는 대시보드 Ingress** (public PKCE 클라이언트, Nous Portal 불필요) |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API server + webhook**: 명시적 Service port와 외부 listener secret |

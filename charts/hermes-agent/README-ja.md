@@ -649,6 +649,7 @@ Hermes が対応する設定にはチャート変更は不要です。[パスス
 | [`values-litellm.yaml`](values-litellm.yaml) | LiteLLM プロキシ（外部/Ingress） | : |
 | [`values-litellm-k8s.yaml`](values-litellm-k8s.yaml) | LiteLLM プロキシ（クラスター内 Service DNS） | : |
 | [`values-ingress.yaml`](values-ingress.yaml) | OpenAI (`openai-api`) | **Dashboard Ingress**（dashboard 有効化、上流のパスワード認証、信頼するプロキシ） |
+| [`values-webapp.yaml`](values-webapp.yaml) | OpenAI (`openai-api`) | **Webapp**: 内部 ClusterIP、外部パスワード Secret、ローカルポート転送 |
 | [`values-ingress-oauth.yaml`](values-ingress-oauth.yaml) | OpenAI (`openai-api`) | **Nous Portal OAuth を使うダッシュボード Ingress**。インターネットに公開するダッシュボードに上流が推奨するログイン方式 |
 | [`values-ingress-oidc.yaml`](values-ingress-oidc.yaml) | OpenAI (`openai-api`) | **独自の OpenID Connect プロバイダーを使うダッシュボード Ingress**（public PKCE クライアント、Nous Portal 不要） |
 | [`values-api-server-and-webhook.yaml`](values-api-server-and-webhook.yaml) | OpenAI (`openai-api`) | **API サーバーと webhook**。明示的な Service ポートと外部 Secret |
