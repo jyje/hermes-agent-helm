@@ -12,6 +12,17 @@ description: Complete GitHub Copilot device login through Discord or Telegram.
 
 A Discord or Telegram bot, GitHub Copilot access, and persistent storage are required so login tokens can be reused.
 
+In Hermes v0.23.0, the `copilot` provider moved to the
+[GitHub Copilot Labs plugin](https://github.com/NousResearch/hermes-labs-plugins/pull/34).
+Hermes installs it automatically for profiles that select Copilot. If you
+restrict outbound traffic, allow the plugin catalog and its GitHub source
+to be reached on first startup, in addition to the Copilot API.
+
+Keep `config.model.provider: copilot`. The chart's device login still writes
+`COPILOT_GITHUB_TOKEN` to the Hermes volume, and the plugin still reads that key.
+A login stored only by the GitHub or Copilot CLI on another machine is not
+available to the plugin. Use the chart's device login in that case.
+
 ## Install
 
 ```bash
@@ -31,13 +42,14 @@ Approve the device code from the initial pod logs or Discord prompt in GitHub.
 
 The token is stored in `HERMES_HOME/.env` on the persistent volume. On a later
 start the init container checks it against `https://api.github.com/user` and
-skips the login when it still works. Only a revoked token (HTTP 401) starts a new
-device login. The check does not depend on your Copilot plan. Chart versions
-up to 1.18.0 checked `copilot_internal/v2/token` instead, which answered 403 for
+skips the login when it still works. If the validation endpoint returns HTTP 401
+or 403, the init container starts a new device login. The check does not depend
+on your Copilot plan. Chart versions up to 1.18.0 checked
+`copilot_internal/v2/token` instead, which answered 403 for
 a valid token on a Copilot Free account and asked for a new code on every
 restart ([#349](https://github.com/jyje/hermes-agent-helm/issues/349)). If you
-override `validateUrl`, keep it to an endpoint that answers 401 for a revoked
-token and 200 otherwise.
+override `validateUrl`, use an endpoint that returns 200 for a usable token and
+reserves 401 or 403 for cases that require signing in again.
 
 ## Telegram instead of Discord
 
