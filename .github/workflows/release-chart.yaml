@@ -24,11 +24,12 @@ jobs:
     outputs:
       version: ${{ steps.ver.outputs.version }}
       chart_name: ${{ steps.ver.outputs.chart_name }}
+      release_title: ${{ steps.ver.outputs.release_title }}
       exists: ${{ steps.ver.outputs.exists }}
     steps:
       - uses: actions/checkout@v7
 
-      - name: Resolve chart version
+      - name: Resolve chart version and release title
         id: ver
         run: |
           VER="$(grep -E '^version:' charts/hermes-agent/Chart.yaml | awk '{print $2}' | tr -d '"')"
@@ -39,6 +40,12 @@ jobs:
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "::notice::v$VER already released - release-chart is skipped."
           else
+            APP_VERSION="$(awk '/^appVersion:/ {print $2; exit}' charts/hermes-agent/Chart.yaml | tr -d "\"'")"
+            if [[ -z "$APP_VERSION" || "$APP_VERSION" == \#* ]]; then
+              echo "::error::Chart.yaml must set appVersion to name the release."
+              exit 1
+            fi
+            echo "release_title=$NAME v$VER ($APP_VERSION upstream)" >> "$GITHUB_OUTPUT"
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -83,16 +90,17 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.check-version.outputs.version }}
-          name: ${{ needs.check-version.outputs.chart_name }} v${{ needs.check-version.outputs.version }}
+          name: ${{ needs.check-version.outputs.release_title }}
           body_path: RELEASE_NOTES.md
 
       - name: Ensure release title (action-gh-release may reuse a stale release without it)
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TITLE: ${{ needs.check-version.outputs.release_title }}
         run: |
           gh release edit "v${{ needs.check-version.outputs.version }}" \
             --repo "${{ github.repository }}" \
-            --title "${{ needs.check-version.outputs.chart_name }} v${{ needs.check-version.outputs.version }}"
+            --title "$RELEASE_TITLE"
 
       - name: Setup Helm
         uses: azure/setup-helm@v5
