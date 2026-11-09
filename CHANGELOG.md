@@ -1,5 +1,61 @@
 # Changelog
 
+## 1.24.0
+
+### Features
+
+- [#430](https://github.com/jyje/hermes-agent-helm/pull/430) [`0dd16a0`](https://github.com/jyje/hermes-agent-helm/commit/0dd16a0a2322483af64549c973b152645abdb49b) - Feature(tests): Isolate optional Helm test diagnostics
+
+  Enable `tests.isolateDoctor` on Kubernetes 1.33 or later to keep a diagnostic container failure from ending the required Helm test checks.
+
+### Fixes
+
+- [#427](https://github.com/jyje/hermes-agent-helm/pull/427) [`9be24f0`](https://github.com/jyje/hermes-agent-helm/commit/9be24f0e2101fc0770bdaa365c4a2c382cff975c) - Fix(a2a): Authorize named peers in the A2A example
+
+  Pair per-peer tokens from an external Secret with matching trusted peer names so authenticated clients can send work through the example Service.
+  When switching from the shared-token example, update the existing Secret and clients before applying the new overlay.
+
+### Dependencies
+
+- [#419](https://github.com/jyje/hermes-agent-helm/pull/419) [`95da257`](https://github.com/jyje/hermes-agent-helm/commit/95da2572cd3d699558be5934a34e851dd254c965) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.22.6.
+
+- [#420](https://github.com/jyje/hermes-agent-helm/pull/420) [`1583ef3`](https://github.com/jyje/hermes-agent-helm/commit/1583ef38ef8e2bdbfce30c5278122371db8f5ec6) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.22.7.
+
+- [#421](https://github.com/jyje/hermes-agent-helm/pull/421) [`31a7669`](https://github.com/jyje/hermes-agent-helm/commit/31a766913f945aaaa5c6b7dff32135f1ba050c7b) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.23.0.
+
+### Documentation
+
+- [#436](https://github.com/jyje/hermes-agent-helm/pull/436) [`ec5329b`](https://github.com/jyje/hermes-agent-helm/commit/ec5329b11d5a0599608e290542537d660bc4d3c1) - Documentation(copilot): Japanese and Simplified Chinese setup guides
+
+  Read the Copilot Labs plugin setup and device login guidance in Japanese or Simplified Chinese.
+
+- [#429](https://github.com/jyje/hermes-agent-helm/pull/429) [`8e2ddc8`](https://github.com/jyje/hermes-agent-helm/commit/8e2ddc80214e950127133e680a3534f8eea28dac) - Documentation(copilot): Explain the GitHub Copilot Labs plugin
+
+  Keep the existing provider and token settings when upgrading to Hermes v0.23.0, and allow plugin installation on first startup when egress is restricted.
+
+- [#428](https://github.com/jyje/hermes-agent-helm/pull/428) [`6e0c7a7`](https://github.com/jyje/hermes-agent-helm/commit/6e0c7a72fac1e5ed0a33ae4f8f8c34c926a866bb) - Documentation(upgrade): Explain the Hermes v0.23.0 upgrade
+
+  Check persisted session pruning settings, move browser workflows to `browser_exec`, and update MCP clients to use `hermes mcp-serve` before upgrading.
+
+- [#434](https://github.com/jyje/hermes-agent-helm/pull/434) [`47fc6f4`](https://github.com/jyje/hermes-agent-helm/commit/47fc6f4c3047f86a4f0d556d3cffdd2e638a2363) - Documentation(config): Optional Remote Config backend
+
+  Show how to configure the Hermes Remote Config backend and explain how it affects local bootstrap and Helm tests.
+
+- [#432](https://github.com/jyje/hermes-agent-helm/pull/432) [`481e1b6`](https://github.com/jyje/hermes-agent-helm/commit/481e1b66183e134114356ed7f4bd26366d9df173) - Documentation(webapp): Guide HTTPS Ingress setup
+
+  Route Webapp traffic through a trusted TLS proxy, keep session cookies secure,
+  and verify the authenticated WebSocket path before sharing access.
+
+- [#431](https://github.com/jyje/hermes-agent-helm/pull/431) [`3cc8a47`](https://github.com/jyje/hermes-agent-helm/commit/3cc8a477731fd5da1c105242c5344faed6d5a5f7) - Documentation(webapp): Add a private Webapp example
+
+  Use a ClusterIP, local port forward and credentials from an external Secret to try the Hermes v0.23.0 Webapp on a trusted cluster.
+
 ## 1.23.0
 
 ### Features
