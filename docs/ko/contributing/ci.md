@@ -162,6 +162,21 @@ flowchart LR
 돕니다. 이미지를 올렸을 때 둘 중 하나의 이름이 바뀌거나 옮겨지면 사용자의 로그인이나
 준비 완료 메시지가 조용히 깨지는 대신 이 시나리오가 빠진 이름과 함께 실패합니다.
 
+#### Doctor 메모리 여유
+
+워크로드 Pod에서 `hermes doctor`를 다시 실행하는 시나리오(`existing-claim`,
+`security-hardened`, `bootstrap-overwrite`)는 doctor가 쓰는 메모리도 함께 잽니다.
+`run_doctor`는 [doctor-memory.py](../../../.github/scripts/doctor-memory.py)를 거쳐
+doctor를 실행합니다. 이 스크립트는 doctor의 출력과 종료 코드를 그대로 두고, 실행되는 동안
+컨테이너의 cgroup을 샘플링합니다. 측정값은 커널이 회수할 수 없는 메모리의 최대 증가량이고
+(페이지 캐시는 제외), 가장 큰 단일 프로세스의 크기와 함께 보고합니다.
+
+로그에는 이 최댓값을 릴리스의 `tests.resources.limits.memory`와 비교한 `doctor memory:`
+줄이 남고, 한도가 최댓값의 1.5배보다 작으면 job이 경고 annotation을 올립니다. 이 점검은
+시나리오를 실패시키지 않습니다. Helm test Job은 이전까지 통과하던 한도에서 아무 조짐 없이
+OOMKilled된 적이 있습니다. 이 경고는 Job이 아직 통과하는 동안, 예를 들어 이미지를 올렸을 때
+여유가 줄어드는 것을 보여 줍니다. 경고가 나오면 `values.yaml`의 기본 한도를 올리세요.
+
 ### Fork PR
 
 Fork PR은 저장소 시크릿을 받지 못하므로, chat 라운드트립(그리고 라이브
