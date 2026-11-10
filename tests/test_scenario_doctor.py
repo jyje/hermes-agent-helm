@@ -2,8 +2,8 @@
 
 The helper mirrors the chart's `tests.doctorStrict` contract: `hermes doctor`
 findings are printed but only fail a scenario when DOCTOR_STRICT=true, while a
-doctor that never ran fails regardless. A stub `kubectl` on PATH stands in for
-the cluster so these run without kind.
+doctor that never ran fails regardless. Stub `kubectl` and `helm` commands on
+PATH stand in for the cluster so these run without kind.
 """
 
 from __future__ import annotations
@@ -30,14 +30,18 @@ DOCTOR_OUTPUT = textwrap.dedent(
 
 
 class RunDoctorTest(unittest.TestCase):
-    def run_helper(self, *, stub_output: str, stub_rc: int, strict: str | None):
+    def run_helper(self, *, stub_output: str, stub_rc: int, strict: str | None, values: str = "{}"):
         with tempfile.TemporaryDirectory() as tmp:
             stub = Path(tmp) / "kubectl"
             payload = Path(tmp) / "out.txt"
             payload.write_text(stub_output, encoding="utf-8")
             stub.write_text(f'#!/bin/sh\ncat "{payload}"\nexit {stub_rc}\n', encoding="utf-8")
             stub.chmod(stub.stat().st_mode | stat.S_IEXEC)
-            env = {"PATH": f"{tmp}:{os.environ['PATH']}", "NS": "t"}
+            # `helm get values --all -o json` for the memory headroom report.
+            helm = Path(tmp) / "helm"
+            helm.write_text(f"#!/bin/sh\ncat <<'JSON'\n{values}\nJSON\n", encoding="utf-8")
+            helm.chmod(helm.stat().st_mode | stat.S_IEXEC)
+            env = {"PATH": f"{tmp}:{os.environ['PATH']}", "NS": "t", "HOME": os.environ.get("HOME", tmp)}
             if strict is not None:
                 env["DOCTOR_STRICT"] = strict
             return subprocess.run(
@@ -71,6 +75,22 @@ class RunDoctorTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("did not run", result.stdout)
+
+    def test_short_memory_headroom_warns_without_failing(self):
+        result = self.run_helper(
+            stub_output=DOCTOR_OUTPUT + f"DOCTOR_MEMORY peak_bytes={800 * 1024 * 1024} largest_process_bytes=0\n",
+            stub_rc=0,
+            strict="true",
+            values='{"tests": {"resources": {"limits": {"memory": "1Gi"}}}}',
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("headroom 1.28x", result.stdout)
+        self.assertIn("::warning::hermes doctor needed 800 MiB", result.stdout)
+
+    def test_unmeasured_doctor_keeps_its_result(self):
+        result = self.run_helper(stub_output=DOCTOR_OUTPUT, stub_rc=0, strict="true")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("doctor memory: not measured", result.stdout)
 
 
 if __name__ == "__main__":

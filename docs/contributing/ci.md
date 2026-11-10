@@ -161,6 +161,26 @@ No secret and no provider call is needed, so it also runs on fork PRs. An
 image bump that renames or moves either dependency fails here with the missing
 name instead of breaking a user's login or ready message silently.
 
+#### Doctor memory headroom
+
+The scenarios that run `hermes doctor` again in the workload pod
+(`existing-claim`, `security-hardened` and `bootstrap-overwrite`) also measure
+how much memory it needs. `run_doctor` starts the doctor through
+[doctor-memory.py](../../.github/scripts/doctor-memory.py), which leaves its
+output and exit status alone and samples the container's cgroup while it runs.
+It first waits for the container to stop growing, so a gateway that is still
+starting is not counted as the doctor.
+The figure is the peak growth in memory the kernel cannot reclaim (page cache
+is left out), reported next to the largest single process.
+
+The log then shows a `doctor memory:` line that compares the peak with the
+release's `tests.resources.limits.memory`, and the job raises a warning
+annotation when the limit is less than 1.5 times the peak. The check never
+fails a scenario. The Helm test Job was once OOMKilled at a limit it had passed
+under before, with no earlier sign. This warning shows shrinking headroom, for
+example on an image bump, while the Job still passes. When it appears, raise
+the default limit in `values.yaml`.
+
 ### Fork PRs
 
 Fork PRs don't receive repository secrets, so the chat round-trip (and any live
