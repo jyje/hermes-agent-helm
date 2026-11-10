@@ -7,8 +7,9 @@ was the first sign. lib.sh's `run_doctor` uses the two modes below so that
 shrinking headroom shows up as a CI warning while the Job still passes.
 
 `measure` runs inside a Hermes pod (lib.sh feeds this file to `python3 -` on
-stdin). It runs the doctor unchanged, samples the container's cgroup while it
-runs, prints one marker line and exits with the doctor's own status.
+stdin). It waits for the container to stop growing, runs the doctor unchanged,
+samples the container's cgroup while it runs, prints one marker line and exits
+with the doctor's own status.
 
 `check` runs on the CI runner. It takes that marker line and reads the release's
 computed values on stdin (they hold secrets, so they never touch argv or disk),
@@ -33,6 +34,12 @@ CGROUP_STAT = Path("/sys/fs/cgroup/memory.stat")
 # dropped on demand, so it says nothing about what the doctor needs.
 UNRECLAIMABLE = ("anon", "shmem", "kernel_stack", "pagetables", "percpu", "sock", "slab_unreclaimable")
 SAMPLE_SECONDS = 0.1
+# The baseline counts as settled once this many samples, one per interval, stay
+# within the spread. A pod that never settles is reported but not compared.
+SETTLE_SAMPLES = 5
+SETTLE_SECONDS = 1.0
+SETTLE_SPREAD = 16 * 1024 * 1024
+SETTLE_TRIES = 60
 MARKER = "DOCTOR_MEMORY"
 HEADROOM = 1.5
 MIB = 1024 * 1024
@@ -51,6 +58,24 @@ def unreclaimable(stat_text: str) -> int | None:
     return sum(int(stat.get(key, 0)) for key in UNRECLAIMABLE)
 
 
+def settled_baseline(sample) -> tuple[int | None, bool]:
+    """The container's memory once it stops growing, and whether it did.
+
+    The growth over this baseline is credited to the doctor, so a gateway that
+    is still starting (a pod that was just restarted) must finish first.
+    """
+    recent: list[int] = []
+    for _ in range(SETTLE_TRIES):
+        current = sample()
+        if current is None:
+            return None, False
+        recent = [*recent, current][-SETTLE_SAMPLES:]
+        if len(recent) == SETTLE_SAMPLES and max(recent) - min(recent) < SETTLE_SPREAD:
+            return current, True
+        time.sleep(SETTLE_SECONDS)
+    return recent[-1], False
+
+
 def measure(command: list[str], stat_path: Path = CGROUP_STAT) -> int:
     def sample() -> int | None:
         try:
@@ -60,7 +85,8 @@ def measure(command: list[str], stat_path: Path = CGROUP_STAT) -> int:
 
     # The pod's other processes (the gateway) are already in the baseline, so
     # the growth over it is what the doctor itself adds.
-    baseline = peak = sample()
+    baseline, settled = settled_baseline(sample)
+    peak = baseline
     proc = subprocess.Popen(command, stdin=subprocess.DEVNULL)
     while proc.poll() is None:
         current = sample()
@@ -71,7 +97,7 @@ def measure(command: list[str], stat_path: Path = CGROUP_STAT) -> int:
     largest = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * 1024
     fields = f"largest_process_bytes={largest}"
     if baseline is not None and peak is not None:
-        fields = f"peak_bytes={peak - baseline} {fields}"
+        fields = f"peak_bytes={peak - baseline} {fields} settled={int(settled)}"
     sys.stdout.flush()
     print(f"{MARKER} {fields}", flush=True)
     return proc.returncode if proc.returncode >= 0 else 128 - proc.returncode
@@ -103,6 +129,8 @@ def check(marker: str, values: object) -> list[str]:
     summary = f"doctor memory: peak {peak // MIB} MiB (largest process {largest // MIB} MiB)"
     if not int(measured.get("peak_bytes", 0)):
         summary += ", from the largest process only"
+    if measured.get("settled") == "0":
+        return [f"{summary}; the pod was still growing when the doctor started, so it is not compared with the limit"]
     limit = job_memory_limit(values)
     if limit is None:
         return [f"{summary}; the test Job has no readable memory limit"]

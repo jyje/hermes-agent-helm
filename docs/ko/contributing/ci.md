@@ -168,7 +168,8 @@ flowchart LR
 `security-hardened`, `bootstrap-overwrite`)는 doctor가 쓰는 메모리도 함께 잽니다.
 `run_doctor`는 [doctor-memory.py](../../../.github/scripts/doctor-memory.py)를 거쳐
 doctor를 실행합니다. 이 스크립트는 doctor의 출력과 종료 코드를 그대로 두고, 실행되는 동안
-컨테이너의 cgroup을 샘플링합니다. 측정값은 커널이 회수할 수 없는 메모리의 최대 증가량이고
+컨테이너의 cgroup을 샘플링합니다. 아직 시작 중인 gateway가 doctor로 계산되지 않도록, 먼저
+컨테이너의 메모리 증가가 멈추기를 기다립니다. 측정값은 커널이 회수할 수 없는 메모리의 최대 증가량이고
 (페이지 캐시는 제외), 가장 큰 단일 프로세스의 크기와 함께 보고합니다.
 
 로그에는 이 최댓값을 릴리스의 `tests.resources.limits.memory`와 비교한 `doctor memory:`

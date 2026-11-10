@@ -168,6 +168,8 @@ The scenarios that run `hermes doctor` again in the workload pod
 how much memory it needs. `run_doctor` starts the doctor through
 [doctor-memory.py](../../.github/scripts/doctor-memory.py), which leaves its
 output and exit status alone and samples the container's cgroup while it runs.
+It first waits for the container to stop growing, so a gateway that is still
+starting is not counted as the doctor.
 The figure is the peak growth in memory the kernel cannot reclaim (page cache
 is left out), reported next to the largest single process.
 
