@@ -799,14 +799,15 @@ tests:
     #    sometimes overloaded. Leave empty to use `config.model.default` as-is
     #    (single attempt, no `-m`/`--provider` override).
     models: []
-  # -- Resource requests/limits for the test Job's container.
+  # -- Resource requests/limits for the test Job's container. The memory limit
+  #    leaves room for `hermes doctor`, which needs several hundred MiB while it runs.
   resources:
     requests:
       cpu: 100m
       memory: 128Mi
     limits:
       cpu: "1"
-      memory: 1Gi
+      memory: 1536Mi
 
 # -- Annotations to add to the Pod.
 podAnnotations: {}
