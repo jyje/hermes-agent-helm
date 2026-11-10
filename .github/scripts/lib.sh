@@ -7,6 +7,7 @@
 set -euo pipefail
 
 NS="${NS:-test-hermes-chart}"
+LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 wait_for_hermes_startup() {
   local pod logs
@@ -85,14 +86,18 @@ run_hook_test() {
 # tool/API keys), so an unconditional call made every image bump that added
 # such a check fail (#303). A doctor that never ran (exec error, pod gone)
 # still fails regardless of strictness: its banner must be in the output.
+# The doctor runs through doctor-memory.py, which leaves its output and exit
+# status alone and adds one line with the memory it needed.
 run_doctor() {
   local pod="$1" out rc=0
-  out="$(kubectl exec -n "$NS" "$pod" -- hermes doctor 2>&1)" || rc=$?
+  out="$(kubectl exec -i -n "$NS" "$pod" -- python3 - measure \
+    < "$LIB_DIR/doctor-memory.py" 2>&1)" || rc=$?
   printf '%s\n' "$out"
   if ! printf '%s\n' "$out" | grep -Fq 'Hermes Doctor'; then
     echo "::error::[$NS] hermes doctor did not run in $pod (exit $rc)"
     return 1
   fi
+  report_doctor_memory "$out"
   if [ "$rc" -ne 0 ]; then
     if [ "${DOCTOR_STRICT:-false}" = "true" ]; then
       echo "::error::[$NS] hermes doctor reported issues (exit $rc) and DOCTOR_STRICT=true"
@@ -101,6 +106,19 @@ run_doctor() {
     echo "::warning::[$NS] hermes doctor reported issues (exit $rc); non-fatal because DOCTOR_STRICT is not true (tests.doctorStrict default)"
   fi
   return 0
+}
+
+# report_doctor_memory <doctor output>
+# Compares the doctor's measured peak memory with the release's test Job limit
+# (`tests.resources.limits.memory`) and prints a `::warning::` when less than
+# 1.5x headroom is left. Warn-only: it never fails a scenario, because the
+# limit actually holding is what the hook test itself checks.
+report_doctor_memory() {
+  local measured
+  measured="$(printf '%s\n' "$1" | grep -m1 -o 'DOCTOR_MEMORY .*' || true)"
+  # The values hold the release's secrets: pipe them, never pass or store them.
+  helm get values hermes-agent -n "$NS" --all -o json 2>/dev/null \
+    | python3 "$LIB_DIR/doctor-memory.py" check --measured "$measured" || true
 }
 
 pod_name() {
