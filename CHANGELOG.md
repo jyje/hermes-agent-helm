@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.25.0
+
+### Fixes
+
+- [#440](https://github.com/jyje/hermes-agent-helm/pull/440) [`f52bba6`](https://github.com/jyje/hermes-agent-helm/commit/f52bba635f1e2632e301675a11ec4cb3bfe5abaf) - Fix(chart): Give the Helm test Job more memory headroom
+
+  Raise the test Job's default memory limit from 1Gi to 1536Mi. On the current Hermes image `hermes doctor` peaked between about 640 and 780 MiB, which left less than 1.5 times headroom under 1Gi. The request stays at 128Mi.
+
+### Dependencies
+
+- [#441](https://github.com/jyje/hermes-agent-helm/pull/441) [`7e6ad1a`](https://github.com/jyje/hermes-agent-helm/commit/7e6ad1a48d7fee2b592f5cf87cf2969df2763a7f) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.23.1.
+
 ## 1.24.0
 
 ### Features
