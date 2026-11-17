@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.26.0
+
+### Dependencies
+
+- [#443](https://github.com/jyje/hermes-agent-helm/pull/443) [`43da8e6`](https://github.com/jyje/hermes-agent-helm/commit/43da8e68d6e28a3180ed8abf394c1d4ccdc186fd) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.23.2.
+
 ## 1.25.0
 
 ### Fixes
