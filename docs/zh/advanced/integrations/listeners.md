@@ -53,6 +53,8 @@ Chart 不为每个平台单独增加配置块。启用上游监听器不会自�
 
 ## 在受信任集群中使用 Webapp
 
+**升级到 Hermes v0.23.2 时：** 如果使用密码登录，请使用原来的凭据重新登录。已有会话会失效，但无需轮换 Secret 或重置 PVC。
+
 使用 Hermes v0.23.0 并创建新 release。先创建命名空间和外部 Secret
 `hermes-agent-webapp-secrets`，其中包含 `OPENAI_API_KEY`、
 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`、`HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`

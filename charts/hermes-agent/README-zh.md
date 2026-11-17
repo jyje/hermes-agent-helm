@@ -585,6 +585,10 @@ config:
 `config.yaml`，因此还需要更新持久化的提供商和模型配置，或先备份再主动重新初始化
 （参阅[配置模型](#配置模型)）。本次移除的是匿名使用示例，并不移除上游已认证的 Nous 支持。
 
+### Hermes v0.23.2
+
+**使用 Basic 认证时需要重新登录。** 从 Hermes v0.23.1 或更早版本升级后，仪表板和 Webapp 中原有的密码登录会话会失效。请使用原来的凭据重新登录，无需轮换 Secret 或重置 PVC。此变更不适用于 OAuth 或 OIDC。请参阅[上游 Basic 认证代码](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185)。
+
 ### Hermes v0.23.0
 
 - **会话自动清理需要主动开启。** `v0.23.0` 镜像的 `sessions.auto_prune` 默认值为 `false`。升级前请检查 PVC 上已有的 `config.yaml`。显式设置的 `true` 仍会启用清理。在默认的 `bootstrap.overwrite: false` 下，修改 Helm 值不会替换已有文件。若未设置此选项，磁盘空间不足时 Hermes 可能会询问，并将开启或关闭的选择保存到 `config.yaml`。

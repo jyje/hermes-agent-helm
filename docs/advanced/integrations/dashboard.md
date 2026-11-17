@@ -28,6 +28,10 @@ dashboard fails closed and never listens.
 | Nous Portal OAuth | A public host. Sign-in with a Nous account; a personal-account client limits sign-in to its owner. |
 | Your own OpenID Connect provider | A public host with your own identity provider. The dashboard has no user allowlist: every identity the provider issues a token to for the client can sign in, so restrict the application at the provider. |
 
+If you upgrade from Hermes v0.23.1 or earlier to v0.23.2, existing Basic
+sessions stop working. Sign in again with the same username and password.
+No Secret rotation or PVC reset is needed. OAuth and OIDC are unaffected.
+
 ## Install
 
 The `dashboard` values and these overlays are in chart releases after 1.16.0.

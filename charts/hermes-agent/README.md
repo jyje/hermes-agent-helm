@@ -1014,6 +1014,14 @@ persisted provider/model configuration too, or intentionally reseed it after
 backing it up (see [Configuration model](#configuration-model)). This retires
 the anonymous example; it does not remove upstream's authenticated Nous support.
 
+### Hermes v0.23.2
+
+**Sign in again if you use Basic authentication.** When upgrading from
+Hermes v0.23.1 or earlier, existing password-based Dashboard and Webapp
+sessions are no longer accepted. Sign in again with the same credentials.
+No Secret rotation or PVC reset is needed. This change does not apply to
+OAuth or OIDC. See the [upstream Basic authentication code](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185).
+
 ### Hermes v0.23.0
 
 - **Session pruning is opt-in.** The `v0.23.0` image defaults

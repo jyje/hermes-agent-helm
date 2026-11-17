@@ -588,6 +588,10 @@ config:
 再シードしてください（[設定モデル](#設定モデル)参照）。
 廃止するのは匿名利用のサンプルであり、上流の認証済み Nous サポートではありません。
 
+### Hermes v0.23.2
+
+**Basic 認証を使っている場合は、再度ログインしてください。** Hermes v0.23.1 以前からアップグレードすると、ダッシュボードと Webapp の既存のパスワード認証セッションは無効になります。同じ認証情報で再度ログインしてください。Secret のローテーションや PVC の初期化は不要です。OAuth と OIDC には適用されません。[上流の Basic 認証コード](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185)を参照してください。
+
 ### Hermes v0.23.0
 
 - **セッションの自動削除はオプトインです。** `v0.23.0` イメージでは `sessions.auto_prune` のデフォルトは `false` です。アップグレード前に PVC 上の `config.yaml` を確認してください。明示的に `true` を設定している場合は自動削除が続きます。デフォルトの `bootstrap.overwrite: false` では、Helm の値を変更しても既存ファイルは置き換わりません。未設定の場合、ディスクの空き容量が少なくなると Hermes が確認を求めることがあり、有効または無効を選ぶと `config.yaml` に保存されます。

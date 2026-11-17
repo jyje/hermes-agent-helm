@@ -50,6 +50,8 @@ platform. Enabling an upstream listener does not create Kubernetes routing.
 
 ## Webapp on a trusted cluster
 
+**Upgrading to Hermes v0.23.2?** If you use password sign-in, sign in again with the same credentials. Old sessions are invalidated, but you do not need to rotate your Secret or reset your PVC.
+
 Use Hermes v0.23.0 and a fresh release. Create the namespace and an external
 Secret named `hermes-agent-webapp-secrets` with `OPENAI_API_KEY`,
 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`, `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`
