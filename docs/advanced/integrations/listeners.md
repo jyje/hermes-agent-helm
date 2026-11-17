@@ -48,6 +48,8 @@ platform. Enabling an upstream listener does not create Kubernetes routing.
 - Preserve provider webhook paths and the external HTTPS URL used by signature
   validation. Do not turn off signatures to accommodate a proxy rewrite.
 
+Starting with Hermes v0.23.2, outbound A2A push callbacks do not follow redirects, and the default URL policy rejects hostnames that resolve to private IPs. This can affect cluster-only Service DNS destinations. Use the final URL and check it from the agent. These callback rules do not apply to incoming A2A requests.
+
 ## Webapp on a trusted cluster
 
 Use Hermes v0.23.0 and a fresh release. Create the namespace and an external

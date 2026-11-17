@@ -799,6 +799,13 @@ Service로 리스너를 노출하려면 외부 Secret에 `A2A_PEER_TOKENS`를 �
 수신자에도 같은 서명 키를 설정하세요. 따로 설정하지 않으면 공유 토큰을 제거할 때
 기본 콜백 서명 키도 사라집니다.
 
+**Hermes v0.23.2 이후의 푸시 콜백.** 콜백 주소는 에이전트가 알림을 보낼
+대상이며, 요청을 받는 A2A Service 주소와 다릅니다. 기본 URL 정책은 사설 IP로
+해석되는 호스트 이름을 차단합니다. 여기에는 사설 IP를 쓰는 클러스터 내부
+Kubernetes Service DNS 이름도 포함됩니다. 콜백 전송 시 리다이렉트를 따르지
+않으므로 최종 URL을 직접 사용하세요. 에이전트가 수신자에 연결할 수 있고 URL
+정책이 허용하는지도 확인하세요. [업스트림 콜백 테스트](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py)를 참고하세요.
+
 ### HTTP 라우팅: Ingress 또는 HTTPRoute
 
 두 라우팅 리소스는 기본으로 꺼져 있습니다. 설치된 Ingress controller가 있으면

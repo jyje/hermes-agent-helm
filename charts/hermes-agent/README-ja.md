@@ -485,6 +485,8 @@ Service 経由でリスナーを公開するには、外部 Secret に `A2A_PEER
 
 以前の共有トークンの例を使用していた場合は、この設定を適用する前に既存の Secret にピア別トークンを追加し、クライアントも各ピアのトークンを使うように変更してください。コールバック受信側が通知の署名を検証する場合は、Secret に `A2A_PUSH_SECRET` を設定し、受信側にも同じ署名キーを設定します。別途設定しないまま共有トークンを削除すると、デフォルトのコールバック署名キーも失われます。
 
+**Hermes v0.23.2 以降のプッシュコールバック。** コールバック URL は通知の送信先で、受信用の A2A Service とは別です。デフォルトの URL ポリシーは、プライベート IP に解決される宛先を拒否します。プライベート IP を使うクラスター内部の Kubernetes Service DNS 名も対象です。コールバックの送信時にリダイレクトを追わないため、最終 URL を直接指定してください。エージェントから受信先に接続でき、URL ポリシーで許可されることを確認してください。[上流のコールバックテスト](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py)を参照してください。
+
 ### HTTP ルーティング: Ingress または HTTPRoute
 
 どちらもデフォルトでは無効です。Ingress コントローラーがある場合は `ingress`、Gateway API CRD と `parentRefs` で参照できる Gateway がある場合は `httpRoute` を使用します。同じホストとパスに両方を有効にせず、クラスターで運用する API を選択してください。
