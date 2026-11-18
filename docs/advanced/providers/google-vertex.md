@@ -9,22 +9,36 @@ description: Connect to Vertex AI Gemini using a GCP service account.
 
 ## When to use it
 
-A GCP service-account JSON Secret with Vertex AI User permissions and a project ID are required.
+Enable the Vertex AI API in your GCP project. The example mounts a GCP
+service-account JSON file with the Vertex AI User role.
+
+The example uses `google/gemini-3.8-flash` on the global endpoint.
+It replaces Gemini 2.5 Flash, which [retired on Vertex](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions).
+Check [model and location availability](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash)
+before choosing a different region or model. This example does not use
+the Gemini Developer API.
 
 ## Install
 
 ```bash
+kubectl create namespace hermes-agent
+kubectl create secret generic vertex-sa --namespace hermes-agent \
+  --from-file=sa.json=/path/to/sa.json
+
 helm upgrade --install hermes-agent ./charts/hermes-agent \
   --namespace hermes-agent --create-namespace \
   -f charts/hermes-agent/values-google-vertex.yaml \
-  --set-string env.GCP_service-account_Secret='<real-value>' --wait
+  --set-string config.vertex.project_id='<your-gcp-project>' --wait
 ```
 
-When an example requires more than one credential, pass every listed value with `--set-string` or use `extraEnvFrom` to reference an existing Secret.
+If the namespace or Secret already exists, reuse it. Do not put the JSON key
+in Helm values or commit it. The example mounts a file, not an API key.
 
 ## Adapt before deploying
 
-Create the credential Secret before installation because the chart mounts it instead of using a static API key.
+On an existing release, the default `bootstrap.overwrite: false` preserves
+the PVC's `config.yaml`. Update the model through Hermes or by editing that
+file; upgrading the overlay alone does not change a persisted model.
 
 [Open Raw YAML](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-google-vertex.yaml)
 

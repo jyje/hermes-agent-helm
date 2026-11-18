@@ -23,13 +23,14 @@
 config:
   model:
     provider: vertex
-    default: google/gemini-2.5-flash
+    # Gemini 2.5 Flash has retired on Vertex. Check availability for your endpoint.
+    default: google/gemini-3.8-flash
   # Non-secret Vertex settings live in config.yaml; only the credential file
   # path goes through the environment (VERTEX_CREDENTIALS_PATH below).
   vertex:
     project_id: "REPLACE_ME_GCP_PROJECT"
-    # "global" uses the global endpoint; set a specific region (e.g.
-    # us-central1) to pin data residency / regional capacity.
+    # "global" uses the global endpoint. Before selecting a region, check that
+    # the model and your consumption option are supported there.
     region: "global"
   terminal:
     backend: local
