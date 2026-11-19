@@ -1,0 +1,11 @@
+{
+  "fixtures": [
+    {
+      "match": {
+        "model": "google/gemini-3.8-flash",
+        "userMessage": "Run the Vertex contract smoke test."
+      },
+      "response": { "content": "VERTEX_CONTRACT_OK" }
+    }
+  ]
+}
