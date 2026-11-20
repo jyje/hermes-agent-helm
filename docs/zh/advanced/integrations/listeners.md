@@ -51,7 +51,11 @@ Chart 不为每个平台单独增加配置块。启用上游监听器不会自�
 
 <a id="webapp-on-a-trusted-cluster"></a>
 
+从 Hermes v0.23.2 开始，出站 A2A 推送回调不会跟随重定向，默认 URL 策略也会拒绝解析到私有 IP 的主机名。将集群内部的 Service DNS 用作回调目标时，可能会受到影响。请直接填写最终 URL，并从智能体侧检查连通性。这些回调规则不适用于入站 A2A 请求。
+
 ## 在受信任集群中使用 Webapp
+
+**升级到 Hermes v0.23.2 时：** 如果使用密码登录，请使用原来的凭据重新登录。已有会话会失效，但无需轮换 Secret 或重置 PVC。
 
 使用 Hermes v0.23.0 并创建新 release。先创建命名空间和外部 Secret
 `hermes-agent-webapp-secrets`，其中包含 `OPENAI_API_KEY`、

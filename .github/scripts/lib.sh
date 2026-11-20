@@ -16,7 +16,7 @@ wait_for_hermes_startup() {
     pod="$(pod_name 2>/dev/null || true)"
     if [ -n "$pod" ]; then
       logs="$(kubectl logs -n "$NS" "$pod" --tail=100 2>/dev/null || true)"
-      if printf '%s\n' "$logs" | grep -Fq '[stage2] Setup complete; starting user services'; then
+      if printf '%s\n' "$logs" | grep -F '[stage2] Setup complete; starting user services' >/dev/null; then
         echo "[$NS] Hermes startup complete on $pod"
         return 0
       fi
@@ -93,7 +93,7 @@ run_doctor() {
   out="$(kubectl exec -i -n "$NS" "$pod" -- python3 - measure \
     < "$LIB_DIR/doctor-memory.py" 2>&1)" || rc=$?
   printf '%s\n' "$out"
-  if ! printf '%s\n' "$out" | grep -Fq 'Hermes Doctor'; then
+  if ! printf '%s\n' "$out" | grep -F 'Hermes Doctor' >/dev/null; then
     echo "::error::[$NS] hermes doctor did not run in $pod (exit $rc)"
     return 1
   fi

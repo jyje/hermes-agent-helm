@@ -1,0 +1,8 @@
+{
+  "fixtures": [
+    {
+      "match": { "userMessage": "vertex-contract-ping", "model": "google/gemini-3.8-flash" },
+      "response": { "content": "VERTEX_CONTRACT_OK" }
+    }
+  ]
+}

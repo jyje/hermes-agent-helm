@@ -11,7 +11,7 @@
 
 [Hermes Agent](https://github.com/NousResearch/hermes-agent) - 멀티 제공자 LLM 에이전트 프레임워크 - 를 Kubernetes에서 실행하세요. Hermes가 지원하는 모든 제공자(OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, 또는 LiteLLM/vLLM 같은 OpenAI 호환 프록시)를 `values.yaml`만으로 설정할 수 있고, 내장된 `helm test` 헬스체크도 함께 제공됩니다.
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.26.0](https://img.shields.io/badge/Version-1.26.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.27.0](https://img.shields.io/badge/Version-1.27.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -22,7 +22,7 @@
 ```bash
 # OCI (권장)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.26.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.27.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -799,6 +799,13 @@ Service로 리스너를 노출하려면 외부 Secret에 `A2A_PEER_TOKENS`를 �
 수신자에도 같은 서명 키를 설정하세요. 따로 설정하지 않으면 공유 토큰을 제거할 때
 기본 콜백 서명 키도 사라집니다.
 
+**Hermes v0.23.2 이후의 푸시 콜백.** 콜백 주소는 에이전트가 알림을 보낼
+대상이며, 요청을 받는 A2A Service 주소와 다릅니다. 기본 URL 정책은 사설 IP로
+해석되는 호스트 이름을 차단합니다. 여기에는 사설 IP를 쓰는 클러스터 내부
+Kubernetes Service DNS 이름도 포함됩니다. 콜백 전송 시 리다이렉트를 따르지
+않으므로 최종 URL을 직접 사용하세요. 에이전트가 수신자에 연결할 수 있고 URL
+정책이 허용하는지도 확인하세요. [업스트림 콜백 테스트](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py)를 참고하세요.
+
 ### HTTP 라우팅: Ingress 또는 HTTPRoute
 
 두 라우팅 리소스는 기본으로 꺼져 있습니다. 설치된 Ingress controller가 있으면
@@ -969,6 +976,14 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 저장된 제공자·모델 설정도 수정하거나 백업 후 의도적으로 다시 시드해야 합니다
 ([설정 모델](#설정-모델) 참고). 익명 예제만 종료하며 업스트림의 인증된 Nous
 지원을 제거하는 것은 아닙니다.
+
+### Hermes v0.23.2
+
+**비밀번호 인증을 사용한다면 다시 로그인하세요.** Hermes v0.23.1 이하에서
+업그레이드하면 대시보드와 Webapp의 기존 비밀번호 로그인 세션은 더 이상
+유효하지 않습니다. 기존 자격 증명으로 다시 로그인하세요. Secret을 교체하거나
+PVC를 초기화할 필요는 없습니다. OAuth와 OIDC에는 적용되지 않습니다.
+[업스트림 Basic 인증 코드](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185)를 참고하세요.
 
 ### Hermes v0.23.0
 
