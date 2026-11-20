@@ -47,30 +47,30 @@ render --set dashboard.enabled=true --set dashboard.auth.provider=oidc \
 
 echo "HERMES_DASHBOARD=1 is set"
 render "${basic[@]}" | container \
-  | yq -e '.env[] | select(.name == "HERMES_DASHBOARD") | .value == "1"' | grep -q true
+  | yq -e '.env[] | select(.name == "HERMES_DASHBOARD") | .value == "1"' | grep true >/dev/null
 
 echo "public_url is derived from the Ingress host (https only with TLS)"
-render "${basic[@]}" "${ingress[@]}" | config '.dashboard.public_url == "http://hermes.example.com"' | grep -q true
+render "${basic[@]}" "${ingress[@]}" | config '.dashboard.public_url == "http://hermes.example.com"' | grep true >/dev/null
 render "${basic[@]}" "${ingress[@]}" --set 'ingress.tls[0].secretName=tls' \
-  | config '.dashboard.public_url == "https://hermes.example.com"' | grep -q true
+  | config '.dashboard.public_url == "https://hermes.example.com"' | grep true >/dev/null
 
 echo "an explicit publicUrl and a config.dashboard value win over the derived one"
 render "${basic[@]}" "${ingress[@]}" --set-string dashboard.publicUrl=https://explicit.example \
-  | config '.dashboard.public_url == "https://explicit.example"' | grep -q true
+  | config '.dashboard.public_url == "https://explicit.example"' | grep true >/dev/null
 render "${basic[@]}" "${ingress[@]}" --set-string config.dashboard.public_url=https://cfg.example \
-  | config '.dashboard.public_url == "https://cfg.example"' | grep -q true
+  | config '.dashboard.public_url == "https://cfg.example"' | grep true >/dev/null
 
 echo "trustedProxies renders into config.dashboard.trusted_proxies"
 render "${basic[@]}" --set 'dashboard.trustedProxies[0]=10.244.0.0/16' \
-  | config '.dashboard.trusted_proxies[0] == "10.244.0.0/16"' | grep -q true
+  | config '.dashboard.trusted_proxies[0] == "10.244.0.0/16"' | grep true >/dev/null
 
 echo "readiness probe: default, overridden, disabled"
 render "${basic[@]}" | container \
-  | yq -e '.readinessProbe.tcpSocket.port == 9119' | grep -q true
+  | yq -e '.readinessProbe.tcpSocket.port == 9119' | grep true >/dev/null
 render "${basic[@]}" --set probes.readiness.httpGet.path=/x --set probes.readiness.httpGet.port=9119 | container \
-  | yq -e '.readinessProbe.httpGet.path == "/x" and (.readinessProbe.tcpSocket == null)' | grep -q true
+  | yq -e '.readinessProbe.httpGet.path == "/x" and (.readinessProbe.tcpSocket == null)' | grep true >/dev/null
 render "${basic[@]}" --set dashboard.readinessProbe.enabled=false | container \
-  | yq -e '.readinessProbe == null' | grep -q true
+  | yq -e '.readinessProbe == null' | grep true >/dev/null
 
 echo "release notes warn about a missing trusted proxy behind HTTPS only"
 notes() { helm install t "$chart" --dry-run=client "${base[@]}" "$@" 2>&1 | sed -n '/^NOTES:/,$p'; }
