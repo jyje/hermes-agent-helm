@@ -62,6 +62,12 @@ Grouped by area and ordered by priority within each group.
     PR, or (b) document the gap and accept it as a known trade-off
     given that the preceding feature commit was tested
 
+- [x] **Offline provider contract for Vertex** (#453)
+  - `validate-chart` runs `provider-contract` for Vertex overlay, image, or
+    harness changes; no cluster, no credentials, aimock pinned
+  - Next: add another provider only when it guards a distinct wire contract
+  - A live Vertex smoke test stays a separate, optional milestone (#452)
+
 ### 🟢 Low priority
 
 - [ ] **Abstract the runner label into a repository variable**

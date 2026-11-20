@@ -38,6 +38,7 @@ jobs:
     outputs:
       functional: ${{ steps.filter.outputs.functional }}
       live_chat: ${{ steps.live_chat.outputs.live_chat }}
+      vertex_contract: ${{ steps.vertex_contract.outputs.vertex_contract }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -68,6 +69,26 @@ jobs:
           python3 .github/scripts/requires-live-chat.py \
             --base "${{ github.event.pull_request.base.sha || github.event.before }}" \
             --head "${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether the Vertex provider contract applies
+        id: vertex_contract
+        # Runs for the Vertex overlay, the contract harness, this workflow, or
+        # an appVersion bump (new default image). Unknown history fails closed:
+        # the check runs rather than being silently skipped.
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            echo "vertex_contract=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only "$base" "${{ github.sha }}" \
+              | grep -E '^(charts/hermes-agent/values-google-vertex\.yaml|\.github/scripts/provider-contract/.*|\.github/workflows/validate-chart\.yaml)$' >/dev/null \
+            || git diff "$base" "${{ github.sha }}" -- charts/hermes-agent/Chart.yaml \
+              | grep -E '^\+appVersion:' >/dev/null; then
+            echo "vertex_contract=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "vertex_contract=false" >> "$GITHUB_OUTPUT"
+          fi
 
   lint:
     runs-on: ubuntu-26.04-arm
@@ -296,6 +317,27 @@ jobs:
             || { echo "::error::charts/hermes-agent/README.md is stale: run 'make docs' and commit"; exit 1; }
           git diff --exit-code charts/hermes-agent/README-ko.md charts/hermes-agent/README-ja.md charts/hermes-agent/README-zh.md \
             || { echo "::error::the translated READMEs carry a stale Values table: run 'make docs' and commit"; exit 1; }
+
+  provider-contract:
+    # Offline provider contract: the chart-pinned Hermes image talks to a local
+    # aimock with no network and no credentials, so a Vertex overlay or image
+    # change cannot silently break the example. Lightweight on purpose: no kind
+    # cluster, so the Secret volume is checked in the rendered manifest and
+    # mounted as a file, not exercised in a Pod. Mock success says nothing about
+    # IAM, quota, or live inference. See .github/scripts/provider-contract/.
+    needs: changes
+    if: needs.changes.outputs.vertex_contract == 'true'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: azure/setup-helm@v5
+
+      - uses: ./.github/actions/install-yq
+
+      - name: Run the Vertex provider contract
+        run: bash .github/scripts/provider-contract/vertex.sh
 
   test:
     # Each matrix entry gets its OWN ephemeral kind cluster (a separate
