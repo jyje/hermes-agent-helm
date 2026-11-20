@@ -97,7 +97,7 @@ jobs:
           # compare on a key that puts the date scheme first: 0.<date> for
           # vYYYY.M.D[.N], 1.<semver> for vX.Y.Z.
           vkey() {
-            if printf '%s' "$1" | grep -qE '^v[0-9]{4}\.'; then
+            if printf '%s' "$1" | grep -E '^v[0-9]{4}\.' >/dev/null; then
               echo "0.${1#v}"
             else
               echo "1.${1#v}"

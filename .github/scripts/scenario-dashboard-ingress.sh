@@ -133,8 +133,8 @@ good="$(login "$PASSWORD" /tmp/jar-good)"
 expect "sign-in succeeds" "$(printf '%s\n' "$good" | head -1 | tr -d '\r' | awk '{print $2}')" 200
 sess="$(printf '%s\n' "$good" | cookies | grep -i '__Host-hermes_session_at=' || true)"
 [ -n "$sess" ] || { echo "::error::[$NS] no __Host- session cookie behind a trusted TLS proxy"; exit 1; }
-printf '%s' "$sess" | grep -qi '; *secure' || { echo "::error::[$NS] session cookie is not Secure"; exit 1; }
-printf '%s' "$sess" | grep -qi '; *httponly' || { echo "::error::[$NS] session cookie is not HttpOnly"; exit 1; }
+printf '%s' "$sess" | grep -i '; *secure' >/dev/null || { echo "::error::[$NS] session cookie is not Secure"; exit 1; }
+printf '%s' "$sess" | grep -i '; *httponly' >/dev/null || { echo "::error::[$NS] session cookie is not HttpOnly"; exit 1; }
 expect "authenticated GET /api/env" "$(status_of -b /tmp/jar-good "https://$HOST/api/env")" 200
 
 echo "[$NS] --- control: without a trusted proxy the same sign-in yields non-Secure cookies"
@@ -152,7 +152,7 @@ for _ in $(seq 1 30); do
   esac
 done
 expect "sign-in still succeeds" "$(printf '%s\n' "$untrusted" | head -1 | tr -d '\r' | awk '{print $2}')" 200
-if printf '%s\n' "$untrusted" | cookies | grep -qi '; *secure'; then
+if printf '%s\n' "$untrusted" | cookies | grep -i '; *secure' >/dev/null; then
   # Informational: upstream may one day mark the cookie Secure on its own. The
   # chart docs say the opposite today, so flag it for a docs update.
   echo "::warning::[$NS] cookies are Secure without trusted_proxies: update the dashboard docs (#321)"
