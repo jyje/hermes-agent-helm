@@ -44,7 +44,7 @@ helm template security-hardened-check charts/hermes-agent \
   --set auth.deviceFlow.provider=github-copilot \
   --set-json 'auth.deviceFlow.securityContext={"runAsUser":10000,"runAsGroup":10000}' \
   | yq -e 'select(.kind == "Deployment" or .kind == "StatefulSet") | .spec.template.spec.initContainers[] | select(.name == "auth-device-login") | .securityContext.runAsUser == 10000' \
-  | grep -q true
+  | grep true >/dev/null
 
 echo "[$NS] asserting team.sharedVolume.permissions.securityContext renders when the init is enabled"
 helm template security-hardened-check charts/hermes-agent \
@@ -55,6 +55,6 @@ helm template security-hardened-check charts/hermes-agent \
   --set 'team.members[0].name=m1' --set 'team.members[0].mentionEnv=M1' --set 'team.members[0].role=r' \
   --set team.sharedVolume.permissions.enabled=true \
   | yq -e 'select(.kind == "Deployment" or .kind == "StatefulSet") | .spec.template.spec.initContainers[] | select(.name == "init-team-shared") | .securityContext.runAsUser == 0' \
-  | grep -q true
+  | grep true >/dev/null
 
 echo "[$NS] security-hardened scenario passed"
