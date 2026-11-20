@@ -32,7 +32,7 @@ logs="$(kubectl logs -n "$NS" "job/hermes-agent-test" --tail=-1)"
 printf '%s\n' "$logs"
 for step in 'OK: hermes_cli.auth provides the OpenAI Codex helpers' \
             'OK: the gateway:startup hook was discovered and its handler ran.'; do
-  if ! printf '%s\n' "$logs" | grep -Fq "$step"; then
+  if ! printf '%s\n' "$logs" | grep -F "$step" >/dev/null; then
     echo "::error::[$NS] the Helm test did not report: $step"
     exit 1
   fi
