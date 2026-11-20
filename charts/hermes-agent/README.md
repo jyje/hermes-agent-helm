@@ -836,6 +836,14 @@ notification signatures, set `A2A_PUSH_SECRET` in the Secret and configure
 the receiver with the same signing secret. Otherwise, removing the shared
 token also removes the default callback signing secret.
 
+**Push callbacks in Hermes v0.23.2 and later.** This is the URL the agent
+calls to deliver a notification, not the inbound A2A Service address.
+The default URL policy rejects targets that resolve to private IPs, including
+cluster-only Kubernetes Service DNS names with private IPs. Hermes does not
+follow redirects when sending a callback. Use the final URL directly and
+verify that the receiver is reachable from the agent and permitted by its URL
+policy. See the [upstream callback tests](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py).
+
 ### HTTP routing: Ingress or HTTPRoute
 
 Both routing resources are off by default. Use `ingress` for an installed

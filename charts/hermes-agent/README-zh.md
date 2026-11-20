@@ -485,6 +485,8 @@ extraEnv:
 
 如果此前使用共享令牌示例，请在应用此配置前向现有 Secret 添加逐对端令牌，并让客户端改用各自的令牌。如果回调接收方验证通知签名，请在 Secret 中设置 `A2A_PUSH_SECRET`，并让接收方使用相同的签名密钥。否则，移除共享令牌时也会移除默认的回调签名密钥。
 
+**Hermes v0.23.2 及更高版本的推送回调。** 回调 URL 是智能体发送通知的目标，不是接收请求的 A2A Service 地址。默认 URL 策略会拒绝解析到私有 IP 的目标，包括使用私有 IP 的集群内部 Kubernetes Service DNS 名称。发送回调时不会跟随重定向，请直接填写最终 URL，并确认智能体可以访问接收方且其 URL 策略允许访问。请参阅[上游回调测试](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py)。
+
 ### HTTP 路由：Ingress 或 HTTPRoute
 
 两种路由资源默认均关闭。有 Ingress 控制器时使用 `ingress`；集群已提供 Gateway API CRD 和可由 `parentRefs` 引用的 Gateway 时使用 `httpRoute`。按集群实际使用的路由 API 选择，不要为同一主机和路径同时启用两者。
