@@ -53,6 +53,8 @@ IPv4와 IPv6를 포함합니다.
 
 ## 신뢰된 클러스터의 Webapp
 
+**Hermes v0.23.2로 업그레이드하나요?** 비밀번호 로그인을 사용하는 경우 기존 자격 증명으로 다시 로그인하세요. 기존 세션만 무효화되며 Secret을 교체하거나 PVC를 초기화할 필요는 없습니다.
+
 Hermes v0.23.0과 새 릴리스를 사용하세요. 네임스페이스를 만들고
 `hermes-agent-webapp-secrets`라는 외부 Secret에 `OPENAI_API_KEY`,
 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`, `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`,

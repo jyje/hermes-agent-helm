@@ -61,6 +61,8 @@ StatefulSet のヘッドレス Service は DNS のみを提供します。上流
 
 ## 信頼できるクラスターでの Webapp
 
+**Hermes v0.23.2 にアップグレードする場合:** パスワード認証を使っている場合は、同じ認証情報で再度ログインしてください。既存のセッションは無効になりますが、Secret のローテーションや PVC の初期化は不要です。
+
 Hermes v0.23.0 を使い、新規リリースとしてインストールします。ネームスペースを作成し、
 外部 Secret `hermes-agent-webapp-secrets` に `OPENAI_API_KEY`、
 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`、`HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`、

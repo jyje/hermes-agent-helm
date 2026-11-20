@@ -970,6 +970,14 @@ HERMES_YOLO_MODE/승인 모드 설정과 함께 사용하세요(전체 내용은
 ([설정 모델](#설정-모델) 참고). 익명 예제만 종료하며 업스트림의 인증된 Nous
 지원을 제거하는 것은 아닙니다.
 
+### Hermes v0.23.2
+
+**비밀번호 인증을 사용한다면 다시 로그인하세요.** Hermes v0.23.1 이하에서
+업그레이드하면 대시보드와 Webapp의 기존 비밀번호 로그인 세션은 더 이상
+유효하지 않습니다. 기존 자격 증명으로 다시 로그인하세요. Secret을 교체하거나
+PVC를 초기화할 필요는 없습니다. OAuth와 OIDC에는 적용되지 않습니다.
+[업스트림 Basic 인증 코드](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185)를 참고하세요.
+
 ### Hermes v0.23.0
 
 - **세션 자동 정리는 선택 사항입니다.** `v0.23.0` 이미지에서
