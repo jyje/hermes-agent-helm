@@ -12,7 +12,7 @@
 
 複数の LLM プロバイダーに対応するエージェントフレームワーク [Hermes Agent](https://github.com/NousResearch/hermes-agent) を Kubernetes 上で実行します。OpenAI、Anthropic、Gemini、OpenRouter、NVIDIA、LiteLLM/vLLM などの OpenAI 互換プロキシを含む、Hermes が対応するプロバイダーを `values.yaml` で設定できます。`helm test` によるヘルスチェックも付属しています。
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.26.0](https://img.shields.io/badge/Version-1.26.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.27.0](https://img.shields.io/badge/Version-1.27.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -26,7 +26,7 @@
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.26.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.27.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -485,6 +485,8 @@ Service 経由でリスナーを公開するには、外部 Secret に `A2A_PEER
 
 以前の共有トークンの例を使用していた場合は、この設定を適用する前に既存の Secret にピア別トークンを追加し、クライアントも各ピアのトークンを使うように変更してください。コールバック受信側が通知の署名を検証する場合は、Secret に `A2A_PUSH_SECRET` を設定し、受信側にも同じ署名キーを設定します。別途設定しないまま共有トークンを削除すると、デフォルトのコールバック署名キーも失われます。
 
+**Hermes v0.23.2 以降のプッシュコールバック。** コールバック URL は通知の送信先で、受信用の A2A Service とは別です。デフォルトの URL ポリシーは、プライベート IP に解決される宛先を拒否します。プライベート IP を使うクラスター内部の Kubernetes Service DNS 名も対象です。コールバックの送信時にリダイレクトを追わないため、最終 URL を直接指定してください。エージェントから受信先に接続でき、URL ポリシーで許可されることを確認してください。[上流のコールバックテスト](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py)を参照してください。
+
 ### HTTP ルーティング: Ingress または HTTPRoute
 
 どちらもデフォルトでは無効です。Ingress コントローラーがある場合は `ingress`、Gateway API CRD と `parentRefs` で参照できる Gateway がある場合は `httpRoute` を使用します。同じホストとパスに両方を有効にせず、クラスターで運用する API を選択してください。
@@ -587,6 +589,10 @@ config:
 保存されたプロバイダー・モデル設定も更新するか、バックアップ後に意図的に
 再シードしてください（[設定モデル](#設定モデル)参照）。
 廃止するのは匿名利用のサンプルであり、上流の認証済み Nous サポートではありません。
+
+### Hermes v0.23.2
+
+**Basic 認証を使っている場合は、再度ログインしてください。** Hermes v0.23.1 以前からアップグレードすると、ダッシュボードと Webapp の既存のパスワード認証セッションは無効になります。同じ認証情報で再度ログインしてください。Secret のローテーションや PVC の初期化は不要です。OAuth と OIDC には適用されません。[上流の Basic 認証コード](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185)を参照してください。
 
 ### Hermes v0.23.0
 

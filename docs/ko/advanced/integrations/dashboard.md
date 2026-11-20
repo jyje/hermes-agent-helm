@@ -26,6 +26,10 @@ description: 비밀번호, Nous Portal OAuth, 자체 OpenID Connect 제공자 �
 | Nous Portal OAuth | 공개 호스트. Nous 계정으로 로그인하며, 개인 계정 클라이언트는 로그인이 소유자로 제한됩니다. |
 | 자체 OpenID Connect 제공자 | 자체 identity provider를 쓰는 공개 호스트. 대시보드에는 사용자 허용 목록이 없어서 제공자가 해당 클라이언트에 토큰을 발급하는 모든 신원이 로그인할 수 있으므로, 제공자에서 애플리케이션 접근을 제한하세요. |
 
+Hermes v0.23.1 이하에서 v0.23.2로 업그레이드하면 기존 Basic 인증 세션이
+무효화됩니다. 같은 사용자 이름과 비밀번호로 다시 로그인하세요. Secret을
+교체하거나 PVC를 초기화할 필요는 없습니다. OAuth와 OIDC에는 적용되지 않습니다.
+
 ## 설치
 
 `dashboard` values와 이 오버레이는 1.16.0 이후의 차트 릴리스에 있습니다.

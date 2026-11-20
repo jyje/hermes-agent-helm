@@ -20,8 +20,8 @@ fail() { echo "::error::dashboard render: $*"; exit 1; }
 
 echo "default render is unchanged while the dashboard is off"
 off="$(render)"
-printf '%s\n' "$off" | grep -q 'HERMES_DASHBOARD' && fail "HERMES_DASHBOARD rendered with dashboard.enabled=false"
-printf '%s\n' "$off" | grep -q 'readinessProbe' && fail "readinessProbe rendered with dashboard.enabled=false"
+printf '%s\n' "$off" | grep 'HERMES_DASHBOARD' >/dev/null && fail "HERMES_DASHBOARD rendered with dashboard.enabled=false"
+printf '%s\n' "$off" | grep 'readinessProbe' >/dev/null && fail "readinessProbe rendered with dashboard.enabled=false"
 
 echo "enabling the dashboard without credentials fails for basic, oauth and oidc"
 for provider in basic oauth oidc; do
@@ -47,49 +47,49 @@ render --set dashboard.enabled=true --set dashboard.auth.provider=oidc \
 
 echo "HERMES_DASHBOARD=1 is set"
 render "${basic[@]}" | container \
-  | yq -e '.env[] | select(.name == "HERMES_DASHBOARD") | .value == "1"' | grep -q true
+  | yq -e '.env[] | select(.name == "HERMES_DASHBOARD") | .value == "1"' | grep true >/dev/null
 
 echo "public_url is derived from the Ingress host (https only with TLS)"
-render "${basic[@]}" "${ingress[@]}" | config '.dashboard.public_url == "http://hermes.example.com"' | grep -q true
+render "${basic[@]}" "${ingress[@]}" | config '.dashboard.public_url == "http://hermes.example.com"' | grep true >/dev/null
 render "${basic[@]}" "${ingress[@]}" --set 'ingress.tls[0].secretName=tls' \
-  | config '.dashboard.public_url == "https://hermes.example.com"' | grep -q true
+  | config '.dashboard.public_url == "https://hermes.example.com"' | grep true >/dev/null
 
 echo "an explicit publicUrl and a config.dashboard value win over the derived one"
 render "${basic[@]}" "${ingress[@]}" --set-string dashboard.publicUrl=https://explicit.example \
-  | config '.dashboard.public_url == "https://explicit.example"' | grep -q true
+  | config '.dashboard.public_url == "https://explicit.example"' | grep true >/dev/null
 render "${basic[@]}" "${ingress[@]}" --set-string config.dashboard.public_url=https://cfg.example \
-  | config '.dashboard.public_url == "https://cfg.example"' | grep -q true
+  | config '.dashboard.public_url == "https://cfg.example"' | grep true >/dev/null
 
 echo "trustedProxies renders into config.dashboard.trusted_proxies"
 render "${basic[@]}" --set 'dashboard.trustedProxies[0]=10.244.0.0/16' \
-  | config '.dashboard.trusted_proxies[0] == "10.244.0.0/16"' | grep -q true
+  | config '.dashboard.trusted_proxies[0] == "10.244.0.0/16"' | grep true >/dev/null
 
 echo "readiness probe: default, overridden, disabled"
 render "${basic[@]}" | container \
-  | yq -e '.readinessProbe.tcpSocket.port == 9119' | grep -q true
+  | yq -e '.readinessProbe.tcpSocket.port == 9119' | grep true >/dev/null
 render "${basic[@]}" --set probes.readiness.httpGet.path=/x --set probes.readiness.httpGet.port=9119 | container \
-  | yq -e '.readinessProbe.httpGet.path == "/x" and (.readinessProbe.tcpSocket == null)' | grep -q true
+  | yq -e '.readinessProbe.httpGet.path == "/x" and (.readinessProbe.tcpSocket == null)' | grep true >/dev/null
 render "${basic[@]}" --set dashboard.readinessProbe.enabled=false | container \
-  | yq -e '.readinessProbe == null' | grep -q true
+  | yq -e '.readinessProbe == null' | grep true >/dev/null
 
 echo "release notes warn about a missing trusted proxy behind HTTPS only"
 notes() { helm install t "$chart" --dry-run=client "${base[@]}" "$@" 2>&1 | sed -n '/^NOTES:/,$p'; }
 tls=(--set 'ingress.tls[0].secretName=tls')
-notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" | grep -q 'no trusted proxy is set' \
+notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" | grep 'no trusted proxy is set' >/dev/null \
   || fail "no warning for https without a trusted proxy"
-notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'dashboard.trustedProxies[0]=10.244.0.0/16' | grep -q 'no trusted proxy' \
+notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'dashboard.trustedProxies[0]=10.244.0.0/16' | grep 'no trusted proxy' >/dev/null \
   && fail "warning despite dashboard.trustedProxies"
-notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'config.dashboard.trusted_proxies[0]=10.244.0.0/16' | grep -q 'no trusted proxy' \
+notes "${basic[@]}" "${ingress[@]}" "${tls[@]}" --set 'config.dashboard.trusted_proxies[0]=10.244.0.0/16' | grep 'no trusted proxy' >/dev/null \
   && fail "warning despite config.dashboard.trusted_proxies"
-notes "${basic[@]}" "${ingress[@]}" | grep -q 'no trusted proxy' && fail "warning for plain http"
-notes | grep -q 'no trusted proxy' && fail "warning while the dashboard is off"
+notes "${basic[@]}" "${ingress[@]}" | grep 'no trusted proxy' >/dev/null && fail "warning for plain http"
+notes | grep 'no trusted proxy' >/dev/null && fail "warning while the dashboard is off"
 
 echo "the dashboard NetworkPolicy overlay allows port 9119 from both networks and trusts the same two"
 overlay=charts/hermes-agent/values-networkpolicy-dashboard.yaml
 helm template t "$chart" -f "$overlay" --show-only templates/networkpolicy.yaml \
-  | yq -e '.spec.ingress[0].ports[0].port == 9119 and (.spec.ingress[0].from | length) == 2' | grep -q true \
+  | yq -e '.spec.ingress[0].ports[0].port == 9119 and (.spec.ingress[0].from | length) == 2' | grep true >/dev/null \
   || fail "the dashboard NetworkPolicy overlay does not allow port 9119 from two networks"
-helm template t "$chart" -f "$overlay" | config '(.dashboard.trusted_proxies | length) == 2' | grep -q true \
+helm template t "$chart" -f "$overlay" | config '(.dashboard.trusted_proxies | length) == 2' | grep true >/dev/null \
   || fail "the dashboard NetworkPolicy overlay does not trust two proxies"
 
 echo "dashboard render assertions passed"

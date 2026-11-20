@@ -12,7 +12,7 @@
 
 在 Kubernetes 上运行支持多个 LLM 提供商的智能体框架 [Hermes Agent](https://github.com/NousResearch/hermes-agent)。通过 `values.yaml` 即可配置 Hermes 支持的提供商，包括 OpenAI、Anthropic、Gemini、OpenRouter、NVIDIA，以及 LiteLLM/vLLM 等 OpenAI 兼容代理，并使用内置的 `helm test` 健康检查。
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.26.0](https://img.shields.io/badge/Version-1.26.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.27.0](https://img.shields.io/badge/Version-1.27.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.22.2](https://img.shields.io/badge/AppVersion-v0.22.2-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -26,7 +26,7 @@
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.26.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.27.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -485,6 +485,8 @@ extraEnv:
 
 如果此前使用共享令牌示例，请在应用此配置前向现有 Secret 添加逐对端令牌，并让客户端改用各自的令牌。如果回调接收方验证通知签名，请在 Secret 中设置 `A2A_PUSH_SECRET`，并让接收方使用相同的签名密钥。否则，移除共享令牌时也会移除默认的回调签名密钥。
 
+**Hermes v0.23.2 及更高版本的推送回调。** 回调 URL 是智能体发送通知的目标，不是接收请求的 A2A Service 地址。默认 URL 策略会拒绝解析到私有 IP 的目标，包括使用私有 IP 的集群内部 Kubernetes Service DNS 名称。发送回调时不会跟随重定向，请直接填写最终 URL，并确认智能体可以访问接收方且其 URL 策略允许访问。请参阅[上游回调测试](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py)。
+
 ### HTTP 路由：Ingress 或 HTTPRoute
 
 两种路由资源默认均关闭。有 Ingress 控制器时使用 `ingress`；集群已提供 Gateway API CRD 和可由 `parentRefs` 引用的 Gateway 时使用 `httpRoute`。按集群实际使用的路由 API 选择，不要为同一主机和路径同时启用两者。
@@ -584,6 +586,10 @@ config:
 并配置自己的凭据。设置 `bootstrap.overwrite: false` 时，现有卷会保留
 `config.yaml`，因此还需要更新持久化的提供商和模型配置，或先备份再主动重新初始化
 （参阅[配置模型](#配置模型)）。本次移除的是匿名使用示例，并不移除上游已认证的 Nous 支持。
+
+### Hermes v0.23.2
+
+**使用 Basic 认证时需要重新登录。** 从 Hermes v0.23.1 或更早版本升级后，仪表板和 Webapp 中原有的密码登录会话会失效。请使用原来的凭据重新登录，无需轮换 Secret 或重置 PVC。此变更不适用于 OAuth 或 OIDC。请参阅[上游 Basic 认证代码](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185)。
 
 ### Hermes v0.23.0
 

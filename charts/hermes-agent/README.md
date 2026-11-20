@@ -10,7 +10,7 @@
 
 Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) - a multi-provider LLM agent framework - on Kubernetes. Configure any provider Hermes supports (OpenAI, Anthropic, Gemini, OpenRouter, NVIDIA, or any OpenAI-compatible proxy such as LiteLLM/vLLM) entirely via values.yaml, with a built-in helm test health check.
 
-[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.26.0](https://img.shields.io/badge/Version-1.26.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.23.2](https://img.shields.io/badge/AppVersion-v0.23.2-informational?style=flat)
+[![GitHub](https://img.shields.io/badge/GitHub-jyje%2Fhermes--agent--helm-181717?logo=github)](https://github.com/jyje/hermes-agent-helm) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jyje/hermes-agent-helm/blob/main/LICENSE) ![Version: 1.27.0](https://img.shields.io/badge/Version-1.27.0-informational?style=flat) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat) ![AppVersion: v0.23.3](https://img.shields.io/badge/AppVersion-v0.23.3-informational?style=flat)
 
 [English](README.md) · [한국어](README-ko.md) · [日本語](README-ja.md) · [简体中文](README-zh.md)
 
@@ -21,7 +21,7 @@ Run [Hermes Agent](https://github.com/NousResearch/hermes-agent) - a multi-provi
 ```bash
 # OCI (recommended)
 helm upgrade --install hermes-agent \
-  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.26.0 \
+  oci://ghcr.io/jyje/hermes-agent-helm/hermes-agent --version 1.27.0 \
   --namespace hermes-agent --create-namespace \
   --set-string env.OPENAI_API_KEY='sk-...' --wait
 ```
@@ -836,6 +836,14 @@ notification signatures, set `A2A_PUSH_SECRET` in the Secret and configure
 the receiver with the same signing secret. Otherwise, removing the shared
 token also removes the default callback signing secret.
 
+**Push callbacks in Hermes v0.23.2 and later.** This is the URL the agent
+calls to deliver a notification, not the inbound A2A Service address.
+The default URL policy rejects targets that resolve to private IPs, including
+cluster-only Kubernetes Service DNS names with private IPs. Hermes does not
+follow redirects when sending a callback. Use the final URL directly and
+verify that the receiver is reachable from the agent and permitted by its URL
+policy. See the [upstream callback tests](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/tests/plugins/test_a2a_callback_ssrf.py).
+
 ### HTTP routing: Ingress or HTTPRoute
 
 Both routing resources are off by default. Use `ingress` for an installed
@@ -973,7 +981,7 @@ can be set the same way as the ones above: secrets under `.Values.env`
 Full reference (kept current with each Hermes release):
 **[Environment Variables - Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/reference/environment-variables)**.
 
-A few more commonly-used ones, current as of image `v0.23.2`:
+A few more commonly-used ones, current as of image `v0.23.3`:
 
 | Variable | Purpose |
 | --- | --- |
@@ -1013,6 +1021,14 @@ volumes keep their `config.yaml` when `bootstrap.overwrite: false`: update the
 persisted provider/model configuration too, or intentionally reseed it after
 backing it up (see [Configuration model](#configuration-model)). This retires
 the anonymous example; it does not remove upstream's authenticated Nous support.
+
+### Hermes v0.23.2
+
+**Sign in again if you use Basic authentication.** When upgrading from
+Hermes v0.23.1 or earlier, existing password-based Dashboard and Webapp
+sessions are no longer accepted. Sign in again with the same credentials.
+No Secret rotation or PVC reset is needed. This change does not apply to
+OAuth or OIDC. See the [upstream Basic authentication code](https://github.com/NousResearch/hermes-agent/blob/v0.23.2/plugins/dashboard_auth/basic/__init__.py#L139-L185).
 
 ### Hermes v0.23.0
 

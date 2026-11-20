@@ -179,7 +179,7 @@ if kubectl exec deployment/hermes-may -n "$NS" -- \
 fi
 
 echo "[$NS] verifying there is no shared-file task coordination plane"
-if kubectl get deployment -n "$NS" -o yaml | grep -q 'team-workspace'; then
+if kubectl get deployment -n "$NS" -o yaml | grep 'team-workspace' >/dev/null; then
   echo "unexpected team-workspace volume found" >&2
   exit 1
 fi
