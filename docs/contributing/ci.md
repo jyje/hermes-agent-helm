@@ -48,7 +48,8 @@ reviews, and merges the Changesets release PR.
 
 ## validate-chart
 
-Two jobs run on every functional change:
+Two jobs run on every functional change, and a third runs when the Vertex
+provider contract applies:
 
 ### `lint`
 
@@ -180,6 +181,40 @@ fails a scenario. The Helm test Job was once OOMKilled at a limit it had passed
 under before, with no earlier sign. This warning shows shrinking headroom, for
 example on an image bump, while the Job still passes. When it appears, raise
 the default limit in `values.yaml`.
+
+### `provider-contract`
+
+An offline check that the chart-pinned Hermes image still honors the Vertex
+example. It runs when a PR touches `values-google-vertex.yaml`, the harness in
+`.github/scripts/provider-contract/`, the workflow, or the `appVersion`. If the
+base commit is unknown, it runs rather than being skipped. There is no kind
+cluster: the job renders the overlay, then runs the image with no network and
+no credentials against a local [aimock](https://aimock.copilotkit.dev/)
+(`@copilotkit/aimock`, version pinned in `vertex.sh`).
+
+The check asserts:
+
+- The render has the expected image, Secret name, read-only mount, and a
+  credential path under that mount.
+- Hermes resolves `provider: vertex` to the exact
+  `.../projects/<project>/locations/<region>/endpoints/openapi` base URL, and
+  takes its token from a synthetic service-account key.
+- One `google/gemini-3.8-flash` request reaches the mock on the exact route,
+  and the reply equals a fixed marker. The mock journal holds exactly one
+  matching entry.
+- A wrong route and a wrong model both fail (negative controls).
+
+Run it locally with `helm`, `yq`, `openssl`, `npm` and `docker`:
+
+```bash
+.github/scripts/provider-contract/vertex.sh
+```
+
+A failure prints `::error::[vertex-contract] ...` with the failed assertion.
+
+What it does not prove: the credential file is bind-mounted, not mounted from a
+Secret volume in a Pod; success against a mock says nothing about IAM, quota,
+or live Vertex inference. Those need a separate, authorized live smoke test.
 
 ### Fork PRs
 
