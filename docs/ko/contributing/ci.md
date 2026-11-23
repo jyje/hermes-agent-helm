@@ -52,7 +52,8 @@ flowchart LR
 
 ## validate-chart
 
-기능적 변경마다 job 두 개가 실행됩니다:
+기능적 변경마다 job 두 개가 실행되고, Vertex 제공자 계약이 적용되면 세 번째 job이
+실행됩니다:
 
 ### `lint`
 
@@ -177,6 +178,37 @@ doctor를 실행합니다. 이 스크립트는 doctor의 출력과 종료 코드
 시나리오를 실패시키지 않습니다. Helm test Job은 이전까지 통과하던 한도에서 아무 조짐 없이
 OOMKilled된 적이 있습니다. 이 경고는 Job이 아직 통과하는 동안, 예를 들어 이미지를 올렸을 때
 여유가 줄어드는 것을 보여 줍니다. 경고가 나오면 `values.yaml`의 기본 한도를 올리세요.
+
+### `provider-contract`
+
+차트에 고정된 Hermes 이미지가 Vertex 예제를 여전히 따르는지 오프라인으로 확인합니다.
+PR이 `values-google-vertex.yaml`, `.github/scripts/provider-contract/`의 하니스,
+워크플로, 또는 `appVersion`을 바꿀 때 실행됩니다. 기준 커밋을 알 수 없으면 건너뛰지
+않고 실행합니다. kind 클러스터는 쓰지 않습니다. 오버레이를 렌더링한 뒤, 네트워크와
+자격 증명이 없는 이미지를 로컬 [aimock](https://aimock.copilotkit.dev/)
+(`@copilotkit/aimock`, 버전은 `vertex.sh`에 고정)에 연결해 실행합니다.
+
+검증 항목은 다음과 같습니다.
+
+- 렌더링 결과의 이미지, Secret 이름, 읽기 전용 마운트, 그 마운트 아래의 자격 증명 경로
+- Hermes가 `provider: vertex`를 정확한
+  `.../projects/<project>/locations/<region>/endpoints/openapi` 기본 URL로 해석하고,
+  합성 서비스 계정 키에서 토큰을 얻는지
+- `google/gemini-3.8-flash` 요청 한 건이 정확한 경로로 mock에 도달하고, 응답이 고정
+  마커와 같은지. mock 저널에는 일치하는 항목이 정확히 하나만 있어야 합니다.
+- 잘못된 경로와 잘못된 모델이 둘 다 실패하는지(음성 대조군)
+
+`helm`, `yq`, `openssl`, `npm`, `docker`가 있으면 로컬에서도 실행할 수 있습니다.
+
+```bash
+.github/scripts/provider-contract/vertex.sh
+```
+
+실패하면 `::error::[vertex-contract] ...`와 함께 어긋난 항목이 출력됩니다.
+
+증명하지 못하는 것: 자격 증명 파일은 Pod의 Secret 볼륨이 아니라 bind mount로
+전달됩니다. mock 성공은 IAM, 할당량, 실제 Vertex 추론에 대해 아무것도 말해 주지 않습니다.
+그것은 별도의 승인된 라이브 스모크 테스트가 필요합니다.
 
 ### Fork PR
 
