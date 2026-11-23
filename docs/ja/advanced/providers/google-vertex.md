@@ -35,6 +35,19 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 既存リリースでは、デフォルトの `bootstrap.overwrite: false` が PVC 上の `config.yaml` を保持します。Hermes でモデルを変更するか、そのファイルを編集してください。オーバーレイをアップグレードするだけでは保存済みのモデルは変わりません。
 
+## 検証
+
+CI はクラウドのアカウントなしでこのオーバーレイを検証します。オーバーレイ、Hermes イメージ、
+ハーネスが変わると、チャートをレンダリングし、ネットワークも認証情報もない状態で固定された
+Hermes イメージをローカルのモックに接続して、Vertex のプロジェクト、リージョン、
+`google/gemini-3.8-flash` のリクエスト経路と固定の応答を確認します。経路やモデルが違うと
+失敗します。具体的な検査とローカルでの実行方法は
+[`provider-contract`](https://github.com/jyje/hermes-agent-helm/blob/main/docs/contributing/ci.md#provider-contract)（英語）を参照してください。
+
+これはモックによる検証です。IAM、クォータ、実際の Vertex 推論は検証せず、Secret も Pod では
+実行せずマウントされたファイルとして確認するだけです。インストール後は、自分のプロジェクトで
+チャットを一度実行してください。
+
 [元の YAML を開く](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-google-vertex.yaml)
 
 ## オーバーレイ全体

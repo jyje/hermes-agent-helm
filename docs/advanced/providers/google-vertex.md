@@ -40,6 +40,19 @@ On an existing release, the default `bootstrap.overwrite: false` preserves
 the PVC's `config.yaml`. Update the model through Hermes or by editing that
 file; upgrading the overlay alone does not change a persisted model.
 
+## Verification
+
+CI checks this overlay without a cloud account. When the overlay, the Hermes
+image or the harness changes, it renders the chart, runs the pinned Hermes image
+with no network and no credentials against a local mock, and asserts the Vertex
+project, region, `google/gemini-3.8-flash` request path and a fixed reply. A
+wrong route or model fails. See [`provider-contract`](../../contributing/ci.md#provider-contract)
+for the exact checks and how to run it locally.
+
+This is a mock. It does not test IAM, quota or live Vertex inference, and the
+Secret is checked as a mounted file, not exercised in a Pod. After installing,
+run one chat against your own project.
+
 [Open Raw YAML](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-google-vertex.yaml)
 
 ## Complete overlay

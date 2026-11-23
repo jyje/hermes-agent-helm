@@ -39,6 +39,18 @@ Helm 값에 넣거나 커밋하지 마세요. 이 예제는 API 키 대신 파�
 `config.yaml`을 보존합니다. Hermes에서 모델을 바꾸거나 해당 파일을 수정하세요.
 오버레이만 업그레이드하면 저장된 모델은 바뀌지 않습니다.
 
+## 검증
+
+CI는 클라우드 계정 없이 이 오버레이를 검증합니다. 오버레이, Hermes 이미지, 하니스가
+바뀌면 차트를 렌더링하고, 네트워크와 자격증명이 없는 상태에서 고정된 Hermes 이미지를
+로컬 mock에 연결해 Vertex 프로젝트, 리전, `google/gemini-3.8-flash` 요청 경로와 고정된
+응답을 확인합니다. 경로나 모델이 틀리면 실패합니다. 정확한 검사와 로컬 실행 방법은
+[`provider-contract`](../../contributing/ci.md#provider-contract)를 참고하세요.
+
+이 검사는 mock입니다. IAM, 쿼터, 실제 Vertex 추론은 검증하지 않고, Secret은 Pod에서
+실행하지 않고 마운트된 파일로만 확인합니다. 설치한 뒤에는 본인 프로젝트로 채팅을 한 번
+실행해 보세요.
+
 [원본 YAML 열기](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-google-vertex.yaml)
 
 ## 전체 오버레이

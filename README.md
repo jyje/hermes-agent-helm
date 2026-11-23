@@ -107,6 +107,11 @@ change), see [Development](#development) below.
   cluster and runs the bundled test Job (`hermes doctor`). When the
   `NVIDIA_API_KEY` repository secret is available, it also runs a **live
   `hermes chat` round-trip** against NVIDIA NIM - not a mock.
+  Provider setup is checked before image upgrades ship: the Google Vertex AI
+  example runs the pinned Hermes image against a local mock with no cloud
+  account or credentials, and fails if the request route or model changes.
+  Vertex is the first covered provider, and the check does not exercise IAM
+  or live inference.
   Leader teams have also completed a live human → leader → member → leader
   round-trip on Discord (threads) and on Telegram.
 
