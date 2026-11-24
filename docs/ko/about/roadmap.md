@@ -13,6 +13,7 @@ description: 프로젝트 로드맵의 한국어 원문입니다.
 | --- | --- | --- | --- |
 | **단일 에이전트** | 이 차트: 릴리즈당 잘 관리된 Hermes 인스턴스 1개 | 현재 | ✅ 제공 |
 | **단일 에이전트 운영성: 웹 대시보드** | 나만의 URL에서 브라우저로 에이전트를 사용하고 관리: `dashboard` values(비밀번호, Nous Portal OAuth, 자체 OpenID Connect 제공자 로그인, 유도되는 공개 URL과 신뢰 프록시, readiness probe), Ingress와 NetworkPolicy 예시, 실제 ingress 컨트롤러를 거쳐 접근하는 CI 시나리오. Ingress를 거치는 Chat까지 실제 클러스터에서 확인했습니다 | 현재 | ✅ v1.17.0부터 제공: [대시보드 로그인과 Ingress](../advanced/integrations/dashboard.md) |
+| **제공자 계약 검사** | 이미지 업그레이드가 나가기 전에 제공자 설정 회귀를 잡음: 오프라인 CI 검사가 차트에 고정된 이미지를 버전 고정 mock에 연결해 정확한 요청을 확인. Vertex AI가 첫 대상이며, 실제 추론이 아닌 mock 검사 | 현재 | ✅ Vertex AI: [제공자 계약](../contributing/devops-roadmap.md) |
 | **에이전트 팀 (ArgoCD ApplicationSet)** | 하나의 ApplicationSet으로 팀의 에이전트별 릴리즈를 생성(명부는 데이터, 이 차트는 템플릿): 공유 gateway 채널 1개, 멤버별 유일한 `fullname`, 팀원마다 Application 파일을 손으로 관리할 필요 없음 | 현재 | ✅ 권장: [Hermes 팀](../advanced/teams/reference.md) |
 | **오퍼레이터** | Kubernetes 오퍼레이터(`Agent` / `AgentTeam` CRD, 별도 레포): ApplicationSet을 대체해 팀 전체 상태를 보여주는 단일 오브젝트, 팀 단위 불변식의 admission-time 검증, 능동적 reconcile을 제공. 이 레포는 그 **설치용 차트**를 호스팅 | 장기 | ⏸️ 미착수: [`charts/hermes-operator/`](../../../charts/hermes-operator/) 플레이스홀더 (TBA) |
 
