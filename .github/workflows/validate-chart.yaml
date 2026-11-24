@@ -282,11 +282,11 @@ jobs:
       - name: device login unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.1.1
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 

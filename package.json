@@ -3,9 +3,9 @@
   "version": "1.28.0",
   "private": true,
   "description": "Release metadata for the Hermes Agent Helm chart.",
-  "packageManager": "pnpm@11.14.0",
+  "packageManager": "pnpm@12.23.0",
   "engines": {
-    "node": "^22.11 || ^24 || >=26"
+    "node": ">=26 <27"
   },
   "scripts": {
     "changeset": "changeset",
