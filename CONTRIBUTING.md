@@ -136,6 +136,38 @@ today.
   old file.
 - Keep a diagram's editable source next to it under `docs/images/src/`.
 
+## Artifact Hub
+
+Artifact Hub lists the chart from the OCI repository. What it reads, and what
+a maintainer keeps in step:
+
+| Element | Source | Keep in step |
+| --- | --- | --- |
+| Repository ownership | `artifacthub-repo.yml`, pushed to the chart's OCI path under the `artifacthub.io` tag | Only when the owner list changes. |
+| Category, license, changes | `artifacthub.io/*` annotations in `Chart.yaml` | The release flow rewrites `changes` from the pending Changesets, so do not edit it by hand. |
+| README and images | The README packaged with each version | See [README images](#readme-images): published versions depend on files on `main`. |
+| Images and security scan | The image tag of each chart version (`appVersion`) | See below. |
+
+### Security scan errors on older versions
+
+Artifact Hub scans the image of every published chart version, and re-scans
+them over time. An alert such as `error running trivy on image
+nousresearch/hermes-agent:<tag>` for an older chart version does not by itself
+mean that the image or the chart is broken.
+
+Seen for the images behind chart `1.13.0`, `1.14.0` and `1.15.0`: the tags
+were still on Docker Hub with both architectures, a local Trivy scan of the same
+image exited 0, and Artifact Hub still held an earlier report for each. The
+failure was on the scanner's side, and its log is not visible to us.
+
+- Check the tag exists and both architectures resolve before suspecting the
+  image. Scan it locally if in doubt.
+- Do not republish or edit an already published chart version to clear the
+  alert. The scan reads the image the version pinned, which must stay as
+  published.
+- Treat the alert as transient and look again after the next scan. File an
+  issue only if the same error persists or the newest version is affected.
+
 ## Branch model
 
 | Branch | Purpose | CI |
