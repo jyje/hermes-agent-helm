@@ -103,6 +103,10 @@ ChatGPT/Codex나 GitHub Copilot 로그인도 채팅 메시지로 끝납니다. �
   번들된 테스트 Job(`hermes doctor`)을 실행합니다. `NVIDIA_API_KEY` 리포지토리
   시크릿이 있으면 NVIDIA NIM에 대한 **live `hermes chat` 라운드트립**도 실행합니다
   - 목(mock)이 아닙니다.
+  제공자 설정도 이미지 업그레이드 전에 검증합니다. Google Vertex AI 예제는 고정된
+  Hermes 이미지를 클라우드 계정이나 자격증명 없이 로컬 mock에 연결해, 요청 경로나
+  모델이 바뀌면 실패하는지 확인합니다. Vertex가 첫 번째 대상이며, 이 검사는 IAM이나
+  실제 추론은 다루지 않습니다.
   리더 팀도 Discord(스레드)와 Telegram에서 사람 → 리더 → 멤버 → 리더 라이브
   라운드트립을 완주했습니다.
 

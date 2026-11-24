@@ -35,6 +35,16 @@ helm upgrade --install hermes-agent ./charts/hermes-agent \
 
 对于已安装的版本，默认设置 `bootstrap.overwrite: false` 会保留 PVC 上的 `config.yaml`。请在 Hermes 中更改模型，或编辑该文件。仅升级覆盖文件不会更改已保存的模型。
 
+## 验证
+
+CI 无需云账号即可验证此覆盖文件。当覆盖文件、Hermes 镜像或测试框架变化时，它会渲染 Chart，
+并在没有网络和凭据的环境中让固定版本的 Hermes 镜像连接本地 mock，检查 Vertex 的项目、区域、
+`google/gemini-3.8-flash` 请求路径以及固定的回复。路径或模型错误会导致失败。具体检查项和本地
+运行方法见 [`provider-contract`](https://github.com/jyje/hermes-agent-helm/blob/main/docs/contributing/ci.md#provider-contract)（英文）。
+
+这是 mock 验证。它不检验 IAM、配额或真实的 Vertex 推理，Secret 也只检查了作为已挂载文件，并未在
+Pod 中实际运行。安装后，请用你自己的项目发起一次对话。
+
 [打开原始 YAML](https://github.com/jyje/hermes-agent-helm/blob/main/charts/hermes-agent/values-google-vertex.yaml)
 
 ## 完整覆盖文件
