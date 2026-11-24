@@ -158,7 +158,9 @@ mean that the image or the chart is broken.
 Seen for the images behind chart `1.13.0`, `1.14.0` and `1.15.0`: the tags
 were still on Docker Hub with both architectures, a local Trivy scan of the same
 image exited 0, and Artifact Hub still held an earlier report for each. The
-failure was on the scanner's side, and its log is not visible to us.
+failure was on the scanner's side, and its log is not visible to us. A later
+scan failed for other versions (`0.6.1` to `1.12.1`) while those three passed,
+so the failing set moves from scan to scan.
 
 - Check the tag exists and both architectures resolve before suspecting the
   image. Scan it locally if in doubt.
