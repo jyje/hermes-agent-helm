@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.28.0
+
+### Fixes
+
+- [#452](https://github.com/jyje/hermes-agent-helm/pull/452) [`38779e8`](https://github.com/jyje/hermes-agent-helm/commit/38779e8ba05975021bb272d6134ff9a4e8ef8386) - Fix(vertex): Replace the retired Gemini 2.5 Flash example model
+
+  Use Gemini 3.8 Flash in the Vertex example and document how to select a supported region and update a model stored on an existing volume. No chart-wide defaults change.
+
+### Dependencies
+
+- [#463](https://github.com/jyje/hermes-agent-helm/pull/463) [`4f7d5c1`](https://github.com/jyje/hermes-agent-helm/commit/4f7d5c1d1ceb09a80d93cde0cf2c685430226407) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.23.4.
+
+### Documentation
+
+- [#451](https://github.com/jyje/hermes-agent-helm/pull/451) [`b2fce74`](https://github.com/jyje/hermes-agent-helm/commit/b2fce74a0ca197b0ab26291f852f92fea612e1ea) - Documentation(a2a): Push callback URL checks
+
+  Explain private-address and redirect restrictions for outbound A2A callbacks.
+
+- [#450](https://github.com/jyje/hermes-agent-helm/pull/450) [`dd4da40`](https://github.com/jyje/hermes-agent-helm/commit/dd4da40a0f6e8f50f870e8b427076a81d16a8d6c) - Documentation(auth): Basic sign-in after upgrading to Hermes v0.23.2
+
+  Explain when Dashboard and Webapp users should sign in again with their existing credentials after an upgrade.
+
+- [#461](https://github.com/jyje/hermes-agent-helm/pull/461) [`504fefb`](https://github.com/jyje/hermes-agent-helm/commit/504fefbfbd3a5b8621aca777ad857b2275f19e7e) - Documentation(docs): say how the Vertex example is checked
+
+  Add a Verification section to the Google Vertex AI guide and a line to the README's end-to-end bullet. CI now checks the Vertex example offline against a local mock, so a change to the overlay or the Hermes image that breaks the request route or model is caught before it ships. The check does not cover IAM or live inference.
+
 ## 1.27.0
 
 ### Dependencies
