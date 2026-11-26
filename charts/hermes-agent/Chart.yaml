@@ -9,7 +9,7 @@ type: application
 icon: https://hermes-agent.nousresearch.com/docs/img/logo.png
 
 # Chart version (bump on chart changes).
-version: 1.28.0
+version: 1.28.1
 
 # Upstream Hermes Agent image version this chart targets by default.
 # Semver tag (vX.Y.Z); upstream switched from date-based tags (vYYYY.M.D)
@@ -36,12 +36,4 @@ annotations:
   artifacthub.io/license: MIT
   artifacthub.io/changes: |
     - kind: "fixed"
-      description: "Documentation(a2a): Push callback URL checks Explain private-address and redirect restrictions for outbound A2A callbacks."
-    - kind: "fixed"
-      description: "Documentation(auth): Basic sign-in after upgrading to Hermes v0.23.2 Explain when Dashboard and Webapp users should sign in again with their existing credent..."
-    - kind: "added"
-      description: "Dependency(image): Update the default Hermes Agent image Update the default Hermes Agent image to v0.23.4."
-    - kind: "fixed"
-      description: "Documentation(docs): say how the Vertex example is checked Add a Verification section to the Google Vertex AI guide and a line to the README's end-to-end bul..."
-    - kind: "fixed"
-      description: "Fix(vertex): Replace the retired Gemini 2.5 Flash example model Use Gemini 3.8 Flash in the Vertex example and document how to select a supported region and..."
+      description: "Documentation(docs): Provider contract checks on the roadmap See provider contract checks on the project roadmap, with Vertex AI as the first covered provide..."

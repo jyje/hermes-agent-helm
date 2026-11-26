@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.28.1
+
+### Documentation
+
+- [#467](https://github.com/jyje/hermes-agent-helm/pull/467) [`8142d62`](https://github.com/jyje/hermes-agent-helm/commit/8142d629dbff340d75778d30e6b540aa8a6c0853) - Documentation(docs): Provider contract checks on the roadmap
+
+  See provider contract checks on the project roadmap, with Vertex AI as the first covered provider and a note that it is a mock check, not live inference.
+
 ## 1.28.0
 
 ### Fixes
