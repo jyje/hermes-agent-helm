@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.29.0
+
+### Dependencies
+
+- [#469](https://github.com/jyje/hermes-agent-helm/pull/469) [`c52c98c`](https://github.com/jyje/hermes-agent-helm/commit/c52c98c253757e195235072cc0e8923a8406db14) - thanks [@jyje-bot](https://github.com/apps/jyje-bot)! - Dependency(image): Update the default Hermes Agent image
+
+  Update the default Hermes Agent image to v0.23.5.
+
+### Documentation
+
+- [#467](https://github.com/jyje/hermes-agent-helm/pull/467) [`8142d62`](https://github.com/jyje/hermes-agent-helm/commit/8142d629dbff340d75778d30e6b540aa8a6c0853) - Documentation(docs): Provider contract checks on the roadmap
+
+  See provider contract checks on the project roadmap, with Vertex AI as the first covered provider and a note that it is a mock check, not live inference.
+
 ## 1.28.0
 
 ### Fixes
